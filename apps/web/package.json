@@ -9,10 +9,13 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pages:build": "pnpm next-on-pages",
+    "deploy": "pnpm pages:build && npx cfman wrangler --account shayanmoradi  pages deploy"
   },
   "dependencies": {
-    "@workspace/ui": "workspace:*",
+    "@repo/editor": "workspace:*",
+    "@repo/ui": "workspace:*",
     "lucide-react": "^0.475.0",
     "next": "^15.4.5",
     "next-themes": "^0.4.6",
@@ -20,11 +23,12 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.15",
     "@types/node": "^20.19.9",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "@workspace/eslint-config": "workspace:^",
-    "@workspace/typescript-config": "workspace:*",
+    "@repo/eslint-config": "workspace:^",
+    "@repo/typescript-config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

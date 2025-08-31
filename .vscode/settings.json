@@ -1,3 +1,13 @@
 {
-  "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css"
+  "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.vscode": true,
+    "**/node_modules": true
+  },
+  "explorerExclude.backup": {}
 }
