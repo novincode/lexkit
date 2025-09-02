@@ -7,6 +7,14 @@ import { ExtensionCategory } from '@repo/editor/extensions';
 
 export interface ImagePayload { src: string; alt: string; caption?: string; }
 
+export interface SerializedImageNode {
+  type: 'image';
+  version: number;
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
 export class ImageNode extends DecoratorNode<React.ReactNode> {
   __src: string;
   __alt: string;
@@ -18,11 +26,25 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
     return new ImageNode(node.__src, node.__alt, node.__caption, node.__key);
   }
 
+  static importJSON(serializedNode: SerializedImageNode): ImageNode {
+    return new ImageNode(serializedNode.src, serializedNode.alt, serializedNode.caption);
+  }
+
   constructor(src: string, alt: string, caption?: string, key?: string) {
     super(key);
     this.__src = src;
     this.__alt = alt;
     this.__caption = caption;
+  }
+
+  exportJSON(): SerializedImageNode {
+    return {
+      type: 'image',
+      version: 1,
+      src: this.__src,
+      alt: this.__alt,
+      caption: this.__caption,
+    };
   }
 
   createDOM(config: any) {

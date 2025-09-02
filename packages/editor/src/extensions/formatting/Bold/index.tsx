@@ -13,10 +13,12 @@ const BoldUI: ComponentType<{ selected?: boolean; className?: string; style?: CS
     commands.formatText('bold');
   };
 
+  const isBoldActive = commands.isActive('bold');
+
   const Button = components.Button;
 
   return (
-    <Button onClick={toggleBold} selected={false}>
+    <Button onClick={toggleBold} selected={isBoldActive}>
       {t('bold.label')}
     </Button>
   );
@@ -28,13 +30,12 @@ export class BoldExtension extends BaseExtension {
   }
 
   register(editor: LexicalEditor): () => void {
-    return editor.registerCommand(FORMAT_TEXT_COMMAND, (payload: any) => {
-      if (payload === 'bold') {
-        // Toggle bold logic - assuming Lexical handles it
-        return true;
-      }
-      return false;
-    }, 4);
+    // Lexical handles FORMAT_TEXT_COMMAND internally, no need to register
+    return () => {};
+  }
+
+  getUI(): ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> | null {
+    return BoldUI;
   }
 }
 

@@ -4,7 +4,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType } from 'lexical';
+import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { useTranslation } from 'react-i18next';
 import { EditorConfig, EditorContextType, Extension, ComponentRegistry } from './types';
 import { componentRegistry } from '../components/registry';
@@ -84,7 +84,16 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
       undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
       redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
       clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
-      isActive: (type: string) => false, // TODO: Implement based on selection
+      isActive: (type: string) => {
+        if (!editor) return false;
+        return editor.getEditorState().read(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            return selection.hasFormat(type as TextFormatType);
+          }
+          return false;
+        });
+      },
     },
     listeners: {
       registerUpdate: (listener: (state: any) => void) => editor?.registerUpdateListener(listener) || (() => {}),

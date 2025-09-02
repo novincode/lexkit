@@ -13,10 +13,12 @@ const ItalicUI: ComponentType<{ selected?: boolean; className?: string; style?: 
     commands.formatText('italic');
   };
 
+  const isItalicActive = commands.isActive('italic');
+
   const Button = components.Button;
 
   return (
-    <Button onClick={toggleItalic} selected={false}>
+    <Button onClick={toggleItalic} selected={isItalicActive}>
       {t('italic.label')}
     </Button>
   );
@@ -28,12 +30,8 @@ export class ItalicExtension extends BaseExtension {
   }
 
   register(editor: LexicalEditor): () => void {
-    return editor.registerCommand(FORMAT_TEXT_COMMAND, (payload: any) => {
-      if (payload === 'italic') {
-        return true;
-      }
-      return false;
-    }, 4);
+    // Lexical handles FORMAT_TEXT_COMMAND internally
+    return () => {};
   }
 
   getUI(): ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> | null {
