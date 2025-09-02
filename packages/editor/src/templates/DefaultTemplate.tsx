@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditorProvider } from '../core';
-import { Extension, ExtensionCategory } from '@repo/editor/extensions';
+import { Extension, ExtensionCategory, boldExtension, italicExtension, imageExtension } from '@repo/editor/extensions';
 
 interface DefaultTemplateProps {
   extensions?: Extension[];
@@ -10,7 +10,11 @@ interface DefaultTemplateProps {
 
 export function DefaultTemplate({ extensions = [], className, enabledCategories = [ExtensionCategory.Toolbar] }: DefaultTemplateProps) {
   // Default extensions can be lazy loaded here if not provided
-  const defaultExtensions: Extension[] = []; // Add default extensions if needed
+  const defaultExtensions: Extension[] = [
+    boldExtension,
+    italicExtension,
+    imageExtension.configure({ showInToolbar: true })
+  ];
   const allExtensions = [...defaultExtensions, ...extensions];
 
   return (

@@ -98,3 +98,5 @@ export class ImageExtension extends BaseExtension<{ onUpload?: (file: File) => P
     return this.config.showInToolbar ? ImageUI : null;
   }
 }
+
+export const imageExtension = new ImageExtension();

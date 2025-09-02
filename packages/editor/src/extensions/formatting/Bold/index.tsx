@@ -36,8 +36,6 @@ export class BoldExtension extends BaseExtension {
       return false;
     }, 4);
   }
-
-  getUI(): ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> | null {
-    return BoldUI;
-  }
 }
+
+export const boldExtension = new BoldExtension();

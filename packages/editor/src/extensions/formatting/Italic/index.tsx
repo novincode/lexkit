@@ -7,11 +7,10 @@ import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '@repo/editor/extensions';
 
 const ItalicUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> = () => {
-  const { t, components } = useEditor();
-  const [editor] = useLexicalComposerContext();
+  const { t, components, commands } = useEditor();
 
   const toggleItalic = () => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
+    commands.formatText('italic');
   };
 
   const Button = components.Button;
@@ -41,3 +40,5 @@ export class ItalicExtension extends BaseExtension {
     return ItalicUI;
   }
 }
+
+export const italicExtension = new ItalicExtension();
