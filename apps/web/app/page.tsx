@@ -1,10 +1,11 @@
-import { Editor, BoldExtension } from "@repo/editor"
+'use client'
+import { DefaultTemplate, BoldExtension } from "@repo/editor"
 
 export default function Page() {
+  const boldExt = new BoldExtension();
   return (
     <div>
- 
-      <Editor extensions={[BoldExtension]} />
+      <DefaultTemplate extensions={[boldExt]} />
     </div>
   )
 }

@@ -1,19 +1,16 @@
-import { LexicalEditor } from 'lexical';
-import { ReactNode, ComponentType } from 'react';
+import { LexicalEditor, TextFormatType } from 'lexical';
+import { ReactNode } from 'react';
+import { TranslationKeys } from '../locales';
+import { ComponentRegistry } from '../components';
+import { Extension, ExtensionCategory } from '../extensions';
+
+export type { Extension, ExtensionCategory } from '../extensions';
+export type { ComponentRegistry } from '../components';
 
 export interface EditorConfig {
-  theme?: string;
+  theme?: any;
   placeholder?: string;
   [key: string]: any;
-}
-
-export interface ComponentRegistry {
-  [key: string]: (props: any) => ReactNode;
-}
-
-export interface Extension {
-  register: (editor: LexicalEditor) => () => void;
-  UI?: ComponentType;
 }
 
 export interface EditorContextType {
@@ -21,6 +18,39 @@ export interface EditorContextType {
   config: EditorConfig;
   components: ComponentRegistry;
   extensions: Extension[];
-  t: (key: string) => string;
+  t: (key: TranslationKeys) => string;
+  commands: {
+    formatText: (format: TextFormatType, value?: boolean | string) => void;
+    insertNode?: (type: string, payload: any) => void;
+    undo: () => void;
+    redo: () => void;
+    clearHistory: () => void;
+    isActive: (type: string) => boolean;
+  };
+  listeners: {
+    registerUpdate: (listener: (state: any) => void) => () => void;
+    registerMutation?: (listener: (mutations: any) => void) => () => void;
+    registerPaste: (listener: (event: ClipboardEvent) => boolean) => () => void;
+  };
+  export: {
+    toHTML: () => Promise<string>;
+    toMarkdown: () => Promise<string>;
+    toJSON: () => any;
+  };
+  import: {
+    fromHTML: (html: string) => Promise<void>;
+    fromMarkdown: (md: string) => Promise<void>;
+    fromJSON: (json: any) => void;
+  };
+  history: {
+    undo: () => void;
+    redo: () => void;
+    clear: () => void;
+  };
   lexical: LexicalEditor | null;
+  extensionsAPI: {
+    add: (ext: Extension) => void;
+    remove: (name: string) => void;
+    reorder: (names: string[]) => void;
+  };
 }

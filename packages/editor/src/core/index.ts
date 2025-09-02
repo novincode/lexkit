@@ -1,2 +1,3 @@
-export { EditorProvider, useEditor } from './EditorProvider';
-export type { EditorConfig, ComponentRegistry, Extension, EditorContextType } from './types';
+export { EditorProvider } from './EditorProvider';
+export { useEditor } from './useEditor';
+export type { EditorConfig, EditorContextType, Extension, ExtensionCategory, ComponentRegistry } from './types';
