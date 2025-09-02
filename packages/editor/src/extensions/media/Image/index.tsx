@@ -84,10 +84,6 @@ export class ImageExtension extends BaseExtension {
   getNodes(): any[] {
     return [ImageNode];
   }
-
-  getThemeContribution(): Record<string, string> {
-    return this.config.nodeClassName ? { 'image': this.config.nodeClassName } : {};
-  }
 }
 
 export const imageExtension = new ImageExtension();

@@ -34,10 +34,6 @@ export abstract class BaseExtension<Config extends BaseExtensionConfig = BaseExt
     return this;
   }
 
-  getThemeContribution(): Record<string, string> {
-    return {};
-  }
-
   getPlugins(): React.ReactNode[] {
     return [];
   }

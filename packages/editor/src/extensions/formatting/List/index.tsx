@@ -21,15 +21,6 @@ export class ListExtension extends BaseExtension {
     return [ListNode, ListItemNode];
   }
 
-  getThemeContribution(): Record<string, string> {
-    if (!this.config.nodeClassName) return {};
-    return {
-      'list.ul': this.config.nodeClassName,
-      'list.ol': this.config.nodeClassName,
-      'list.listitem': this.config.nodeClassName,
-    };
-  }
-
   getPlugins(): React.ReactNode[] {
     return [<ListPlugin key="list-plugin" />];
   }

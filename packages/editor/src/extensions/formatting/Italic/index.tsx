@@ -14,10 +14,6 @@ export class ItalicExtension extends BaseExtension {
     // Lexical handles FORMAT_TEXT_COMMAND internally
     return () => {};
   }
-
-  getThemeContribution(): Record<string, string> {
-    return this.config.nodeClassName ? { 'text.italic': this.config.nodeClassName } : {};
-  }
 }
 
 export const italicExtension = new ItalicExtension();

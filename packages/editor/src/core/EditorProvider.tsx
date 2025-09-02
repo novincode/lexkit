@@ -33,25 +33,9 @@ function EditorProviderInner({ children, config = {}, extensions = [], plugins =
 
   const nodes = extensions.flatMap(ext => ext.getNodes?.() || []);
 
-  // Build theme from extension configs
-  const builtTheme = { ...config.theme };
-  let styleStr = '';
-  extensions.forEach(ext => {
-    const contrib = ext.getThemeContribution?.() || {};
-    Object.entries(contrib).forEach(([key, className]) => {
-      builtTheme[key] = (builtTheme[key] || '') + ' ' + className;
-    });
-
-    if (ext.config.nodeStyle && ext.config.nodeClassName) {
-      const className = ext.config.nodeClassName;
-      const styleObj = ext.config.nodeStyle;
-      styleStr += `.${className} { ${Object.entries(styleObj).map(([k, v]) => `${k}:${v}`).join(';')} } `;
-    }
-  });
-
   const initialConfig = {
     namespace: 'modern-editor',
-    theme: builtTheme,
+    theme: config.theme,
     onError: console.error,
     nodes: nodes,
   };
@@ -154,34 +138,18 @@ function EditorProviderInner({ children, config = {}, extensions = [], plugins =
 }
 
 export function EditorProvider(props: EditorProviderProps) {
-  const builtTheme = { ...props.config?.theme || {} };
-  let styleStr = '';
-  props.extensions?.forEach(ext => {
-    const contrib = ext.getThemeContribution?.() || {};
-    Object.entries(contrib).forEach(([key, className]) => {
-      builtTheme[key] = (builtTheme[key] || '') + ' ' + className;
-    });
-
-    if (ext.config.nodeStyle && ext.config.nodeClassName) {
-      const className = ext.config.nodeClassName;
-      const styleObj = ext.config.nodeStyle;
-      styleStr += `.${className} { ${Object.entries(styleObj).map(([k, v]) => `${k}:${v}`).join(';')} } `;
-    }
-  });
-
   const nodes = props.extensions?.flatMap(ext => ext.getNodes?.() || []) || [];
   const plugins = props.extensions?.flatMap(ext => ext.getPlugins?.() || []) || [];
 
   const initialConfig = {
     namespace: 'modern-editor',
-    theme: builtTheme,
+    theme: props.config?.theme || {},
     onError: console.error,
     nodes: nodes,
   };
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <style dangerouslySetInnerHTML={{ __html: styleStr }} />
       <EditorProviderInner {...props} plugins={plugins} />
     </LexicalComposer>
   );
