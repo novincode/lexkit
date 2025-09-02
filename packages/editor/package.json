@@ -1,0 +1,43 @@
+{
+  "name": "@repo/editor",
+  "version": "0.0.0",
+  "type": "module",
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint . --max-warnings 0",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@lexical/html": "^0.34.0",
+    "@lexical/markdown": "^0.34.0",
+    "@lexical/react": "^0.34.0",
+    "clsx": "^2.1.1",
+    "i18next": "^25.4.2",
+    "lexical": "^0.34.0",
+    "lucide-react": "^0.475.0",
+    "react-i18next": "^15.7.3",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.1",
+    "eslint": "^9.32.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}

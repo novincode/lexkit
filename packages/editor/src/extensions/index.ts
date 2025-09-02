@@ -1,0 +1,1 @@
+export { BoldExtension } from './BoldExtension';

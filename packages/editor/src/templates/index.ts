@@ -1,0 +1,1 @@
+export { DefaultTemplate } from './DefaultTemplate';
