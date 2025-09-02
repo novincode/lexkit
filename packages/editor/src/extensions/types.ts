@@ -26,4 +26,6 @@ export interface Extension<Config extends BaseExtensionConfig = BaseExtensionCon
   overrideUI?: (CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>) => Extension<Config>;
   overrideNodeRender?: (overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }) => Extension<Config>;
   getNodes?: () => any[];
+  getThemeContribution?: () => Record<string, string>;
+  getPlugins?: () => React.ReactNode[];
 }

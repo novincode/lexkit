@@ -34,7 +34,11 @@ export abstract class BaseExtension<Config extends BaseExtensionConfig = BaseExt
     return this;
   }
 
-  getNodeOverrides() {
-    return this.nodeOverrides;
+  getThemeContribution(): Record<string, string> {
+    return {};
+  }
+
+  getPlugins(): React.ReactNode[] {
+    return [];
   }
 }

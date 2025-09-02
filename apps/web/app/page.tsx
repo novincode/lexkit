@@ -1,5 +1,5 @@
 'use client'
-import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension } from "@repo/editor"
+import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension, listExtension } from "@repo/editor"
 
 function EditorContent() {
   return (
@@ -12,7 +12,7 @@ function EditorContent() {
 export default function Page() {
   const configuredBold = boldExtension.configure({
     nodeStyle: {
-      backgroundColor: "#111111"
+      backgroundColor: "yellow!important"
     },
     nodeClassName: "test-class",
     
@@ -21,6 +21,7 @@ export default function Page() {
   const extensions = [
     configuredBold,
     italicExtension,
+    listExtension,
     imageExtension.configure({ showInToolbar: true })
   ];
 

@@ -18,9 +18,10 @@ interface EditorProviderProps {
   children: ReactNode;
   config?: EditorConfig;
   extensions?: Extension[];
+  plugins?: ReactNode[];
 }
 
-function EditorProviderInner({ children, config = {}, extensions = [] }: EditorProviderProps) {
+function EditorProviderInner({ children, config = {}, extensions = [], plugins = [] }: EditorProviderProps) {
   const [editor] = useLexicalComposerContext();
   const [lazyExports, setLazyExports] = useState({
     toHTML: async () => '',
@@ -34,20 +35,17 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
 
   // Build theme from extension configs
   const builtTheme = { ...config.theme };
+  let styleStr = '';
   extensions.forEach(ext => {
-    const extNodes = ext.getNodes?.();
-    if (extNodes && extNodes.length > 0) {
-      extNodes.forEach(node => {
-        if (node.getType) {
-          const nodeType = node.getType();
-          if (ext.config?.nodeClassName || ext.config?.nodeStyle) {
-            builtTheme[nodeType] = {
-              className: ext.config.nodeClassName,
-              style: ext.config.nodeStyle,
-            };
-          }
-        }
-      });
+    const contrib = ext.getThemeContribution?.() || {};
+    Object.entries(contrib).forEach(([key, className]) => {
+      builtTheme[key] = (builtTheme[key] || '') + ' ' + className;
+    });
+
+    if (ext.config.nodeStyle && ext.config.nodeClassName) {
+      const className = ext.config.nodeClassName;
+      const styleObj = ext.config.nodeStyle;
+      styleStr += `.${className} { ${Object.entries(styleObj).map(([k, v]) => `${k}:${v}`).join(';')} } `;
     }
   });
 
@@ -148,6 +146,7 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
           ErrorBoundary={ErrorBoundary}
         />
         <HistoryPlugin />
+        {plugins}
         {children}
       </div>
     </EditorContext.Provider>
@@ -155,18 +154,35 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
 }
 
 export function EditorProvider(props: EditorProviderProps) {
+  const builtTheme = { ...props.config?.theme || {} };
+  let styleStr = '';
+  props.extensions?.forEach(ext => {
+    const contrib = ext.getThemeContribution?.() || {};
+    Object.entries(contrib).forEach(([key, className]) => {
+      builtTheme[key] = (builtTheme[key] || '') + ' ' + className;
+    });
+
+    if (ext.config.nodeStyle && ext.config.nodeClassName) {
+      const className = ext.config.nodeClassName;
+      const styleObj = ext.config.nodeStyle;
+      styleStr += `.${className} { ${Object.entries(styleObj).map(([k, v]) => `${k}:${v}`).join(';')} } `;
+    }
+  });
+
   const nodes = props.extensions?.flatMap(ext => ext.getNodes?.() || []) || [];
+  const plugins = props.extensions?.flatMap(ext => ext.getPlugins?.() || []) || [];
 
   const initialConfig = {
     namespace: 'modern-editor',
-    theme: props.config?.theme || {},
+    theme: builtTheme,
     onError: console.error,
     nodes: nodes,
   };
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <EditorProviderInner {...props} />
+      <style dangerouslySetInnerHTML={{ __html: styleStr }} />
+      <EditorProviderInner {...props} plugins={plugins} />
     </LexicalComposer>
   );
 }

@@ -4,6 +4,8 @@ import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '@repo/editor/extensions';
 import { ListNode, ListItemNode } from '@lexical/list';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import React from 'react';
 
 export class ListExtension extends BaseExtension {
   constructor() {
@@ -17,6 +19,19 @@ export class ListExtension extends BaseExtension {
 
   getNodes(): any[] {
     return [ListNode, ListItemNode];
+  }
+
+  getThemeContribution(): Record<string, string> {
+    if (!this.config.nodeClassName) return {};
+    return {
+      'list.ul': this.config.nodeClassName,
+      'list.ol': this.config.nodeClassName,
+      'list.listitem': this.config.nodeClassName,
+    };
+  }
+
+  getPlugins(): React.ReactNode[] {
+    return [<ListPlugin key="list-plugin" />];
   }
 }
 

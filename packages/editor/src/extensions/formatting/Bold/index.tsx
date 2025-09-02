@@ -14,6 +14,10 @@ export class BoldExtension extends BaseExtension {
     // Lexical handles FORMAT_TEXT_COMMAND internally, no need to register
     return () => {};
   }
+
+  getThemeContribution(): Record<string, string> {
+    return this.config.nodeClassName ? { 'text.bold': this.config.nodeClassName } : {};
+  }
 }
 
 export const boldExtension = new BoldExtension();
