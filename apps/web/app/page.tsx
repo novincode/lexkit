@@ -1,21 +1,10 @@
 'use client'
 import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension } from "@repo/editor"
-import { useEditor } from "@repo/editor/core/useEditor";
-import { Button } from "@repo/ui/components/button";
 
 function EditorContent() {
-  const editor = useEditor();
-
   return (
     <>
       <DefaultTemplate />
-      <Button variant={'ghost'}
-      onClick={() => {
-        editor.commands.undo()
-      }}
-      >
-        UNDO
-      </Button>
     </>
   );
 }
@@ -23,9 +12,10 @@ function EditorContent() {
 export default function Page() {
   const configuredBold = boldExtension.configure({
     nodeStyle: {
-      backgroundColor: "yellow"
+      backgroundColor: "#111111"
     },
-    nodeClassName: "test-class"
+    nodeClassName: "test-class",
+    
   });
 
   const extensions = [
@@ -37,7 +27,7 @@ export default function Page() {
   const editorConfig = {
     theme: {
       text: {
-        bold: 'font-bold text-blue-500',
+        bold: 'font-bold text-red-500',
         italic: 'italic',
       },
     },

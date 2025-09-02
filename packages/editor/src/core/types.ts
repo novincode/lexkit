@@ -1,14 +1,17 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
-import { ReactNode } from 'react';
+import { ReactNode, CSSProperties } from 'react';
 import { TranslationKeys } from '../locales';
-import { ComponentRegistry } from '../components';
 import { Extension, ExtensionCategory } from '../extensions';
 
 export type { Extension, ExtensionCategory } from '../extensions';
-export type { ComponentRegistry } from '../components';
+
+export interface NodeTheme {
+  className?: string;
+  style?: CSSProperties;
+}
 
 export interface EditorConfig {
-  theme?: any;
+  theme?: Record<string, any>;
   placeholder?: string;
   [key: string]: any;
 }
@@ -16,7 +19,6 @@ export interface EditorConfig {
 export interface EditorContextType {
   editor: LexicalEditor | null;
   config: EditorConfig;
-  components: ComponentRegistry;
   extensions: Extension[];
   t: (key: TranslationKeys) => string;
   commands: {

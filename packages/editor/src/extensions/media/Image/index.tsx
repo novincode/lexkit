@@ -71,53 +71,18 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 }
 
-const ImageUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> = () => {
-  const { t, components, commands } = useEditor();
-
-  const insertImage = () => {
-    // For now, prompt for URL
-    const src = prompt('Enter image URL');
-    if (src) {
-      commands.insertNode?.('image', { src, alt: 'Image' });
-    }
-  };
-
-  const Button = components.Button;
-
-  return (
-    <Button onClick={insertImage}>
-      {t('image.upload')}
-    </Button>
-  );
-};
-
-export class ImageExtension extends BaseExtension<{ onUpload?: (file: File) => Promise<string>; uploadOnPaste?: boolean; showInToolbar?: boolean }> {
+export class ImageExtension extends BaseExtension {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
-    this.config = { uploadOnPaste: true, showInToolbar: true };
   }
 
   register(editor: LexicalEditor): () => void {
-    // Commands are registered here
-    // editor.registerCommand('INSERT_IMAGE_COMMAND' as any, (payload: ImagePayload) => {
-    //   editor.update(() => {
-    //     const node = new ImageNode(payload.src, payload.alt, payload.caption);
-    //     // Insert at selection
-    //   });
-    //   return true;
-    // }, 4);
-
-    // TODO: Add paste listener for images
-
+    // Register commands if needed
     return () => {};
   }
 
   getNodes(): any[] {
     return [ImageNode];
-  }
-
-  getUI(): ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }> | null {
-    return this.config.showInToolbar ? ImageUI : null;
   }
 }
 

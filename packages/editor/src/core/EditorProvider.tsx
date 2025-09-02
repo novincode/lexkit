@@ -6,8 +6,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { useTranslation } from 'react-i18next';
-import { EditorConfig, EditorContextType, Extension, ComponentRegistry } from './types';
-import { componentRegistry } from '../components/registry';
+import { EditorConfig, EditorContextType, Extension } from './types';
 
 export const EditorContext = createContext<EditorContextType | null>(null);
 
@@ -33,9 +32,28 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
 
   const nodes = extensions.flatMap(ext => ext.getNodes?.() || []);
 
+  // Build theme from extension configs
+  const builtTheme = { ...config.theme };
+  extensions.forEach(ext => {
+    const extNodes = ext.getNodes?.();
+    if (extNodes && extNodes.length > 0) {
+      extNodes.forEach(node => {
+        if (node.getType) {
+          const nodeType = node.getType();
+          if (ext.config?.nodeClassName || ext.config?.nodeStyle) {
+            builtTheme[nodeType] = {
+              className: ext.config.nodeClassName,
+              style: ext.config.nodeStyle,
+            };
+          }
+        }
+      });
+    }
+  });
+
   const initialConfig = {
     namespace: 'modern-editor',
-    theme: config.theme || {},
+    theme: builtTheme,
     onError: console.error,
     nodes: nodes,
   };
@@ -76,7 +94,6 @@ function EditorProviderInner({ children, config = {}, extensions = [] }: EditorP
   const contextValue: EditorContextType = {
     editor,
     config,
-    components: componentRegistry,
     extensions,
     t: t as any,
     commands: {

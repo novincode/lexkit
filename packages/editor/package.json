@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@lexical/html": "^0.34.0",
+    "@lexical/list": "^0.34.0",
     "@lexical/markdown": "^0.34.0",
     "@lexical/react": "^0.34.0",
     "clsx": "^2.1.1",

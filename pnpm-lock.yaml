@@ -75,6 +75,9 @@ importers:
       '@lexical/html':
         specifier: ^0.34.0
         version: 0.34.0
+      '@lexical/list':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@lexical/markdown':
         specifier: ^0.34.0
         version: 0.34.0
