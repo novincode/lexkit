@@ -5,7 +5,8 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot } from 'lexical';
+import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
+import { ImageNode } from '@repo/editor/extensions/media/Image';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';
@@ -85,6 +86,7 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
   }, []);
 
   const [showImageMenu, setShowImageMenu] = useState(false);
+  const [showReplaceMenu, setShowReplaceMenu] = useState(false);
 
   const handleInsertImageFromUrl = () => {
     const src = prompt('Enter image URL:');
@@ -124,6 +126,41 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
     }
   };
 
+  const handleReplaceFromUrl = () => {
+    const src = prompt('Enter new image URL:');
+    if (!src || !editor) return;
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isNodeSelection(selection)) {
+        const nodes = selection.getNodes();
+        for (const node of nodes) {
+          if (node instanceof ImageNode) {
+            (node as ImageNode).setSrc(src);
+          }
+        }
+      }
+    });
+  };
+
+  const handleReplaceFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && editor) {
+      const src = URL.createObjectURL(file);
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes();
+          for (const node of nodes) {
+            if (node instanceof ImageNode) {
+              (node as ImageNode).setSrc(src);
+            }
+          }
+        }
+      });
+    }
+    e.target.value = '';
+  };
+
   return (
     <>
       <Toolbar 
@@ -137,6 +174,10 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
         handleInsertImageFromUrl={handleInsertImageFromUrl}
         handleFileUpload={handleFileUpload}
         handleSetCaption={handleSetCaption}
+        showReplaceMenu={showReplaceMenu}
+        setShowReplaceMenu={setShowReplaceMenu}
+        handleReplaceFromUrl={handleReplaceFromUrl}
+        handleReplaceFromFile={handleReplaceFromFile}
       />
       <div className={defaultTheme.editor}>
         <RichTextPlugin
@@ -161,7 +202,11 @@ function Toolbar({
   setShowImageMenu, 
   handleInsertImageFromUrl, 
   handleFileUpload, 
-  handleSetCaption 
+  handleSetCaption,
+  showReplaceMenu,
+  setShowReplaceMenu,
+  handleReplaceFromUrl,
+  handleReplaceFromFile 
 }: {
   commands: EditorCommands;
   hasExtension: (name: "bold" | "italic" | "list" | "history" | "image") => boolean;
@@ -173,6 +218,10 @@ function Toolbar({
   handleInsertImageFromUrl: () => void;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSetCaption: () => void;
+  showReplaceMenu: boolean;
+  setShowReplaceMenu: (show: boolean) => void;
+  handleReplaceFromUrl: () => void;
+  handleReplaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
 
   return (
@@ -250,6 +299,32 @@ function Toolbar({
               <button onClick={handleSetCaption} title="Edit Caption">
                 <Edit size={20} />
               </button>
+              <div className="replace-menu-container">
+                <button 
+                  onClick={() => setShowReplaceMenu(!showReplaceMenu)} 
+                  title="Replace Image"
+                >
+                  <Upload size={20} />
+                </button>
+                {showReplaceMenu && (
+                  <div className="replace-dropdown">
+                    <button onClick={handleReplaceFromUrl} title="Replace from URL">
+                      <Link size={16} />
+                      <span>From URL</span>
+                    </button>
+                    <label className="file-upload-button" title="Replace from computer">
+                      <Upload size={16} />
+                      <span>Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleReplaceFromFile}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

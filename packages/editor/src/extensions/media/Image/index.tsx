@@ -29,7 +29,6 @@ function ImageComponent({
   const [aspectRatio, setAspectRatio] = useState(1);
   const [currentWidth, setCurrentWidth] = useState(width || 'auto');
   const [currentHeight, setCurrentHeight] = useState(height || 'auto');
-  const [replaceFileInput, setReplaceFileInput] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const img = imageRef.current;
@@ -58,6 +57,7 @@ function ImageComponent({
   // Handle click to select
   const onClick = (event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     editor.update(() => {
       const selection = $createNodeSelection();
       selection.add(nodeKey!);
@@ -114,18 +114,6 @@ function ImageComponent({
     document.addEventListener('touchend', onUp);
   };
 
-  // Replace logic
-  const handleReplace = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const newSrc = URL.createObjectURL(file);
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey!);
-        if (node instanceof ImageNode) node.setSrc(newSrc);
-      });
-    }
-  };
-
   const figureStyle: CSSProperties = {
     margin: '1rem 0',
     display: 'block',
@@ -165,8 +153,6 @@ function ImageComponent({
           <div className="resizer nw" onMouseDown={startResize('nw')} onTouchStart={startResize('nw')} />
           <div className="resizer se" onMouseDown={startResize('se')} onTouchStart={startResize('se')} />
           <div className="resizer sw" onMouseDown={startResize('sw')} onTouchStart={startResize('sw')} />
-          <button className="replace-button" onClick={() => replaceFileInput?.click()}>Replace</button>
-          <input type="file" accept="image/*" ref={setReplaceFileInput} style={{ display: 'none' }} onChange={handleReplace} />
         </>
       )}
     </figure>
@@ -227,8 +213,6 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     const div = document.createElement('div');
     const themeClass = config.theme?.image || '';
     div.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
-    div.setAttribute('contentEditable', 'false');
-    console.log('📦 createDOM called for ImageNode');
     return div;
   }
 
@@ -443,17 +427,16 @@ export class ImageExtension extends BaseExtension<
               paragraph.append(imageNode);
               $getRoot().append(paragraph);
               console.log('✅ Appended to root');
-              // Set selection to the paragraph
-              paragraph.select();
+              // Add another paragraph after
+              const nextPara = $createParagraphNode();
+              $getRoot().append(nextPara);
+              nextPara.select();
             } else {
               console.log('✅ Inserted via selection');
-              // Add paragraph after if inserted
-              const parent = imageNode.getParent();
-              if (parent) {
-                const nextPara = $createParagraphNode();
-                parent.insertAfter(nextPara);
-                nextPara.select();
-              }
+              // Add paragraph after the image
+              const nextPara = $createParagraphNode();
+              imageNode.insertAfter(nextPara);
+              nextPara.select();
             }
           } catch (error) {
             console.error('❌ Insertion error:', error);

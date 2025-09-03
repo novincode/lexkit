@@ -30,12 +30,12 @@ export class ImageTranslator {
     return {
       img: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
-          const img = domNode as HTMLImageElement;
-          
-          if (!img.src) {
-            console.warn('🚫 Image has no src, skipping import');
-            return null;
-          }
+          try {
+            const img = domNode as HTMLImageElement;
+            if (!img || !img.src || img.tagName !== 'IMG') {
+              console.warn('🚫 Invalid img element, skipping import', domNode);
+              return null;
+            }
 
           // Extract alignment from various possible sources
           let alignment: 'left' | 'center' | 'right' | 'none' = 'none';
@@ -82,37 +82,46 @@ export class ImageTranslator {
           );
 
           return { node };
+          } catch (error) {
+            console.error('Error importing img', error);
+            return null;
+          }
         },
         priority: 0,
       }),
       figure: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
-          const figure = domNode as HTMLElement;
-          const img = figure.querySelector('img');
-          
-          if (!img || !img.src) {
+          try {
+            const figure = domNode as HTMLElement;
+            const img = figure.querySelector('img');
+            
+            if (!img || !img.src) {
+              return null;
+            }
+
+            const figcaption = figure.querySelector('figcaption');
+            const caption = figcaption?.textContent || undefined;
+
+            console.log('📥 Importing figure with image:', {
+              src: img.src,
+              alt: img.alt,
+              caption
+            });
+
+            const node = $createImageNode(
+              img.src,
+              img.alt || '',
+              caption,
+              'center', // Figures are typically centered
+              figure.className || undefined,
+              this.extractStyleObject(figure)
+            );
+
+            return { node };
+          } catch (error) {
+            console.error('Error importing figure', error);
             return null;
           }
-
-          const figcaption = figure.querySelector('figcaption');
-          const caption = figcaption?.textContent || undefined;
-
-          console.log('📥 Importing figure with image:', {
-            src: img.src,
-            alt: img.alt,
-            caption
-          });
-
-          const node = $createImageNode(
-            img.src,
-            img.alt || '',
-            caption,
-            'center', // Figures are typically centered
-            figure.className || undefined,
-            this.extractStyleObject(figure)
-          );
-
-          return { node };
         },
         priority: 1, // Higher priority than img to handle figure first
       }),
