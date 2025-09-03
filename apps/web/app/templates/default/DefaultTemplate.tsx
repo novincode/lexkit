@@ -152,6 +152,44 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
     return () => window.removeEventListener('error', handleError);
   }, []);
 
+  // Handle clipboard paste for images
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item && item.type.indexOf('image') !== -1) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            console.log('📋 Pasting image from clipboard:', file.name, 'size:', file.size);
+            if (imageExtension.config.uploadHandler) {
+              imageExtension.config.uploadHandler(file).then(src => {
+                console.log('Inserting pasted image:', { src, alt: file.name });
+                commands.insertImage({ src, alt: file.name, file });
+              }).catch(error => {
+                console.error('Failed to upload pasted image:', error);
+                // Fallback: create object URL
+                const src = URL.createObjectURL(file);
+                commands.insertImage({ src, alt: file.name, file });
+              });
+            } else {
+              // Fallback: create object URL
+              const src = URL.createObjectURL(file);
+              commands.insertImage({ src, alt: file.name, file });
+            }
+          }
+          break; // Only handle the first image
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [commands]);
+
   return (
     <>
       <Toolbar 

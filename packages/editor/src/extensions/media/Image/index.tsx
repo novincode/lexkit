@@ -139,7 +139,7 @@ function ImageComponent({
     document.addEventListener('touchend', onUp);
   };
 
-  const figureStyle: CSSProperties = {
+  const figureStyle: React.CSSProperties = {
     margin: '1rem 0',
     display: 'block',
     position: 'relative',
@@ -147,7 +147,7 @@ function ImageComponent({
     ...style
   };
 
-  const imgStyle: CSSProperties = {
+  const imgStyle: React.CSSProperties = {
     maxWidth: '100%',
     display: 'block',
     borderRadius: '4px',
@@ -156,7 +156,7 @@ function ImageComponent({
     margin: alignment === 'center' ? '0 auto' : '0',
   };
 
-  const captionStyle: CSSProperties = {
+  const captionStyle: React.CSSProperties = {
     fontSize: '0.9em',
     color: '#666',
     fontStyle: 'italic',
