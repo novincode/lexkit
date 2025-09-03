@@ -63,4 +63,5 @@ export const defaultTheme = {
     strikethrough: 'lexkit-text-strikethrough',
     code: 'lexkit-text-code',
   },
+  image: 'lexical-image',
 };

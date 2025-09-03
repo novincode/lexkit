@@ -1,39 +1,77 @@
-import { DecoratorNode } from 'lexical';
+import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '../../types';
+import { ExtensionCategory, BaseExtensionConfig } from '../../types';
+import { ImagePayload, ImageComponentProps, SerializedImageNode, ImageExtensionConfig, ImageCommands, ImageStateQueries, Alignment } from './types';
 
-export interface ImagePayload { src: string; alt: string; caption?: string; }
+const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>('insert-image');
 
-export interface SerializedImageNode {
-  type: 'image';
-  version: number;
-  src: string;
-  alt: string;
-  caption?: string;
-}
+let defaultImageComponent: ComponentType<ImageComponentProps> = ({
+  src,
+  alt,
+  caption,
+  alignment = 'none',
+  className = '',
+  style,
+}) => (
+  <figure className={`lexical-image align-${alignment} ${className}`} style={style}>
+    <img src={src} alt={alt} />
+    {caption && <figcaption>{caption}</figcaption>}
+  </figure>
+);
 
-export class ImageNode extends DecoratorNode<React.ReactNode> {
+export class ImageNode extends DecoratorNode<ReactNode> {
   __src: string;
   __alt: string;
   __caption?: string;
+  __alignment: Alignment;
+  __className?: string;
+  __style?: CSSProperties;
 
-  static getType() { return 'image'; }
+  static getType(): string {
+    return 'image';
+  }
 
-  static clone(node: ImageNode) {
-    return new ImageNode(node.__src, node.__alt, node.__caption, node.__key);
+  static clone(node: ImageNode): ImageNode {
+    return new ImageNode(
+      node.__src,
+      node.__alt,
+      node.__caption,
+      node.__alignment,
+      node.__className,
+      node.__style,
+      node.__key
+    );
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    return new ImageNode(serializedNode.src, serializedNode.alt, serializedNode.caption);
+    return new ImageNode(
+      serializedNode.src,
+      serializedNode.alt,
+      serializedNode.caption,
+      serializedNode.alignment,
+      serializedNode.className,
+      serializedNode.style
+    );
   }
 
-  constructor(src: string, alt: string, caption?: string, key?: string) {
+  constructor(
+    src: string,
+    alt: string,
+    caption?: string,
+    alignment: Alignment = 'none',
+    className?: string,
+    style?: CSSProperties,
+    key?: NodeKey
+  ) {
     super(key);
     this.__src = src;
     this.__alt = alt;
     this.__caption = caption;
+    this.__alignment = alignment;
+    this.__className = className;
+    this.__style = style;
   }
 
   exportJSON(): SerializedImageNode {
@@ -43,51 +81,323 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
       src: this.__src,
       alt: this.__alt,
       caption: this.__caption,
+      alignment: this.__alignment,
+      className: this.__className,
+      style: this.__style,
     };
   }
 
-  createDOM(config: any) {
+  setSrc(src: string): void {
+    const writable = this.getWritable();
+    writable.__src = src;
+  }
+
+  setAlt(alt: string): void {
+    const writable = this.getWritable();
+    writable.__alt = alt;
+  }
+
+  setCaption(caption?: string): void {
+    const writable = this.getWritable();
+    writable.__caption = caption;
+  }
+
+  setAlignment(alignment: Alignment): void {
+    const writable = this.getWritable();
+    writable.__alignment = alignment;
+  }
+
+  setClassName(className?: string): void {
+    const writable = this.getWritable();
+    writable.__className = className;
+  }
+
+  setStyle(style?: CSSProperties): void {
+    const writable = this.getWritable();
+    writable.__style = style;
+  }
+
+  createDOM(config: EditorConfig): HTMLElement {
+    const figure = document.createElement('figure');
+    figure.contentEditable = 'false'; // Makes the node selectable as a whole
+    figure.className = `${config.theme?.image || 'lexical-image'} align-${this.__alignment} ${this.__className || ''}`;
+    if (this.__style) {
+      Object.assign(figure.style, this.__style);
+    }
+
     const img = document.createElement('img');
     img.src = this.__src;
     img.alt = this.__alt;
-    img.className = config.nodeClassName || '';
-    Object.assign(img.style, config.nodeStyle || {});
-    return img;
+    figure.appendChild(img);
+
+    if (this.__caption) {
+      const figcaption = document.createElement('figcaption');
+      figcaption.textContent = this.__caption;
+      figure.appendChild(figcaption);
+    }
+
+    return figure;
   }
 
-  updateDOM(prev: ImageNode, dom: HTMLElement) {
-    if (prev.__src !== this.__src) {
-      (dom as HTMLImageElement).src = this.__src;
+  updateDOM(prevNode: ImageNode, dom: HTMLElement): boolean {
+    const figure = dom;
+    const img = figure.querySelector('img') as HTMLImageElement | null;
+
+    if (img) {
+      if (prevNode.__src !== this.__src) {
+        img.src = this.__src;
+      }
+      if (prevNode.__alt !== this.__alt) {
+        img.alt = this.__alt;
+      }
     }
-    if (prev.__alt !== this.__alt) {
-      (dom as HTMLImageElement).alt = this.__alt;
+
+    let figcaption = figure.querySelector('figcaption') as HTMLElement | null;
+    if (this.__caption !== prevNode.__caption) {
+      if (this.__caption) {
+        if (!figcaption) {
+          figcaption = document.createElement('figcaption');
+          figure.appendChild(figcaption);
+        }
+        figcaption.textContent = this.__caption;
+      } else if (figcaption) {
+        figcaption.remove();
+      }
     }
+
+    const newClassName = `${figure.classList[0] || 'lexical-image'} align-${this.__alignment} ${this.__className || ''}`;
+    if (figure.className !== newClassName) {
+      figure.className = newClassName;
+    }
+
+    if (this.__style !== prevNode.__style) {
+      figure.style.cssText = ''; // Reset
+      if (this.__style) {
+        Object.assign(figure.style, this.__style);
+      }
+    }
+
     return false;
   }
 
-  decorate() {
-    return <img src={this.__src} alt={this.__alt} />;
+  decorate(): ReactNode {
+    const Component = defaultImageComponent;
+    return <Component
+      src={this.__src}
+      alt={this.__alt}
+      caption={this.__caption}
+      alignment={this.__alignment}
+      className={this.__className}
+      style={this.__style}
+    />;
   }
 }
 
-export type ImageCommands = {};
-
-export class ImageExtension extends BaseExtension<'image', any, ImageCommands, {}, ReactNode[]> {
+export class ImageExtension extends BaseExtension<
+  'image',
+  ImageExtensionConfig,
+  ImageCommands,
+  ImageStateQueries,
+  ReactNode[]
+> {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
   }
 
+  configure(config: Partial<ImageExtensionConfig>): this {
+    if (config.customRenderer) {
+      defaultImageComponent = config.customRenderer;
+    }
+    if (config.uploadHandler) {
+      this.config.uploadHandler = config.uploadHandler;
+    }
+    if (config.defaultAlignment) {
+      this.config.defaultAlignment = config.defaultAlignment;
+    }
+    if (config.classNames) {
+      this.config.classNames = config.classNames;
+    }
+    if (config.styles) {
+      this.config.styles = config.styles;
+    }
+    this.config = { ...this.config, ...config };
+    return this;
+  }
+
   register(editor: LexicalEditor): () => void {
-    // Register commands if needed
-    return () => {};
+    const removeCommand = editor.registerCommand<ImagePayload>(
+      INSERT_IMAGE_COMMAND,
+      (payload) => {
+        if (payload.file) {
+          this.config.uploadHandler?.(payload.file).then(src => {
+            editor.update(() => {
+              const imageNode = new ImageNode(
+                src || '',
+                payload.alt,
+                payload.caption,
+                payload.alignment || this.config.defaultAlignment || 'none',
+                payload.className,
+                payload.style
+              );
+              $insertNodes([imageNode]);
+            });
+          });
+        } else {
+          editor.update(() => {
+            const imageNode = new ImageNode(
+              payload.src || '',
+              payload.alt,
+              payload.caption,
+              payload.alignment || this.config.defaultAlignment || 'none',
+              payload.className,
+              payload.style
+            );
+            $insertNodes([imageNode]);
+          });
+        }
+        return true;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+
+    return removeCommand;
   }
 
   getNodes(): any[] {
     return [ImageNode];
   }
 
-  getStateQueries(editor: LexicalEditor): {} {
-    return {};
+  getCommands(editor: LexicalEditor): ImageCommands {
+    return {
+      insertImage: (payload: ImagePayload) => {
+        editor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
+      },
+      setImageAlignment: (alignment: Alignment) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            for (const node of nodes) {
+              if (node instanceof ImageNode) {
+                node.setAlignment(alignment);
+              }
+            }
+          }
+        });
+      },
+      setImageCaption: (caption: string) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            for (const node of nodes) {
+              if (node instanceof ImageNode) {
+                node.setCaption(caption);
+              }
+            }
+          }
+        });
+      },
+      setImageClassName: (className: string) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            for (const node of nodes) {
+              if (node instanceof ImageNode) {
+                node.setClassName(className);
+              }
+            }
+          }
+        });
+      },
+      setImageStyle: (style: CSSProperties) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            for (const node of nodes) {
+              if (node instanceof ImageNode) {
+                node.setStyle(style);
+              }
+            }
+          }
+        });
+      },
+    };
+  }
+
+  getStateQueries(editor: LexicalEditor): ImageStateQueries {
+    return {
+      imageSelected: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const nodes = selection.getNodes();
+              resolve(nodes.length === 1 && nodes[0] instanceof ImageNode);
+            } else {
+              resolve(false);
+            }
+          });
+        }),
+      isImageAlignedLeft: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const nodes = selection.getNodes();
+              if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
+                resolve((nodes[0] as ImageNode).__alignment === 'left');
+                return;
+              }
+            }
+            resolve(false);
+          });
+        }),
+      isImageAlignedCenter: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const nodes = selection.getNodes();
+              if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
+                resolve((nodes[0] as ImageNode).__alignment === 'center');
+                return;
+              }
+            }
+            resolve(false);
+          });
+        }),
+      isImageAlignedRight: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const nodes = selection.getNodes();
+              if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
+                resolve((nodes[0] as ImageNode).__alignment === 'right');
+                return;
+              }
+            }
+            resolve(false);
+          });
+        }),
+      isImageAlignedNone: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const nodes = selection.getNodes();
+              if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
+                resolve((nodes[0] as ImageNode).__alignment === 'none');
+                return;
+              }
+            }
+            resolve(false);
+          });
+        }),
+    };
   }
 }
 
