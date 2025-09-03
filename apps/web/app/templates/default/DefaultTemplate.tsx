@@ -1,0 +1,110 @@
+'use client'
+import React, { useState, useEffect } from 'react';
+import { createEditorSystem, boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { $getSelection, $isRangeSelection } from 'lexical';
+import { defaultTheme } from './theme';
+import './styles.css';
+import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon } from 'lucide-react';
+
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+interface DefaultTemplateProps {
+  className?: string;
+}
+
+export function DefaultTemplate({ className }: DefaultTemplateProps) {
+  const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension] as const;
+  const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
+
+  function Toolbar() {
+    const { commands, hasExtension, editor } = useEditor();
+    const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+      if (!editor) return;
+      const unregister = editor.registerUpdateListener(() => {
+        editor.getEditorState().read(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const formats = new Set<string>();
+            if (selection.hasFormat('bold')) formats.add('bold');
+            if (selection.hasFormat('italic')) formats.add('italic');
+            setActiveFormats(formats);
+          } else {
+            setActiveFormats(new Set());
+          }
+        });
+      });
+      return unregister;
+    }, [editor]);
+
+    const toggleBold = () => commands.formatText('bold');
+    const toggleItalic = () => commands.formatText('italic');
+    const toggleUnorderedList = () => commands.toggleUnorderedList();
+    const toggleOrderedList = () => commands.toggleOrderedList();
+    const undo = () => commands.undo();
+    const redo = () => commands.redo();
+
+    return (
+      <div className={defaultTheme.toolbar}>
+        {hasExtension('bold') && (
+          <button onClick={toggleBold} className={activeFormats.has('bold') ? 'active' : ''} title="Bold">
+            <Bold size={20} />
+          </button>
+        )}
+        {hasExtension('italic') && (
+          <button onClick={toggleItalic} className={activeFormats.has('italic') ? 'active' : ''} title="Italic">
+            <Italic size={20} />
+          </button>
+        )}
+        {hasExtension('list') && (
+          <>
+            <button onClick={toggleUnorderedList} title="Bulleted List">
+              <List size={20} />
+            </button>
+            <button onClick={toggleOrderedList} title="Numbered List">
+              <ListOrdered size={20} />
+            </button>
+          </>
+        )}
+        {hasExtension('history') && (
+          <>
+            <button onClick={undo} title="Undo">
+              <Undo size={20} />
+            </button>
+            <button onClick={redo} title="Redo">
+              <Redo size={20} />
+            </button>
+          </>
+        )}
+        <button onClick={() => setIsDark(!isDark)} title={isDark ? 'Light Mode' : 'Dark Mode'}>
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`lexkit-editor-wrapper ${className || ''}`} style={{ width: '100%',  display: 'flex', flexDirection: 'column' }}>
+      <Provider extensions={extensions} config={{ theme: defaultTheme }}>
+        <div style={{ flex: 1, display: 'flex',maxHeight:'100vh', flexDirection: 'column', position: 'relative' }}>
+          <Toolbar />
+          <div className={defaultTheme.editor}>
+            <RichTextPlugin
+              contentEditable={<ContentEditable className={defaultTheme.contentEditable} />}
+              placeholder={<div className="lexkit-placeholder">Start typing...</div>}
+              ErrorBoundary={ErrorBoundary}
+            />
+          </div>
+        </div>
+      </Provider>
+    </div>
+  );
+}

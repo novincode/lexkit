@@ -1,9 +1,15 @@
+import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND } from 'lexical';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '../../types';
 import { ReactNode } from 'react';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 
-export type HistoryCommands = {};
+export type HistoryCommands = {
+  undo: () => void;
+  redo: () => void;
+  clearHistory: () => void;
+};
 
 export class HistoryExtension extends BaseExtension<'history', any, HistoryCommands, ReactNode[]> {
   constructor() {
@@ -16,8 +22,15 @@ export class HistoryExtension extends BaseExtension<'history', any, HistoryComma
   }
 
   getPlugins(): ReactNode[] {
-    // Lazy load in useEffect in createEditorSystem
-    return [];
+    return [<HistoryPlugin key="history-plugin" />];
+  }
+
+  getCommands(editor: LexicalEditor): HistoryCommands {
+    return {
+      undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
+      redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
+      clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
+    };
   }
 }
 

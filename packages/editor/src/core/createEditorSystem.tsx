@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands, ExtractFormatTypes } from '../extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
@@ -26,9 +27,6 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     // Lazy commands from extensions + base
     const baseCommands: BaseCommands = {
       formatText: (format: TextFormatType, value?: boolean | string) => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format),
-      undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
-      redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
-      clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
     };
     const extensionCommands = extensions.reduce((acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }), {}) as Record<string, any>;
     const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
@@ -87,11 +85,6 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
         fromHTML: lazyExports.fromHTML,
         fromMarkdown: lazyExports.fromMarkdown,
         fromJSON: (json: any) => editor?.setEditorState(editor.parseEditorState(json)),
-      },
-      history: {
-        undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
-        redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
-        clear: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
       },
       lexical: editor,
       extensionsAPI: {

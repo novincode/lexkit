@@ -1,5 +1,7 @@
 import { DefaultTemplate } from './DefaultTemplate';
 
 export default function Page() {
-  return <DefaultTemplate />;
+  return <div className='p-4'>
+     <DefaultTemplate />;
+  </div>
 }

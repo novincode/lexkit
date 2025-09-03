@@ -57,9 +57,6 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] exte
 // Base commands (always available)
 export interface BaseCommands {
   formatText: (format: TextFormatType, value?: boolean | string) => void;
-  undo: () => void;
-  redo: () => void;
-  clearHistory: () => void;
 }
 
 // Context type, generic over Exts
@@ -81,11 +78,6 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
     fromHTML: (html: string) => Promise<void>;
     fromMarkdown: (md: string) => Promise<void>;
     fromJSON: (json: any) => void;
-  };
-  history: {
-    undo: () => void;
-    redo: () => void;
-    clear: () => void;
   };
   lexical: LexicalEditor | null;
   extensionsAPI: {
