@@ -14,12 +14,15 @@ let defaultImageComponent: ComponentType<ImageComponentProps> = ({
   alignment = 'none',
   className = '',
   style,
-}) => (
-  <figure className={`lexical-image align-${alignment} ${className}`} style={style}>
-    <img src={src} alt={alt} />
-    {caption && <figcaption>{caption}</figcaption>}
-  </figure>
-);
+}) => {
+  console.log('Rendering defaultImageComponent:', { src, alt, caption, alignment });
+  return (
+    <figure className={`lexical-image align-${alignment} ${className}`} style={style}>
+      <img src={src} alt={alt} />
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  );
+};
 
 export class ImageNode extends DecoratorNode<ReactNode> {
   __src: string;
@@ -66,6 +69,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     key?: NodeKey
   ) {
     super(key);
+    console.log('Creating ImageNode:', { src, alt, caption, alignment });
     this.__src = src;
     this.__alt = alt;
     this.__caption = caption;
@@ -117,70 +121,13 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     writable.__style = style;
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
-    const figure = document.createElement('figure');
-    figure.contentEditable = 'false'; // Makes the node selectable as a whole
-    figure.className = `${config.theme?.image || 'lexical-image'} align-${this.__alignment} ${this.__className || ''}`;
-    if (this.__style) {
-      Object.assign(figure.style, this.__style);
-    }
-
-    const img = document.createElement('img');
-    img.src = this.__src;
-    img.alt = this.__alt;
-    figure.appendChild(img);
-
-    if (this.__caption) {
-      const figcaption = document.createElement('figcaption');
-      figcaption.textContent = this.__caption;
-      figure.appendChild(figcaption);
-    }
-
-    return figure;
-  }
-
-  updateDOM(prevNode: ImageNode, dom: HTMLElement): boolean {
-    const figure = dom;
-    const img = figure.querySelector('img') as HTMLImageElement | null;
-
-    if (img) {
-      if (prevNode.__src !== this.__src) {
-        img.src = this.__src;
-      }
-      if (prevNode.__alt !== this.__alt) {
-        img.alt = this.__alt;
-      }
-    }
-
-    let figcaption = figure.querySelector('figcaption') as HTMLElement | null;
-    if (this.__caption !== prevNode.__caption) {
-      if (this.__caption) {
-        if (!figcaption) {
-          figcaption = document.createElement('figcaption');
-          figure.appendChild(figcaption);
-        }
-        figcaption.textContent = this.__caption;
-      } else if (figcaption) {
-        figcaption.remove();
-      }
-    }
-
-    const newClassName = `${figure.classList[0] || 'lexical-image'} align-${this.__alignment} ${this.__className || ''}`;
-    if (figure.className !== newClassName) {
-      figure.className = newClassName;
-    }
-
-    if (this.__style !== prevNode.__style) {
-      figure.style.cssText = ''; // Reset
-      if (this.__style) {
-        Object.assign(figure.style, this.__style);
-      }
-    }
-
-    return false;
-  }
-
   decorate(): ReactNode {
+    console.log('Decorating image node:', {
+      src: this.__src,
+      alt: this.__alt,
+      caption: this.__caption,
+      alignment: this.__alignment
+    });
     const Component = defaultImageComponent;
     return <Component
       src={this.__src}
@@ -228,8 +175,10 @@ export class ImageExtension extends BaseExtension<
     const removeCommand = editor.registerCommand<ImagePayload>(
       INSERT_IMAGE_COMMAND,
       (payload) => {
+        console.log('Inserting image:', payload);
         if (payload.file) {
           this.config.uploadHandler?.(payload.file).then(src => {
+            console.log('Upload result:', src);
             editor.update(() => {
               const imageNode = new ImageNode(
                 src || '',
@@ -240,6 +189,7 @@ export class ImageExtension extends BaseExtension<
                 payload.style
               );
               $insertNodes([imageNode]);
+              console.log('Image node inserted');
             });
           });
         } else {
@@ -253,6 +203,7 @@ export class ImageExtension extends BaseExtension<
               payload.style
             );
             $insertNodes([imageNode]);
+            console.log('Image node inserted from URL');
           });
         }
         return true;

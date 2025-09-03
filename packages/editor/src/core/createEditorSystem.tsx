@@ -182,12 +182,15 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
   function Provider(props: ProviderProps<Exts>) {
     const nodes = useMemo(() => props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []), [props.extensions]);
 
-    const initialConfig = {
-      namespace: 'modern-editor',
-      theme: props.config?.theme || {},
-      onError: console.error,
-      nodes,
-    };
+    const initialConfig = useMemo(
+      () => ({
+        namespace: 'modern-editor',
+        theme: props.config?.theme || {},
+        onError: console.error,
+        nodes,
+      }),
+      [props.config?.theme, nodes]
+    );
 
     return (
       <LexicalComposer initialConfig={initialConfig}>
