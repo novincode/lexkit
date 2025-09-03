@@ -60,38 +60,47 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       });
     }, [editor]);
 
-    // Collect state queries
+    // Collect state queries (now all Promise-based)
     const stateQueries = extensions.reduce(
       (acc, ext) => ({
         ...acc,
         ...(ext.getStateQueries ? ext.getStateQueries(editor!) : {}),
       }),
-      {} as Record<string, () => boolean>
+      {} as Record<string, () => Promise<boolean>>
     );
 
     // Batched active states
-    const [activeStates, setActiveStates] = useState<Record<string, boolean>>(() => {
-      const initial: Record<string, boolean> = {};
-      for (const key of Object.keys(stateQueries)) {
-        initial[key] = false; // Default to false
-      }
-      return initial;
-    });
+    const [activeStates, setActiveStates] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
       if (!editor) return;
 
-      const unregister = editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          const newStates: Record<string, boolean> = {};
-          for (const [key, queryFn] of Object.entries(stateQueries)) {
-            newStates[key] = queryFn();
-          }
-          setActiveStates(newStates);
+      const unregister = editor.registerUpdateListener(() => {
+        // No editorState.read() here—all queries handle their own reads if needed
+        const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
+          queryFn().then((value) => [key, value] as [string, boolean])
+        );
+
+        Promise.all(promises).then((results) => {
+          const newStates = Object.fromEntries(results);
+          setActiveStates((prev) => ({ ...prev, ...newStates })); // Merge to avoid overwriting
         });
       });
 
       return unregister;
+    }, [editor, stateQueries]);
+
+    // Optional: Initial query on mount (to avoid undefined flash)
+    useEffect(() => {
+      if (!editor || Object.keys(stateQueries).length === 0) return;
+
+      const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
+        queryFn().then((value) => [key, value] as [string, boolean])
+      );
+
+      Promise.all(promises).then((results) => {
+        setActiveStates(Object.fromEntries(results));
+      });
     }, [editor, stateQueries]);
 
     const contextValue: EditorContextType<Exts> = {

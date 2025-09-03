@@ -29,15 +29,19 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
     } as any;
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => boolean> {
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
     return {
-      [this.name]: () => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          return selection.hasFormat(this.name);
-        }
-        return false;
-      },
+      [this.name]: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+              resolve(selection.hasFormat(this.name));
+            } else {
+              resolve(false);
+            }
+          });
+        }),
     };
   }
 }

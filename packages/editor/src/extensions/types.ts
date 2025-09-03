@@ -35,7 +35,7 @@ export interface Extension<Name extends string = string, Config extends BaseExte
   getNodes?: () => any[];
   getPlugins: () => Plugins;
   getCommands: (editor: LexicalEditor) => Commands;
-  getStateQueries?: (editor: LexicalEditor) => Record<string, () => boolean>;
+  getStateQueries?: (editor: LexicalEditor) => Record<string, () => Promise<boolean>>;  // All queries async now
   // More: getToolbarItems?(): ToolbarItem<Commands>[];
 }
 

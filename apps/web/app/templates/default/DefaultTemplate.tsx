@@ -50,7 +50,8 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
         )}
         {hasExtension('history') && (
           <>
-            <button onClick={() => commands.undo()} className={activeStates.canUndo ? '' : 'disabled'} title="Undo">
+          {activeStates.orderedList ? "1" : "0"}
+            <button onClick={() => commands.undo()} disabled={!activeStates.canUndo} className={activeStates.canUndo ? '' : 'disabled'} title="Undo">
               <Undo size={20} />
             </button>
             <button onClick={() => commands.redo()} disabled={!activeStates.canRedo} className={activeStates.canRedo ? '' : 'disabled'} title="Redo">

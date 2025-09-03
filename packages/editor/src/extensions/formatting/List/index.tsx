@@ -80,32 +80,46 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
     };
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => boolean> {
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
     return {
-      unorderedList: () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) return false;
-        let node: any = selection.anchor.getNode();
-        while (node) {
-          if ($isListNode(node)) {
-            return node.getListType() === 'bullet';
-          }
-          node = node.getParent();
-        }
-        return false;
-      },
-      orderedList: () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) return false;
-        let node: any = selection.anchor.getNode();
-        while (node) {
-          if ($isListNode(node)) {
-            return node.getListType() === 'number';
-          }
-          node = node.getParent();
-        }
-        return false;
-      },
+      unorderedList: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) {
+              resolve(false);
+              return;
+            }
+            let node: any = selection.anchor.getNode();
+            while (node) {
+              if ($isListNode(node)) {
+                resolve(node.getListType() === 'bullet');
+                return;
+              }
+              node = node.getParent();
+            }
+            resolve(false);
+          });
+        }),
+      orderedList: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) {
+              resolve(false);
+              return;
+            }
+            let node: any = selection.anchor.getNode();
+            while (node) {
+              if ($isListNode(node)) {
+                resolve(node.getListType() === 'number');
+                return;
+              }
+              node = node.getParent();
+            }
+            resolve(false);
+          });
+        }),
     };
   }
 }

@@ -1,4 +1,4 @@
-import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND } from 'lexical';
+import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, CAN_UNDO_COMMAND, CAN_REDO_COMMAND } from 'lexical';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '../../types';
@@ -39,10 +39,26 @@ export class HistoryExtension extends BaseExtension<'history', any, HistoryComma
     };
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => boolean> {
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
     return {
-      canUndo: () => (editor as any)._historyState?.canUndo || false,
-      canRedo: () => (editor as any)._historyState?.canRedo || false,
+      canUndo: () =>
+        new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(false), 10);
+          editor.dispatchCommand(CAN_UNDO_COMMAND as any, (canUndo: boolean) => {
+            clearTimeout(timeout);
+            resolve(canUndo);
+            return true;
+          });
+        }),
+      canRedo: () =>
+        new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(false), 10);
+          editor.dispatchCommand(CAN_REDO_COMMAND as any, (canRedo: boolean) => {
+            clearTimeout(timeout);
+            resolve(canRedo);
+            return true;
+          });
+        }),
     };
   }
 }
