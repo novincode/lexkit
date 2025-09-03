@@ -1,4 +1,4 @@
-import { LexicalEditor } from 'lexical';
+import { LexicalEditor, TextFormatType } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from './types';
 
@@ -11,6 +11,7 @@ export abstract class BaseExtension<
   name: Name;
   category: ExtensionCategory[] = [ExtensionCategory.Toolbar];
   config: Config = {} as Config;
+  supportedFormats: readonly TextFormatType[] = [];
   private nodeOverrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean } = {};
 
   constructor(name: Name, category: ExtensionCategory[] = [ExtensionCategory.Toolbar]) {

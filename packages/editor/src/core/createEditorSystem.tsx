@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands, ExtractFormatTypes } from '../extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -31,7 +31,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
     };
     const extensionCommands = extensions.flatMap(ext => ext.getCommands ? [ext.getCommands(editor!)] : []).reduce((acc, cmds) => ({ ...acc, ...cmds }), {});
-    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
+    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands<ExtractFormatTypes<Exts>> & ExtractCommands<Exts>;
 
     // Plugins: Collect inferred
     const plugins = extensions.flatMap(ext => ext.getPlugins?.() || []) as ExtractPlugins<Exts>[];

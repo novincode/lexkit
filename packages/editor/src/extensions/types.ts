@@ -27,27 +27,33 @@ export interface Extension<Name extends string = string, Config extends BaseExte
   name: Name; // Literal for inference
   category: ExtensionCategory[];
   config: Config;
+  supportedFormats?: readonly TextFormatType[];
   configure?: (config: Partial<Config>) => Extension<Name, Config, Commands, Plugins>;
   register: (editor: LexicalEditor) => () => void;
   overrideUI?: (CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>) => Extension<Name, Config, Commands, Plugins>;
   overrideNodeRender?: (overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }) => Extension<Name, Config, Commands, Plugins>;
   getNodes?: () => any[];
-  getPlugins?: () => Plugins;
-  getCommands?: (editor: LexicalEditor) => Commands;
+  getPlugins: () => Plugins;
+  getCommands: (editor: LexicalEditor) => Commands;
   // More: getToolbarItems?(): ToolbarItem<Commands>[];
 }
 
 // Infer unions from array of extensions
 export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
-export type ExtractCommands<Exts extends readonly Extension[]> = UnionToIntersection<Exts[number] extends { getCommands: (editor: LexicalEditor) => infer C } ? C : {}>;
-export type ExtractPlugins<Exts extends readonly Extension[]> = Exts[number] extends { getPlugins: () => infer P } ? P extends (infer T)[] ? T : never : never;
+export type ExtractCommands<Exts extends readonly Extension[]> = UnionToIntersection<
+  ReturnType<Exts[number]['getCommands']>
+>;
+export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[number]['getPlugins']>[number];
+export type ExtractFormatTypes<Exts extends readonly Extension[]> = Exts[number] extends { supportedFormats: infer F }
+  ? F extends readonly TextFormatType[] ? F[number] : never
+  : never;
 
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
 // Base commands (always available)
-export interface BaseCommands {
-  formatText: (format: TextFormatType, value?: boolean | string) => void;
+export interface BaseCommands<FormatType extends TextFormatType = TextFormatType> {
+  formatText: (format: FormatType, value?: boolean | string) => void;
   undo: () => void;
   redo: () => void;
   clearHistory: () => void;
@@ -58,7 +64,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   editor: LexicalEditor | null;
   config?: EditorConfig;
   extensions: Exts;
-  commands: BaseCommands & ExtractCommands<Exts>;
+  commands: BaseCommands<ExtractFormatTypes<Exts>> & ExtractCommands<Exts>;
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
     registerPaste: (listener: (event: ClipboardEvent) => boolean) => (() => void) | undefined;

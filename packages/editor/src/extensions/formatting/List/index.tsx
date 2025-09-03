@@ -9,8 +9,8 @@ import React from 'react';
 
 // Define types for inference
 export type ListCommands = {
-  toggleUnorderedList: () => Promise<void>;
-  toggleOrderedList: () => Promise<void>;
+  toggleUnorderedList: () => void;
+  toggleOrderedList: () => void;
 };
 
 export class ListExtension extends BaseExtension<'list', any, ListCommands, ReactNode[]> {
@@ -33,7 +33,7 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
 
   getCommands(editor: LexicalEditor): ListCommands {
     return {
-      toggleUnorderedList: async () => {
+      toggleUnorderedList: () => {
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
@@ -55,7 +55,7 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
           }
         });
       },
-      toggleOrderedList: async () => {
+      toggleOrderedList: () => {
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {

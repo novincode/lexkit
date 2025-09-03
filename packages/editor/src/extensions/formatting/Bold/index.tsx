@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical';
+import { FORMAT_TEXT_COMMAND, TextFormatType } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
@@ -9,6 +9,8 @@ export type BoldCommands = {
 };
 
 export class BoldExtension extends BaseExtension<'bold', any, BoldCommands, ReactNode[]> {
+  supportedFormats: readonly TextFormatType[] = ['bold'];
+
   constructor() {
     super('bold', [ExtensionCategory.Toolbar]);
   }
