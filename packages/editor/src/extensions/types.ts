@@ -50,9 +50,6 @@ export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
   ReturnType<Exts[number]['getCommands']>
 >;
 export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[number]['getPlugins']>[number];
-export type ExtractStateQueries<Exts extends readonly Extension[]> = UnionToIntersection<
-  Exts[number] extends { getStateQueries: infer F } ? F extends (...args: any) => infer R ? R : {} : {}
->;
 
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;

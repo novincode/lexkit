@@ -85,14 +85,26 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
       unorderedList: () => {
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return false;
-        const node = selection.anchor.getNode().getParent();
-        return $isListNode(node) && node.getListType() === 'bullet';
+        let node: any = selection.anchor.getNode();
+        while (node) {
+          if ($isListNode(node)) {
+            return node.getListType() === 'bullet';
+          }
+          node = node.getParent();
+        }
+        return false;
       },
       orderedList: () => {
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return false;
-        const node = selection.anchor.getNode().getParent();
-        return $isListNode(node) && node.getListType() === 'number';
+        let node: any = selection.anchor.getNode();
+        while (node) {
+          if ($isListNode(node)) {
+            return node.getListType() === 'number';
+          }
+          node = node.getParent();
+        }
+        return false;
       },
     };
   }

@@ -25,6 +25,7 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
   function Toolbar() {
     const { commands, hasExtension, activeStates } = useEditor();
 
+    
     return (
       <div className={defaultTheme.toolbar}>
         {hasExtension('bold') && (
@@ -52,7 +53,7 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
             <button onClick={() => commands.undo()} className={activeStates.canUndo ? '' : 'disabled'} title="Undo">
               <Undo size={20} />
             </button>
-            <button onClick={() => commands.redo()} className={activeStates.canRedo ? '' : 'disabled'} title="Redo">
+            <button onClick={() => commands.redo()} disabled={!activeStates.canRedo} className={activeStates.canRedo ? '' : 'disabled'} title="Redo">
               <Redo size={20} />
             </button>
           </>

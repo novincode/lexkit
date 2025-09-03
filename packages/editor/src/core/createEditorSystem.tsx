@@ -3,7 +3,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands, ExtractStateQueries } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -70,7 +70,13 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     );
 
     // Batched active states
-    const [activeStates, setActiveStates] = useState<Record<string, boolean>>({});
+    const [activeStates, setActiveStates] = useState<Record<string, boolean>>(() => {
+      const initial: Record<string, boolean> = {};
+      for (const key of Object.keys(stateQueries)) {
+        initial[key] = false; // Default to false
+      }
+      return initial;
+    });
 
     useEffect(() => {
       if (!editor) return;
