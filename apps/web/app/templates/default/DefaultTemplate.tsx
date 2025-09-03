@@ -1,6 +1,6 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import {  boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
+import React, { useState, useEffect, useMemo } from 'react';
+import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -45,33 +45,100 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
 
-function DecoratorPlugin() {
-  const [editor] = useLexicalComposerContext();
-  useEffect(() => {
-    console.log('🛠️ DecoratorPlugin initialized');
-    // Log when decorator nodes are rendered
-    const unregister = editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const nodes = $getRoot().getChildren();
-        nodes.forEach(node => {
-          if (node.getType() === 'image') {
-            console.log('🎨 Found ImageNode in state, should render:', node);
+// Custom hook for toolbar state and handlers
+function useToolbarState(commands: EditorCommands, activeStates: EditorStateQueries, editor: any) {
+  const [showImageMenu, setShowImageMenu] = useState(false);
+  const [showReplaceMenu, setShowReplaceMenu] = useState(false);
+
+  const handlers = useMemo(() => ({
+    insertImageFromUrl: () => {
+      const src = prompt('Enter image URL:');
+      if (!src) return;
+      const alt = prompt('Enter alt text:') || '';
+      const caption = prompt('Enter caption (optional):') || undefined;
+      console.log('Inserting image from URL:', { src, alt, caption });
+      commands.insertImage({ src, alt, caption });
+      setShowImageMenu(false);
+    },
+
+    fileUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && imageExtension.config.uploadHandler) {
+        try {
+          const src = await imageExtension.config.uploadHandler(file);
+          console.log('Inserting uploaded image:', { src, alt: file.name });
+          commands.insertImage({ src, alt: file.name, file });
+        } catch (error) {
+          alert('Failed to upload image');
+        }
+      } else if (file) {
+        const src = URL.createObjectURL(file);
+        console.log('Inserting local image:', { src, alt: file.name });
+        commands.insertImage({ src, alt: file.name, file });
+      }
+      setShowImageMenu(false);
+      e.target.value = '';
+    },
+
+    setCaption: () => {
+      if (activeStates.imageSelected) {
+        const newCaption = prompt('Enter new caption:') || '';
+        commands.setImageCaption(newCaption);
+      }
+    },
+
+    replaceFromUrl: () => {
+      const src = prompt('Enter new image URL:');
+      if (!src || !editor) return;
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes();
+          for (const node of nodes) {
+            if (node instanceof ImageNode) {
+              (node as ImageNode).setSrc(src);
+            }
+          }
+        }
+      });
+    },
+
+    replaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && editor) {
+        const src = URL.createObjectURL(file);
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            for (const node of nodes) {
+              if (node instanceof ImageNode) {
+                (node as ImageNode).setSrc(src);
+              }
+            }
           }
         });
-      });
-    });
-    return unregister;
-  }, [editor]);
-  return null;
+      }
+      e.target.value = '';
+    },
+  }), [commands, activeStates, editor]);
+
+  return {
+    showImageMenu,
+    setShowImageMenu,
+    showReplaceMenu,
+    setShowReplaceMenu,
+    handlers,
+  };
 }
 
 function EditorContent({ className, isDark, toggleTheme }: { className?: string; isDark: boolean; toggleTheme: () => void }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
+  const { showImageMenu, setShowImageMenu, showReplaceMenu, setShowReplaceMenu, handlers } = useToolbarState(commands, activeStates, editor);
 
   // Update theme dynamically without resetting editor
   useEffect(() => {
     if (editor) {
-      // Update the document theme attribute
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }
   }, [isDark, editor]);
@@ -85,82 +152,6 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
     return () => window.removeEventListener('error', handleError);
   }, []);
 
-  const [showImageMenu, setShowImageMenu] = useState(false);
-  const [showReplaceMenu, setShowReplaceMenu] = useState(false);
-
-  const handleInsertImageFromUrl = () => {
-    const src = prompt('Enter image URL:');
-    if (!src) return;
-    const alt = prompt('Enter alt text:') || '';
-    const caption = prompt('Enter caption (optional):') || undefined;
-    console.log('Inserting image from URL:', { src, alt, caption });
-    commands.insertImage({ src, alt, caption });
-    setShowImageMenu(false);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && imageExtension.config.uploadHandler) {
-      try {
-        const src = await imageExtension.config.uploadHandler(file);
-        console.log('Inserting uploaded image:', { src, alt: file.name });
-        commands.insertImage({ src, alt: file.name, file });
-      } catch (error) {
-        alert('Failed to upload image');
-      }
-    } else if (file) {
-      // Fallback: create object URL for local preview
-      const src = URL.createObjectURL(file);
-      console.log('Inserting local image:', { src, alt: file.name });
-      commands.insertImage({ src, alt: file.name, file });
-    }
-    setShowImageMenu(false);
-    // Reset file input
-    e.target.value = '';
-  };
-
-  const handleSetCaption = () => {
-    if (activeStates.imageSelected) {
-      const newCaption = prompt('Enter new caption:') || '';
-      commands.setImageCaption(newCaption);
-    }
-  };
-
-  const handleReplaceFromUrl = () => {
-    const src = prompt('Enter new image URL:');
-    if (!src || !editor) return;
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isNodeSelection(selection)) {
-        const nodes = selection.getNodes();
-        for (const node of nodes) {
-          if (node instanceof ImageNode) {
-            (node as ImageNode).setSrc(src);
-          }
-        }
-      }
-    });
-  };
-
-  const handleReplaceFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && editor) {
-      const src = URL.createObjectURL(file);
-      editor.update(() => {
-        const selection = $getSelection();
-        if ($isNodeSelection(selection)) {
-          const nodes = selection.getNodes();
-          for (const node of nodes) {
-            if (node instanceof ImageNode) {
-              (node as ImageNode).setSrc(src);
-            }
-          }
-        }
-      });
-    }
-    e.target.value = '';
-  };
-
   return (
     <>
       <Toolbar 
@@ -169,15 +160,9 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
         activeStates={activeStates} 
         isDark={isDark} 
         toggleTheme={toggleTheme}
-        showImageMenu={showImageMenu}
-        setShowImageMenu={setShowImageMenu}
-        handleInsertImageFromUrl={handleInsertImageFromUrl}
-        handleFileUpload={handleFileUpload}
-        handleSetCaption={handleSetCaption}
-        showReplaceMenu={showReplaceMenu}
-        setShowReplaceMenu={setShowReplaceMenu}
-        handleReplaceFromUrl={handleReplaceFromUrl}
-        handleReplaceFromFile={handleReplaceFromFile}
+        imageMenu={{ show: showImageMenu, setShow: setShowImageMenu }}
+        replaceMenu={{ show: showReplaceMenu, setShow: setShowReplaceMenu }}
+        handlers={handlers}
       />
       <div className={defaultTheme.editor}>
         <RichTextPlugin
@@ -186,7 +171,7 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
           ErrorBoundary={ErrorBoundary}
         />
         <HistoryPlugin />
-        <DecoratorPlugin />
+        {/* DecoratorPlugin removed - was only used for debugging image nodes */}
       </div>
     </>
   );
@@ -198,30 +183,24 @@ function Toolbar({
   activeStates, 
   isDark, 
   toggleTheme, 
-  showImageMenu, 
-  setShowImageMenu, 
-  handleInsertImageFromUrl, 
-  handleFileUpload, 
-  handleSetCaption,
-  showReplaceMenu,
-  setShowReplaceMenu,
-  handleReplaceFromUrl,
-  handleReplaceFromFile 
+  imageMenu,
+  replaceMenu,
+  handlers 
 }: {
   commands: EditorCommands;
   hasExtension: (name: "bold" | "italic" | "list" | "history" | "image") => boolean;
   activeStates: EditorStateQueries;
   isDark: boolean;
   toggleTheme: () => void;
-  showImageMenu: boolean;
-  setShowImageMenu: (show: boolean) => void;
-  handleInsertImageFromUrl: () => void;
-  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSetCaption: () => void;
-  showReplaceMenu: boolean;
-  setShowReplaceMenu: (show: boolean) => void;
-  handleReplaceFromUrl: () => void;
-  handleReplaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  imageMenu: { show: boolean; setShow: (show: boolean) => void };
+  replaceMenu: { show: boolean; setShow: (show: boolean) => void };
+  handlers: {
+    insertImageFromUrl: () => void;
+    fileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    setCaption: () => void;
+    replaceFromUrl: () => void;
+    replaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  };
 }) {
 
   return (
@@ -249,15 +228,15 @@ function Toolbar({
       {hasExtension('image') && (
         <div className="image-menu-container">
           <button 
-            onClick={() => setShowImageMenu(!showImageMenu)} 
+            onClick={() => imageMenu.setShow(!imageMenu.show)} 
             className={activeStates.imageSelected ? 'active' : ''} 
             title="Insert Image"
           >
             <Image size={20} />
           </button>
-          {showImageMenu && (
+          {imageMenu.show && (
             <div className="image-dropdown">
-              <button onClick={handleInsertImageFromUrl} title="Insert from URL">
+              <button onClick={handlers.insertImageFromUrl} title="Insert from URL">
                 <Link size={16} />
                 <span>From URL</span>
               </button>
@@ -267,7 +246,7 @@ function Toolbar({
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handleFileUpload}
+                  onChange={handlers.fileUpload}
                   style={{ display: 'none' }}
                 />
               </label>
@@ -296,19 +275,19 @@ function Toolbar({
               >
                 <AlignRight size={20} />
               </button>
-              <button onClick={handleSetCaption} title="Edit Caption">
+              <button onClick={handlers.setCaption} title="Edit Caption">
                 <Edit size={20} />
               </button>
               <div className="replace-menu-container">
                 <button 
-                  onClick={() => setShowReplaceMenu(!showReplaceMenu)} 
+                  onClick={() => replaceMenu.setShow(!replaceMenu.show)} 
                   title="Replace Image"
                 >
                   <Upload size={20} />
                 </button>
-                {showReplaceMenu && (
+                {replaceMenu.show && (
                   <div className="replace-dropdown">
-                    <button onClick={handleReplaceFromUrl} title="Replace from URL">
+                    <button onClick={handlers.replaceFromUrl} title="Replace from URL">
                       <Link size={16} />
                       <span>From URL</span>
                     </button>
@@ -318,7 +297,7 @@ function Toolbar({
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={handleReplaceFromFile}
+                        onChange={handlers.replaceFromFile}
                         style={{ display: 'none' }}
                       />
                     </label>
