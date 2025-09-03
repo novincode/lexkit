@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { createEditorSystem, boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { $getSelection, $isRangeSelection } from 'lexical';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon } from 'lucide-react';
@@ -24,62 +23,36 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
   }, [isDark]);
 
   function Toolbar() {
-    const { commands, hasExtension, editor } = useEditor();
-    const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
-
-    useEffect(() => {
-      if (!editor) return;
-      const unregister = editor.registerUpdateListener(() => {
-        editor.getEditorState().read(() => {
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const formats = new Set<string>();
-            if (selection.hasFormat('bold')) formats.add('bold');
-            if (selection.hasFormat('italic')) formats.add('italic');
-            setActiveFormats(formats);
-          } else {
-            setActiveFormats(new Set());
-          }
-        });
-      });
-      return unregister;
-    }, [editor]);
-
-    const toggleBold = () => commands.formatText('bold');
-    const toggleItalic = () => commands.formatText('italic');
-    const toggleUnorderedList = () => commands.toggleUnorderedList();
-    const toggleOrderedList = () => commands.toggleOrderedList();
-    const undo = () => commands.undo();
-    const redo = () => commands.redo();
+    const { commands, hasExtension, activeStates } = useEditor();
 
     return (
       <div className={defaultTheme.toolbar}>
         {hasExtension('bold') && (
-          <button onClick={toggleBold} className={activeFormats.has('bold') ? 'active' : ''} title="Bold">
+          <button onClick={() => commands.toggleBold()} className={activeStates.bold ? 'active' : ''} title="Bold">
             <Bold size={20} />
           </button>
         )}
         {hasExtension('italic') && (
-          <button onClick={toggleItalic} className={activeFormats.has('italic') ? 'active' : ''} title="Italic">
+          <button onClick={() => commands.toggleItalic()} className={activeStates.italic ? 'active' : ''} title="Italic">
             <Italic size={20} />
           </button>
         )}
         {hasExtension('list') && (
           <>
-            <button onClick={toggleUnorderedList} title="Bulleted List">
+            <button onClick={() => commands.toggleUnorderedList()} className={activeStates.unorderedList ? 'active' : ''} title="Bulleted List">
               <List size={20} />
             </button>
-            <button onClick={toggleOrderedList} title="Numbered List">
+            <button onClick={() => commands.toggleOrderedList()} className={activeStates.orderedList ? 'active' : ''} title="Numbered List">
               <ListOrdered size={20} />
             </button>
           </>
         )}
         {hasExtension('history') && (
           <>
-            <button onClick={undo} title="Undo">
+            <button onClick={() => commands.undo()} className={activeStates.canUndo ? '' : 'disabled'} title="Undo">
               <Undo size={20} />
             </button>
-            <button onClick={redo} title="Redo">
+            <button onClick={() => commands.redo()} className={activeStates.canRedo ? '' : 'disabled'} title="Redo">
               <Redo size={20} />
             </button>
           </>

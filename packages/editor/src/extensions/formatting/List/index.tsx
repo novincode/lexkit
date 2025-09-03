@@ -2,8 +2,8 @@ import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '@repo/editor/extensions';
-import { ListNode, ListItemNode } from '@lexical/list';
+import { ExtensionCategory } from '../../../extensions/types';
+import { ListNode, ListItemNode, $isListNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import React from 'react';
 
@@ -76,6 +76,23 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
             }
           }
         });
+      },
+    };
+  }
+
+  getStateQueries(editor: LexicalEditor): Record<string, () => boolean> {
+    return {
+      unorderedList: () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return false;
+        const node = selection.anchor.getNode().getParent();
+        return $isListNode(node) && node.getListType() === 'bullet';
+      },
+      orderedList: () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return false;
+        const node = selection.anchor.getNode().getParent();
+        return $isListNode(node) && node.getListType() === 'number';
       },
     };
   }

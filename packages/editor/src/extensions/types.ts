@@ -35,6 +35,7 @@ export interface Extension<Name extends string = string, Config extends BaseExte
   getNodes?: () => any[];
   getPlugins: () => Plugins;
   getCommands: (editor: LexicalEditor) => Commands;
+  getStateQueries?: (editor: LexicalEditor) => Record<string, () => boolean>;
   // More: getToolbarItems?(): ToolbarItem<Commands>[];
 }
 
@@ -49,7 +50,9 @@ export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
   ReturnType<Exts[number]['getCommands']>
 >;
 export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[number]['getPlugins']>[number];
-export type ExtractFormatTypes<Exts extends readonly Extension[]> = NonNullable<Exts[number]['supportedFormats']>[number];
+export type ExtractStateQueries<Exts extends readonly Extension[]> = UnionToIntersection<
+  Exts[number] extends { getStateQueries: infer F } ? F extends (...args: any) => infer R ? R : {} : {}
+>;
 
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
@@ -65,6 +68,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   config?: EditorConfig;
   extensions: Exts;
   commands: BaseCommands & ExtractCommands<Exts>;
+  activeStates: Record<string, boolean>;
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
     registerPaste: (listener: (event: ClipboardEvent) => boolean) => (() => void) | undefined;

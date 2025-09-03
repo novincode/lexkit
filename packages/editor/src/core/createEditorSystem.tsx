@@ -3,7 +3,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands, ExtractFormatTypes } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands, ExtractStateQueries } from '../extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -60,18 +60,40 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       });
     }, [editor]);
 
+    // Collect state queries
+    const stateQueries = extensions.reduce(
+      (acc, ext) => ({
+        ...acc,
+        ...(ext.getStateQueries ? ext.getStateQueries(editor!) : {}),
+      }),
+      {} as Record<string, () => boolean>
+    );
+
+    // Batched active states
+    const [activeStates, setActiveStates] = useState<Record<string, boolean>>({});
+
     useEffect(() => {
-      if (editor) {
-        const unregisters = extensions.map(ext => ext.register(editor));
-        return () => unregisters.forEach(un => un());
-      }
-    }, [editor, extensions]);
+      if (!editor) return;
+
+      const unregister = editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          const newStates: Record<string, boolean> = {};
+          for (const [key, queryFn] of Object.entries(stateQueries)) {
+            newStates[key] = queryFn();
+          }
+          setActiveStates(newStates);
+        });
+      });
+
+      return unregister;
+    }, [editor, stateQueries]);
 
     const contextValue: EditorContextType<Exts> = {
       editor,
       config,
       extensions,
       commands,
+      activeStates,
       listeners: {
         registerUpdate: (listener: (state: any) => void) => editor?.registerUpdateListener(listener) || (() => {}),
         registerPaste: (listener: (event: ClipboardEvent) => boolean) => editor?.registerCommand(PASTE_COMMAND, listener, 4) || (() => {}),
