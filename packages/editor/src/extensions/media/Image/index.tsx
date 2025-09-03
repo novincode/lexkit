@@ -1,5 +1,6 @@
-import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode } from 'lexical';
-import { ComponentType, CSSProperties, ReactNode } from 'react';
+import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode, $getNodeByKey, $setSelection, $createNodeSelection, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND } from 'lexical';
+import { ComponentType, CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory, BaseExtensionConfig } from '../../types';
@@ -8,38 +9,137 @@ import { ImageTranslator, importImageDOM, exportImageDOM, importImageJSON, expor
 
 const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>('insert-image');
 
-let defaultImageComponent: ComponentType<ImageComponentProps> = ({
+function ImageComponent({
   src,
   alt,
   caption,
   alignment = 'none',
   className = '',
   style,
-}) => {
-  console.log('🖼️ Rendering defaultImageComponent:', { src, alt, caption, alignment });
+  nodeKey,
+  width,
+  height,
+  resizable = true,
+}: ImageComponentProps) {
+  const [editor] = useLexicalComposerContext();
+  const imageRef = useRef<HTMLImageElement>(null);
+  const resizerRef = useRef<HTMLDivElement>(null);
+  const [isSelected, setIsSelected] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState(1);
+  const [currentWidth, setCurrentWidth] = useState(width || 'auto');
+  const [currentHeight, setCurrentHeight] = useState(height || 'auto');
+  const [replaceFileInput, setReplaceFileInput] = useState<HTMLInputElement | null>(null);
 
-  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error('❌ Image failed to load:', src, e);
+  useEffect(() => {
+    const img = imageRef.current;
+    if (img) {
+      img.onload = () => {
+        setAspectRatio(img.naturalWidth / img.naturalHeight);
+      };
+    }
+  }, [src]);
+
+  // Listen for selection changes
+  useEffect(() => {
+    return editor.registerUpdateListener(({editorState}) => {
+      editorState.read(() => {
+        const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const selectedNodes = selection.getNodes();
+          setIsSelected(selectedNodes.some(node => node.getKey() === nodeKey));
+        } else {
+          setIsSelected(false);
+        }
+      });
+    });
+  }, [editor, nodeKey]);
+
+  // Handle click to select
+  const onClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    editor.update(() => {
+      const selection = $createNodeSelection();
+      selection.add(nodeKey!);
+      $setSelection(selection);
+    });
   };
 
-  const handleLoad = () => {
-    console.log('✅ Image loaded successfully:', src);
+  // Resizing logic (unified mouse/touch)
+  const startResize = (direction: string) => (event: any) => {
+    event.preventDefault();
+    setIsResizing(true);
+    const startX = 'touches' in event ? event.touches?.[0]?.clientX || 0 : event.clientX;
+    const startY = 'touches' in event ? event.touches?.[0]?.clientY || 0 : event.clientY;
+    const startWidth = imageRef.current?.clientWidth || 0;
+    const startHeight = imageRef.current?.clientHeight || 0;
+
+    const onMove = (moveEvent: any) => {
+      const x = 'touches' in moveEvent ? moveEvent.touches?.[0]?.clientX || 0 : moveEvent.clientX;
+      const y = 'touches' in moveEvent ? moveEvent.touches?.[0]?.clientY || 0 : moveEvent.clientY;
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+
+      if (direction.includes('e')) newWidth += x - startX;
+      if (direction.includes('w')) newWidth += startX - x;
+      if (direction.includes('s')) newHeight += y - startY;
+      if (direction.includes('n')) newHeight += startY - y;
+
+      // Maintain aspect
+      if (event.shiftKey) {
+        newHeight = newWidth / aspectRatio;
+      } else {
+        newWidth = newHeight * aspectRatio;
+      }
+
+      setCurrentWidth(Math.max(50, newWidth));
+      setCurrentHeight(Math.max(50, newHeight));
+    };
+
+    const onUp = () => {
+      setIsResizing(false);
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey!);
+        if (node instanceof ImageNode) node.setWidthAndHeight(currentWidth as number, currentHeight as number);
+      });
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onUp);
   };
 
-  // Add some basic styling to make sure the image is visible
+  // Replace logic
+  const handleReplace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newSrc = URL.createObjectURL(file);
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey!);
+        if (node instanceof ImageNode) node.setSrc(newSrc);
+      });
+    }
+  };
+
   const figureStyle: CSSProperties = {
     margin: '1rem 0',
     display: 'block',
     textAlign: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : alignment === 'center' ? 'center' : 'left',
+    position: 'relative',
     ...style
   };
 
   const imgStyle: CSSProperties = {
     maxWidth: '100%',
-    height: 'auto',
     display: 'block',
-    border: '1px solid #ddd', // Add border to see if element is rendered
-    borderRadius: '4px',
+    borderRadius: '4px', // Removed border
+    width: currentWidth,
+    height: currentHeight,
   };
 
   const captionStyle: CSSProperties = {
@@ -51,18 +151,29 @@ let defaultImageComponent: ComponentType<ImageComponentProps> = ({
   };
 
   return (
-    <figure className={`lexical-image align-${alignment} ${className}`} style={figureStyle}>
+    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''}`} style={figureStyle} onClick={onClick}>
       <img
+        ref={imageRef}
         src={src}
         alt={alt}
-        onError={handleError}
-        onLoad={handleLoad}
         style={imgStyle}
       />
-      {caption && <figcaption className="image-caption" style={captionStyle}>{caption}</figcaption>}
+      {caption && <figcaption style={captionStyle}>{caption}</figcaption>}
+      {isSelected && resizable && (
+        <>
+          <div className="resizer ne" onMouseDown={startResize('ne')} onTouchStart={startResize('ne')} />
+          <div className="resizer nw" onMouseDown={startResize('nw')} onTouchStart={startResize('nw')} />
+          <div className="resizer se" onMouseDown={startResize('se')} onTouchStart={startResize('se')} />
+          <div className="resizer sw" onMouseDown={startResize('sw')} onTouchStart={startResize('sw')} />
+          <button className="replace-button" onClick={() => replaceFileInput?.click()}>Replace</button>
+          <input type="file" accept="image/*" ref={setReplaceFileInput} style={{ display: 'none' }} onChange={handleReplace} />
+        </>
+      )}
     </figure>
   );
-};
+}
+
+let defaultImageComponent: ComponentType<ImageComponentProps> = ImageComponent;
 
 export class ImageNode extends DecoratorNode<ReactNode> {
   __src: string;
@@ -71,6 +182,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   __alignment: Alignment;
   __className?: string;
   __style?: CSSProperties;
+  __width?: number;
+  __height?: number;
 
   static getType(): string {
     return 'image';
@@ -93,6 +206,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     alignment: Alignment = 'none',
     className?: string,
     style?: CSSProperties,
+    width?: number,
+    height?: number,
     key?: NodeKey
   ) {
     super(key);
@@ -103,6 +218,28 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__alignment = alignment;
     this.__className = className;
     this.__style = style;
+    this.__width = width;
+    this.__height = height;
+  }
+
+  // Required for DecoratorNode: creates the DOM container for the React component
+  createDOM(config: EditorConfig): HTMLElement {
+    const div = document.createElement('div');
+    const themeClass = config.theme?.image || '';
+    div.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
+    div.setAttribute('contentEditable', 'false');
+    console.log('📦 createDOM called for ImageNode');
+    return div;
+  }
+
+  // Required for DecoratorNode: handles updates to the DOM container
+  updateDOM(prevNode: ImageNode, dom: HTMLElement, config: EditorConfig): boolean {
+    if (this.__alignment !== prevNode.__alignment) {
+      const themeClass = config.theme?.image || '';
+      dom.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
+    }
+    console.log('🔄 updateDOM called for ImageNode');
+    return false; // No full re-render needed
   }
 
   // Use new translator
@@ -143,6 +280,20 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   setStyle(style?: CSSProperties): void {
     const writable = this.getWritable();
     writable.__style = style;
+  }
+
+  getWidth(): number | undefined {
+    return this.__width;
+  }
+
+  getHeight(): number | undefined {
+    return this.__height;
+  }
+
+  setWidthAndHeight(width: number, height: number): void {
+    const writable = this.getWritable();
+    writable.__width = width;
+    writable.__height = height;
   }
 
   // This is the key method - it determines if the node can be selected
@@ -194,6 +345,10 @@ export class ImageNode extends DecoratorNode<ReactNode> {
           alignment={this.__alignment}
           className={this.__className}
           style={this.__style}
+          nodeKey={this.getKey()}
+          width={this.__width}
+          height={this.__height}
+          resizable={true}
         />
       );
     } catch (error) {
@@ -218,9 +373,11 @@ export function $createImageNode(
   caption?: string,
   alignment: Alignment = 'none',
   className?: string,
-  style?: CSSProperties
+  style?: CSSProperties,
+  width?: number,
+  height?: number
 ): ImageNode {
-  return new ImageNode(src, alt, caption, alignment, className, style);
+  return new ImageNode(src, alt, caption, alignment, className, style, width, height);
 }
 
 export class ImageExtension extends BaseExtension<
@@ -250,7 +407,7 @@ export class ImageExtension extends BaseExtension<
     if (config.styles) {
       this.config.styles = config.styles;
     }
-    this.config = { ...this.config, ...config };
+    this.config = { ...this.config, ...config, resizable: config.resizable ?? true };
     return this;
   }
 
@@ -286,8 +443,17 @@ export class ImageExtension extends BaseExtension<
               paragraph.append(imageNode);
               $getRoot().append(paragraph);
               console.log('✅ Appended to root');
+              // Set selection to the paragraph
+              paragraph.select();
             } else {
               console.log('✅ Inserted via selection');
+              // Add paragraph after if inserted
+              const parent = imageNode.getParent();
+              if (parent) {
+                const nextPara = $createParagraphNode();
+                parent.insertAfter(nextPara);
+                nextPara.select();
+              }
             }
           } catch (error) {
             console.error('❌ Insertion error:', error);
@@ -298,7 +464,45 @@ export class ImageExtension extends BaseExtension<
       COMMAND_PRIORITY_EDITOR
     );
     console.log('✅ ImageExtension registered');
-    return removeCommand;
+    const removeDelete = editor.registerCommand(
+      KEY_DELETE_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes();
+          if (nodes.some(node => node instanceof ImageNode)) {
+            editor.update(() => {
+              nodes.forEach(node => node.remove());
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+    const removeBackspace = editor.registerCommand(
+      KEY_BACKSPACE_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes();
+          if (nodes.some(node => node instanceof ImageNode)) {
+            editor.update(() => {
+              nodes.forEach(node => node.remove());
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+    return () => {
+      removeCommand();
+      removeDelete();
+      removeBackspace();
+    };
   }
 
   getNodes(): any[] {

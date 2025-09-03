@@ -19,6 +19,8 @@ export type SerializedImageNode = Spread<
     alignment: 'left' | 'center' | 'right' | 'none';
     className?: string;
     style?: Record<string, string>;
+    width?: number;
+    height?: number;
   },
   SerializedLexicalNode
 >;
@@ -140,11 +142,13 @@ export class ImageTranslator {
       alignment: node.__alignment,
       className: node.__className,
       style: node.__style ? this.styleObjectToRecord(node.__style) : undefined,
+      width: node.__width,
+      height: node.__height,
     };
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { src, alt, caption, alignment, className, style } = serializedNode;
+    const { src, alt, caption, alignment, className, style, width, height } = serializedNode;
     
     console.log('📥 Importing ImageNode from JSON:', serializedNode);
     
@@ -154,7 +158,9 @@ export class ImageTranslator {
       caption,
       alignment,
       className,
-      style ? this.recordToStyleObject(style) : undefined
+      style ? this.recordToStyleObject(style) : undefined,
+      width,
+      height
     );
   }
 
@@ -165,6 +171,10 @@ export class ImageTranslator {
     // Set basic image attributes
     img.src = node.__src;
     img.alt = node.__alt;
+    
+    // Apply width and height if present
+    if (node.__width) img.width = node.__width;
+    if (node.__height) img.height = node.__height;
     
     // Apply className if present
     if (node.__className) {

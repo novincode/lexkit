@@ -135,14 +135,73 @@
   border-radius: 0.375rem;
 }
 
-/* Image Styles */
-.lexical-image {
-  max-width: 100%;
-  margin: 10px 0;
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 3px var(--lexkit-shadow);
-  display: block !important;
-  border: 2px solid #007acc; /* Make it visible for debugging */
+.lexical-image.selected {
+  outline: 2px solid blue;
+}
+
+.lexical-image.resizing {
+  opacity: 0.8;
+  cursor: resizing;
+}
+
+.resizer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: blue;
+  border: 1px solid white;
+  border-radius: 50%;
+  cursor: nwse-resize;
+}
+
+.resizer.ne {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.resizer.nw {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.resizer.se {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+
+.resizer.sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.replace-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border: 1px solid gray;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.lexical-image-container.align-left {
+  text-align: left;
+}
+
+.lexical-image-container.align-center {
+  text-align: center;
+}
+
+.lexical-image-container.align-right {
+  text-align: right;
+}
+
+.lexical-image-container.align-none {
+  text-align: left;
 }
 
 .lexical-image img {

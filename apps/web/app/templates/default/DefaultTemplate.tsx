@@ -289,7 +289,8 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
         console.log('🔗 Created object URL:', objectUrl);
         return objectUrl;
       },
-      defaultAlignment: 'center'
+      defaultAlignment: 'center',
+      resizable: true
     });
     console.log('✅ Image extension configured');
   }, []);

@@ -11,9 +11,14 @@ export interface ImagePayload {
   className?: string;
   style?: CSSProperties;
   file?: File;
+  width?: number;
+  height?: number;
 }
 
-export interface ImageComponentProps extends ImagePayload {}
+export interface ImageComponentProps extends ImagePayload {
+  nodeKey?: string;
+  resizable?: boolean;
+}
 
 export interface SerializedImageNode {
   type: 'image';
@@ -24,6 +29,8 @@ export interface SerializedImageNode {
   alignment: Alignment;
   className?: string;
   style?: Record<string, string>;
+  width?: number;
+  height?: number;
 }
 
 export interface ImageExtensionConfig extends BaseExtensionConfig {
@@ -32,6 +39,7 @@ export interface ImageExtensionConfig extends BaseExtensionConfig {
   classNames?: Partial<Record<Alignment | 'wrapper' | 'caption', string>>;
   styles?: Partial<Record<Alignment | 'wrapper' | 'caption', CSSProperties>>;
   customRenderer?: ComponentType<ImageComponentProps>;
+  resizable?: boolean; // New: Enable resizing (default true)
 }
 
 export type ImageCommands = {
