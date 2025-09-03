@@ -47,7 +47,7 @@ export type ExtractPlugins<Exts extends Extension[]> = Exts[number] extends { ge
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
 // Base commands (always available)
-interface BaseCommands {
+export interface BaseCommands {
   formatText: (format: TextFormatType, value?: boolean | string) => boolean;
   undo: () => boolean;
   redo: () => boolean;

@@ -3,7 +3,8 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { useTranslation } from 'react-i18next';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
+import { defaultTheme, mergeTheme } from '@repo/editor/themes';
 
 interface ProviderProps<Exts extends Extension[]> {
   children: ReactNode;
@@ -26,14 +27,14 @@ export function createEditorSystem<Exts extends Extension[]>() {
     const { t } = useTranslation();
 
     // Lazy commands from extensions + base
-    const extensionCommands = extensions.flatMap(ext => ext.getCommands ? [ext.getCommands(editor!)] : []).reduce((acc, cmds) => ({ ...acc, ...cmds }), {});
-    const commands = {
+    const baseCommands = {
       formatText: (format: TextFormatType, value?: boolean | string) => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format),
       undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
       redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
       clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
-      ...extensionCommands,
     };
+    const extensionCommands = extensions.flatMap(ext => ext.getCommands ? [ext.getCommands(editor!)] : []).reduce((acc, cmds) => ({ ...acc, ...cmds }), {});
+    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
 
     // Plugins: Collect inferred
     const plugins = extensions.flatMap(ext => ext.getPlugins?.() || []) as ExtractPlugins<Exts>[];
@@ -128,3 +129,8 @@ export function createEditorSystem<Exts extends Extension[]>() {
 
   return { Provider, useEditor };
 }
+
+// Base system for untyped use
+export const baseEditorSystem = createEditorSystem<Extension[]>();
+export const BaseProvider = baseEditorSystem.Provider;
+export const useBaseEditor = baseEditorSystem.useEditor;

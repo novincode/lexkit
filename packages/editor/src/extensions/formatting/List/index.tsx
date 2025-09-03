@@ -33,8 +33,16 @@ export class ListExtension extends BaseExtension<'list'> {
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
-            const nodes = selection.getNodes();
-            const hasList = nodes.some((node: any) => node.getType() === 'list');
+            const anchorNode = selection.anchor.getNode();
+            let parent = anchorNode.getParent();
+            let hasList = false;
+            while (parent) {
+              if (parent.getType() === 'list') {
+                hasList = true;
+                break;
+              }
+              parent = parent.getParent();
+            }
             if (hasList) {
               editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
             } else {
@@ -49,8 +57,16 @@ export class ListExtension extends BaseExtension<'list'> {
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
-            const nodes = selection.getNodes();
-            const hasList = nodes.some((node: any) => node.getType() === 'list');
+            const anchorNode = selection.anchor.getNode();
+            let parent = anchorNode.getParent();
+            let hasList = false;
+            while (parent) {
+              if (parent.getType() === 'list') {
+                hasList = true;
+                break;
+              }
+              parent = parent.getParent();
+            }
             if (hasList) {
               editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
             } else {

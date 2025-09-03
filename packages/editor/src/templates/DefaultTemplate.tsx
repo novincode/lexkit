@@ -13,7 +13,7 @@ interface DefaultTemplateProps {
 
 export function DefaultTemplate({ className, useEditor: useEditorProp }: DefaultTemplateProps) {
   const useEditorToUse = useEditorProp || (() => ({} as any));
-  const { commands, t, hasExtension } = useEditorToUse();
+  const { commands, t, hasExtension, plugins } = useEditorToUse();
 
   const toggleBold = () => commands.formatText?.('bold');
   const toggleItalic = () => commands.formatText?.('italic');
@@ -56,6 +56,7 @@ export function DefaultTemplate({ className, useEditor: useEditorProp }: Default
         />
       </div>
       <HistoryPlugin />
+      {plugins}
     </div>
   );
 }
