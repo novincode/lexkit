@@ -1,6 +1,6 @@
 import { LexicalEditor } from 'lexical';
 import { ComponentType, CSSProperties } from 'react';
-import { BaseExtensionConfig, Extension, ExtensionCategory } from './types';
+import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from './types';
 
 export abstract class BaseExtension<Config extends BaseExtensionConfig = BaseExtensionConfig> implements Extension<Config> {
   name: string;
@@ -35,6 +35,10 @@ export abstract class BaseExtension<Config extends BaseExtensionConfig = BaseExt
   }
 
   getPlugins(): React.ReactNode[] {
+    return [];
+  }
+
+  getToolbarItems(commands: any): ToolbarItem[] {
     return [];
   }
 }

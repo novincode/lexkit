@@ -1,12 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { useTranslation } from 'react-i18next';
 import { EditorConfig, EditorContextType, Extension } from './types';
+import { REMOVE_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, ListNode } from '@lexical/list';
 
 export const EditorContext = createContext<EditorContextType | null>(null);
 
@@ -83,6 +81,36 @@ function EditorProviderInner({ children, config = {}, extensions = [], plugins =
       undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
       redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
       clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
+      insertUnorderedList: () => editor?.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined),
+      insertOrderedList: () => editor?.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined),
+      toggleUnorderedList: () => {
+        editor?.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+            const hasList = nodes.some(node => node.getType() === 'list');
+            if (hasList) {
+              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+            } else {
+              editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+            }
+          }
+        });
+      },
+      toggleOrderedList: () => {
+        editor?.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+            const hasList = nodes.some(node => node.getType() === 'list');
+            if (hasList) {
+              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+            } else {
+              editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+            }
+          }
+        });
+      },
       isActive: (type: string) => {
         if (!editor) return false;
         return editor.getEditorState().read(() => {
@@ -119,20 +147,13 @@ function EditorProviderInner({ children, config = {}, extensions = [], plugins =
       remove: (name: string) => {},
       reorder: (names: string[]) => {},
     },
+    plugins,
+    hasPlugin: (name: string) => extensions.some(ext => ext.name === name),
   };
 
   return (
     <EditorContext.Provider value={contextValue}>
-      <div className="editor-container">
-        <RichTextPlugin
-          contentEditable={<ContentEditable className="editor-input" />}
-          placeholder={<div>{t('placeholder')}</div>}
-          ErrorBoundary={ErrorBoundary}
-        />
-        <HistoryPlugin />
-        {plugins}
-        {children}
-      </div>
+      {children}
     </EditorContext.Provider>
   );
 }

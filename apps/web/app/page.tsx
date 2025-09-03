@@ -1,5 +1,5 @@
 'use client'
-import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension, listExtension } from "@repo/editor"
+import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension, listExtension, useEditor } from "@repo/editor"
 
 const defaultTheme = {
   text: {
@@ -33,6 +33,7 @@ const defaultTheme = {
 };
 
 function EditorContent() {
+
   return (
     <>
       <DefaultTemplate />
@@ -41,18 +42,12 @@ function EditorContent() {
 }
 
 export default function Page() {
-  const configuredBold = boldExtension.configure({
-    // Removed nodeStyle and nodeClassName - use theme instead
-  });
+ 
 
   const extensions = [
-    configuredBold,
+    boldExtension,
     italicExtension,
-    listExtension.configure({
-      nodeStyle: {
-        background:'black'
-      }
-    }),
+    listExtension,
     imageExtension.configure({ showInToolbar: true })
   ];
 

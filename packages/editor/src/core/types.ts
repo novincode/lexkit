@@ -27,6 +27,10 @@ export interface EditorContextType {
     undo: () => void;
     redo: () => void;
     clearHistory: () => void;
+    insertUnorderedList: () => void;
+    insertOrderedList: () => void;
+    toggleUnorderedList: () => void;
+    toggleOrderedList: () => void;
     isActive: (type: string) => boolean;
   };
   listeners: {
@@ -55,4 +59,6 @@ export interface EditorContextType {
     remove: (name: string) => void;
     reorder: (names: string[]) => void;
   };
+  plugins: ReactNode[];
+  hasPlugin: (name: string) => boolean;
 }

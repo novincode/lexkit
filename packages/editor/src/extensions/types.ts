@@ -15,6 +15,21 @@ export interface BaseExtensionConfig {
   [key: string]: any;
 }
 
+export enum PluginName {
+  Bold = 'bold',
+  Italic = 'italic',
+  List = 'list',
+  Image = 'image',
+  FontSelect = 'font-select',
+}
+
+export interface ToolbarItem {
+  label: string;
+  onClick: () => void;
+  isActive?: () => boolean;
+  component?: React.ComponentType<any>;
+}
+
 export interface Extension<Config extends BaseExtensionConfig = BaseExtensionConfig> {
   name: string;
   category: ExtensionCategory[];
