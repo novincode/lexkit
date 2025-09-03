@@ -85,6 +85,10 @@ export class ImageExtension extends BaseExtension<'image', any, ImageCommands, R
   getNodes(): any[] {
     return [ImageNode];
   }
+
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+    return {};
+  }
 }
 
 export const imageExtension = new ImageExtension();

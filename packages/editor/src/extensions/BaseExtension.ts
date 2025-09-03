@@ -48,6 +48,10 @@ export abstract class BaseExtension<
     return {} as Commands;
   }
 
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+    return {};
+  }
+
   getToolbarItems(commands: any): ToolbarItem[] {
     return [];
   }

@@ -39,7 +39,10 @@ export class HistoryExtension extends BaseExtension<'history', any, HistoryComma
     };
   }
 
-  getStateQueries?(editor: LexicalEditor): Record<string, () => Promise<boolean>>;
+  // History states are handled via event listeners in createEditorSystem
+  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+    return {};
+  }
 }
 
 export const historyExtension = new HistoryExtension();

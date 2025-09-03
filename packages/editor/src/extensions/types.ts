@@ -44,6 +44,11 @@ type MergeCommands<T> = {
   [K in T extends any ? keyof T : never]: T extends { [P in K]: any } ? T[K] : never;
 };
 
+// Helper: Merge state queries the same way as commands
+type MergeStateQueries<T> = {
+  [K in T extends any ? keyof T : never]: boolean;
+};
+
 // Infer unions from array of extensions
 export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
 export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
@@ -54,10 +59,10 @@ export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
-// Infer state queries
-export type ExtractStateQueries<Exts extends readonly Extension[]> = {
-  [K in Exts[number] extends { getStateQueries: (editor: LexicalEditor) => infer R } ? keyof R & string : never]: boolean;
-} & ('history' extends ExtractNames<Exts> ? { canUndo: boolean; canRedo: boolean } : {});
+// Extract state queries the same way as commands
+export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQueries<
+  Exts[number] extends { getStateQueries: (editor: LexicalEditor) => infer R } ? R : {}
+> & ('history' extends ExtractNames<Exts> ? { canUndo: boolean; canRedo: boolean } : {});
 
 // Base commands (always available)
 export interface BaseCommands {
