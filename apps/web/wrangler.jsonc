@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "lexkit-web",
+	"name": "lexkit",
 	"compatibility_date": "2025-08-31",
 	"compatibility_flags": [
 		"nodejs_compat"

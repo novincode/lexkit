@@ -1,11 +1,12 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { createEditorSystem, boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor';
+import {  boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon } from 'lucide-react';
+import { createEditorSystem } from '@repo/editor';
 
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
