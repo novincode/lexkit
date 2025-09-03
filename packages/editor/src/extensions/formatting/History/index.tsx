@@ -39,28 +39,7 @@ export class HistoryExtension extends BaseExtension<'history', any, HistoryComma
     };
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
-    return {
-      canUndo: () =>
-        new Promise((resolve) => {
-          const timeout = setTimeout(() => resolve(false), 10);
-          editor.dispatchCommand(CAN_UNDO_COMMAND as any, (canUndo: boolean) => {
-            clearTimeout(timeout);
-            resolve(canUndo);
-            return true;
-          });
-        }),
-      canRedo: () =>
-        new Promise((resolve) => {
-          const timeout = setTimeout(() => resolve(false), 10);
-          editor.dispatchCommand(CAN_REDO_COMMAND as any, (canRedo: boolean) => {
-            clearTimeout(timeout);
-            resolve(canRedo);
-            return true;
-          });
-        }),
-    };
-  }
+  getStateQueries?(editor: LexicalEditor): Record<string, () => Promise<boolean>>;
 }
 
 export const historyExtension = new HistoryExtension();

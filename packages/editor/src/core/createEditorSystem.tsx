@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
+import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection, CAN_UNDO_COMMAND, CAN_REDO_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '../extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -28,11 +28,11 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     const baseCommands: BaseCommands = {
       formatText: (format: TextFormatType, value?: boolean | string) => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format),
     };
-    const extensionCommands = extensions.reduce((acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }), {}) as Record<string, any>;
+    const extensionCommands = useMemo(() => extensions.reduce((acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }), {}), [extensions, editor]);
     const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
 
     // Plugins: Collect inferred
-    const plugins = extensions.flatMap(ext => ext.getPlugins?.() || []) as ExtractPlugins<Exts>[];
+    const plugins = useMemo(() => extensions.flatMap(ext => ext.getPlugins?.() || []), [extensions]);
 
     // Lazy exports
     const [lazyExports, setLazyExports] = useState({
@@ -61,16 +61,26 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     }, [editor]);
 
     // Collect state queries (now all Promise-based)
-    const stateQueries = extensions.reduce(
+    const stateQueries = useMemo(() => extensions.reduce(
       (acc, ext) => ({
         ...acc,
         ...(ext.getStateQueries ? ext.getStateQueries(editor!) : {}),
       }),
       {} as Record<string, () => Promise<boolean>>
-    );
+    ), [extensions, editor]);
+
+    const hasHistory = useMemo(() => extensions.some(ext => ext.name === 'history'), [extensions]);
 
     // Batched active states
-    const [activeStates, setActiveStates] = useState<Record<string, boolean>>({});
+    const [activeStates, setActiveStates] = useState<ExtractStateQueries<Exts>>(() => {
+      const obj: Record<string, boolean> = {};
+      Object.keys(stateQueries).forEach(key => obj[key] = false);
+      if (hasHistory) {
+        obj.canUndo = false;
+        obj.canRedo = false;
+      }
+      return obj as ExtractStateQueries<Exts>;
+    });
 
     useEffect(() => {
       if (!editor) return;
@@ -83,7 +93,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 
         Promise.all(promises).then((results) => {
           const newStates = Object.fromEntries(results);
-          setActiveStates((prev) => ({ ...prev, ...newStates })); // Merge to avoid overwriting
+          setActiveStates((prev) => ({ ...prev, ...newStates } as ExtractStateQueries<Exts>)); // Merge to avoid overwriting
         });
       });
 
@@ -92,23 +102,56 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 
     // Optional: Initial query on mount (to avoid undefined flash)
     useEffect(() => {
-      if (!editor || Object.keys(stateQueries).length === 0) return;
+      if (!editor) return;
 
       const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
         queryFn().then((value) => [key, value] as [string, boolean])
       );
 
       Promise.all(promises).then((results) => {
-        setActiveStates(Object.fromEntries(results));
+        const newStates = Object.fromEntries(results);
+        if (hasHistory) {
+          newStates.canUndo = false;
+          newStates.canRedo = false;
+        }
+        setActiveStates(newStates as ExtractStateQueries<Exts>);
       });
-    }, [editor, stateQueries]);
+    }, [editor, stateQueries, hasHistory]);
+
+    // Event listeners for history states (if extension present)
+    useEffect(() => {
+      if (!editor || !hasHistory) return;
+
+      const unregisterUndo = editor.registerCommand(
+        CAN_UNDO_COMMAND,
+        (payload: boolean) => {
+          setActiveStates((prev) => ({ ...prev, canUndo: payload } as ExtractStateQueries<Exts>));
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      );
+
+      const unregisterRedo = editor.registerCommand(
+        CAN_REDO_COMMAND,
+        (payload: boolean) => {
+          setActiveStates((prev) => ({ ...prev, canRedo: payload } as ExtractStateQueries<Exts>));
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      );
+
+      return () => {
+        unregisterUndo();
+        unregisterRedo();
+      };
+    }, [editor, hasHistory]);
 
     const contextValue: EditorContextType<Exts> = {
       editor,
       config,
       extensions,
       commands,
-      activeStates,
+      activeStates: activeStates as ExtractStateQueries<Exts>,
       listeners: {
         registerUpdate: (listener: (state: any) => void) => editor?.registerUpdateListener(listener) || (() => {}),
         registerPaste: (listener: (event: ClipboardEvent) => boolean) => editor?.registerCommand(PASTE_COMMAND, listener, 4) || (() => {}),
@@ -133,11 +176,11 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       hasExtension: (name) => extensions.some(ext => ext.name === name),
     };
 
-    return <EditorContext.Provider value={contextValue}>{children}{plugins}</EditorContext.Provider>;
+    return <EditorContext.Provider value={contextValue}>{plugins}{children}</EditorContext.Provider>;
   }
 
   function Provider(props: ProviderProps<Exts>) {
-    const nodes = props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []);
+    const nodes = useMemo(() => props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []), [props.extensions]);
 
     const initialConfig = {
       namespace: 'modern-editor',

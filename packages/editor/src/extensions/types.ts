@@ -54,6 +54,11 @@ export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
+// Infer state queries
+export type ExtractStateQueries<Exts extends readonly Extension[]> = {
+  [K in Exts[number] extends { getStateQueries: (editor: LexicalEditor) => infer R } ? keyof R & string : never]: boolean;
+} & ('history' extends ExtractNames<Exts> ? { canUndo: boolean; canRedo: boolean } : {});
+
 // Base commands (always available)
 export interface BaseCommands {
   formatText: (format: TextFormatType, value?: boolean | string) => void;
@@ -65,7 +70,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   config?: EditorConfig;
   extensions: Exts;
   commands: BaseCommands & ExtractCommands<Exts>;
-  activeStates: Record<string, boolean>;
+  activeStates: ExtractStateQueries<Exts>;
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
     registerPaste: (listener: (event: ClipboardEvent) => boolean) => (() => void) | undefined;
