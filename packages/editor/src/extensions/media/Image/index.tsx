@@ -75,8 +75,8 @@ function ImageComponent({
 
   // Resizing logic (unified mouse/touch)
   const startResize = (direction: string) => (event: any) => {
-    // Only allow resizing if image has loaded and has valid dimensions
-    if (!imageRef.current || aspectRatio === 1 || !event.target) {
+    // Only allow resizing if image has loaded and event is valid
+    if (!imageRef.current || !event.target) {
       return;
     }
     
@@ -142,17 +142,18 @@ function ImageComponent({
   const figureStyle: CSSProperties = {
     margin: '1rem 0',
     display: 'block',
-    textAlign: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : alignment === 'center' ? 'center' : 'left',
     position: 'relative',
+    textAlign: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : alignment === 'center' ? 'center' : 'left',
     ...style
   };
 
   const imgStyle: CSSProperties = {
     maxWidth: '100%',
     display: 'block',
-    borderRadius: '4px', // Removed border
-    width: currentWidth,
-    height: currentHeight,
+    borderRadius: '4px',
+    width: typeof currentWidth === 'number' ? '100%' : currentWidth,
+    height: typeof currentHeight === 'number' ? '100%' : currentHeight,
+    margin: alignment === 'center' ? '0 auto' : '0',
   };
 
   const captionStyle: CSSProperties = {
@@ -165,77 +166,87 @@ function ImageComponent({
 
   return (
     <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''}`} style={figureStyle} onClick={onClick}>
-      <img
-        ref={imageRef}
-        src={src}
-        alt={alt}
-        style={imgStyle}
-      />
+      <div style={{
+        position: 'relative',
+        display: alignment === 'center' ? 'inline-block' : 'block',
+        float: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none',
+        marginRight: alignment === 'left' ? '1rem' : '0',
+        marginLeft: alignment === 'right' ? '1rem' : '0',
+        width: currentWidth,
+        height: currentHeight,
+      }}>
+        <img
+          ref={imageRef}
+          src={src}
+          alt={alt}
+          style={imgStyle}
+        />
+        {isSelected && resizable && (
+          <>
+            <div 
+              className="resizer ne" 
+              onMouseDown={startResize('ne')} 
+              onTouchStart={startResize('ne')}
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                width: '10px',
+                height: '10px',
+                background: '#007acc',
+                cursor: 'ne-resize',
+                borderRadius: '50%'
+              }}
+            />
+            <div 
+              className="resizer nw" 
+              onMouseDown={startResize('nw')} 
+              onTouchStart={startResize('nw')}
+              style={{
+                position: 'absolute',
+                top: '-5px',
+                left: '-5px',
+                width: '10px',
+                height: '10px',
+                background: '#007acc',
+                cursor: 'nw-resize',
+                borderRadius: '50%'
+              }}
+            />
+            <div 
+              className="resizer se" 
+              onMouseDown={startResize('se')} 
+              onTouchStart={startResize('se')}
+              style={{
+                position: 'absolute',
+                bottom: '-5px',
+                right: '-5px',
+                width: '10px',
+                height: '10px',
+                background: '#007acc',
+                cursor: 'se-resize',
+                borderRadius: '50%'
+              }}
+            />
+            <div 
+              className="resizer sw" 
+              onMouseDown={startResize('sw')} 
+              onTouchStart={startResize('sw')}
+              style={{
+                position: 'absolute',
+                bottom: '-5px',
+                left: '-5px',
+                width: '10px',
+                height: '10px',
+                background: '#007acc',
+                cursor: 'sw-resize',
+                borderRadius: '50%'
+              }}
+            />
+          </>
+        )}
+      </div>
       {caption && <figcaption style={captionStyle}>{caption}</figcaption>}
-      {isSelected && resizable && (
-        <>
-          <div 
-            className="resizer ne" 
-            onMouseDown={startResize('ne')} 
-            onTouchStart={startResize('ne')}
-            style={{
-              position: 'absolute',
-              top: '-5px',
-              right: '-5px',
-              width: '10px',
-              height: '10px',
-              background: '#007acc',
-              cursor: 'ne-resize',
-              borderRadius: '50%'
-            }}
-          />
-          <div 
-            className="resizer nw" 
-            onMouseDown={startResize('nw')} 
-            onTouchStart={startResize('nw')}
-            style={{
-              position: 'absolute',
-              top: '-5px',
-              left: '-5px',
-              width: '10px',
-              height: '10px',
-              background: '#007acc',
-              cursor: 'nw-resize',
-              borderRadius: '50%'
-            }}
-          />
-          <div 
-            className="resizer se" 
-            onMouseDown={startResize('se')} 
-            onTouchStart={startResize('se')}
-            style={{
-              position: 'absolute',
-              bottom: '-5px',
-              right: '-5px',
-              width: '10px',
-              height: '10px',
-              background: '#007acc',
-              cursor: 'se-resize',
-              borderRadius: '50%'
-            }}
-          />
-          <div 
-            className="resizer sw" 
-            onMouseDown={startResize('sw')} 
-            onTouchStart={startResize('sw')}
-            style={{
-              position: 'absolute',
-              bottom: '-5px',
-              left: '-5px',
-              width: '10px',
-              height: '10px',
-              background: '#007acc',
-              cursor: 'sw-resize',
-              borderRadius: '50%'
-            }}
-          />
-        </>
-      )}
     </figure>
   );
 }
