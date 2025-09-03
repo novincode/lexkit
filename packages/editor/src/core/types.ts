@@ -1,6 +1,5 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
 import { ReactNode, CSSProperties } from 'react';
-import { TranslationKeys } from '../locales';
 import { Extension, ExtensionCategory } from '../extensions';
 
 export type { Extension, ExtensionCategory } from '../extensions';
@@ -20,7 +19,6 @@ export interface EditorContextType {
   editor: LexicalEditor | null;
   config: EditorConfig;
   extensions: Extension[];
-  t: (key: TranslationKeys) => string;
   commands: {
     formatText: (format: TextFormatType, value?: boolean | string) => void;
     insertNode?: (type: string, payload: any) => void;

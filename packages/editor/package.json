@@ -17,16 +17,6 @@
     "dev": "tsup --watch"
   },
   "dependencies": {
-    "@lexical/html": "^0.34.0",
-    "@lexical/list": "^0.34.0",
-    "@lexical/markdown": "^0.34.0",
-    "@lexical/react": "^0.34.0",
-    "clsx": "^2.1.1",
-    "i18next": "^25.4.2",
-    "lexical": "^0.34.0",
-    "lucide-react": "^0.475.0",
-    "react-i18next": "^15.7.3",
-    "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -38,6 +28,11 @@
     "typescript": "^5.7.3"
   },
   "peerDependencies": {
+    "@lexical/html": "^0.34.0",
+    "@lexical/list": "^0.34.0",
+    "@lexical/markdown": "^0.34.0",
+    "@lexical/react": "^0.34.0",
+    "lexical": "^0.34.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   }

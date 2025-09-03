@@ -6,14 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
 import { defaultTheme, mergeTheme } from '@repo/editor/themes';
 
-interface ProviderProps<Exts extends Extension[]> {
+interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
   config?: EditorConfig;
   extensions: Exts;
 }
 
 // Factory: Creates typed Provider/useEditor per Exts
-export function createEditorSystem<Exts extends Extension[]>() {
+export function createEditorSystem<Exts extends readonly Extension[]>() {
   const EditorContext = createContext<EditorContextType<Exts> | null>(null);
 
   function useEditor() {
@@ -76,7 +76,6 @@ export function createEditorSystem<Exts extends Extension[]>() {
       editor,
       config,
       extensions,
-      t: t as any,
       commands,
       listeners: {
         registerUpdate: (listener: (state: any) => void) => editor?.registerUpdateListener(listener) || (() => {}),
@@ -107,7 +106,7 @@ export function createEditorSystem<Exts extends Extension[]>() {
       hasExtension: (name) => extensions.some(ext => ext.name === name),
     };
 
-    return <EditorContext.Provider value={contextValue}>{children}</EditorContext.Provider>;
+    return <EditorContext.Provider value={contextValue}>{children}{plugins}</EditorContext.Provider>;
   }
 
   function Provider(props: ProviderProps<Exts>) {

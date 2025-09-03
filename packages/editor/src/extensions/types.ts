@@ -1,6 +1,5 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
-import { TranslationKeys } from '../locales';
 
 export enum ExtensionCategory {
   Toolbar = 'toolbar',
@@ -39,9 +38,9 @@ export interface Extension<Name extends string = string, Config extends BaseExte
 }
 
 // Infer unions from array of extensions
-export type ExtractNames<Exts extends Extension[]> = Exts[number]['name'];
-export type ExtractCommands<Exts extends Extension[]> = UnionToIntersection<Exts[number] extends { getCommands: (editor: LexicalEditor) => infer C } ? C : {}>;
-export type ExtractPlugins<Exts extends Extension[]> = Exts[number] extends { getPlugins: () => infer P } ? P extends (infer T)[] ? T : never : never;
+export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
+export type ExtractCommands<Exts extends readonly Extension[]> = UnionToIntersection<Exts[number] extends { getCommands: (editor: LexicalEditor) => infer C } ? C : {}>;
+export type ExtractPlugins<Exts extends readonly Extension[]> = Exts[number] extends { getPlugins: () => infer P } ? P extends (infer T)[] ? T : never : never;
 
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
@@ -55,11 +54,10 @@ export interface BaseCommands {
 }
 
 // Context type, generic over Exts
-export interface EditorContextType<Exts extends Extension[]> {
+export interface EditorContextType<Exts extends readonly Extension[]> {
   editor: LexicalEditor | null;
   config?: EditorConfig;
   extensions: Exts;
-  t: (key: TranslationKeys) => string;
   commands: BaseCommands & ExtractCommands<Exts>;
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
