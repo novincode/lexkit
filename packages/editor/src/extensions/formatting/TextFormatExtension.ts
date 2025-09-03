@@ -11,6 +11,7 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
   Name,
   any,
   TextFormatCommands<Name>,
+  Record<Name, () => Promise<boolean>>,
   ReactNode[]
 > {
   constructor(name: Name) {
@@ -29,7 +30,7 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
     } as any;
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+  getStateQueries(editor: LexicalEditor): Record<Name, () => Promise<boolean>> {
     return {
       [this.name]: () =>
         new Promise((resolve) => {
@@ -42,6 +43,6 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
             }
           });
         }),
-    };
+    } as Record<Name, () => Promise<boolean>>;
   }
 }

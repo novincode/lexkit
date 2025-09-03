@@ -23,30 +23,30 @@ export interface ToolbarItem {
 }
 
 // Base for all extensions
-export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends Record<string, any> = {}, Plugins extends ReactNode[] = ReactNode[]> {
+export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends Record<string, any> = {}, StateQueries extends Record<string, () => Promise<boolean>> = {}, Plugins extends ReactNode[] = ReactNode[]> {
   name: Name; // Literal for inference
   category: ExtensionCategory[];
   config: Config;
   supportedFormats?: readonly TextFormatType[];
-  configure?: (config: Partial<Config>) => Extension<Name, Config, Commands, Plugins>;
+  configure?: (config: Partial<Config>) => Extension<Name, Config, Commands, StateQueries, Plugins>;
   register: (editor: LexicalEditor) => () => void;
-  overrideUI?: (CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>) => Extension<Name, Config, Commands, Plugins>;
-  overrideNodeRender?: (overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }) => Extension<Name, Config, Commands, Plugins>;
+  overrideUI?: (CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>) => Extension<Name, Config, Commands, StateQueries, Plugins>;
+  overrideNodeRender?: (overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }) => Extension<Name, Config, Commands, StateQueries, Plugins>;
   getNodes?: () => any[];
   getPlugins: () => Plugins;
   getCommands: (editor: LexicalEditor) => Commands;
-  getStateQueries?: (editor: LexicalEditor) => Record<string, () => Promise<boolean>>;  // All queries async now
+  getStateQueries?: (editor: LexicalEditor) => StateQueries;
   // More: getToolbarItems?(): ToolbarItem<Commands>[];
 }
 
-// Helper: Merge union of objects into one object
+// Merge commands (updated to use unknown for distribution)
 type MergeCommands<T> = {
-  [K in T extends any ? keyof T : never]: T extends { [P in K]: any } ? T[K] : never;
+  [K in UnionKeys<T>]: T extends { [P in K]: infer V } ? V : never;
 };
 
-// Helper: Merge state queries the same way as commands
+// Merge state queries (updated to use unknown for distribution, values as boolean)
 type MergeStateQueries<T> = {
-  [K in T extends any ? keyof T : never]: boolean;
+  [K in UnionKeys<T>]: boolean;
 };
 
 // Infer unions from array of extensions
@@ -59,9 +59,12 @@ export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
-// Extract state queries the same way as commands
+// Helper for union of keys
+type UnionKeys<T> = T extends unknown ? keyof T : never;
+
+// Extract state queries similarly
 export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQueries<
-  Exts[number] extends { getStateQueries: (editor: LexicalEditor) => infer R } ? R : {}
+  ReturnType<NonNullable<Exts[number]['getStateQueries']>>
 > & ('history' extends ExtractNames<Exts> ? { canUndo: boolean; canRedo: boolean } : {});
 
 // Base commands (always available)

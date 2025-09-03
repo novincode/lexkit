@@ -11,7 +11,13 @@ export type HistoryCommands = {
   clearHistory: () => void;
 };
 
-export class HistoryExtension extends BaseExtension<'history', any, HistoryCommands, ReactNode[]> {
+export class HistoryExtension extends BaseExtension<
+  'history',
+  any,
+  HistoryCommands,
+  {},
+  ReactNode[]
+> {
   constructor() {
     super('history', [ExtensionCategory.Toolbar]);
   }
@@ -40,7 +46,7 @@ export class HistoryExtension extends BaseExtension<'history', any, HistoryComma
   }
 
   // History states are handled via event listeners in createEditorSystem
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+  getStateQueries(editor: LexicalEditor): {} {
     return {};
   }
 }

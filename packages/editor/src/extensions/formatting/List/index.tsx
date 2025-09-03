@@ -13,7 +13,13 @@ export type ListCommands = {
   toggleOrderedList: () => void;
 };
 
-export class ListExtension extends BaseExtension<'list', any, ListCommands, ReactNode[]> {
+export class ListExtension extends BaseExtension<
+  'list',
+  any,
+  ListCommands,
+  { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> },
+  ReactNode[]
+> {
   constructor() {
     super('list', [ExtensionCategory.Toolbar]);
   }
@@ -80,7 +86,7 @@ export class ListExtension extends BaseExtension<'list', any, ListCommands, Reac
     };
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+  getStateQueries(editor: LexicalEditor): { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> } {
     return {
       unorderedList: () =>
         new Promise((resolve) => {

@@ -72,7 +72,7 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
 
 export type ImageCommands = {};
 
-export class ImageExtension extends BaseExtension<'image', any, ImageCommands, ReactNode[]> {
+export class ImageExtension extends BaseExtension<'image', any, ImageCommands, {}, ReactNode[]> {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
   }
@@ -86,7 +86,7 @@ export class ImageExtension extends BaseExtension<'image', any, ImageCommands, R
     return [ImageNode];
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
+  getStateQueries(editor: LexicalEditor): {} {
     return {};
   }
 }

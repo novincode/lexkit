@@ -6,8 +6,9 @@ export abstract class BaseExtension<
   Name extends string = string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
   Commands extends Record<string, any> = {},
+  StateQueries extends Record<string, () => Promise<boolean>> = {},
   Plugins extends ReactNode[] = ReactNode[]
-> implements Extension<Name, Config, Commands, Plugins> {
+> implements Extension<Name, Config, Commands, StateQueries, Plugins> {
   name: Name;
   category: ExtensionCategory[] = [ExtensionCategory.Toolbar];
   config: Config = {} as Config;
@@ -19,7 +20,7 @@ export abstract class BaseExtension<
     this.category = category;
   }
 
-  configure(config: Partial<Config>): Extension<Name, Config, Commands, Plugins> {
+  configure(config: Partial<Config>): Extension<Name, Config, Commands, StateQueries, Plugins> {
     this.config = { ...this.config, ...config };
     return this;
   }
@@ -30,12 +31,12 @@ export abstract class BaseExtension<
     return [];
   }
 
-  overrideUI(CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>): Extension<Name, Config, Commands, Plugins> {
+  overrideUI(CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>): Extension<Name, Config, Commands, StateQueries, Plugins> {
     // For node rendering, perhaps
     return this;
   }
 
-  overrideNodeRender(overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }): Extension<Name, Config, Commands, Plugins> {
+  overrideNodeRender(overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }): Extension<Name, Config, Commands, StateQueries, Plugins> {
     this.nodeOverrides = { ...this.nodeOverrides, ...overrides };
     return this;
   }
@@ -48,8 +49,8 @@ export abstract class BaseExtension<
     return {} as Commands;
   }
 
-  getStateQueries(editor: LexicalEditor): Record<string, () => Promise<boolean>> {
-    return {};
+  getStateQueries(editor: LexicalEditor): StateQueries {
+    return {} as StateQueries;
   }
 
   getToolbarItems(commands: any): ToolbarItem[] {
