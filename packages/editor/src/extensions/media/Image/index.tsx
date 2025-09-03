@@ -1,5 +1,5 @@
 import { DecoratorNode } from 'lexical';
-import { ComponentType, CSSProperties } from 'react';
+import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '../../types';
@@ -70,7 +70,9 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 }
 
-export class ImageExtension extends BaseExtension<'image'> {
+export type ImageCommands = {};
+
+export class ImageExtension extends BaseExtension<'image', any, ImageCommands, ReactNode[]> {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
   }

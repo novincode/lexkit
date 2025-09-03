@@ -18,8 +18,8 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
 
     const toggleBold = () => commands.formatText('bold');
     const toggleItalic = () => commands.formatText('italic');
-    const toggleUnorderedList = () => commands.toggleUnorderedList?.();
-    const toggleOrderedList = () => commands.toggleOrderedList?.();
+    const toggleUnorderedList = () => commands.toggleUnorderedList();
+    const toggleOrderedList = () => commands.toggleOrderedList();
     const undo = () => commands.undo();
 
     return (

@@ -2,9 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
-import { useTranslation } from 'react-i18next';
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, BaseCommands } from '../extensions/types';
-import { defaultTheme, mergeTheme } from '@repo/editor/themes';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -24,7 +22,6 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 
   function ProviderInner({ children, config = {}, extensions }: ProviderProps<Exts>) {
     const [editor] = useLexicalComposerContext();
-    const { t } = useTranslation();
 
     // Lazy commands from extensions + base
     const baseCommands = {
@@ -130,6 +127,6 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 }
 
 // Base system for untyped use
-export const baseEditorSystem = createEditorSystem<Extension[]>();
+export const baseEditorSystem = createEditorSystem<readonly Extension[]>();
 export const BaseProvider = baseEditorSystem.Provider;
 export const useBaseEditor = baseEditorSystem.useEditor;

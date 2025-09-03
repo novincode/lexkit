@@ -1,8 +1,11 @@
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '../../types';
+import { ReactNode } from 'react';
 
-export class HistoryExtension extends BaseExtension<'history'> {
+export type HistoryCommands = {};
+
+export class HistoryExtension extends BaseExtension<'history', any, HistoryCommands, ReactNode[]> {
   constructor() {
     super('history', [ExtensionCategory.Toolbar]);
   }
@@ -12,13 +15,9 @@ export class HistoryExtension extends BaseExtension<'history'> {
     return () => {};
   }
 
-  getPlugins() {
-    return [this.lazyLoadHistoryPlugin()];
-  }
-
-  private async lazyLoadHistoryPlugin() {
-    const { HistoryPlugin } = await import('@lexical/react/LexicalHistoryPlugin');
-    return <HistoryPlugin key="history-plugin" />;
+  getPlugins(): ReactNode[] {
+    // Lazy load in useEffect in createEditorSystem
+    return [];
   }
 }
 

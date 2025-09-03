@@ -47,10 +47,10 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] exte
 
 // Base commands (always available)
 export interface BaseCommands {
-  formatText: (format: TextFormatType, value?: boolean | string) => boolean;
-  undo: () => boolean;
-  redo: () => boolean;
-  clearHistory: () => boolean;
+  formatText: (format: TextFormatType, value?: boolean | string) => void;
+  undo: () => void;
+  redo: () => void;
+  clearHistory: () => void;
 }
 
 // Context type, generic over Exts

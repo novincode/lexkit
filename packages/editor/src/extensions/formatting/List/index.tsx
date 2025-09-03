@@ -1,13 +1,19 @@
-import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND } from '@lexical/list';
-import { ComponentType, CSSProperties } from 'react';
-import { LexicalEditor } from 'lexical';
+import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } from '@lexical/list';
+import { ComponentType, CSSProperties, ReactNode } from 'react';
+import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory } from '@repo/editor/extensions';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import React from 'react';
 
-export class ListExtension extends BaseExtension<'list'> {
+// Define types for inference
+export type ListCommands = {
+  toggleUnorderedList: () => Promise<void>;
+  toggleOrderedList: () => Promise<void>;
+};
+
+export class ListExtension extends BaseExtension<'list', any, ListCommands, ReactNode[]> {
   constructor() {
     super('list', [ExtensionCategory.Toolbar]);
   }
@@ -25,11 +31,9 @@ export class ListExtension extends BaseExtension<'list'> {
     return [<ListPlugin key="list-plugin" />];
   }
 
-  getCommands(editor: LexicalEditor) {
+  getCommands(editor: LexicalEditor): ListCommands {
     return {
       toggleUnorderedList: async () => {
-        const { INSERT_UNORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } = await import('@lexical/list');
-        const { $getSelection, $isRangeSelection } = await import('lexical');
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
@@ -52,8 +56,6 @@ export class ListExtension extends BaseExtension<'list'> {
         });
       },
       toggleOrderedList: async () => {
-        const { INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } = await import('@lexical/list');
-        const { $getSelection, $isRangeSelection } = await import('lexical');
         editor.update(() => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
