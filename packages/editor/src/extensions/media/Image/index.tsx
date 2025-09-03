@@ -1,9 +1,10 @@
-import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection } from 'lexical';
+import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
 import { ExtensionCategory, BaseExtensionConfig } from '../../types';
 import { ImagePayload, ImageComponentProps, SerializedImageNode, ImageExtensionConfig, ImageCommands, ImageStateQueries, Alignment } from './types';
+import { ImageTranslator, importImageDOM, exportImageDOM, importImageJSON, exportImageJSON } from './ImageTranslator';
 
 const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>('insert-image');
 
@@ -15,11 +16,50 @@ let defaultImageComponent: ComponentType<ImageComponentProps> = ({
   className = '',
   style,
 }) => {
-  console.log('Rendering defaultImageComponent:', { src, alt, caption, alignment });
+  console.log('🖼️ Rendering defaultImageComponent:', { src, alt, caption, alignment });
+
+  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('❌ Image failed to load:', src, e);
+  };
+
+  const handleLoad = () => {
+    console.log('✅ Image loaded successfully:', src);
+  };
+
+  // Add some basic styling to make sure the image is visible
+  const figureStyle: CSSProperties = {
+    margin: '1rem 0',
+    display: 'block',
+    textAlign: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : alignment === 'center' ? 'center' : 'left',
+    ...style
+  };
+
+  const imgStyle: CSSProperties = {
+    maxWidth: '100%',
+    height: 'auto',
+    display: 'block',
+    border: '1px solid #ddd', // Add border to see if element is rendered
+    borderRadius: '4px',
+  };
+
+  const captionStyle: CSSProperties = {
+    fontSize: '0.9em',
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: '0.5rem',
+    textAlign: 'center'
+  };
+
   return (
-    <figure className={`lexical-image align-${alignment} ${className}`} style={style}>
-      <img src={src} alt={alt} />
-      {caption && <figcaption>{caption}</figcaption>}
+    <figure className={`lexical-image align-${alignment} ${className}`} style={figureStyle}>
+      <img
+        src={src}
+        alt={alt}
+        onError={handleError}
+        onLoad={handleLoad}
+        style={imgStyle}
+      />
+      {caption && <figcaption className="image-caption" style={captionStyle}>{caption}</figcaption>}
     </figure>
   );
 };
@@ -36,32 +76,19 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     return 'image';
   }
 
-  static clone(node: ImageNode): ImageNode {
-    return new ImageNode(
-      node.__src,
-      node.__alt,
-      node.__caption,
-      node.__alignment,
-      node.__className,
-      node.__style,
-      node.__key
-    );
+  // Use new translator
+  static importDOM(): DOMConversionMap | null {
+    return ImageTranslator.importDOM();
   }
 
+  // Use new translator
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    return new ImageNode(
-      serializedNode.src,
-      serializedNode.alt,
-      serializedNode.caption,
-      serializedNode.alignment,
-      serializedNode.className,
-      serializedNode.style
-    );
+    return ImageTranslator.importJSON(serializedNode);
   }
 
   constructor(
-    src: string,
-    alt: string,
+    src: string = '',
+    alt: string = '',
     caption?: string,
     alignment: Alignment = 'none',
     className?: string,
@@ -78,17 +105,14 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__style = style;
   }
 
+  // Use new translator
+  exportDOM(): DOMExportOutput {
+    return ImageTranslator.exportDOM(this);
+  }
+
+  // Use new translator
   exportJSON(): SerializedImageNode {
-    return {
-      type: 'image',
-      version: 1,
-      src: this.__src,
-      alt: this.__alt,
-      caption: this.__caption,
-      alignment: this.__alignment,
-      className: this.__className,
-      style: this.__style,
-    };
+    return ImageTranslator.exportJSON(this);
   }
 
   setSrc(src: string): void {
@@ -121,23 +145,82 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     writable.__style = style;
   }
 
+  // This is the key method - it determines if the node can be selected
+  isInline(): boolean {
+    return false;
+  }
+
+  // This ensures the image node is treated as a block element
+  isBlockElement(): boolean {
+    return true;
+  }
+
+  // This is critical - ensure the node is considered a top-level block
+  canBeEmpty(): boolean {
+    return false;
+  }
+
   decorate(): ReactNode {
-    console.log('Decorating image node:', {
+    console.log('🎨 ImageNode.decorate() called for node:', this.__key, {
       src: this.__src,
       alt: this.__alt,
       caption: this.__caption,
-      alignment: this.__alignment
+      alignment: this.__alignment,
+      isValidSrc: !!this.__src && this.__src.length > 0
     });
-    const Component = defaultImageComponent;
-    return <Component
-      src={this.__src}
-      alt={this.__alt}
-      caption={this.__caption}
-      alignment={this.__alignment}
-      className={this.__className}
-      style={this.__style}
-    />;
+
+    // Ensure we have a valid src
+    if (!this.__src || this.__src.length === 0) {
+      console.error('❌ No src provided to ImageNode');
+      return (
+        <div style={{
+          color: 'red',
+          border: '1px solid red',
+          padding: '10px',
+          backgroundColor: '#ffe6e6'
+        }}>
+          Image Error: No source URL provided
+        </div>
+      );
+    }
+
+    try {
+      const Component = defaultImageComponent;
+      return (
+        <Component
+          src={this.__src}
+          alt={this.__alt}
+          caption={this.__caption}
+          alignment={this.__alignment}
+          className={this.__className}
+          style={this.__style}
+        />
+      );
+    } catch (error) {
+      console.error('❌ Error rendering ImageNode:', error);
+      return (
+        <div style={{
+          color: 'red',
+          border: '1px solid red',
+          padding: '10px',
+          backgroundColor: '#ffe6e6'
+        }}>
+          Image Error: {String(error)}
+        </div>
+      );
+    }
   }
+}
+
+export function $createImageNode(
+  src: string,
+  alt: string,
+  caption?: string,
+  alignment: Alignment = 'none',
+  className?: string,
+  style?: CSSProperties
+): ImageNode {
+  return new ImageNode(src, alt, caption, alignment, className, style);
 }
 
 export class ImageExtension extends BaseExtension<
@@ -172,49 +255,54 @@ export class ImageExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
+    console.log('🔧 Registering ImageExtension');
     const removeCommand = editor.registerCommand<ImagePayload>(
       INSERT_IMAGE_COMMAND,
       (payload) => {
-        console.log('Inserting image:', payload);
-        if (payload.file) {
-          this.config.uploadHandler?.(payload.file).then(src => {
-            console.log('Upload result:', src);
-            editor.update(() => {
-              const imageNode = new ImageNode(
-                src || '',
-                payload.alt,
-                payload.caption,
-                payload.alignment || this.config.defaultAlignment || 'none',
-                payload.className,
-                payload.style
-              );
-              $insertNodes([imageNode]);
-              console.log('Image node inserted');
-            });
-          });
-        } else {
-          editor.update(() => {
-            const imageNode = new ImageNode(
-              payload.src || '',
+        console.log('📸 Inserting image:', payload);
+        editor.update(() => {
+          try {
+            const src = payload.src || (payload.file ? URL.createObjectURL(payload.file) : '');
+            if (!src) throw new Error('No src for image');
+            
+            const imageNode = $createImageNode(
+              src,
               payload.alt,
               payload.caption,
               payload.alignment || this.config.defaultAlignment || 'none',
               payload.className,
               payload.style
             );
-            $insertNodes([imageNode]);
-            console.log('Image node inserted from URL');
-          });
-        }
+            
+            const selection = $getSelection();
+            let inserted = false;
+            if ($isRangeSelection(selection)) {
+              selection.insertNodes([imageNode]);
+              inserted = true;
+            }
+            
+            if (!inserted) {
+              const paragraph = $createParagraphNode();
+              paragraph.append(imageNode);
+              $getRoot().append(paragraph);
+              console.log('✅ Appended to root');
+            } else {
+              console.log('✅ Inserted via selection');
+            }
+          } catch (error) {
+            console.error('❌ Insertion error:', error);
+          }
+        });
         return true;
       },
       COMMAND_PRIORITY_EDITOR
     );
-
+    console.log('✅ ImageExtension registered');
     return removeCommand;
   }
 
   getNodes(): any[] {
+    console.log('📝 ImageExtension getNodes() called, returning ImageNode');
     return [ImageNode];
   }
 

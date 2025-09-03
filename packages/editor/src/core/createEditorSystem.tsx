@@ -60,6 +60,13 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       });
     }, [editor]);
 
+    // Register extensions (this was missing!)
+    useEffect(() => {
+      if (!editor) return;
+      const unregisters = extensions.map(ext => ext.register(editor));
+      return () => unregisters.forEach(unreg => unreg && unreg());
+    }, [editor, extensions]);
+
     // Collect state queries (now all Promise-based)
     const stateQueries = useMemo(() => extensions.reduce(
       (acc, ext) => ({
@@ -179,27 +186,31 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     return <EditorContext.Provider value={contextValue}>{plugins}{children}</EditorContext.Provider>;
   }
 
-  function Provider(props: ProviderProps<Exts>) {
-    const nodes = useMemo(() => props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []), [props.extensions]);
+function Provider(props: ProviderProps<Exts>) {
+  const nodes = useMemo(() => {
+    const allNodes = props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []);
+    console.log('🔧 Registering nodes with Lexical:', allNodes.map(node => node?.getType?.() || 'unknown'));
+    return allNodes;
+  }, [props.extensions]);
 
-    const initialConfig = useMemo(
-      () => ({
-        namespace: 'modern-editor',
-        theme: props.config?.theme || {},
-        onError: console.error,
-        nodes,
-      }),
-      [props.config?.theme, nodes]
-    );
+  const initialConfig = useMemo(
+    () => ({
+      namespace: 'modern-editor',
+      theme: props.config?.theme || {},
+      onError: (error: Error) => {
+        console.error('❌ Lexical error:', error);
+      },
+      nodes,
+    }),
+    [props.config?.theme, nodes]
+  );
 
-    return (
-      <LexicalComposer initialConfig={initialConfig}>
-        <ProviderInner {...props} />
-      </LexicalComposer>
-    );
-  }
-
-  return { Provider, useEditor };
+  return (
+    <LexicalComposer initialConfig={initialConfig}>
+      <ProviderInner {...props} />
+    </LexicalComposer>
+  );
+}  return { Provider, useEditor };
 }
 
 // Base system for untyped use

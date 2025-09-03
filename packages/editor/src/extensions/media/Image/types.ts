@@ -23,7 +23,7 @@ export interface SerializedImageNode {
   caption?: string;
   alignment: Alignment;
   className?: string;
-  style?: CSSProperties;
+  style?: Record<string, string>;
 }
 
 export interface ImageExtensionConfig extends BaseExtensionConfig {

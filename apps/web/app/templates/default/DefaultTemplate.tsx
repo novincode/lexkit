@@ -3,13 +3,36 @@ import React, { useState, useEffect } from 'react';
 import {  boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getRoot } from 'lexical';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';
 import { createEditorSystem } from '@repo/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
 
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+  try {
+    return <>{children}</>;
+  } catch (error) {
+    console.error('🚨 Editor Error Boundary caught error:', error);
+    return (
+      <div style={{
+        color: 'red',
+        border: '1px solid red',
+        padding: '20px',
+        backgroundColor: '#ffe6e6',
+        borderRadius: '4px',
+        margin: '10px 0'
+      }}>
+        <h3>Editor Error</h3>
+        <p>{String(error)}</p>
+        <p>Please refresh the page and try again.</p>
+      </div>
+    );
+  }
+};
 
 // Define the extensions array as a const to maintain literal types
 const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension] as const;
@@ -21,6 +44,26 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
 
+function DecoratorPlugin() {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    console.log('🛠️ DecoratorPlugin initialized');
+    // Log when decorator nodes are rendered
+    const unregister = editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const nodes = $getRoot().getChildren();
+        nodes.forEach(node => {
+          if (node.getType() === 'image') {
+            console.log('🎨 Found ImageNode in state, should render:', node);
+          }
+        });
+      });
+    });
+    return unregister;
+  }, [editor]);
+  return null;
+}
+
 function EditorContent({ className, isDark, toggleTheme }: { className?: string; isDark: boolean; toggleTheme: () => void }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
 
@@ -31,6 +74,15 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }
   }, [isDark, editor]);
+
+  // Catch global errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Global error caught:', event.error);
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   const [showImageMenu, setShowImageMenu] = useState(false);
 
@@ -92,6 +144,8 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
           placeholder={<div className="lexkit-placeholder">Start typing...</div>}
           ErrorBoundary={ErrorBoundary}
         />
+        <HistoryPlugin />
+        <DecoratorPlugin />
       </div>
     </>
   );
@@ -213,13 +267,6 @@ function Toolbar({
       <button onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}>
         {isDark ? <Sun size={20} /> : <Moon size={20} />}
       </button>
-      <button 
-        onClick={() => commands.insertImage({ src: 'https://via.placeholder.com/300x200', alt: 'Test Image', caption: 'Test Caption' })}
-        title="Test Image"
-        style={{ backgroundColor: '#ff6b6b', color: 'white' }}
-      >
-        Test Image
-      </button>
     </div>
   );
 }
@@ -233,14 +280,18 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
 
   // Configure image extension with upload handler
   useEffect(() => {
+    console.log('🔧 Configuring image extension...');
     imageExtension.configure({
       uploadHandler: async (file: File) => {
-        console.log('Upload handler called with file:', file.name);
+        console.log('📤 Upload handler called with file:', file.name, 'size:', file.size);
         // For testing, create object URL
-        return URL.createObjectURL(file);
+        const objectUrl = URL.createObjectURL(file);
+        console.log('🔗 Created object URL:', objectUrl);
+        return objectUrl;
       },
       defaultAlignment: 'center'
     });
+    console.log('✅ Image extension configured');
   }, []);
 
   // Handle theme change without causing re-renders that affect the editor
