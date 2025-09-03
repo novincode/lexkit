@@ -27,8 +27,8 @@ function ImageComponent({
   const [isSelected, setIsSelected] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(1);
-  const [currentWidth, setCurrentWidth] = useState(width || 'auto');
-  const [currentHeight, setCurrentHeight] = useState(height || 'auto');
+  const [currentWidth, setCurrentWidth] = useState<number | 'auto'>(width || 'auto');
+  const [currentHeight, setCurrentHeight] = useState<number | 'auto'>(height || 'auto');
 
   useEffect(() => {
     const img = imageRef.current;
@@ -39,8 +39,15 @@ function ImageComponent({
     }
   }, [src]);
 
+  // Update dimensions when props change
+  useEffect(() => {
+    setCurrentWidth(width || 'auto');
+    setCurrentHeight(height || 'auto');
+  }, [width, height]);
+
   // Listen for selection changes
   useEffect(() => {
+    if (!nodeKey) return;
     return editor.registerUpdateListener(({editorState}) => {
       editorState.read(() => {
         const selection = $getSelection();
@@ -58,21 +65,30 @@ function ImageComponent({
   const onClick = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    if (!nodeKey) return;
     editor.update(() => {
       const selection = $createNodeSelection();
-      selection.add(nodeKey!);
+      selection.add(nodeKey);
       $setSelection(selection);
     });
   };
 
   // Resizing logic (unified mouse/touch)
   const startResize = (direction: string) => (event: any) => {
+    // Only allow resizing if image has loaded and has valid dimensions
+    if (!imageRef.current || aspectRatio === 1 || !event.target) {
+      return;
+    }
+    
     event.preventDefault();
     setIsResizing(true);
     const startX = 'touches' in event ? event.touches?.[0]?.clientX || 0 : event.clientX;
     const startY = 'touches' in event ? event.touches?.[0]?.clientY || 0 : event.clientY;
-    const startWidth = imageRef.current?.clientWidth || 0;
-    const startHeight = imageRef.current?.clientHeight || 0;
+    const startWidth = imageRef.current.clientWidth || 100;
+    const startHeight = imageRef.current.clientHeight || 100;
+
+    let currentResizeWidth = startWidth;
+    let currentResizeHeight = startHeight;
 
     const onMove = (moveEvent: any) => {
       const x = 'touches' in moveEvent ? moveEvent.touches?.[0]?.clientX || 0 : moveEvent.clientX;
@@ -85,22 +101,31 @@ function ImageComponent({
       if (direction.includes('s')) newHeight += y - startY;
       if (direction.includes('n')) newHeight += startY - y;
 
-      // Maintain aspect
-      if (event.shiftKey) {
+      // Maintain aspect ratio if shift key is held
+      if (moveEvent.shiftKey) {
         newHeight = newWidth / aspectRatio;
-      } else {
-        newWidth = newHeight * aspectRatio;
       }
 
-      setCurrentWidth(Math.max(50, newWidth));
-      setCurrentHeight(Math.max(50, newHeight));
+      newWidth = Math.max(50, newWidth);
+      newHeight = Math.max(50, newHeight);
+
+      currentResizeWidth = newWidth;
+      currentResizeHeight = newHeight;
+
+      setCurrentWidth(newWidth);
+      setCurrentHeight(newHeight);
     };
 
     const onUp = () => {
       setIsResizing(false);
       editor.update(() => {
         const node = $getNodeByKey(nodeKey!);
-        if (node instanceof ImageNode) node.setWidthAndHeight(currentWidth as number, currentHeight as number);
+        if (node instanceof ImageNode) {
+          // Only update dimensions if they are numbers
+          if (typeof currentResizeWidth === 'number' && typeof currentResizeHeight === 'number') {
+            node.setWidthAndHeight(currentResizeWidth, currentResizeHeight);
+          }
+        }
       });
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
@@ -149,10 +174,66 @@ function ImageComponent({
       {caption && <figcaption style={captionStyle}>{caption}</figcaption>}
       {isSelected && resizable && (
         <>
-          <div className="resizer ne" onMouseDown={startResize('ne')} onTouchStart={startResize('ne')} />
-          <div className="resizer nw" onMouseDown={startResize('nw')} onTouchStart={startResize('nw')} />
-          <div className="resizer se" onMouseDown={startResize('se')} onTouchStart={startResize('se')} />
-          <div className="resizer sw" onMouseDown={startResize('sw')} onTouchStart={startResize('sw')} />
+          <div 
+            className="resizer ne" 
+            onMouseDown={startResize('ne')} 
+            onTouchStart={startResize('ne')}
+            style={{
+              position: 'absolute',
+              top: '-5px',
+              right: '-5px',
+              width: '10px',
+              height: '10px',
+              background: '#007acc',
+              cursor: 'ne-resize',
+              borderRadius: '50%'
+            }}
+          />
+          <div 
+            className="resizer nw" 
+            onMouseDown={startResize('nw')} 
+            onTouchStart={startResize('nw')}
+            style={{
+              position: 'absolute',
+              top: '-5px',
+              left: '-5px',
+              width: '10px',
+              height: '10px',
+              background: '#007acc',
+              cursor: 'nw-resize',
+              borderRadius: '50%'
+            }}
+          />
+          <div 
+            className="resizer se" 
+            onMouseDown={startResize('se')} 
+            onTouchStart={startResize('se')}
+            style={{
+              position: 'absolute',
+              bottom: '-5px',
+              right: '-5px',
+              width: '10px',
+              height: '10px',
+              background: '#007acc',
+              cursor: 'se-resize',
+              borderRadius: '50%'
+            }}
+          />
+          <div 
+            className="resizer sw" 
+            onMouseDown={startResize('sw')} 
+            onTouchStart={startResize('sw')}
+            style={{
+              position: 'absolute',
+              bottom: '-5px',
+              left: '-5px',
+              width: '10px',
+              height: '10px',
+              background: '#007acc',
+              cursor: 'sw-resize',
+              borderRadius: '50%'
+            }}
+          />
         </>
       )}
     </figure>
@@ -173,6 +254,20 @@ export class ImageNode extends DecoratorNode<ReactNode> {
 
   static getType(): string {
     return 'image';
+  }
+
+  static clone(node: ImageNode): ImageNode {
+    return new ImageNode(
+      node.__src,
+      node.__alt,
+      node.__caption,
+      node.__alignment,
+      node.__className,
+      node.__style,
+      node.__width,
+      node.__height,
+      node.__key
+    );
   }
 
   // Use new translator
@@ -197,8 +292,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     key?: NodeKey
   ) {
     super(key);
-    console.log('Creating ImageNode:', { src, alt, caption, alignment });
-    this.__src = src;
+    // Ensure src is not empty
+    this.__src = src && src.length > 0 ? src : '';
     this.__alt = alt;
     this.__caption = caption;
     this.__alignment = alignment;
@@ -206,6 +301,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__style = style;
     this.__width = width;
     this.__height = height;
+    console.log('Creating ImageNode:', { src: this.__src, alt: this.__alt, caption: this.__caption, alignment: this.__alignment });
   }
 
   // Required for DecoratorNode: creates the DOM container for the React component
@@ -237,6 +333,10 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   }
 
   setSrc(src: string): void {
+    if (!src || src.length === 0) {
+      console.warn('Attempted to set empty src on ImageNode');
+      return;
+    }
     const writable = this.getWritable();
     writable.__src = src;
   }
@@ -361,6 +461,9 @@ export function $createImageNode(
   width?: number,
   height?: number
 ): ImageNode {
+  if (!src || src.length === 0) {
+    throw new Error('Cannot create ImageNode with empty src');
+  }
   return new ImageNode(src, alt, caption, alignment, className, style, width, height);
 }
 

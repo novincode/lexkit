@@ -31,11 +31,11 @@ export class ImageTranslator {
       img: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
           try {
-            const img = domNode as HTMLImageElement;
-            if (!img || !img.src || img.tagName !== 'IMG') {
-              console.warn('🚫 Invalid img element, skipping import', domNode);
+            if (!domNode || !(domNode instanceof HTMLImageElement) || !domNode.src) {
+              console.warn('🚫 Invalid domNode for img conversion', domNode);
               return null;
             }
+            const img = domNode;
 
           // Extract alignment from various possible sources
           let alignment: 'left' | 'center' | 'right' | 'none' = 'none';
@@ -72,16 +72,21 @@ export class ImageTranslator {
             className: img.className
           });
 
-          const node = $createImageNode(
-            img.src,
-            img.alt || '',
-            caption,
-            alignment,
-            img.className || undefined,
-            this.extractStyleObject(img)
-          );
+          try {
+            const node = $createImageNode(
+              img.src,
+              img.alt || '',
+              caption,
+              alignment,
+              img.className || undefined,
+              this.extractStyleObject(img)
+            );
 
-          return { node };
+            return { node };
+          } catch (error) {
+            console.error('Error creating ImageNode from DOM:', error);
+            return null;
+          }
           } catch (error) {
             console.error('Error importing img', error);
             return null;
@@ -92,7 +97,11 @@ export class ImageTranslator {
       figure: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
           try {
-            const figure = domNode as HTMLElement;
+            if (!domNode || !(domNode instanceof HTMLElement) || domNode.tagName !== 'FIGURE') {
+              console.warn('🚫 Invalid domNode for figure conversion', domNode);
+              return null;
+            }
+            const figure = domNode;
             const img = figure.querySelector('img');
             
             if (!img || !img.src) {
@@ -108,16 +117,21 @@ export class ImageTranslator {
               caption
             });
 
-            const node = $createImageNode(
-              img.src,
-              img.alt || '',
-              caption,
-              'center', // Figures are typically centered
-              figure.className || undefined,
-              this.extractStyleObject(figure)
-            );
+            try {
+              const node = $createImageNode(
+                img.src,
+                img.alt || '',
+                caption,
+                'center', // Figures are typically centered
+                figure.className || undefined,
+                this.extractStyleObject(figure)
+              );
 
-            return { node };
+              return { node };
+            } catch (error) {
+              console.error('Error creating ImageNode from figure:', error);
+              return null;
+            }
           } catch (error) {
             console.error('Error importing figure', error);
             return null;
@@ -160,6 +174,10 @@ export class ImageTranslator {
     const { src, alt, caption, alignment, className, style, width, height } = serializedNode;
     
     console.log('📥 Importing ImageNode from JSON:', serializedNode);
+    
+    if (!src || src.length === 0) {
+      throw new Error('Cannot import ImageNode with empty src');
+    }
     
     return $createImageNode(
       src,
@@ -243,7 +261,7 @@ export class ImageTranslator {
   }
 
   private static extractStyleObject(element: HTMLElement): Record<string, any> | undefined {
-    if (!element.style.length) return undefined;
+    if (!element || !(element instanceof HTMLElement) || !element.style || !element.style.length) return undefined;
 
     const styleObj: Record<string, any> = {};
     
