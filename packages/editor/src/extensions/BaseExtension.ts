@@ -5,7 +5,7 @@ import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from '
 export abstract class BaseExtension<
   Name extends string = string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
-  Commands extends {} = {},
+  Commands extends Record<string, any> = {},
   Plugins extends ReactNode[] = ReactNode[]
 > implements Extension<Name, Config, Commands, Plugins> {
   name: Name;

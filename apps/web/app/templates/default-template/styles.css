@@ -1,0 +1,202 @@
+/* Default Editor Theme Styles */
+
+/* Toolbar */
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.editor-toolbar button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.editor-toolbar button:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.editor-toolbar button:active {
+  background-color: #f3f4f6;
+}
+
+/* Editor Content */
+.editor-content {
+  min-height: 8rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.editor-content-editable {
+  min-height: 8rem;
+  padding: 0.5rem;
+  outline: none;
+}
+
+/* Paragraph */
+.editor-paragraph {
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+/* Headings */
+.editor-heading-h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.editor-heading-h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.editor-heading-h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.editor-heading-h4 {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.editor-heading-h5 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.editor-heading-h6 {
+  font-size: 0.875rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+/* Lists */
+.editor-list-ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.editor-list-ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.editor-list-li {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+/* Quote */
+.editor-quote {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #d1d5db;
+  background-color: #f9fafb;
+  font-style: italic;
+}
+
+/* Code */
+.editor-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Code Highlight (syntax highlighting) */
+.editor-code-atrule { color: #7c3aed; }
+.editor-code-attr { color: #059669; }
+.editor-code-boolean { color: #dc2626; }
+.editor-code-builtin { color: #7c3aed; }
+.editor-code-cdata { color: #6b7280; }
+.editor-code-char { color: #059669; }
+.editor-code-class { color: #dc2626; }
+.editor-code-class-name { color: #dc2626; }
+.editor-code-comment { color: #6b7280; font-style: italic; }
+.editor-code-constant { color: #dc2626; }
+.editor-code-deleted { color: #dc2626; }
+.editor-code-doctype { color: #6b7280; }
+.editor-code-entity { color: #059669; }
+.editor-code-function { color: #7c3aed; }
+.editor-code-important { color: #dc2626; font-weight: bold; }
+.editor-code-inserted { color: #059669; }
+.editor-code-keyword { color: #7c3aed; }
+.editor-code-namespace { color: #7c3aed; }
+.editor-code-number { color: #dc2626; }
+.editor-code-operator { color: #374151; }
+.editor-code-prolog { color: #6b7280; }
+.editor-code-property { color: #059669; }
+.editor-code-punctuation { color: #374151; }
+.editor-code-regex { color: #059669; }
+.editor-code-selector { color: #7c3aed; }
+.editor-code-string { color: #059669; }
+.editor-code-symbol { color: #dc2626; }
+.editor-code-tag { color: #7c3aed; }
+.editor-code-url { color: #059669; }
+.editor-code-variable { color: #dc2626; }
+
+/* Link */
+.editor-link {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.editor-link:hover {
+  color: #1d4ed8;
+}
+
+/* Text formatting */
+.editor-text-bold {
+  font-weight: bold;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}

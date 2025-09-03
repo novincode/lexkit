@@ -24,14 +24,14 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     const [editor] = useLexicalComposerContext();
 
     // Lazy commands from extensions + base
-    const baseCommands = {
+    const baseCommands: BaseCommands = {
       formatText: (format: TextFormatType, value?: boolean | string) => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format),
       undo: () => editor?.dispatchCommand(UNDO_COMMAND, undefined),
       redo: () => editor?.dispatchCommand(REDO_COMMAND, undefined),
       clearHistory: () => editor?.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
     };
-    const extensionCommands = extensions.flatMap(ext => ext.getCommands ? [ext.getCommands(editor!)] : []).reduce((acc, cmds) => ({ ...acc, ...cmds }), {});
-    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands<ExtractFormatTypes<Exts>> & ExtractCommands<Exts>;
+    const extensionCommands = extensions.reduce((acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }), {}) as Record<string, any>;
+    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
 
     // Plugins: Collect inferred
     const plugins = extensions.flatMap(ext => ext.getPlugins?.() || []) as ExtractPlugins<Exts>[];

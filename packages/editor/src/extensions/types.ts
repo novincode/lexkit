@@ -23,7 +23,7 @@ export interface ToolbarItem {
 }
 
 // Base for all extensions
-export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends {} = {}, Plugins extends ReactNode[] = ReactNode[]> {
+export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends Record<string, any> = {}, Plugins extends ReactNode[] = ReactNode[]> {
   name: Name; // Literal for inference
   category: ExtensionCategory[];
   config: Config;
@@ -38,22 +38,25 @@ export interface Extension<Name extends string = string, Config extends BaseExte
   // More: getToolbarItems?(): ToolbarItem<Commands>[];
 }
 
+// Helper: Merge union of objects into one object
+type MergeCommands<T> = {
+  [K in T extends any ? keyof T : never]: T extends { [P in K]: any } ? T[K] : never;
+};
+
 // Infer unions from array of extensions
 export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
-export type ExtractCommands<Exts extends readonly Extension[]> = UnionToIntersection<
+export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
   ReturnType<Exts[number]['getCommands']>
 >;
 export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[number]['getPlugins']>[number];
-export type ExtractFormatTypes<Exts extends readonly Extension[]> = Exts[number] extends { supportedFormats: infer F }
-  ? F extends readonly TextFormatType[] ? F[number] : never
-  : never;
+export type ExtractFormatTypes<Exts extends readonly Extension[]> = NonNullable<Exts[number]['supportedFormats']>[number];
 
 // Helper: Union to intersection for flat types
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
 
 // Base commands (always available)
-export interface BaseCommands<FormatType extends TextFormatType = TextFormatType> {
-  formatText: (format: FormatType, value?: boolean | string) => void;
+export interface BaseCommands {
+  formatText: (format: TextFormatType, value?: boolean | string) => void;
   undo: () => void;
   redo: () => void;
   clearHistory: () => void;
@@ -64,7 +67,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   editor: LexicalEditor | null;
   config?: EditorConfig;
   extensions: Exts;
-  commands: BaseCommands<ExtractFormatTypes<Exts>> & ExtractCommands<Exts>;
+  commands: BaseCommands & ExtractCommands<Exts>;
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
     registerPaste: (listener: (event: ClipboardEvent) => boolean) => (() => void) | undefined;
