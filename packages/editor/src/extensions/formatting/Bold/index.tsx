@@ -1,11 +1,10 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical';
 import { ComponentType, CSSProperties } from 'react';
-import { useEditor } from '../../../core/useEditor';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '@repo/editor/extensions';
+import { ExtensionCategory } from '../../types';
 
-export class BoldExtension extends BaseExtension {
+export class BoldExtension extends BaseExtension<'bold'> {
   constructor() {
     super('bold', [ExtensionCategory.Toolbar]);
   }
@@ -13,6 +12,14 @@ export class BoldExtension extends BaseExtension {
   register(editor: LexicalEditor): () => void {
     // Lexical handles FORMAT_TEXT_COMMAND internally, no need to register
     return () => {};
+  }
+
+  getCommands(editor: LexicalEditor) {
+    return {
+      toggleBold: () => {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
+      },
+    };
   }
 }
 

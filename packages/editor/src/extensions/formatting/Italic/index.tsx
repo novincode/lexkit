@@ -1,11 +1,10 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical';
 import { ComponentType, CSSProperties } from 'react';
-import { useEditor } from '../../../core/useEditor';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '@repo/editor/extensions';
+import { ExtensionCategory } from '../../types';
 
-export class ItalicExtension extends BaseExtension {
+export class ItalicExtension extends BaseExtension<'italic'> {
   constructor() {
     super('italic', [ExtensionCategory.Toolbar]);
   }
@@ -13,6 +12,14 @@ export class ItalicExtension extends BaseExtension {
   register(editor: LexicalEditor): () => void {
     // Lexical handles FORMAT_TEXT_COMMAND internally
     return () => {};
+  }
+
+  getCommands(editor: LexicalEditor) {
+    return {
+      toggleItalic: () => {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
+      },
+    };
   }
 }
 

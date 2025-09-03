@@ -1,5 +1,5 @@
 'use client'
-import { DefaultTemplate, EditorProvider, boldExtension, italicExtension, imageExtension, listExtension, useEditor } from "@repo/editor"
+import { DefaultTemplate, createEditorSystem, boldExtension, italicExtension, imageExtension, listExtension } from "@repo/editor"
 
 const defaultTheme = {
   text: {
@@ -32,18 +32,7 @@ const defaultTheme = {
   image: 'max-w-full h-auto rounded shadow',
 };
 
-function EditorContent() {
-
-  return (
-    <>
-      <DefaultTemplate />
-    </>
-  );
-}
-
 export default function Page() {
- 
-
   const extensions = [
     boldExtension,
     italicExtension,
@@ -61,6 +50,19 @@ export default function Page() {
       },
     },
   };
+
+  // Create typed system
+  const { Provider: EditorProvider, useEditor: useTypedEditor } = createEditorSystem<typeof extensions>();
+
+  
+  function EditorContent() {
+
+    return (
+      <>
+        <DefaultTemplate useEditor={useTypedEditor} />
+      </>
+    );
+  }
 
   return (
     <EditorProvider extensions={extensions} config={editorConfig}>

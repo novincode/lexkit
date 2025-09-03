@@ -1,9 +1,8 @@
 import { DecoratorNode } from 'lexical';
 import { ComponentType, CSSProperties } from 'react';
-import { useEditor } from '../../../core/useEditor';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '@repo/editor/extensions';
+import { ExtensionCategory } from '../../types';
 
 export interface ImagePayload { src: string; alt: string; caption?: string; }
 
@@ -71,7 +70,7 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
   }
 }
 
-export class ImageExtension extends BaseExtension {
+export class ImageExtension extends BaseExtension<'image'> {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
   }

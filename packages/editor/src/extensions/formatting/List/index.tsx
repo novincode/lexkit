@@ -7,7 +7,7 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import React from 'react';
 
-export class ListExtension extends BaseExtension {
+export class ListExtension extends BaseExtension<'list'> {
   constructor() {
     super('list', [ExtensionCategory.Toolbar]);
   }
@@ -23,6 +23,43 @@ export class ListExtension extends BaseExtension {
 
   getPlugins(): React.ReactNode[] {
     return [<ListPlugin key="list-plugin" />];
+  }
+
+  getCommands(editor: LexicalEditor) {
+    return {
+      toggleUnorderedList: async () => {
+        const { INSERT_UNORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } = await import('@lexical/list');
+        const { $getSelection, $isRangeSelection } = await import('lexical');
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+            const hasList = nodes.some((node: any) => node.getType() === 'list');
+            if (hasList) {
+              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+            } else {
+              editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+            }
+          }
+        });
+      },
+      toggleOrderedList: async () => {
+        const { INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } = await import('@lexical/list');
+        const { $getSelection, $isRangeSelection } = await import('lexical');
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+            const hasList = nodes.some((node: any) => node.getType() === 'list');
+            if (hasList) {
+              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+            } else {
+              editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+            }
+          }
+        });
+      },
+    };
   }
 }
 
