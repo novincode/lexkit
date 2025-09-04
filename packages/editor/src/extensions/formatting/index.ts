@@ -1,0 +1,4 @@
+export { BoldExtension, boldExtension } from './BoldExtension';
+export { ItalicExtension, italicExtension } from './ItalicExtension';
+export { ListExtension, listExtension } from './ListExtension';
+export { HistoryExtension, historyExtension } from './HistoryExtension';

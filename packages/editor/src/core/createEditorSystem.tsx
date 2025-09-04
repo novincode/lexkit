@@ -3,7 +3,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection, CAN_UNDO_COMMAND, CAN_REDO_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '../extensions/types';
+import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;

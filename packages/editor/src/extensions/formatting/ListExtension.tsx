@@ -1,8 +1,8 @@
 import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } from '@lexical/list';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory } from '../../../extensions/types';
+import { BaseExtension } from '@repo/editor/extensions/base';
+import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ListNode, ListItemNode, $isListNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import React from 'react';

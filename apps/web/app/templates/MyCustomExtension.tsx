@@ -1,5 +1,5 @@
 import React from 'react';
-import { createCustomNodeExtension } from '../../../../packages/editor/src/extensions/customNodeExtension';
+import { createCustomNodeExtension } from '@repo/editor/extensions/custom';
 import { $getSelection, $isRangeSelection, $getRoot, $createParagraphNode } from 'lexical';
 
 // Create the extension using the factory

@@ -1,6 +1,6 @@
 import { FORMAT_TEXT_COMMAND, LexicalEditor, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
-import { BaseExtension } from '../BaseExtension';
-import { ExtensionCategory } from '../types';
+import { BaseExtension } from '@repo/editor/extensions/base';
+import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
 
 export type TextFormatCommands<Name extends TextFormatType> = {

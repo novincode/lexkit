@@ -1,9 +1,9 @@
-export { BoldExtension, boldExtension } from './formatting/Bold';
-export { ItalicExtension, italicExtension } from './formatting/Italic';
-export { ListExtension, listExtension } from './formatting/List';
-export { HistoryExtension, historyExtension } from './formatting/History';
-export { TextFormatExtension } from './formatting/TextFormatExtension';
-export { ImageExtension, imageExtension } from './media/Image';
-export { createCustomNodeExtension } from './customNodeExtension';
+export { BoldExtension, boldExtension } from './formatting/BoldExtension';
+export { ItalicExtension, italicExtension } from './formatting/ItalicExtension';
+export { ListExtension, listExtension } from './formatting/ListExtension';
+export { HistoryExtension, historyExtension } from './formatting/HistoryExtension';
+export { TextFormatExtension } from './base/TextFormatExtension';
+export { ImageExtension, imageExtension } from './media/ImageExtension';
+export { createCustomNodeExtension } from './custom/CustomNodeExtension';
 export * from './types';
-export * from './BaseExtension';
+export * from './base/BaseExtension';

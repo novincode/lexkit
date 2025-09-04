@@ -7,7 +7,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
-import { ImageNode } from '@repo/editor/extensions/media/Image';
+import { ImageNode } from '@repo/editor/extensions/media';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';

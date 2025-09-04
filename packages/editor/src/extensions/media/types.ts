@@ -1,5 +1,5 @@
 import { ComponentType, CSSProperties } from 'react';
-import { BaseExtensionConfig } from '../../types';
+import { BaseExtensionConfig } from '@repo/editor/extensions/types';
 
 export type Alignment = 'left' | 'right' | 'center' | 'none';
 

@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '../TextFormatExtension';
+import { TextFormatExtension } from '@repo/editor/extensions/base';
 
 export class ItalicExtension extends TextFormatExtension<'italic'> {
   constructor() {

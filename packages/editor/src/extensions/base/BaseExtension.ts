@@ -1,6 +1,6 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
-import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from './types';
+import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from '@repo/editor/extensions/types';
 
 export abstract class BaseExtension<
   Name extends string = string,

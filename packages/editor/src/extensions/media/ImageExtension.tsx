@@ -2,8 +2,8 @@ import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNod
 import { ComponentType, CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '../../BaseExtension';
-import { ExtensionCategory, BaseExtensionConfig } from '../../types';
+import { BaseExtension } from '@repo/editor/extensions/base';
+import { ExtensionCategory, BaseExtensionConfig } from '@repo/editor/extensions/types';
 import { ImagePayload, ImageComponentProps, SerializedImageNode, ImageExtensionConfig, ImageCommands, ImageStateQueries, Alignment } from './types';
 import { ImageTranslator, importImageDOM, exportImageDOM, importImageJSON, exportImageJSON } from './ImageTranslator';
 
