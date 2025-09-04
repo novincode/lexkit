@@ -17,6 +17,7 @@ import {
   $insertNodes,
   $getRoot,
   LexicalEditor,
+  $getNodeByKey,
 } from 'lexical';
 import { ReactNode, useEffect, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -85,6 +86,10 @@ class CustomElementNode extends ElementNode {
     this.__updateDOM = updateDOM;
   }
 
+  isSelectable(): boolean {
+    return true;
+  }
+
   static importJSON(serialized: SerializedCustomNode): CustomElementNode {
     const { payload, children } = serialized;
     const node = new CustomElementNode(payload, serialized.type);
@@ -124,6 +129,21 @@ class CustomElementNode extends ElementNode {
   createDOM(config: EditorConfig): HTMLElement {
     const element = document.createElement('div');
     element.setAttribute('data-custom-node-type', this.__nodeType);
+    element.setAttribute('data-lexical-key', this.getKey());
+    // Apply custom styling
+    element.style.border = '2px solid #ccc';
+    element.style.borderRadius = '8px';
+    element.style.padding = '16px';
+    element.style.margin = '8px 0';
+    element.style.backgroundColor = '#f8f9fa';
+    // Add label
+    const label = document.createElement('div');
+    label.textContent = 'Custom Container';
+    label.style.fontSize = '12px';
+    label.style.color = '#666';
+    label.style.marginBottom = '8px';
+    label.style.fontWeight = 'bold';
+    element.appendChild(label);
     if (this.__createDOM) {
       return this.__createDOM(config, this);
     }
@@ -194,6 +214,7 @@ class CustomDecoratorNode extends DecoratorNode<ReactNode> {
   createDOM(config: EditorConfig): HTMLElement {
     const element = document.createElement('span');
     element.setAttribute('data-custom-node-type', this.__nodeType);
+    element.setAttribute('data-lexical-key', this.getKey());
     if (this.__createDOM) {
       return this.__createDOM(config, this);
     }
@@ -314,7 +335,27 @@ export function createCustomNodeExtension<
         COMMAND_PRIORITY_EDITOR
       );
 
-      return unregisterInsert;
+      const unregisterUpdate = editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          const selection = $getSelection();
+          const selectedNodes = $isNodeSelection(selection) ? selection.getNodes() : [];
+          const elements = document.querySelectorAll(`[data-custom-node-type="${userConfig.nodeType}"]`);
+          elements.forEach((el) => {
+            const key = el.getAttribute('data-lexical-key');
+            if (key) {
+              const node = $getNodeByKey(key);
+              const isSelected = node && selectedNodes.some((n) => n.getKey() === key);
+              (el as HTMLElement).style.border = isSelected ? '2px solid #007ACC' : '2px solid #ccc';
+              (el as HTMLElement).style.backgroundColor = isSelected ? '#f0f8ff' : '#f8f9fa';
+            }
+          });
+        });
+      });
+
+      return () => {
+        unregisterInsert();
+        unregisterUpdate();
+      };
     }
 
     getNodes(): any[] {
