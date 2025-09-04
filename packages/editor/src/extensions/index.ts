@@ -4,5 +4,6 @@ export { ListExtension, listExtension } from './formatting/List';
 export { HistoryExtension, historyExtension } from './formatting/History';
 export { TextFormatExtension } from './formatting/TextFormatExtension';
 export { ImageExtension, imageExtension } from './media/Image';
+export { createCustomNodeExtension } from './customNodeExtension';
 export * from './types';
 export * from './BaseExtension';

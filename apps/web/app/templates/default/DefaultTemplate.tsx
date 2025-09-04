@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react';
 import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
+import { myCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -37,7 +38,7 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Define the extensions array as a const to maintain literal types
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension] as const;
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, myCustomExtension] as const;
 
 // Create a typed editor system for these specific extensions
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -320,6 +321,11 @@ function Toolbar({
             <Redo size={20} />
           </button>
         </>
+      )}
+      {hasExtension('myBlock') && (
+        <button onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })} title="Insert Custom Block">
+          Insert Block
+        </button>
       )}
       <button onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}>
         {isDark ? <Sun size={20} /> : <Moon size={20} />}
