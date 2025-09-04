@@ -40,6 +40,7 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
   nodeType: string; // e.g., 'myCustomBlock'
   defaultPayload?: CustomPayload; // Initial data
   render: (props: {
+    node: any;
     payload: CustomPayload;
     children?: ReactNode;
     nodeKey: string;
@@ -118,32 +119,38 @@ export function createCustomNodeExtension<
     }
 
     decorate(): ReactNode {
-      const [editor] = useLexicalComposerContext();
-      const [isSelected, setIsSelected] = useState(false);
-
-      useEffect(() => {
-        return editor.registerUpdateListener(({ editorState }) => {
-          editorState.read(() => {
-            const selection = $getSelection();
-            setIsSelected(
-              !!(selection && $isNodeSelection(selection) && selection.getNodes().some((n) => n.getKey() === (this as any).getKey()))
-            );
-          });
-        });
-      }, [editor]);
-
-      return config.render({
-        payload: this.__payload,
-        children: undefined,
-        nodeKey: (this as any).getKey(),
-        isSelected,
-      });
+      return <CustomDecorator node={this} />;
     }
   }
 
   // Helper to create node
   function $createCustomNode(payload: CustomPayload): CustomNode {
     return new CustomNode(payload);
+  }
+
+  // Decorator component for handling selection
+  function CustomDecorator({ node }: { node: CustomNode }) {
+    const [editor] = useLexicalComposerContext();
+    const [isSelected, setIsSelected] = useState(false);
+
+    useEffect(() => {
+      return editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          const selection = $getSelection();
+          setIsSelected(
+            !!(selection && $isNodeSelection(selection) && selection.getNodes().some((n) => n.getKey() === node.getKey()))
+          );
+        });
+      });
+    }, [editor, node]);
+
+    return config.render({
+      node,
+      payload: node.__payload,
+      children: undefined,
+      nodeKey: node.getKey(),
+      isSelected,
+    });
   }
 
   // The extension class
@@ -154,9 +161,9 @@ export function createCustomNodeExtension<
 
     register(editor: LexicalEditor): () => void {
       // Register insert command (default; users can override in config.commands)
-      const unregisterInsert = editor.registerCommand<CustomPayload>(
+      const unregisterInsert = editor.registerCommand(
         INSERT_CUSTOM_NODE,
-        (payload) => {
+        (payload: CustomPayload) => {
           editor.update(() => {
             const node = $createCustomNode(payload);
             const selection = $getSelection();
@@ -179,8 +186,9 @@ export function createCustomNodeExtension<
     }
 
     getCommands(editor: LexicalEditor): Commands {
+      const commandName = `insert${config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)}`;
       const defaultCommands = {
-        insertCustomNode: (payload: CustomPayload) => { editor.dispatchCommand(INSERT_CUSTOM_NODE, payload); },
+        [commandName]: (payload: CustomPayload) => { editor.dispatchCommand(INSERT_CUSTOM_NODE, payload); },
       } as unknown as Partial<Commands>;
 
       return { ...defaultCommands, ...(config.commands ? config.commands(editor) : {}) } as Commands;
