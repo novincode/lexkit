@@ -45,6 +45,7 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
     children?: ReactNode;
     nodeKey: string;
     isSelected: boolean;
+    updatePayload: (newPayload: CustomPayload) => void;
   }) => ReactNode; // React render with children callback
   importJSON?: (serialized: SerializedCustomNode) => CustomPayload;
   exportJSON?: (payload: CustomPayload) => SerializedCustomNode;
@@ -144,12 +145,19 @@ export function createCustomNodeExtension<
       });
     }, [editor, node]);
 
+    const updatePayload = (newPayload: CustomPayload) => {
+      editor.update(() => {
+        node.setPayload(newPayload);
+      });
+    };
+
     return config.render({
       node,
       payload: node.__payload,
       children: undefined,
       nodeKey: node.getKey(),
       isSelected,
+      updatePayload,
     });
   }
 

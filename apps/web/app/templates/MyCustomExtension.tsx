@@ -15,7 +15,7 @@ type MyStateQueries = {
 const { extension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, MyStateQueries>({
   nodeType: 'myBlock',
   defaultPayload: { text: 'Hello World', color: 'blue' },
-  render: ({ node, payload, isSelected }) => (
+  render: ({ node, payload, isSelected, updatePayload }) => (
     <div
       style={{
         border: `3px solid ${payload.color}`,
@@ -31,10 +31,6 @@ const { extension, $createCustomNode } = createCustomNodeExtension<'myBlock', My
       }}
       contentEditable
       suppressContentEditableWarning
-      onInput={(e) => {
-        const newText = e.currentTarget.textContent || '';
-        node.setPayload({ ...payload, text: newText });
-      }}
     >
       {payload.text}
     </div>
