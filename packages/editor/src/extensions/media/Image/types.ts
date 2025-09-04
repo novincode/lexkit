@@ -40,6 +40,11 @@ export interface ImageExtensionConfig extends BaseExtensionConfig {
   styles?: Partial<Record<Alignment | 'wrapper' | 'caption', CSSProperties>>;
   customRenderer?: ComponentType<ImageComponentProps>;
   resizable?: boolean; // New: Enable resizing (default true)
+  pasteListener?: {  // New: Config for paste behavior
+    insert: boolean;  // Insert new image on paste (if no image selected)
+    replace: boolean; // Replace selected image's src on paste
+  };
+  debug?: boolean;  // New: Optional flag for console logs
 }
 
 export type ImageCommands = {

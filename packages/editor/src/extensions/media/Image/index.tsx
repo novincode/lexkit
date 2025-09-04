@@ -1,4 +1,4 @@
-import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode, $getNodeByKey, $setSelection, $createNodeSelection, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND } from 'lexical';
+import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode, $getNodeByKey, $setSelection, $createNodeSelection, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, PASTE_COMMAND, COMMAND_PRIORITY_NORMAL } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor } from 'lexical';
@@ -37,6 +37,15 @@ function ImageComponent({
         setAspectRatio(img.naturalWidth / img.naturalHeight);
       };
     }
+  }, [src]);
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (src && src.startsWith('blob:')) {
+        URL.revokeObjectURL(src);
+      }
+    };
   }, [src]);
 
   // Update dimensions when props change
@@ -487,6 +496,12 @@ export class ImageExtension extends BaseExtension<
 > {
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
+    this.config = {  // Set defaults
+      ...this.config,
+      resizable: true,
+      pasteListener: { insert: true, replace: true },
+      debug: false,
+    };
   }
 
   configure(config: Partial<ImageExtensionConfig>): this {
@@ -505,6 +520,12 @@ export class ImageExtension extends BaseExtension<
     if (config.styles) {
       this.config.styles = config.styles;
     }
+    // Merge pasteListener with defaults
+    this.config.pasteListener = {
+      insert: config.pasteListener?.insert ?? this.config.pasteListener?.insert ?? true,
+      replace: config.pasteListener?.replace ?? this.config.pasteListener?.replace ?? true,
+    };
+    this.config.debug = config.debug ?? this.config.debug ?? false;
     this.config = { ...this.config, ...config, resizable: config.resizable ?? true };
     return this;
   }
@@ -595,10 +616,76 @@ export class ImageExtension extends BaseExtension<
       },
       COMMAND_PRIORITY_EDITOR
     );
+
+    // New: Paste handler
+    let removePaste: () => void = () => {};
+    if (this.config.pasteListener?.insert || this.config.pasteListener?.replace) {
+      const debugLog = this.config.debug ? console.log : () => {};
+      removePaste = editor.registerCommand<ClipboardEvent>(
+        PASTE_COMMAND,
+        (event) => {
+          const items = event.clipboardData?.items;
+          if (!items) return false;
+
+          let handled = false;
+          for (const item of items) {
+            if (item.type.startsWith('image/')) {
+              event.preventDefault();
+              const file = item.getAsFile();
+              if (!file) continue;
+
+              debugLog('📋 Pasting image:', file.name);
+
+              // Get src (upload or local URL)
+              const getSrc = this.config.uploadHandler
+                ? this.config.uploadHandler(file).catch((err) => {
+                    console.error('Upload failed:', err);
+                    return URL.createObjectURL(file);  // Fallback
+                  })
+                : Promise.resolve(URL.createObjectURL(file));
+
+              getSrc.then((src) => {
+                editor.update(() => {
+                  const selection = $getSelection();
+                  const alt = file.name || 'Pasted image';
+
+                  if ($isNodeSelection(selection) && this.config.pasteListener?.replace) {
+                    const nodes = selection.getNodes();
+                    const imageNode = nodes.find((node) => node instanceof ImageNode) as ImageNode | undefined;
+                    if (imageNode) {
+                      debugLog('🔄 Replacing selected image src');
+                      imageNode.setSrc(src);
+                      handled = true;
+                      return;
+                    }
+                  }
+
+                  if (this.config.pasteListener?.insert) {
+                    debugLog('➕ Inserting new pasted image');
+                    const imageNode = $createImageNode(src, alt);
+                    if ($isRangeSelection(selection)) {
+                      selection.insertNodes([imageNode]);
+                    } else {
+                      $getRoot().append($createParagraphNode().append(imageNode));
+                    }
+                    handled = true;
+                  }
+                });
+              });
+              break;  // Handle only first image
+            }
+          }
+          return handled;  // true if we handled it (stops other handlers)
+        },
+        COMMAND_PRIORITY_NORMAL  // Balanced priority
+      );
+    }
+
     return () => {
       removeCommand();
       removeDelete();
       removeBackspace();
+      removePaste();
     };
   }
 
