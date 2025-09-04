@@ -17,12 +17,9 @@ import {
   $insertNodes,
   $getRoot,
   LexicalEditor,
-  $getNodeByKey,
-  COPY_COMMAND,
-  CUT_COMMAND,
-  PASTE_COMMAND,
 } from 'lexical';
 import { ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BaseExtension } from './BaseExtension';
 import { BaseExtensionConfig, ExtensionCategory } from './types';
@@ -65,6 +62,49 @@ export function createCustomNodeExtension<
 >(userConfig: CustomNodeConfig<Commands, StateQueries>) {
   const isContainer = userConfig.isContainer ?? false;
   const INSERT_CUSTOM_NODE = createCommand<CustomPayload>('insert-custom-node');
+
+  // React component for rendering (used by both Element and Decorator nodes)
+  function CustomNodeComponent({ 
+    node, 
+    payload, 
+    nodeKey, 
+    children 
+  }: { 
+    node: LexicalNode; 
+    payload: CustomPayload; 
+    nodeKey: string; 
+    children?: ReactNode 
+  }) {
+    const [editor] = useLexicalComposerContext();
+    const [isSelected, setIsSelected] = useState(false);
+
+    useEffect(() => {
+      return editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          const selection = $getSelection();
+          setIsSelected(
+            $isNodeSelection(selection) && selection.getNodes().some((n) => n.__key === nodeKey)
+          );
+        });
+      });
+    }, [editor, nodeKey]);
+
+    const updatePayload = (newPayload: Partial<CustomPayload>) => {
+      editor.update(() => {
+        const writable = node.getWritable();
+        (writable as any).__payload = { ...(writable as any).__payload, ...newPayload };
+      });
+    };
+
+    return userConfig.render ? userConfig.render({
+      node,
+      payload,
+      children,
+      nodeKey,
+      isSelected,
+      updatePayload,
+    }) : null;
+  }
 
   // Element Node for containers
   class CustomElementNode extends ElementNode {
@@ -124,12 +164,23 @@ export function createCustomNodeExtension<
     }
 
     createDOM(config: EditorConfig): HTMLElement {
+      if (userConfig.createDOM) {
+        const element = userConfig.createDOM(config, this);
+        element.setAttribute('data-custom-node-type', this.__nodeType);
+        element.setAttribute('data-lexical-key', this.getKey());
+        return element;
+      }
+      
       const element = document.createElement('div');
       element.setAttribute('data-custom-node-type', this.__nodeType);
+      element.setAttribute('data-lexical-key', this.getKey());
       
-      if (userConfig.createDOM) {
-        return userConfig.createDOM(config, this);
-      }
+      // Add basic styling for containers
+      element.style.border = '2px solid #ccc';
+      element.style.borderRadius = '8px';
+      element.style.padding = '16px';
+      element.style.margin = '8px 0';
+      element.style.position = 'relative';
       
       return element;
     }
@@ -196,7 +247,9 @@ export function createCustomNodeExtension<
       element.setAttribute('data-custom-node-type', this.__nodeType);
       
       if (userConfig.createDOM) {
-        return userConfig.createDOM(config, this);
+        const customElement = userConfig.createDOM(config, this);
+        customElement.setAttribute('data-custom-node-type', this.__nodeType);
+        return customElement;
       }
       
       return element;
@@ -219,43 +272,19 @@ export function createCustomNodeExtension<
     }
 
     decorate(): ReactNode {
-      return <CustomDecoratorComponent node={this} />;
+      return <CustomNodeComponent 
+        node={this} 
+        payload={this.__payload} 
+        nodeKey={this.__key}
+        children={undefined}
+      />;
     }
-  }
-
-  // Decorator component
-  function CustomDecoratorComponent({ node }: { node: CustomDecoratorNode }) {
-    const [editor] = useLexicalComposerContext();
-    const [isSelected, setIsSelected] = useState(false);
-
-    useEffect(() => {
-      return editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          const selection = $getSelection();
-          setIsSelected(
-            $isNodeSelection(selection) && selection.getNodes().some((n) => n.__key === node.__key)
-          );
-        });
-      });
-    }, [editor, node]);
-
-    const updatePayload = (newPayload: Partial<CustomPayload>) => {
-      editor.update(() => node.setPayload(newPayload));
-    };
-
-    return userConfig.render ? userConfig.render({
-      node,
-      payload: node.__payload,
-      children: undefined,
-      nodeKey: node.__key,
-      isSelected,
-      updatePayload,
-    }) : null;
   }
 
   // Helper to create node
   function $createCustomNode(payload: CustomPayload = userConfig.defaultPayload || {}): CustomElementNode | CustomDecoratorNode {
     if (isContainer) {
+      // For containers, always use ElementNode regardless of render prop
       const node = new CustomElementNode(payload, userConfig.nodeType);
       
       if (userConfig.initialChildren) {
@@ -282,6 +311,7 @@ export function createCustomNodeExtension<
       
       return node;
     } else {
+      // For non-containers, use DecoratorNode
       return new CustomDecoratorNode(payload, userConfig.nodeType);
     }
   }
@@ -310,8 +340,41 @@ export function createCustomNodeExtension<
         COMMAND_PRIORITY_EDITOR
       );
 
+      // Handle selection updates for ElementNodes
+      const unregisterUpdate = editor.registerUpdateListener(({ editorState, prevEditorState }) => {
+        if (isContainer && userConfig.render) {
+          // For containers, we need to update DOM styling based on selection
+          editorState.read(() => {
+            const selection = $getSelection();
+            const selectedNodes = $isNodeSelection(selection) ? selection.getNodes() : [];
+            
+            // Update all custom element nodes
+            editor.getEditorState().read(() => {
+              const root = $getRoot();
+              const updateNode = (node: LexicalNode) => {
+                if (node.getType() === userConfig.nodeType) {
+                  const isSelected = selectedNodes.some(n => n.__key === node.__key);
+                  const domElement = document.querySelector(`[data-lexical-key="${node.__key}"]`);
+                  if (domElement) {
+                    domElement.setAttribute('data-selected', isSelected.toString());
+                    (domElement as HTMLElement).style.borderColor = isSelected ? '#007ACC' : '#ccc';
+                    (domElement as HTMLElement).style.backgroundColor = isSelected ? '#f0f8ff' : 'transparent';
+                  }
+                }
+                // Only recurse into ElementNodes
+                if ('getChildren' in node) {
+                  (node as ElementNode).getChildren().forEach(updateNode);
+                }
+              };
+              updateNode(root);
+            });
+          });
+        }
+      });
+
       return () => {
         unregisterInsert();
+        unregisterUpdate();
       };
     }
 
