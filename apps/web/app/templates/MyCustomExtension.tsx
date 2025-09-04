@@ -7,7 +7,7 @@ type MyCommands = {
   insertMyBlock: (payload: { text: string; color: string }) => void;
 };
 
-const { extension: MyCustomExtension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, {}>({
+const { extension: MyCustomExtension, $createCustomNode, jsxToDOM } = createCustomNodeExtension<'myBlock', MyCommands, {}>({
   nodeType: 'myBlock',
   isContainer: true,
   initialChildren: () => [
@@ -20,30 +20,32 @@ const { extension: MyCustomExtension, $createCustomNode } = createCustomNodeExte
       version: 1
     }
   ],
-  createDOM: (config, node) => {
-    const element = document.createElement('div');
-    element.setAttribute('data-custom-node-type', 'myBlock');
-    element.setAttribute('data-lexical-key', node.getKey());
-    
-    // Add custom styling
-    element.style.border = '2px solid #ccc';
-    element.style.borderRadius = '8px';
-    element.style.padding = '16px';
-    element.style.margin = '8px 0';
-    element.style.backgroundColor = '#f8f9fa';
-    element.style.position = 'relative';
-    
-    // Add label
-    const label = document.createElement('div');
-    label.textContent = 'Custom Container';
-    label.style.fontSize = '12px';
-    label.style.color = '#666';
-    label.style.marginBottom = '8px';
-    label.style.fontWeight = 'bold';
-    element.appendChild(label);
-    
-    return element;
-  },
+  // NEW: Use JSX directly! 🎉
+  jsx: ({ node, payload, nodeKey, isSelected, updatePayload }) => (
+    <div
+      data-custom-node-type="myBlock"
+      data-lexical-key={nodeKey}
+      style={{
+        border: isSelected ? '2px solid #007ACC' : '2px solid #ccc',
+        borderRadius: '8px',
+        padding: '16px',
+        margin: '8px 0',
+        backgroundColor: isSelected ? '#f0f8ff' : '#f8f9fa',
+        position: 'relative'
+      }}
+    >
+      <div
+        style={{
+          fontSize: '12px',
+          color: '#666',
+          marginBottom: '8px',
+          fontWeight: 'bold'
+        }}
+      >
+        Custom Container JSX! 🚀
+      </div>
+    </div>
+  ),
   commands: (editor) => ({
     insertMyBlock: (payload: { text: string; color: string }) => {
       editor.update(() => {

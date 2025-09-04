@@ -19,10 +19,28 @@ import {
   LexicalEditor,
 } from 'lexical';
 import { ReactNode, useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BaseExtension } from './BaseExtension';
 import { BaseExtensionConfig, ExtensionCategory } from './types';
+
+// JSX to DOM converter - the magic happens here!
+function jsxToDOM(jsxElement: React.ReactElement): HTMLElement {
+  // Render JSX to HTML string
+  const htmlString = renderToStaticMarkup(jsxElement);
+  
+  // Create a temporary container
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlString;
+  
+  // Return the first child (the actual element)
+  const element = tempDiv.firstElementChild as HTMLElement;
+  
+  // Clean up
+  tempDiv.remove();
+  
+  return element;
+}
 
 // Generic payload
 type CustomPayload = Record<string, any>;
@@ -48,6 +66,14 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
     isSelected: boolean;
     updatePayload: (newPayload: Partial<CustomPayload>) => void;
   }) => ReactNode;
+  // NEW: JSX support for containers
+  jsx?: (props: {
+    node: LexicalNode;
+    payload: CustomPayload;
+    nodeKey: string;
+    isSelected: boolean;
+    updatePayload: (newPayload: Partial<CustomPayload>) => void;
+  }) => React.ReactElement;
   createDOM?: (config: EditorConfig, node: LexicalNode) => HTMLElement;
   updateDOM?: (prevNode: LexicalNode, dom: HTMLElement, config: EditorConfig) => boolean;
   commands?: (editor: LexicalEditor) => CustomCommands;
@@ -166,6 +192,24 @@ export function createCustomNodeExtension<
     createDOM(config: EditorConfig): HTMLElement {
       if (userConfig.createDOM) {
         const element = userConfig.createDOM(config, this);
+        element.setAttribute('data-custom-node-type', this.__nodeType);
+        element.setAttribute('data-lexical-key', this.getKey());
+        return element;
+      }
+      
+      // NEW: JSX support for containers!
+      if (userConfig.jsx) {
+        const jsxElement = userConfig.jsx({
+          node: this,
+          payload: this.__payload,
+          nodeKey: this.getKey(),
+          isSelected: false, // Will be updated by selection listener
+          updatePayload: (newPayload: Partial<CustomPayload>) => {
+            this.setPayload(newPayload);
+          }
+        });
+        
+        const element = jsxToDOM(jsxElement);
         element.setAttribute('data-custom-node-type', this.__nodeType);
         element.setAttribute('data-lexical-key', this.getKey());
         return element;
@@ -342,7 +386,7 @@ export function createCustomNodeExtension<
 
       // Handle selection updates for ElementNodes
       const unregisterUpdate = editor.registerUpdateListener(({ editorState, prevEditorState }) => {
-        if (isContainer && userConfig.render) {
+        if (isContainer) {
           // For containers, we need to update DOM styling based on selection
           editorState.read(() => {
             const selection = $getSelection();
@@ -404,5 +448,5 @@ export function createCustomNodeExtension<
     }
   }
 
-  return { extension: new CustomNodeExtension(), $createCustomNode };
+  return { extension: new CustomNodeExtension(), $createCustomNode, jsxToDOM };
 }
