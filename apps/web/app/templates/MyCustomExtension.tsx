@@ -35,15 +35,16 @@ const MyCustomComponent = ({
       {children}
     </div>
   );
-};// Create the extension using the factory
+};
+
+// Create the extension using the factory
 type MyCommands = {
   insertMyBlock: (payload: { text: string; color: string }) => void;
 };
 
 const { extension: MyCustomExtension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, {}>({
   nodeType: 'myBlock',
-  isContainer: true, // This makes it an ElementNode that can contain other nodes
-  render: MyCustomComponent,
+  isContainer: true,
   initialChildren: () => [
     {
       type: 'paragraph',
@@ -54,6 +55,26 @@ const { extension: MyCustomExtension, $createCustomNode } = createCustomNodeExte
       version: 1
     }
   ],
+  createDOM: (config, node) => {
+    const element = document.createElement('div');
+    element.setAttribute('data-custom-node-type', 'myBlock');
+    element.style.border = '2px solid #ccc';
+    element.style.borderRadius = '8px';
+    element.style.padding = '16px';
+    element.style.margin = '8px 0';
+    element.style.backgroundColor = '#f8f9fa';
+    
+    // Add label
+    const label = document.createElement('div');
+    label.textContent = 'Custom Container';
+    label.style.fontSize = '12px';
+    label.style.color = '#666';
+    label.style.marginBottom = '8px';
+    label.style.fontWeight = 'bold';
+    element.appendChild(label);
+    
+    return element;
+  },
   commands: (editor) => ({
     insertMyBlock: (payload: { text: string; color: string }) => {
       editor.update(() => {
