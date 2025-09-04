@@ -85,7 +85,13 @@ export function createCustomNodeExtension<
   Name extends string,
   Commands extends Record<string, any> = {},
   StateQueries extends Record<string, () => Promise<boolean>> = {}
->(userConfig: CustomNodeConfig<Commands, StateQueries>) {
+>(
+  userConfig: CustomNodeConfig<Commands, StateQueries>
+): {
+  extension: BaseExtension<Name, BaseExtensionConfig, Commands, StateQueries>;
+  $createCustomNode: (payload?: CustomPayload) => ElementNode | DecoratorNode<ReactNode>;
+  jsxToDOM: (jsxElement: React.ReactElement) => HTMLElement;
+} {
   const isContainer = userConfig.isContainer ?? false;
   const INSERT_CUSTOM_NODE = createCommand<CustomPayload>('insert-custom-node');
 
