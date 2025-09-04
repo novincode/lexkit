@@ -203,5 +203,5 @@ export function createCustomNodeExtension<
     }
   }
 
-  return new CustomNodeExtension();
+  return { extension: new CustomNodeExtension(), $createCustomNode };
 }

@@ -1,17 +1,18 @@
 import React from 'react';
 import { createCustomNodeExtension, Extension, BaseExtensionConfig } from '@repo/editor/extensions';
+import { $getSelection, $isRangeSelection, $insertNodes, $getRoot, $createParagraphNode, LexicalNode } from 'lexical';
 
 // Define types for custom commands/queries (for type safety)
 type CustomPayload = Record<string, any>;
 type MyCommands = {
-  insertMyBlock?: (payload: { text: string; color: string }) => void;
+  insertMyBlock: (payload: { text: string; color: string }) => void;
 };
 type MyStateQueries = {
   isMyBlockActive: () => Promise<boolean>;
 };
 
 // Create the extension
-const myCustomExtension: Extension<'myBlock', BaseExtensionConfig, MyCommands, MyStateQueries> = createCustomNodeExtension<'myBlock', MyCommands, MyStateQueries>({
+const { extension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, MyStateQueries>({
   nodeType: 'myBlock',
   defaultPayload: { text: 'Hello World', color: 'blue' },
   render: ({ node, payload, isSelected }) => (
@@ -38,8 +39,20 @@ const myCustomExtension: Extension<'myBlock', BaseExtensionConfig, MyCommands, M
       {payload.text}
     </div>
   ),
-    // Custom commands (type-safe)
-  commands: (editor) => ({}),
+  // Custom commands (type-safe)
+  commands: (editor) => ({
+    insertMyBlock: (payload: { text: string; color: string }) => {
+      editor.update(() => {
+        const node = $createCustomNode(payload);
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          selection.insertNodes([node as LexicalNode]);
+        } else {
+          $getRoot().append($createParagraphNode().append(node as LexicalNode));
+        }
+      });
+    },
+  }),
   // Custom queries
   stateQueries: (editor) => ({
     isMyBlockActive: () => new Promise((resolve) => {
@@ -51,4 +64,4 @@ const myCustomExtension: Extension<'myBlock', BaseExtensionConfig, MyCommands, M
   }),
 });
 
-export { myCustomExtension };
+export { extension as myCustomExtension };
