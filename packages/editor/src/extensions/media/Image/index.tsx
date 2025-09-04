@@ -20,6 +20,7 @@ function ImageComponent({
   width,
   height,
   resizable = true,
+  uploading = false,
 }: ImageComponentProps) {
   const [editor] = useLexicalComposerContext();
   const imageRef = useRef<HTMLImageElement>(null);
@@ -174,7 +175,7 @@ function ImageComponent({
   };
 
   return (
-    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''}`} style={figureStyle} onClick={onClick}>
+    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''} ${uploading ? 'uploading' : ''}`} style={figureStyle} onClick={onClick}>
       <div style={{
         position: 'relative',
         display: alignment === 'center' ? 'inline-block' : 'block',
@@ -271,6 +272,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   __style?: CSSProperties;
   __width?: number;
   __height?: number;
+  __uploading?: boolean;
 
   static getType(): string {
     return 'image';
@@ -286,6 +288,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
       node.__style,
       node.__width,
       node.__height,
+      node.__uploading,
       node.__key
     );
   }
@@ -309,6 +312,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     style?: CSSProperties,
     width?: number,
     height?: number,
+    uploading?: boolean,
     key?: NodeKey
   ) {
     super(key);
@@ -321,7 +325,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__style = style;
     this.__width = width;
     this.__height = height;
-    console.log('Creating ImageNode:', { src: this.__src, alt: this.__alt, caption: this.__caption, alignment: this.__alignment });
+    this.__uploading = uploading;
+    console.log('Creating ImageNode:', { src: this.__src, alt: this.__alt, caption: this.__caption, alignment: this.__alignment, uploading: this.__uploading });
   }
 
   // Required for DecoratorNode: creates the DOM container for the React component
@@ -453,6 +458,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
           width={this.__width}
           height={this.__height}
           resizable={true}
+          uploading={this.__uploading}
         />
       );
     } catch (error) {
@@ -479,12 +485,13 @@ export function $createImageNode(
   className?: string,
   style?: CSSProperties,
   width?: number,
-  height?: number
+  height?: number,
+  uploading?: boolean
 ): ImageNode {
   if (!src || src.length === 0) {
     throw new Error('Cannot create ImageNode with empty src');
   }
-  return new ImageNode(src, alt, caption, alignment, className, style, width, height);
+  return new ImageNode(src, alt, caption, alignment, className, style, width, height, uploading);
 }
 
 export class ImageExtension extends BaseExtension<
@@ -494,6 +501,8 @@ export class ImageExtension extends BaseExtension<
   ImageStateQueries,
   ReactNode[]
 > {
+  private recentImages: Set<string> = new Set(); // Track recent image src to prevent duplicates
+
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
     this.config = {  // Set defaults
@@ -501,6 +510,7 @@ export class ImageExtension extends BaseExtension<
       resizable: true,
       pasteListener: { insert: true, replace: true },
       debug: false,
+      forceUpload: false,
     };
   }
 
@@ -538,16 +548,52 @@ export class ImageExtension extends BaseExtension<
         console.log('📸 Inserting image:', payload);
         editor.update(() => {
           try {
-            const src = payload.src || (payload.file ? URL.createObjectURL(payload.file) : '');
+            let src = payload.src || (payload.file ? URL.createObjectURL(payload.file) : '');
             if (!src) throw new Error('No src for image');
-            
+
+            // Check for duplicates
+            if (this.recentImages.has(src)) {
+              console.log('🚫 Duplicate image src detected, skipping:', src);
+              return true;
+            }
+            this.recentImages.add(src);
+            // Clear recent images after 1s to allow new insertions
+            setTimeout(() => this.recentImages.delete(src), 1000);
+
+            let uploading = false;
+            if (payload.file && this.config.uploadHandler && this.config.forceUpload) {
+              uploading = true;
+              // Async upload
+              this.config.uploadHandler(payload.file).then((uploadedSrc) => {
+                editor.update(() => {
+                  const node = $getNodeByKey(imageNode.getKey());
+                  if (node instanceof ImageNode) {
+                    node.setSrc(uploadedSrc);
+                    node.__uploading = false;
+                  }
+                });
+              }).catch((error) => {
+                console.error('Upload failed:', error);
+                // Keep blob URL, set uploading to false
+                editor.update(() => {
+                  const node = $getNodeByKey(imageNode.getKey());
+                  if (node instanceof ImageNode) {
+                    node.__uploading = false;
+                  }
+                });
+              });
+            }
+
             const imageNode = $createImageNode(
               src,
               payload.alt,
               payload.caption,
               payload.alignment || this.config.defaultAlignment || 'none',
               payload.className,
-              payload.style
+              payload.style,
+              undefined,
+              undefined,
+              uploading
             );
             
             const selection = $getSelection();
@@ -628,8 +674,13 @@ export class ImageExtension extends BaseExtension<
           if (!items) return false;
 
           let handled = false;
+          const hasHtml = Array.from(items).some(item => item.type === 'text/html');
           for (const item of items) {
             if (item.type.startsWith('image/')) {
+              if (hasHtml) {
+                // Skip handling image file if HTML is present to avoid duplicate with importDOM
+                continue;
+              }
               event.preventDefault();
               const file = item.getAsFile();
               if (!file) continue;
@@ -637,7 +688,7 @@ export class ImageExtension extends BaseExtension<
               debugLog('📋 Pasting image:', file.name);
 
               // Get src (upload or local URL)
-              const getSrc = this.config.uploadHandler
+              const getSrc = this.config.uploadHandler && this.config.forceUpload
                 ? this.config.uploadHandler(file).catch((err) => {
                     console.error('Upload failed:', err);
                     return URL.createObjectURL(file);  // Fallback
@@ -645,16 +696,49 @@ export class ImageExtension extends BaseExtension<
                 : Promise.resolve(URL.createObjectURL(file));
 
               getSrc.then((src) => {
+                // Skip if recently inserted
+                if (this.recentImages.has(src)) {
+                  debugLog('🚫 Duplicate paste image src detected, skipping:', src);
+                  return;
+                }
+                this.recentImages.add(src);
+                setTimeout(() => this.recentImages.delete(src), 1000);
+
+                let uploading = false;
+                let imageNode: ImageNode;
+                if (this.config.uploadHandler && this.config.forceUpload && file) {
+                  uploading = true;
+                  // Async upload
+                  this.config.uploadHandler(file).then((uploadedSrc) => {
+                    editor.update(() => {
+                      const node = $getNodeByKey(imageNode.getKey());
+                      if (node instanceof ImageNode) {
+                        node.setSrc(uploadedSrc);
+                        node.__uploading = false;
+                      }
+                    });
+                  }).catch((error) => {
+                    console.error('Upload failed:', error);
+                    editor.update(() => {
+                      const node = $getNodeByKey(imageNode.getKey());
+                      if (node instanceof ImageNode) {
+                        node.__uploading = false;
+                      }
+                    });
+                  });
+                }
+
                 editor.update(() => {
                   const selection = $getSelection();
                   const alt = file.name || 'Pasted image';
 
                   if ($isNodeSelection(selection) && this.config.pasteListener?.replace) {
                     const nodes = selection.getNodes();
-                    const imageNode = nodes.find((node) => node instanceof ImageNode) as ImageNode | undefined;
-                    if (imageNode) {
+                    const existingImageNode = nodes.find((node) => node instanceof ImageNode) as ImageNode | undefined;
+                    if (existingImageNode) {
                       debugLog('🔄 Replacing selected image src');
-                      imageNode.setSrc(src);
+                      existingImageNode.setSrc(src);
+                      existingImageNode.__uploading = uploading;
                       handled = true;
                       return;
                     }
@@ -662,7 +746,7 @@ export class ImageExtension extends BaseExtension<
 
                   if (this.config.pasteListener?.insert) {
                     debugLog('➕ Inserting new pasted image');
-                    const imageNode = $createImageNode(src, alt);
+                    imageNode = $createImageNode(src, alt, undefined, 'none', undefined, undefined, undefined, undefined, uploading);
                     if ($isRangeSelection(selection)) {
                       selection.insertNodes([imageNode]);
                     } else {

@@ -18,6 +18,7 @@ export interface ImagePayload {
 export interface ImageComponentProps extends ImagePayload {
   nodeKey?: string;
   resizable?: boolean;
+  uploading?: boolean;
 }
 
 export interface SerializedImageNode {
@@ -45,6 +46,7 @@ export interface ImageExtensionConfig extends BaseExtensionConfig {
     replace: boolean; // Replace selected image's src on paste
   };
   debug?: boolean;  // New: Optional flag for console logs
+  forceUpload?: boolean; // New: Force upload even for internet URLs (default false)
 }
 
 export type ImageCommands = {

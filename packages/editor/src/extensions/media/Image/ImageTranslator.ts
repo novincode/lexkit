@@ -21,6 +21,7 @@ export type SerializedImageNode = Spread<
     style?: Record<string, string>;
     width?: number;
     height?: number;
+    uploading?: boolean;
   },
   SerializedLexicalNode
 >;
@@ -36,6 +37,12 @@ export class ImageTranslator {
               return null;
             }
             const img = domNode;
+
+            // Skip blob URLs during paste to avoid duplicates, but allow http/https URLs
+            if (img.src.startsWith('blob:') || img.src.startsWith('data:')) {
+              console.log('🚫 Skipping blob/data URL in importDOM:', img.src);
+              return null;
+            }
 
           // Extract alignment from various possible sources
           let alignment: 'left' | 'center' | 'right' | 'none' = 'none';
@@ -104,7 +111,8 @@ export class ImageTranslator {
             const figure = domNode;
             const img = figure.querySelector('img');
             
-            if (!img || !img.src) {
+            if (!img || !img.src || (img.src.startsWith('blob:') || img.src.startsWith('data:'))) {
+              console.log('🚫 Skipping figure with no valid img or blob/data URL:', img?.src);
               return null;
             }
 
@@ -167,11 +175,12 @@ export class ImageTranslator {
       style: node.__style ? this.styleObjectToRecord(node.__style) : undefined,
       width: node.__width,
       height: node.__height,
+      uploading: node.__uploading,
     };
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { src, alt, caption, alignment, className, style, width, height } = serializedNode;
+    const { src, alt, caption, alignment, className, style, width, height, uploading } = serializedNode;
     
     console.log('📥 Importing ImageNode from JSON:', serializedNode);
     
@@ -187,7 +196,8 @@ export class ImageTranslator {
       className,
       style ? this.recordToStyleObject(style) : undefined,
       width,
-      height
+      height,
+      uploading
     );
   }
 
