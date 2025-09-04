@@ -1,24 +1,21 @@
 import {
+  $createParagraphNode,
+  $createTextNode,
   DecoratorNode,
-  TextNode,
-  NodeKey,
-  EditorConfig,
+  ElementNode,
   LexicalNode,
+  NodeKey,
+  SerializedElementNode,
   SerializedLexicalNode,
+  EditorConfig,
   Spread,
-  DOMConversionMap,
-  DOMConversionOutput,
-  DOMExportOutput,
   createCommand,
   COMMAND_PRIORITY_EDITOR,
-  $createNodeSelection,
-  $setSelection,
   $getSelection,
   $isRangeSelection,
   $isNodeSelection,
   $insertNodes,
   $getRoot,
-  $createParagraphNode,
   LexicalEditor,
 } from 'lexical';
 import { ReactNode, useEffect, useState } from 'react';
@@ -26,159 +23,290 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { BaseExtension } from './BaseExtension';
 import { BaseExtensionConfig, ExtensionCategory } from './types';
 
-// Generic payload for custom node (users can extend via config)
+// Generic payload
 type CustomPayload = Record<string, any>;
 
-// Serialized form (spread for flexibility)
+// Serialized with children if container
 type SerializedCustomNode = Spread<{
   type: string;
   payload: CustomPayload;
+  children?: SerializedLexicalNode[];
 }, SerializedLexicalNode>;
 
-// Config interface for the factory
+// Config interface
 interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
-  nodeType: string; // e.g., 'myCustomBlock'
-  defaultPayload?: CustomPayload; // Initial data
-  render: (props: {
-    node: any;
+  nodeType: string;
+  isContainer?: boolean;
+  defaultPayload?: CustomPayload;
+  initialChildren?: () => SerializedLexicalNode[];
+  render?: (props: {
+    node: LexicalNode;
     payload: CustomPayload;
     children?: ReactNode;
     nodeKey: string;
     isSelected: boolean;
-    updatePayload: (newPayload: CustomPayload) => void;
-  }) => ReactNode; // React render with children callback
-  importJSON?: (serialized: SerializedCustomNode) => CustomPayload;
-  exportJSON?: (payload: CustomPayload) => SerializedCustomNode;
-  importDOM?: () => DOMConversionMap | null;
-  exportDOM?: (editor: LexicalEditor, node: LexicalNode) => DOMExportOutput;
-  commands?: (editor: LexicalEditor) => CustomCommands; // Custom commands
-  stateQueries?: (editor: LexicalEditor) => CustomStateQueries; // Custom queries
+    updatePayload: (newPayload: Partial<CustomPayload>) => void;
+  }) => ReactNode;
+  createDOM?: (config: EditorConfig, node: LexicalNode) => HTMLElement;
+  updateDOM?: (prevNode: LexicalNode, dom: HTMLElement, config: EditorConfig) => boolean;
+  commands?: (editor: LexicalEditor) => CustomCommands;
+  stateQueries?: (editor: LexicalEditor) => CustomStateQueries;
 }
 
-// Factory function (generic for type safety)
+// Element Node for containers
+class CustomElementNode extends ElementNode {
+  __payload: CustomPayload;
+  __nodeType: string;
+  __render?: CustomNodeConfig<any, any>['render'];
+  __createDOM?: CustomNodeConfig<any, any>['createDOM'];
+  __updateDOM?: CustomNodeConfig<any, any>['updateDOM'];
+
+  static getType(): string {
+    return 'custom-element';
+  }
+
+  static clone(node: CustomElementNode): CustomElementNode {
+    return new CustomElementNode(node.__payload, node.__nodeType, node.__key);
+  }
+
+  constructor(
+    payload: CustomPayload = {},
+    nodeType: string,
+    key?: NodeKey,
+    render?: CustomNodeConfig<any, any>['render'],
+    createDOM?: CustomNodeConfig<any, any>['createDOM'],
+    updateDOM?: CustomNodeConfig<any, any>['updateDOM']
+  ) {
+    super(key);
+    this.__payload = payload;
+    this.__nodeType = nodeType;
+    this.__render = render;
+    this.__createDOM = createDOM;
+    this.__updateDOM = updateDOM;
+  }
+
+  static importJSON(serialized: SerializedCustomNode): CustomElementNode {
+    const { payload, children } = serialized;
+    const node = new CustomElementNode(payload, serialized.type);
+    if (children) {
+      children.forEach(childData => {
+        if (childData.type === 'paragraph') {
+          const paragraph = $createParagraphNode();
+          if ((childData as any).children) {
+            (childData as any).children.forEach((textChild: any) => {
+              if (textChild.type === 'text') {
+                paragraph.append($createTextNode(textChild.text || ''));
+              }
+            });
+          }
+          node.append(paragraph);
+        } else if (childData.type === 'text') {
+          node.append($createTextNode((childData as any).text || ''));
+        }
+      });
+    }
+    return node;
+  }
+
+  exportJSON(): SerializedElementNode {
+    const children = this.getChildren().map(child => child.exportJSON());
+    return {
+      type: this.__nodeType,
+      version: 1,
+      payload: this.__payload,
+      children,
+      direction: null,
+      format: '',
+      indent: 0,
+    } as any;
+  }
+
+  createDOM(config: EditorConfig): HTMLElement {
+    const element = document.createElement('div');
+    element.setAttribute('data-custom-node-type', this.__nodeType);
+    if (this.__createDOM) {
+      return this.__createDOM(config, this);
+    }
+    return element;
+  }
+
+  updateDOM(prevNode: CustomElementNode, dom: HTMLElement, config: EditorConfig): boolean {
+    if (this.__updateDOM) {
+      return this.__updateDOM(prevNode, dom, config);
+    }
+    return false;
+  }
+
+  getPayload(): CustomPayload {
+    return this.__payload;
+  }
+
+  setPayload(newPayload: Partial<CustomPayload>): void {
+    this.__payload = { ...this.__payload, ...newPayload };
+  }
+}
+
+// Decorator Node for non-containers
+class CustomDecoratorNode extends DecoratorNode<ReactNode> {
+  __payload: CustomPayload;
+  __nodeType: string;
+  __render?: CustomNodeConfig<any, any>['render'];
+  __createDOM?: CustomNodeConfig<any, any>['createDOM'];
+  __updateDOM?: CustomNodeConfig<any, any>['updateDOM'];
+
+  static getType(): string {
+    return 'custom-decorator';
+  }
+
+  static clone(node: CustomDecoratorNode): CustomDecoratorNode {
+    return new CustomDecoratorNode(node.__payload, node.__nodeType, node.__key);
+  }
+
+  constructor(
+    payload: CustomPayload = {},
+    nodeType: string,
+    key?: NodeKey,
+    render?: CustomNodeConfig<any, any>['render'],
+    createDOM?: CustomNodeConfig<any, any>['createDOM'],
+    updateDOM?: CustomNodeConfig<any, any>['updateDOM']
+  ) {
+    super(key);
+    this.__payload = payload;
+    this.__nodeType = nodeType;
+    this.__render = render;
+    this.__createDOM = createDOM;
+    this.__updateDOM = updateDOM;
+  }
+
+  static importJSON(serialized: SerializedCustomNode): CustomDecoratorNode {
+    const { payload } = serialized;
+    return new CustomDecoratorNode(payload, serialized.type);
+  }
+
+  exportJSON(): SerializedLexicalNode {
+    return {
+      type: this.__nodeType,
+      version: 1,
+      payload: this.__payload
+    } as any;
+  }
+
+  createDOM(config: EditorConfig): HTMLElement {
+    const element = document.createElement('span');
+    element.setAttribute('data-custom-node-type', this.__nodeType);
+    if (this.__createDOM) {
+      return this.__createDOM(config, this);
+    }
+    return element;
+  }
+
+  updateDOM(prevNode: CustomDecoratorNode, dom: HTMLElement, config: EditorConfig): boolean {
+    if (this.__updateDOM) {
+      return this.__updateDOM(prevNode, dom, config);
+    }
+    return false;
+  }
+
+  getPayload(): CustomPayload {
+    return this.__payload;
+  }
+
+  setPayload(newPayload: Partial<CustomPayload>): void {
+    this.__payload = { ...this.__payload, ...newPayload };
+  }
+
+  decorate(): ReactNode {
+    return <CustomDecoratorComponent node={this} />;
+  }
+}
+
+// Decorator component
+function CustomDecoratorComponent({ node }: { node: CustomDecoratorNode }) {
+  const [editor] = useLexicalComposerContext();
+  const [isSelected, setIsSelected] = useState(false);
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const selection = $getSelection();
+        setIsSelected(
+          $isNodeSelection(selection) && selection.getNodes().some((n) => n.__key === node.__key)
+        );
+      });
+    });
+  }, [editor, node]);
+
+  const updatePayload = (newPayload: Partial<CustomPayload>) => {
+    editor.update(() => node.setPayload(newPayload));
+  };
+
+  return node.__render ? node.__render({
+    node,
+    payload: node.__payload,
+    children: undefined,
+    nodeKey: node.__key,
+    isSelected,
+    updatePayload,
+  }) : null;
+}
+
+// Factory function
 export function createCustomNodeExtension<
   Name extends string,
   Commands extends Record<string, any> = {},
   StateQueries extends Record<string, () => Promise<boolean>> = {}
->(config: CustomNodeConfig<Commands, StateQueries>) {
+>(userConfig: CustomNodeConfig<Commands, StateQueries>) {
+  const isContainer = userConfig.isContainer ?? false;
   const INSERT_CUSTOM_NODE = createCommand<CustomPayload>('insert-custom-node');
 
-  // Dynamic node class based on config
-  class CustomNode extends DecoratorNode<ReactNode> {
-    __payload: CustomPayload;
-
-    static getType(): string {
-      return config.nodeType;
-    }
-
-    static clone(node: CustomNode): CustomNode {
-      return new CustomNode(node.__payload, node.getKey());
-    }
-
-    constructor(payload: CustomPayload = config.defaultPayload || {}, key?: NodeKey) {
-      super(key);
-      this.__payload = payload;
-    }
-
-    static importJSON(serialized: SerializedCustomNode): CustomNode {
-      const payload = config.importJSON ? config.importJSON(serialized) : serialized.payload;
-      return new CustomNode(payload);
-    }
-
-    exportJSON(): SerializedCustomNode {
-      const serialized = config.exportJSON ? config.exportJSON(this.__payload) : { payload: this.__payload };
-      return {
-        type: config.nodeType,
-        version: 1,
-        ...serialized,
-      };
-    }
-
-    static importDOM(): DOMConversionMap | null {
-      return config.importDOM ? config.importDOM() : null;
-    }
-
-    exportDOM(editor: LexicalEditor): DOMExportOutput {
-      return config.exportDOM ? config.exportDOM(editor, this as LexicalNode) : { element: document.createElement('div') };
-    }
-
-    createDOM(config: EditorConfig): HTMLElement {
-      return document.createElement('div');
-    }
-
-    updateDOM(prevNode: CustomNode, dom: HTMLElement): boolean {
-      return false;
-    }
-
-    getPayload(): CustomPayload {
-      return (this.getLatest() as CustomNode).__payload;
-    }
-
-    setPayload(payload: CustomPayload): void {
-      const writable = this.getWritable() as CustomNode;
-      writable.__payload = { ...writable.__payload, ...payload };
-    }
-
-    decorate(): ReactNode {
-      return <CustomDecorator node={this} />;
-    }
-  }
-
   // Helper to create node
-  function $createCustomNode(payload: CustomPayload): CustomNode {
-    return new CustomNode(payload);
-  }
-
-  // Decorator component for handling selection
-  function CustomDecorator({ node }: { node: CustomNode }) {
-    const [editor] = useLexicalComposerContext();
-    const [isSelected, setIsSelected] = useState(false);
-
-    useEffect(() => {
-      return editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          const selection = $getSelection();
-          setIsSelected(
-            !!(selection && $isNodeSelection(selection) && selection.getNodes().some((n) => n.getKey() === node.getKey()))
-          );
+  function $createCustomNode(payload: CustomPayload): CustomElementNode | CustomDecoratorNode {
+    if (isContainer) {
+      const node = new CustomElementNode(payload, userConfig.nodeType, undefined, userConfig.render, userConfig.createDOM, userConfig.updateDOM);
+      if (userConfig.initialChildren) {
+        const initialChildren = userConfig.initialChildren();
+        initialChildren.forEach(childData => {
+          if (childData.type === 'paragraph') {
+            const paragraph = $createParagraphNode();
+            if ((childData as any).children) {
+              (childData as any).children.forEach((textChild: any) => {
+                if (textChild.type === 'text') {
+                  paragraph.append($createTextNode(textChild.text || ''));
+                }
+              });
+            }
+            node.append(paragraph);
+          }
         });
-      });
-    }, [editor, node]);
-
-    const updatePayload = (newPayload: CustomPayload) => {
-      editor.update(() => {
-        node.setPayload(newPayload);
-      });
-    };
-
-    return config.render({
-      node,
-      payload: node.__payload,
-      children: undefined,
-      nodeKey: node.getKey(),
-      isSelected,
-      updatePayload,
-    });
+      } else {
+        // Default empty paragraph
+        const paragraph = $createParagraphNode();
+        paragraph.append($createTextNode(''));
+        node.append(paragraph);
+      }
+      return node;
+    } else {
+      return new CustomDecoratorNode(payload, userConfig.nodeType, undefined, userConfig.render, userConfig.createDOM, userConfig.updateDOM);
+    }
   }
 
-  // The extension class
+  // Extension class
   class CustomNodeExtension extends BaseExtension<Name, BaseExtensionConfig, Commands, StateQueries> {
     constructor() {
-      super(config.nodeType as Name, [ExtensionCategory.Toolbar]); // Assuming toolbar for now
+      super(userConfig.nodeType as Name, [ExtensionCategory.Toolbar]);
     }
 
     register(editor: LexicalEditor): () => void {
-      // Register insert command (default; users can override in config.commands)
-      const unregisterInsert = editor.registerCommand(
+      const unregisterInsert = editor.registerCommand<CustomPayload>(
         INSERT_CUSTOM_NODE,
-        (payload: CustomPayload) => {
+        (payload) => {
           editor.update(() => {
             const node = $createCustomNode(payload);
             const selection = $getSelection();
             if ($isRangeSelection(selection)) {
-              selection.insertNodes([node as LexicalNode]);
+              selection.insertNodes([node]);
             } else {
-              $getRoot().append($createParagraphNode().append(node as LexicalNode));
+              $getRoot().append($createParagraphNode().append(node));
             }
           });
           return true;
@@ -190,24 +318,28 @@ export function createCustomNodeExtension<
     }
 
     getNodes(): any[] {
-      return [CustomNode];
+      return isContainer ? [CustomElementNode] : [CustomDecoratorNode];
     }
 
     getCommands(editor: LexicalEditor): Commands {
-      const commandName = `insert${config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)}`;
       const defaultCommands = {
-        [commandName]: (payload: CustomPayload) => { editor.dispatchCommand(INSERT_CUSTOM_NODE, payload); },
+        insertCustomNode: (payload: CustomPayload) => editor.dispatchCommand(INSERT_CUSTOM_NODE, payload),
       } as unknown as Partial<Commands>;
 
-      return { ...defaultCommands, ...(config.commands ? config.commands(editor) : {}) } as Commands;
+      return { ...defaultCommands, ...(userConfig.commands ? userConfig.commands(editor) : {}) } as Commands;
     }
 
     getStateQueries(editor: LexicalEditor): StateQueries {
       const defaultQueries = {
-        isCustomNodeActive: () => Promise.resolve(false), // Placeholder; implement based on need
+        isCustomNodeActive: () => new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            resolve(!!selection && $isNodeSelection(selection) && selection.getNodes().some((n) => n.getType() === userConfig.nodeType));
+          });
+        }),
       } as unknown as Partial<StateQueries>;
 
-      return { ...defaultQueries, ...(config.stateQueries ? config.stateQueries(editor) : {}) } as StateQueries;
+      return { ...defaultQueries, ...(userConfig.stateQueries ? userConfig.stateQueries(editor) : {}) } as StateQueries;
     }
   }
 

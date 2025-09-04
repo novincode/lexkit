@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react';
 import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
-import { myCustomExtension } from '../MyCustomExtension';
+import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -38,7 +38,7 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Define the extensions array as a const to maintain literal types
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, myCustomExtension] as const;
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, MyCustomExtension] as const;
 
 // Create a typed editor system for these specific extensions
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();

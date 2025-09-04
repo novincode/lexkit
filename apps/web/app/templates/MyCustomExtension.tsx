@@ -1,63 +1,78 @@
 import React from 'react';
-import { createCustomNodeExtension, Extension, BaseExtensionConfig } from '@repo/editor/extensions';
-import { $getSelection, $isRangeSelection, $insertNodes, $getRoot, $createParagraphNode, LexicalNode } from 'lexical';
+import { createCustomNodeExtension } from '../../../../packages/editor/src/extensions/customNodeExtension';
+import { $getSelection, $isRangeSelection, $getRoot, $createParagraphNode } from 'lexical';
 
-// Define types for custom commands/queries (for type safety)
-type CustomPayload = Record<string, any>;
+// Simple wrapper component for the custom node
+const MyCustomComponent = ({
+  children,
+  isSelected
+}: {
+  node: any;
+  payload: any;
+  children?: React.ReactNode;
+  nodeKey: string;
+  isSelected: boolean;
+  updatePayload: (newPayload: Partial<any>) => void;
+}): React.ReactNode => {
+  return (
+    <div
+      style={{
+        border: isSelected ? '2px solid #007ACC' : '2px solid #ccc',
+        borderRadius: '8px',
+        padding: '16px',
+        margin: '8px 0',
+        backgroundColor: isSelected ? '#f0f8ff' : '#f8f9fa'
+      }}
+    >
+      <div style={{
+        fontSize: '12px',
+        color: '#666',
+        marginBottom: '8px',
+        fontWeight: 'bold'
+      }}>
+        Custom Container
+      </div>
+      {children}
+    </div>
+  );
+};// Create the extension using the factory
 type MyCommands = {
   insertMyBlock: (payload: { text: string; color: string }) => void;
 };
-type MyStateQueries = {
-  isMyBlockActive: () => Promise<boolean>;
-};
 
-// Create the extension
-const { extension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, MyStateQueries>({
+const { extension: MyCustomExtension, $createCustomNode } = createCustomNodeExtension<'myBlock', MyCommands, {}>({
   nodeType: 'myBlock',
-  defaultPayload: { text: 'Hello World', color: 'blue' },
-  render: ({ node, payload, isSelected, updatePayload }) => (
-    <div
-      style={{
-        border: `3px solid ${payload.color}`,
-        padding: '20px',
-        background: isSelected ? 'lightyellow' : 'lightblue',
-        borderRadius: '10px',
-        fontSize: '18px',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        margin: '10px 0',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        transition: 'all 0.3s ease'
-      }}
-      contentEditable
-      suppressContentEditableWarning
-    >
-      {payload.text}
-    </div>
-  ),
-  // Custom commands (type-safe)
+  isContainer: true, // This makes it an ElementNode that can contain other nodes
+  render: MyCustomComponent,
+  initialChildren: () => [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Hello World' }],
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1
+    }
+  ],
   commands: (editor) => ({
     insertMyBlock: (payload: { text: string; color: string }) => {
       editor.update(() => {
         const node = $createCustomNode(payload);
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          selection.insertNodes([node as LexicalNode]);
+          selection.insertNodes([node]);
         } else {
-          $getRoot().append($createParagraphNode().append(node as LexicalNode));
+          $getRoot().append($createParagraphNode().append(node));
         }
       });
     },
   }),
-  // Custom queries
-  stateQueries: (editor) => ({
-    isMyBlockActive: () => new Promise((resolve) => {
-      editor.getEditorState().read(() => {
-        // Logic to check if myBlock is active
-        resolve(false); // Placeholder
-      });
-    }),
-  }),
 });
 
-export { extension as myCustomExtension };
+export { MyCustomExtension };
+
+// Usage example:
+// 1. Register the extension with your editor
+// 2. Use the insertCustomNode command to insert nodes
+// 3. The container will render with native Lexical editing capabilities
+// 4. Style the container using CSS: [data-custom-node-type="myBlock"]
