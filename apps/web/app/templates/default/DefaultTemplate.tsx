@@ -12,6 +12,7 @@ import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';
 import { createEditorSystem } from '@repo/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
+import { LexicalEditor } from 'lexical';
 
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
   try {
@@ -44,9 +45,10 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 // Extract the types for our specific extensions
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
+type ExtensionNames = typeof extensions[number]['name'];
 
 // Custom hook for toolbar state and handlers
-function useToolbarState(commands: EditorCommands, activeStates: EditorStateQueries, editor: any) {
+function useToolbarState(commands: EditorCommands, activeStates: EditorStateQueries, editor: LexicalEditor | null) {
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [showReplaceMenu, setShowReplaceMenu] = useState(false);
 
@@ -136,6 +138,7 @@ function EditorContent({ className, isDark, toggleTheme }: { className?: string;
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const { showImageMenu, setShowImageMenu, showReplaceMenu, setShowReplaceMenu, handlers } = useToolbarState(commands, activeStates, editor);
 
+  
   // Update theme dynamically without resetting editor
   useEffect(() => {
     if (editor) {
@@ -226,7 +229,7 @@ function Toolbar({
   handlers 
 }: {
   commands: EditorCommands;
-  hasExtension: (name: "bold" | "italic" | "list" | "history" | "image") => boolean;
+  hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   isDark: boolean;
   toggleTheme: () => void;

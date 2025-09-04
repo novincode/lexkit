@@ -15,10 +15,10 @@ export interface EditorConfig {
   [key: string]: any;
 }
 
-export interface EditorContextType {
+export interface EditorContextType<Exts extends readonly Extension[]> {
   editor: LexicalEditor | null;
   config: EditorConfig;
-  extensions: Extension[];
+  extensions: Exts;
   commands: {
     formatText: (format: TextFormatType, value?: boolean | string) => void;
     insertNode?: (type: string, payload: any) => void;
@@ -58,5 +58,5 @@ export interface EditorContextType {
     reorder: (names: string[]) => void;
   };
   plugins: ReactNode[];
-  hasPlugin: (name: string) => boolean;
+  hasExtension: (name: Exts[number]['name']) => boolean;
 }

@@ -180,7 +180,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
         reorder: (names: string[]) => {},
       },
       plugins,
-      hasExtension: (name) => extensions.some(ext => ext.name === name),
+      hasExtension: (name: Exts[number]['name']) => extensions.some(ext => ext.name === name),
     };
 
     return <EditorContext.Provider value={contextValue}>{plugins}{children}</EditorContext.Provider>;
