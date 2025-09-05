@@ -43,7 +43,7 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): MarkdownCommands {
-    const transformers = [...TRANSFORMERS, ...(this.config.customTransformers || [])];
+    const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
 
     return {
       exportToMarkdown: () => {

@@ -542,3 +542,73 @@
     left: 12px;
   }
 }
+
+/* HTML Embed Styles */
+.html-embed-container {
+  width: 100% !important;
+  box-sizing: border-box;
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin: 8px 0;
+  min-height: 100px;
+}
+
+.html-embed-textarea {
+  width: 100% !important;
+  box-sizing: border-box;
+  background: #fafafa;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 8px;
+  min-height: 120px;
+}
+
+.html-preview-mode {
+  padding: 8px;
+  background: #fff;
+}
+
+/* Toggle button using ::after pseudo-element */
+.html-embed-container::after {
+  content: '👁️';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #007ACC;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.html-embed-container.html-preview-mode::after {
+  content: '✏️';
+}
+
+/* Better visual indication for HTML embed blocks */
+.html-embed-container::before {
+  content: "HTML Embed";
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: #007ACC;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.html-embed-container.html-preview-mode::before {
+  content: "HTML Preview";
+  background: #28a745;
+}

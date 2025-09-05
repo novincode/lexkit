@@ -401,15 +401,6 @@ function Toolbar({
           >
             <FileCode size={16} />
           </button>
-          {activeStates.isHTMLEmbedSelected && (
-            <button 
-              onClick={() => commands.toggleHTMLPreview()}
-              className="lexkit-toolbar-button"
-              title="Toggle HTML Preview/Edit"
-            >
-              {activeStates.isHTMLPreviewMode ? '✏️' : '👁️'}
-            </button>
-          )}
         </div>
       )}
 
