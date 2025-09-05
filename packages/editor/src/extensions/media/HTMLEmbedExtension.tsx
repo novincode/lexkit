@@ -32,7 +32,15 @@ const { extension: HTMLEmbedExtension, $createCustomNode: $createHTMLEmbedNode, 
   },
   render: ({ payload, nodeKey, isSelected, updatePayload }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [localHTML, setLocalHTML] = useState('');
     const htmlPayload = payload as HTMLEmbedPayload;
+
+    // Initialize local HTML when entering edit mode
+    useState(() => {
+      if (!htmlPayload.preview) {
+        setLocalHTML(htmlPayload.html);
+      }
+    });
 
     // Show editor mode
     if (isEditing || !htmlPayload.preview) {
@@ -61,8 +69,8 @@ const { extension: HTMLEmbedExtension, $createCustomNode: $createHTMLEmbedNode, 
             <span>✏️ Edit HTML</span>
             <button
               onClick={() => {
+                updatePayload({ html: localHTML, preview: true });
                 setIsEditing(false);
-                updatePayload({ preview: true });
               }}
               style={{
                 padding: '4px 8px',
@@ -78,8 +86,9 @@ const { extension: HTMLEmbedExtension, $createCustomNode: $createHTMLEmbedNode, 
             </button>
           </div>
           <textarea
-            value={htmlPayload.html}
-            onChange={(e) => updatePayload({ html: e.target.value })}
+            value={localHTML || htmlPayload.html}
+            onChange={(e) => setLocalHTML(e.target.value)}
+            onBlur={(e) => updatePayload({ html: e.target.value })}
             style={{
               width: '100%',
               minHeight: '120px',
@@ -107,7 +116,10 @@ const { extension: HTMLEmbedExtension, $createCustomNode: $createHTMLEmbedNode, 
           position: 'relative',
           overflow: 'hidden'
         }}
-        onDoubleClick={() => setIsEditing(true)}
+        onDoubleClick={() => {
+          setLocalHTML(htmlPayload.html);
+          setIsEditing(true);
+        }}
       >
         <div
           style={{
@@ -123,6 +135,7 @@ const { extension: HTMLEmbedExtension, $createCustomNode: $createHTMLEmbedNode, 
           <button
             onClick={(e) => {
               e.stopPropagation();
+              setLocalHTML(htmlPayload.html);
               setIsEditing(true);
               updatePayload({ preview: false });
             }}
