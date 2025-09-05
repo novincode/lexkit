@@ -115,7 +115,7 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
     const element = document.createElement('div');
     element.setAttribute('data-lexical-html-embed', 'true');
     element.setAttribute('data-html-content', this.__payload.html);
-    element.innerHTML = this.__payload.html;
+    // Don't set innerHTML to avoid duplication - the data-html-content is sufficient
     return { element };
   }
 

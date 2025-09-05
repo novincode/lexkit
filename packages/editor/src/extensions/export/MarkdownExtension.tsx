@@ -28,11 +28,11 @@ export class MarkdownExtension extends BaseExtension<
 > {
   constructor() {
     super('markdown', [ExtensionCategory.Toolbar]);
-    this.config = {};
+    this.config = { customTransformers: [] };
   }
 
   configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
-    console.log('🔧 Configuring MarkdownExtension with transformers:', config.customTransformers);
+    console.log('🔧 Configuring MarkdownExtension with custom transformers:', config.customTransformers?.length || 0);
     this.config = { ...this.config, ...config };
     return this;
   }
@@ -44,61 +44,28 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): MarkdownCommands {
-    // Append custom transformers to ensure they take precedence
+    // Combine default and custom transformers
     const transformers = [...TRANSFORMERS, ...(this.config.customTransformers || [])];
+    
+    console.log('🔧 MarkdownExtension getCommands - Total transformers:', transformers.length);
+    console.log('🔧 Custom transformers added:', this.config.customTransformers?.length || 0);
 
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
-            console.log('🔄 Starting markdown export with transformers:', transformers.length);
+            console.log('🔄 Starting markdown export with', transformers.length, 'transformers');
             
-            // First, try the standard Lexical export
-            let markdown = $convertToMarkdownString(transformers);
-            console.log('� Standard Lexical markdown result:', markdown);
+            // Debug: Log transformer types
+            transformers.forEach((t, i) => {
+              console.log(`Transformer ${i}: type=${t.type}, deps=${t.dependencies?.length || 0}`);
+            });
             
-            // Now manually handle HTML embed nodes (since Lexical might not traverse DecoratorNodes)
-            const root = $getRoot();
-            const allChildren = root.getChildren();
-            console.log('� Checking all children for HTML embeds...');
+            // Use Lexical's built-in markdown conversion with all transformers
+            const markdown = $convertToMarkdownString(transformers);
             
-            // Find our custom transformer
-            const htmlEmbedTransformer = transformers.find(t => 
-              t.dependencies && 
-              t.dependencies.some((d: any) => d.getType && d.getType() === 'html-embed')
-            );
-            
-            if (htmlEmbedTransformer) {
-              console.log('✅ Found HTML embed transformer');
-              
-              allChildren.forEach((node, index) => {
-                console.log(`🔍 Checking node ${index}:`, node.getType(), node.constructor.name);
-                
-                if (node.getType() === 'html-embed') {
-                  console.log('🎯 Found HTML embed node, calling transformer...');
-                  try {
-                    const transformerResult = htmlEmbedTransformer.export(node, null, null);
-                    console.log('🔄 Transformer result:', transformerResult);
-                    
-                    if (transformerResult) {
-                      // Add the transformer result to our markdown
-                      if (markdown.trim()) {
-                        markdown += '\n\n' + transformerResult;
-                      } else {
-                        markdown = transformerResult;
-                      }
-                      console.log('✅ Added HTML embed to markdown');
-                    }
-                  } catch (error) {
-                    console.error('❌ Error calling transformer:', error);
-                  }
-                }
-              });
-            } else {
-              console.log('❌ HTML embed transformer not found!');
-            }
-            
-            console.log('✅ Final markdown result:', markdown);
+            console.log('✅ Markdown export completed, result length:', markdown.length);
+            console.log('✅ Markdown content:', markdown);
             return markdown;
           } catch (error) {
             console.error('❌ Markdown export error:', error);
@@ -118,8 +85,11 @@ export class MarkdownExtension extends BaseExtension<
               return;
             }
 
-            console.log('🔄 Importing Markdown with transformers:', transformers.length, 'content:', markdown);
+            console.log('🔄 Importing markdown with', transformers.length, 'transformers');
+            console.log('🔄 Markdown to import:', markdown);
+            
             $convertFromMarkdownString(markdown, transformers);
+            
             console.log('✅ Markdown import completed');
           } catch (error) {
             console.error('❌ Markdown import error:', error);
