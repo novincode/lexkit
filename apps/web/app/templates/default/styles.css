@@ -786,3 +786,49 @@
   background-color: var(--lexkit-muted);
   border-color: var(--lexkit-border-hover);
 }
+
+/* Table selection styles */
+table[data-lexical-table-selection] {
+  box-shadow: 0 0 0 2px var(--lexkit-accent);
+}
+
+table td[data-lexical-table-cell-selection] {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Lexical Table Theme Classes */
+.lexkit-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  border: 1px solid var(--lexkit-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lexkit-table-cell {
+  border: 1px solid var(--lexkit-border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 80px;
+  position: relative;
+  background-color: var(--lexkit-bg);
+  color: var(--lexkit-fg);
+}
+
+.lexkit-table-cell-header {
+  background-color: var(--lexkit-muted);
+  font-weight: 600;
+  color: var(--lexkit-fg);
+  border: 1px solid var(--lexkit-border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 80px;
+  position: relative;
+}
+
+.lexkit-table-cell:focus,
+.lexkit-table-cell-header:focus {
+  outline: 2px solid var(--lexkit-accent);
+  outline-offset: -2px;
+}

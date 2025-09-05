@@ -65,4 +65,8 @@ export const defaultTheme = {
   },
   image: 'lexical-image',
   horizontalRule: 'lexkit-hr',
+  table: 'lexkit-table',
+  tableRow: 'lexkit-table-row',
+  tableCell: 'lexkit-table-cell',
+  tableCellHeader: 'lexkit-table-cell-header',
 };
