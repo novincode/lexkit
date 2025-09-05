@@ -247,10 +247,173 @@
 }
 
 /* File Input Styling */
+/* File Input (hidden) */
 .lexkit-file-input {
   position: absolute;
+  left: -9999px;
   opacity: 0;
   pointer-events: none;
+}
+
+/* Command Palette Styles */
+.lexkit-command-palette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+  z-index: 1000;
+}
+
+.lexkit-command-palette {
+  background: var(--lexkit-bg-primary);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+  width: 640px;
+  max-width: 90vw;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lexkit-command-palette-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lexkit-border);
+  gap: 12px;
+}
+
+.lexkit-command-palette-icon {
+  color: var(--lexkit-text-secondary);
+  flex-shrink: 0;
+}
+
+.lexkit-command-palette-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: var(--lexkit-text-primary);
+  font-family: inherit;
+}
+
+.lexkit-command-palette-input::placeholder {
+  color: var(--lexkit-text-secondary);
+}
+
+.lexkit-command-palette-kbd {
+  background: var(--lexkit-bg-secondary);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--lexkit-text-secondary);
+  font-family: monospace;
+}
+
+.lexkit-command-palette-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.lexkit-command-palette-group {
+  margin-bottom: 8px;
+}
+
+.lexkit-command-palette-group-title {
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lexkit-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lexkit-command-palette-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.1s;
+}
+
+.lexkit-command-palette-item:hover,
+.lexkit-command-palette-item.selected {
+  background: var(--lexkit-bg-secondary);
+}
+
+.lexkit-command-palette-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.lexkit-command-palette-item-title {
+  font-size: 14px;
+  color: var(--lexkit-text-primary);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.lexkit-command-palette-item-description {
+  font-size: 12px;
+  color: var(--lexkit-text-secondary);
+  line-height: 1.4;
+}
+
+.lexkit-command-palette-item-shortcut {
+  background: var(--lexkit-bg-tertiary);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: var(--lexkit-text-secondary);
+  font-family: monospace;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.lexkit-command-palette-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--lexkit-border);
+  background: var(--lexkit-bg-secondary);
+}
+
+.lexkit-command-palette-hint {
+  font-size: 11px;
+  color: var(--lexkit-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lexkit-command-palette-hint kbd {
+  background: var(--lexkit-bg-primary);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-family: monospace;
+}
+
+.lexkit-command-palette-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--lexkit-text-secondary);
+  font-size: 14px;
 }
 
 /* Editor Content */

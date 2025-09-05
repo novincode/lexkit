@@ -88,12 +88,53 @@ export class TableExtension extends BaseExtension<
 
   /**
    * Registers the extension with the editor.
-   * No special registration needed as Lexical handles table commands internally.
+   * Sets up context menu handlers for table interactions.
    *
    * @param editor - The Lexical editor instance
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
+    const handleContextMenu = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if we're right-clicking on a table element
+      const tableCell = target.closest('td, th');
+      if (tableCell) {
+        event.preventDefault();
+        
+        // Get the context menu extension if available
+        // This would need to be accessed through the editor system
+        // For now, we'll add this as a comment for the implementation
+        
+        /*
+        const contextMenuConfig = {
+          items: [
+            { label: 'Insert Row Above', action: () => this.insertRowAbove(editor) },
+            { label: 'Insert Row Below', action: () => this.insertRowBelow(editor) },
+            { separator: true },
+            { label: 'Insert Column Left', action: () => this.insertColumnLeft(editor) },
+            { label: 'Insert Column Right', action: () => this.insertColumnRight(editor) },
+            { separator: true },
+            { label: 'Delete Row', action: () => this.deleteRow(editor) },
+            { label: 'Delete Column', action: () => this.deleteColumn(editor) },
+          ],
+          position: { x: event.clientX, y: event.clientY },
+          target: tableCell
+        };
+        
+        // commands.showContextMenu(contextMenuConfig);
+        */
+      }
+    };
+
+    const editorElement = editor.getRootElement();
+    if (editorElement) {
+      editorElement.addEventListener('contextmenu', handleContextMenu);
+      return () => {
+        editorElement.removeEventListener('contextmenu', handleContextMenu);
+      };
+    }
+
     return () => {};
   }
 

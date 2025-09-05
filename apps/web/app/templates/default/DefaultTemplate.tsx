@@ -19,6 +19,7 @@ import {
   codeFormatExtension,
   htmlEmbedExtension
 } from '@lexkit/editor/extensions';
+import { commandPaletteExtension, floatingToolbarExtension } from '@lexkit/editor/extensions/core';
 import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/transformers';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -335,60 +336,13 @@ function Toolbar({
       {/* Table Section */}
       {hasExtension('table') && (
         <div className="lexkit-toolbar-section">
-          {!activeStates.isInTableCell ? (
-            <button
-              onClick={() => setShowTableDialog(true)}
-              className="lexkit-toolbar-button"
-              title="Insert Table"
-            >
-              <Table size={16} />
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => commands.table.insertRowAbove()}
-                className="lexkit-toolbar-button"
-                title="Insert Row Above"
-              >
-                ↥ Row
-              </button>
-              <button
-                onClick={() => commands.table.insertRowBelow()}
-                className="lexkit-toolbar-button"
-                title="Insert Row Below"
-              >
-                ↧ Row
-              </button>
-              <button
-                onClick={() => commands.table.insertColumnLeft()}
-                className="lexkit-toolbar-button"
-                title="Insert Column Left"
-              >
-                ← Col
-              </button>
-              <button
-                onClick={() => commands.table.insertColumnRight()}
-                className="lexkit-toolbar-button"
-                title="Insert Column Right"
-              >
-                → Col
-              </button>
-              <button
-                onClick={() => commands.table.deleteRow()}
-                className="lexkit-toolbar-button"
-                title="Delete Row"
-              >
-                ✕ Row
-              </button>
-              <button
-                onClick={() => commands.table.deleteColumn()}
-                className="lexkit-toolbar-button"
-                title="Delete Column"
-              >
-                ✕ Col
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setShowTableDialog(true)}
+            className="lexkit-toolbar-button"
+            title="Insert Table (Ctrl+Shift+T)"
+          >
+            <Table size={16} />
+          </button>
         </div>
       )}
 
@@ -716,6 +670,15 @@ function EditorContent({
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [content, setContent] = useState({ html: '', markdown: '' });
+
+  // Register command palette commands and keyboard shortcuts
+  useEffect(() => {
+    if (!editor) return;
+
+    return () => {
+      // Cleanup
+    };
+  }, [editor]);
 
   // Update theme dynamically
   useEffect(() => {

@@ -37,6 +37,9 @@ export { htmlEmbedExtension } from './media/HTMLEmbedExtension';
 // Custom Extensions
 export { createCustomNodeExtension } from './custom/CustomNodeExtension';
 
+// Core Extensions
+export * from './core';
+
 // Base Classes & Types
 export { TextFormatExtension } from './base/TextFormatExtension';
 export * from './types';
