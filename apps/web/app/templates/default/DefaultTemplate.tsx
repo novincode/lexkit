@@ -19,7 +19,7 @@ import {
   codeFormatExtension,
   htmlEmbedExtension
 } from '@lexkit/editor/extensions';
-import { commandPaletteExtension, floatingToolbarExtension } from '@lexkit/editor/extensions/core';
+import { commandPaletteExtension, floatingToolbarExtension, contextMenuExtension } from '@lexkit/editor/extensions/core';
 import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/transformers';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -54,12 +54,15 @@ import {
   FileCode,
   Eye,
   Pencil,
-  Table
+  Table,
+  Command
 } from 'lucide-react';
 import { Select, Dropdown, Dialog } from './components';
 import { createEditorSystem } from '@lexkit/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
+import { commandsToCommandPaletteItems, registerKeyboardShortcuts } from './commands';
+import { CommandPalette } from './CommandPalette';
 
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
   try {
@@ -103,7 +106,10 @@ const extensions = [
     customTransformers: ALL_MARKDOWN_TRANSFORMERS
   }),
   htmlEmbedExtension,
-  MyCustomExtension
+  MyCustomExtension,
+  floatingToolbarExtension,
+  contextMenuExtension,
+  commandPaletteExtension
 ] as const;
 
 // Create a typed editor system for these specific extensions
@@ -505,6 +511,17 @@ function Toolbar({
         </div>
       )}
 
+      {/* Command Palette */}
+      <div className="lexkit-toolbar-section">
+        <button 
+          onClick={() => commands.showCommandPalette()} 
+          className="lexkit-toolbar-button"
+          title="Command Palette (Ctrl+K)"
+        >
+          <Command size={16} />
+        </button>
+      </div>
+
       {/* Theme Toggle */}
       <div className="lexkit-toolbar-section">
         <button 
@@ -670,15 +687,31 @@ function EditorContent({
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [content, setContent] = useState({ html: '', markdown: '' });
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   // Register command palette commands and keyboard shortcuts
   useEffect(() => {
     if (!editor) return;
 
+    // Register commands in the command palette
+    const paletteCommands = commandsToCommandPaletteItems(commands);
+    paletteCommands.forEach(cmd => {
+      commands.registerCommand(cmd);
+    });
+
+    // Override the command palette show command to use our local state
+    const originalShowCommand = commands.showCommandPalette;
+    (commands as any).showCommandPalette = () => setCommandPaletteOpen(true);
+
+    // Register keyboard shortcuts
+    const unregisterShortcuts = registerKeyboardShortcuts(commands, document.body);
+
     return () => {
-      // Cleanup
+      unregisterShortcuts();
+      // Restore original command
+      (commands as any).showCommandPalette = originalShowCommand;
     };
-  }, [editor]);
+  }, [editor, commands]);
 
   // Update theme dynamically
   useEffect(() => {
@@ -799,6 +832,13 @@ function EditorContent({
         ) : null}
         <HistoryPlugin />
       </div>
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        commands={commandsToCommandPaletteItems(commands)}
+      />
     </>
   );
 }

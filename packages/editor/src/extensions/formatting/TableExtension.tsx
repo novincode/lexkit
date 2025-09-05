@@ -102,36 +102,41 @@ export class TableExtension extends BaseExtension<
       if (tableCell) {
         event.preventDefault();
         
-        // Get the context menu extension if available
-        // This would need to be accessed through the editor system
-        // For now, we'll add this as a comment for the implementation
-        
-        /*
-        const contextMenuConfig = {
-          items: [
-            { label: 'Insert Row Above', action: () => this.insertRowAbove(editor) },
-            { label: 'Insert Row Below', action: () => this.insertRowBelow(editor) },
-            { separator: true },
-            { label: 'Insert Column Left', action: () => this.insertColumnLeft(editor) },
-            { label: 'Insert Column Right', action: () => this.insertColumnRight(editor) },
-            { separator: true },
-            { label: 'Delete Row', action: () => this.deleteRow(editor) },
-            { label: 'Delete Column', action: () => this.deleteColumn(editor) },
-          ],
-          position: { x: event.clientX, y: event.clientY },
-          target: tableCell
-        };
-        
-        // commands.showContextMenu(contextMenuConfig);
-        */
+        // Show context menu with table commands
+        this.showTableContextMenu(editor, event.clientX, event.clientY, tableCell as HTMLElement);
       }
+    };
+
+    const handleSelectionChange = () => {
+      // Check if we're in a table cell
+      editor.getEditorState().read(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode();
+          const focusNode = selection.focus.getNode();
+          
+          // Check if either anchor or focus is in a table cell
+          const isInTable = this.isNodeInTableCell(anchorNode) || this.isNodeInTableCell(focusNode);
+          
+          if (isInTable) {
+            this.showTableFloatingToolbar(editor);
+          } else {
+            this.hideTableFloatingToolbar(editor);
+          }
+        }
+      });
     };
 
     const editorElement = editor.getRootElement();
     if (editorElement) {
       editorElement.addEventListener('contextmenu', handleContextMenu);
+      
+      // Listen for selection changes
+      const unregisterSelection = editor.registerUpdateListener(handleSelectionChange);
+      
       return () => {
         editorElement.removeEventListener('contextmenu', handleContextMenu);
+        unregisterSelection();
       };
     }
 
@@ -332,6 +337,157 @@ export class TableExtension extends BaseExtension<
    */
   getMarkdownTransformers(): any[] {
     return [TABLE_MARKDOWN_TRANSFORMER];
+  }
+
+  /**
+   * Helper method to check if a node is inside a table cell
+   */
+  private isNodeInTableCell(node: any): boolean {
+    let currentNode = node;
+    while (currentNode) {
+      if ($isTableCellNode(currentNode)) {
+        return true;
+      }
+      currentNode = currentNode.getParent();
+    }
+    return false;
+  }
+
+  /**
+   * Shows context menu with table-specific commands
+   */
+  private showTableContextMenu(editor: LexicalEditor, x: number, y: number, target: HTMLElement) {
+    // For now, we'll use a simple approach with direct DOM manipulation
+    // In a real implementation, this would integrate with the context menu extension
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'table-context-menu';
+    contextMenu.style.position = 'fixed';
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.style.background = 'white';
+    contextMenu.style.border = '1px solid #ccc';
+    contextMenu.style.borderRadius = '4px';
+    contextMenu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+    contextMenu.style.zIndex = '1000';
+    contextMenu.style.minWidth = '150px';
+
+    const items = [
+      { label: 'Insert Row Above', action: () => this.insertRowAbove(editor) },
+      { label: 'Insert Row Below', action: () => this.insertRowBelow(editor) },
+      { label: 'Insert Column Left', action: () => this.insertColumnLeft(editor) },
+      { label: 'Insert Column Right', action: () => this.insertColumnRight(editor) },
+      { label: 'Delete Row', action: () => this.deleteRow(editor) },
+      { label: 'Delete Column', action: () => this.deleteColumn(editor) },
+    ];
+
+    items.forEach(item => {
+      const menuItem = document.createElement('div');
+      menuItem.textContent = item.label;
+      menuItem.style.padding = '8px 12px';
+      menuItem.style.cursor = 'pointer';
+      menuItem.style.borderBottom = '1px solid #eee';
+      menuItem.addEventListener('click', () => {
+        item.action();
+        if (contextMenu.parentNode) {
+          document.body.removeChild(contextMenu);
+        }
+        document.removeEventListener('click', closeMenu);
+      });
+      menuItem.addEventListener('mouseenter', () => {
+        menuItem.style.backgroundColor = '#f5f5f5';
+      });
+      menuItem.addEventListener('mouseleave', () => {
+        menuItem.style.backgroundColor = 'white';
+      });
+      contextMenu.appendChild(menuItem);
+    });
+
+    // Remove last border
+    if (contextMenu.lastChild) {
+      (contextMenu.lastChild as HTMLElement).style.borderBottom = 'none';
+    }
+
+    document.body.appendChild(contextMenu);
+
+    // Close on click outside
+    const closeMenu = (e: MouseEvent) => {
+      if (!contextMenu.contains(e.target as Node) && contextMenu.parentNode) {
+        document.body.removeChild(contextMenu);
+        document.removeEventListener('click', closeMenu);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+  }
+
+  /**
+   * Shows floating toolbar with table commands
+   */
+  private showTableFloatingToolbar(editor: LexicalEditor) {
+    // For now, we'll use a simple approach
+    // In a real implementation, this would integrate with the floating toolbar extension
+    console.log('Table floating toolbar would show here');
+  }
+
+  /**
+   * Hides the table floating toolbar
+   */
+  private hideTableFloatingToolbar(editor: LexicalEditor) {
+    // For now, we'll use a simple approach
+    console.log('Table floating toolbar would hide here');
+  }
+
+  /**
+   * Inserts a row above the current selection
+   */
+  private insertRowAbove(editor: LexicalEditor) {
+    editor.update(() => {
+      $insertTableRowAtSelection(false);
+    });
+  }
+
+  /**
+   * Inserts a row below the current selection
+   */
+  private insertRowBelow(editor: LexicalEditor) {
+    editor.update(() => {
+      $insertTableRowAtSelection(true);
+    });
+  }
+
+  /**
+   * Inserts a column to the left of the current selection
+   */
+  private insertColumnLeft(editor: LexicalEditor) {
+    editor.update(() => {
+      $insertTableColumnAtSelection(false);
+    });
+  }
+
+  /**
+   * Inserts a column to the right of the current selection
+   */
+  private insertColumnRight(editor: LexicalEditor) {
+    editor.update(() => {
+      $insertTableColumnAtSelection(true);
+    });
+  }
+
+  /**
+   * Deletes the current row
+   */
+  private deleteRow(editor: LexicalEditor) {
+    editor.update(() => {
+      $deleteTableRowAtSelection();
+    });
+  }
+
+  /**
+   * Deletes the current column
+   */
+  private deleteColumn(editor: LexicalEditor) {
+    editor.update(() => {
+      $deleteTableColumnAtSelection();
+    });
   }
 }
 

@@ -995,3 +995,31 @@ table td[data-lexical-table-cell-selection] {
   outline: 2px solid var(--lexkit-accent);
   outline-offset: -2px;
 }
+
+/* Table Context Menu */
+.table-context-menu {
+  position: fixed;
+  background: var(--lexkit-bg);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--lexkit-shadow);
+  z-index: 1000;
+  min-width: 160px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.table-context-menu > div {
+  padding: 8px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.table-context-menu > div:hover {
+  background-color: var(--lexkit-muted);
+}
+
+.table-context-menu > div:not(:last-child) {
+  border-bottom: 1px solid var(--lexkit-border);
+}
