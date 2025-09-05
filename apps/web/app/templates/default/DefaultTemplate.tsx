@@ -222,7 +222,7 @@ function Toolbar({
     else if (value === 'quote') commands.toggleQuote();
   };
 
-  return (
+  const toolbar = (
     <div className="lexkit-toolbar">
       {/* Text Formatting Section */}
       <div className="lexkit-toolbar-section">

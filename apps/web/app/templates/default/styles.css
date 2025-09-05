@@ -638,3 +638,151 @@
   letter-spacing: 0.5px;
   z-index: 5;
 }
+
+/* Dialog Overlay */
+.lexkit-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Dialog */
+.lexkit-dialog {
+  background-color: var(--lexkit-bg);
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  min-width: 400px;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Dialog Header */
+.lexkit-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lexkit-border);
+}
+
+.lexkit-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--lexkit-fg);
+}
+
+.lexkit-dialog-close {
+  background: none;
+  border: none;
+  color: var(--lexkit-muted-fg);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.lexkit-dialog-close:hover {
+  background-color: var(--lexkit-muted);
+  color: var(--lexkit-fg);
+}
+
+/* Dialog Content */
+.lexkit-dialog-content {
+  padding: 20px;
+}
+
+/* Table Dialog */
+.lexkit-table-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lexkit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lexkit-form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lexkit-fg);
+}
+
+.lexkit-input {
+  padding: 8px 12px;
+  border: 1px solid var(--lexkit-border);
+  border-radius: 6px;
+  background-color: var(--lexkit-bg);
+  color: var(--lexkit-fg);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.lexkit-input:focus {
+  outline: none;
+  border-color: var(--lexkit-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.lexkit-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--lexkit-fg);
+  cursor: pointer;
+}
+
+.lexkit-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--lexkit-accent);
+}
+
+.lexkit-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.lexkit-button-primary,
+.lexkit-button-secondary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid;
+}
+
+.lexkit-button-primary {
+  background-color: var(--lexkit-accent);
+  border-color: var(--lexkit-accent);
+  color: white;
+}
+
+.lexkit-button-primary:hover {
+  background-color: var(--lexkit-accent-hover);
+  border-color: var(--lexkit-accent-hover);
+}
+
+.lexkit-button-secondary {
+  background-color: transparent;
+  border-color: var(--lexkit-border);
+  color: var(--lexkit-fg);
+}
+
+.lexkit-button-secondary:hover {
+  background-color: var(--lexkit-muted);
+  border-color: var(--lexkit-border-hover);
+}

@@ -1,9 +1,17 @@
 import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { INSERT_TABLE_COMMAND, TableNode, TableRowNode, TableCellNode, $isTableNode, $createTableNodeWithDimensions } from '@lexical/table';
+import { 
+  INSERT_TABLE_COMMAND, 
+  TableNode, 
+  TableRowNode, 
+  TableCellNode, 
+  $isTableNode, 
+  $createTableNodeWithDimensions
+} from '@lexical/table';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import React from 'react';
+import type { LexicalNode, ElementNode } from 'lexical';
 
 /**
  * Table configuration type
