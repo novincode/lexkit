@@ -238,7 +238,7 @@ function Toolbar({
         )}
         <button 
           onClick={() => commands.formatText('code')} 
-          className={`lexkit-toolbar-button ${commands.hasFormatText("bold") ? 'active' : ''}`}
+          className={`lexkit-toolbar-button ${activeStates.code ? 'active' : ''}`}
           title="Inline Code"
         >
           <Code size={16} />
