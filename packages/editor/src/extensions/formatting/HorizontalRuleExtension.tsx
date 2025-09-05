@@ -4,6 +4,26 @@ import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import React from 'react';
+import type { LexicalNode, ElementNode } from 'lexical';
+
+/**
+ * Horizontal Rule Transformer for Markdown
+ * Supports ---, ***, and ___ syntax
+ */
+export const HORIZONTAL_RULE_TRANSFORMER = {
+  dependencies: [HorizontalRuleNode],
+  export: (node: LexicalNode) => {
+    if (!$isHorizontalRuleNode(node)) return null;
+    return '---';
+  },
+  regExp: /^(?:---|\*\*\*|___)\s*$/,
+  replace: (parentNode: ElementNode, children: LexicalNode[], match: string[]) => {
+    const hrNode = $createHorizontalRuleNode();
+    parentNode.replace(hrNode);
+    return hrNode;
+  },
+  type: 'element' as const,
+};
 
 /**
  * Commands provided by the horizontal rule extension.
