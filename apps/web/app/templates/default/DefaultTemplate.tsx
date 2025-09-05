@@ -44,7 +44,9 @@ import {
   Code,
   Terminal,
   Type,
-  FileCode
+  FileCode,
+  Eye,
+  Pencil
 } from 'lucide-react';
 import { Select, Dropdown } from './components';
 import { createEditorSystem } from '@repo/editor';
@@ -401,6 +403,15 @@ function Toolbar({
           >
             <FileCode size={16} />
           </button>
+          {activeStates.isHTMLEmbedSelected && (
+            <button 
+              onClick={() => commands.toggleHTMLPreview()}
+              className="lexkit-toolbar-button"
+              title="Toggle Preview/Edit"
+            >
+              {activeStates.isHTMLPreviewMode ? <Eye size={16} /> : <Pencil size={16} />}
+            </button>
+          )}
         </div>
       )}
 

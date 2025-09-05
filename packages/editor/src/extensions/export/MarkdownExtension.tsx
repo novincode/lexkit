@@ -32,6 +32,7 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
+    console.log('🔧 Configuring MarkdownExtension with transformers:', config.customTransformers);
     this.config = { ...this.config, ...config };
     return this;
   }
@@ -43,12 +44,66 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): MarkdownCommands {
-    const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
+    // Append custom transformers to ensure they take precedence
+    const transformers = [...TRANSFORMERS, ...(this.config.customTransformers || [])];
 
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
-          return $convertToMarkdownString(transformers);
+          try {
+            console.log('🔄 Starting markdown export with transformers:', transformers.length);
+            
+            // First, try the standard Lexical export
+            let markdown = $convertToMarkdownString(transformers);
+            console.log('� Standard Lexical markdown result:', markdown);
+            
+            // Now manually handle HTML embed nodes (since Lexical might not traverse DecoratorNodes)
+            const root = $getRoot();
+            const allChildren = root.getChildren();
+            console.log('� Checking all children for HTML embeds...');
+            
+            // Find our custom transformer
+            const htmlEmbedTransformer = transformers.find(t => 
+              t.dependencies && 
+              t.dependencies.some((d: any) => d.getType && d.getType() === 'html-embed')
+            );
+            
+            if (htmlEmbedTransformer) {
+              console.log('✅ Found HTML embed transformer');
+              
+              allChildren.forEach((node, index) => {
+                console.log(`🔍 Checking node ${index}:`, node.getType(), node.constructor.name);
+                
+                if (node.getType() === 'html-embed') {
+                  console.log('🎯 Found HTML embed node, calling transformer...');
+                  try {
+                    const transformerResult = htmlEmbedTransformer.export(node, null, null);
+                    console.log('🔄 Transformer result:', transformerResult);
+                    
+                    if (transformerResult) {
+                      // Add the transformer result to our markdown
+                      if (markdown.trim()) {
+                        markdown += '\n\n' + transformerResult;
+                      } else {
+                        markdown = transformerResult;
+                      }
+                      console.log('✅ Added HTML embed to markdown');
+                    }
+                  } catch (error) {
+                    console.error('❌ Error calling transformer:', error);
+                  }
+                }
+              });
+            } else {
+              console.log('❌ HTML embed transformer not found!');
+            }
+            
+            console.log('✅ Final markdown result:', markdown);
+            return markdown;
+          } catch (error) {
+            console.error('❌ Markdown export error:', error);
+            return '';
+          }
         });
       },
 
@@ -63,10 +118,11 @@ export class MarkdownExtension extends BaseExtension<
               return;
             }
 
-            // Convert markdown to Lexical nodes
+            console.log('🔄 Importing Markdown with transformers:', transformers.length, 'content:', markdown);
             $convertFromMarkdownString(markdown, transformers);
+            console.log('✅ Markdown import completed');
           } catch (error) {
-            console.error('Markdown import error:', error);
+            console.error('❌ Markdown import error:', error);
             const root = $getRoot();
             root.clear();
             root.append($createParagraphNode());
