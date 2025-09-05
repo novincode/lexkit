@@ -20,6 +20,8 @@
     "@lexical/link": "^0.34.0",
     "@lexical/code": "^0.34.0",
     "@lexical/markdown": "^0.34.0",
+    "@lexical/rich-text": "^0.34.0",
+    "@lexical/html": "^0.34.0",
     "@repo/editor": "workspace:*",
     "@repo/ui": "workspace:*",
     "lexical": "^0.34.0",

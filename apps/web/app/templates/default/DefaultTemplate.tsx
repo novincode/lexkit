@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react';
-import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension } from '@repo/editor/extensions';
+import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension, headingExtension } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -11,6 +11,7 @@ import { ImageNode } from '@repo/editor/extensions/media';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select';
 import { createEditorSystem } from '@repo/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
@@ -38,7 +39,7 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Define the extensions array as a const to maintain literal types
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, MyCustomExtension] as const;
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, headingExtension, MyCustomExtension] as const;
 
 // Create a typed editor system for these specific extensions
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -218,6 +219,35 @@ function Toolbar({
         <button onClick={() => commands.toggleItalic()} className={activeStates.italic ? 'active' : ''} title="Italic">
           <Italic size={20} />
         </button>
+      )}
+      {hasExtension('heading') && (
+        <Select 
+          value={activeStates.isH1 ? 'h1' : activeStates.isH2 ? 'h2' : activeStates.isH3 ? 'h3' : activeStates.isH4 ? 'h4' : activeStates.isH5 ? 'h5' : activeStates.isH6 ? 'h6' : activeStates.isQuote ? 'quote' : 'p'} 
+          onValueChange={(value) => {
+            if (value === 'p') commands.toggleParagraph();
+            else if (value === 'h1') commands.toggleH1();
+            else if (value === 'h2') commands.toggleH2();
+            else if (value === 'h3') commands.toggleH3();
+            else if (value === 'h4') commands.toggleH4();
+            else if (value === 'h5') commands.toggleH5();
+            else if (value === 'h6') commands.toggleH6();
+            else if (value === 'quote') commands.toggleQuote();
+          }}
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="p">Paragraph</SelectItem>
+            <SelectItem value="h1">Heading 1</SelectItem>
+            <SelectItem value="h2">Heading 2</SelectItem>
+            <SelectItem value="h3">Heading 3</SelectItem>
+            <SelectItem value="h4">Heading 4</SelectItem>
+            <SelectItem value="h5">Heading 5</SelectItem>
+            <SelectItem value="h6">Heading 6</SelectItem>
+            <SelectItem value="quote">Quote</SelectItem>
+          </SelectContent>
+        </Select>
       )}
       {hasExtension('list') && (
         <>

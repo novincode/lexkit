@@ -32,6 +32,9 @@ importers:
       '@lexical/history':
         specifier: ^0.34.0
         version: 0.34.0
+      '@lexical/html':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@lexical/link':
         specifier: ^0.34.0
         version: 0.34.0
@@ -44,6 +47,9 @@ importers:
       '@lexical/react':
         specifier: ^0.34.0
         version: 0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
+      '@lexical/rich-text':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@repo/editor':
         specifier: workspace:*
         version: link:../../packages/editor
@@ -105,6 +111,9 @@ importers:
       '@lexical/react':
         specifier: ^0.34.0
         version: 0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
+      '@lexical/rich-text':
+        specifier: ^0.34.0
+        version: 0.34.0
       lexical:
         specifier: ^0.34.0
         version: 0.34.0
