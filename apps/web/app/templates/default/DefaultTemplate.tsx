@@ -5,6 +5,7 @@ import {
   italicExtension, 
   underlineExtension,
   strikethroughExtension,
+  linkExtension,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -41,6 +42,7 @@ import {
   AlignRight, 
   Upload, 
   Link,
+  Unlink,
   Code,
   Terminal,
   Type,
@@ -81,6 +83,7 @@ const extensions = [
   italicExtension, 
   underlineExtension,
   strikethroughExtension,
+  linkExtension,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -251,6 +254,15 @@ function Toolbar({
         >
           <Code size={16} />
         </button>
+        {hasExtension('link') && (
+          <button 
+            onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()} 
+            className={`lexkit-toolbar-button ${activeStates.isLink ? 'active' : ''}`}
+            title={activeStates.isLink ? "Remove Link" : "Insert Link"}
+          >
+            {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
+          </button>
+        )}
       </div>
 
       {/* Block Format Section */}

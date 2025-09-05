@@ -6,3 +6,4 @@ export { ListExtension, listExtension } from './ListExtension';
 export { BlockFormatExtension, blockFormatExtension } from './BlockTypeExtension';
 export { CodeExtension, codeExtension } from './CodeExtension';
 export { CodeFormatExtension, codeFormatExtension } from './CodeFormatExtension';
+export { LinkExtension, linkExtension } from './LinkExtension';

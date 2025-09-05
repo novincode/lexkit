@@ -74,6 +74,40 @@ commands.formatText('code'); // Inline code
 activeStates.code;
 ```
 
+### Link Extension
+```tsx
+import { linkExtension } from '@lexkit/editor';
+
+const extensions = [linkExtension] as const;
+
+// Configure paste listener and validation
+linkExtension.configure({
+  pasteListener: {
+    insert: true,  // Auto-convert pasted URLs to links
+    autoLink: false // Auto-link URLs as you type
+  },
+  validateUrl: (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  defaultAttributes: {
+    target: '_blank',
+    rel: 'noopener noreferrer'
+  }
+});
+
+// Usage
+commands.insertLink('https://example.com', 'Link Text');
+commands.insertLink(); // Prompts for URL
+commands.removeLink();
+
+activeStates.isLink;
+```
+
 ## Structure Extensions
 
 ### List Extension
