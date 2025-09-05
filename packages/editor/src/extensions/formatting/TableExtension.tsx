@@ -1,11 +1,15 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode, $createTextNode } from 'lexical';
 import { 
   INSERT_TABLE_COMMAND, 
   TableNode, 
   TableRowNode, 
   TableCellNode, 
   $isTableNode, 
-  $createTableNodeWithDimensions
+  $isTableRowNode,
+  $isTableCellNode,
+  $createTableNodeWithDimensions,
+  $createTableRowNode,
+  $createTableCellNode
 } from '@lexical/table';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
@@ -139,7 +143,141 @@ export class TableExtension extends BaseExtension<
         })
     };
   }
+
+  /**
+   * Returns markdown transformers provided by this extension.
+   *
+   * @returns Array containing table markdown transformers
+   */
+  getMarkdownTransformers(): any[] {
+    return [TABLE_MARKDOWN_TRANSFORMER];
+  }
 }
+
+/**
+ * Table Markdown Transformer
+ * Supports standard GitHub Flavored Markdown table syntax
+ */
+export const TABLE_MARKDOWN_TRANSFORMER = {
+  dependencies: [TableNode, TableRowNode, TableCellNode],
+  export: (node: any) => {
+    if (!$isTableNode(node)) return null;
+
+    try {
+      const rows = node.getChildren();
+      if (rows.length === 0) return null;
+
+      const tableData: string[][] = [];
+
+      // Extract data from each row
+      for (const row of rows) {
+        if (!$isTableRowNode(row)) continue;
+
+        const cells = row.getChildren();
+        const rowData: string[] = [];
+
+        for (const cell of cells) {
+          if (!$isTableCellNode(cell)) continue;
+
+          // Get text content from cell
+          const textContent = cell.getTextContent().trim();
+          rowData.push(textContent || ' ');
+        }
+
+        if (rowData.length > 0) {
+          tableData.push(rowData);
+        }
+      }
+
+      if (tableData.length === 0 || !tableData[0]) return null;
+
+      // Generate markdown
+      const markdownLines: string[] = [];
+
+      // Header row
+      markdownLines.push('| ' + tableData[0].join(' | ') + ' |');
+
+      // Separator row
+      const colCount = tableData[0].length;
+      const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
+      markdownLines.push(separator);
+
+      // Data rows
+      for (let i = 1; i < tableData.length; i++) {
+        const row = tableData[i];
+        if (row) {
+          markdownLines.push('| ' + row.join(' | ') + ' |');
+        }
+      }
+
+      return markdownLines.join('\n');
+    } catch (error) {
+      console.error('Error exporting table to markdown:', error);
+      return null;
+    }
+  },
+  regExp: /^\|(.+)\|\s*\n\|[\s\-\|:]+\|\s*\n(?:\|(.+)\|\s*\n)*$/,
+  replace: (parentNode: any, _children: any[], match: any) => {
+    try {
+      const fullMatch = match[0];
+      const lines = fullMatch.trim().split('\n');
+
+      if (lines.length < 2) return;
+
+      // Parse all rows
+      const tableData: string[][] = [];
+      let isHeader = true;
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+
+        const cells = line.split('|').slice(1, -1).map((cell: string) => cell.trim());
+
+        // Skip separator line (contains only dashes)
+        if (cells.every((cell: string) => /^-+$/.test(cell))) {
+          isHeader = false;
+          continue;
+        }
+
+        tableData.push(cells);
+      }
+
+      if (tableData.length === 0) return;
+
+      const totalRows = tableData.length;
+      const totalCols = Math.max(...tableData.map(row => row.length));
+
+      // Create table
+      const tableNode = $createTableNodeWithDimensions(totalRows, totalCols, true);
+      const tableRows = tableNode.getChildren();
+
+      // Fill table with data
+      tableData.forEach((rowData, rowIndex) => {
+        if (tableRows[rowIndex] && $isTableRowNode(tableRows[rowIndex])) {
+          const rowCells = tableRows[rowIndex].getChildren();
+
+          rowData.forEach((cellText, colIndex) => {
+            if (rowCells[colIndex] && $isTableCellNode(rowCells[colIndex])) {
+              const cell = rowCells[colIndex] as any;
+              cell.clear();
+
+              const paragraph = $createParagraphNode();
+              if (cellText && cellText.trim()) {
+                paragraph.append($createTextNode(cellText.trim()));
+              }
+              cell.append(paragraph);
+            }
+          });
+        }
+      });
+
+      parentNode.replace(tableNode);
+    } catch (error) {
+      console.error('Error importing table from markdown:', error);
+    }
+  },
+  type: 'multiline-element' as const,
+};
 
 /**
  * Pre-configured table extension instance.

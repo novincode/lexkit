@@ -22,6 +22,7 @@ import {
 import { HTML_EMBED_MARKDOWN_TRANSFORMER } from '@lexkit/editor/extensions/media/HTMLEmbedExtension';
 import { HORIZONTAL_RULE_TRANSFORMER } from '@lexkit/editor/extensions/formatting/HorizontalRuleExtension';
 import { UNDERLINE_TRANSFORMER } from '@lexkit/editor/extensions/formatting/UnderlineExtension';
+import { TABLE_MARKDOWN_TRANSFORMER } from '@lexkit/editor/extensions/formatting/TableExtension';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -101,7 +102,7 @@ const extensions = [
   codeFormatExtension,
   htmlExtension,
   markdownExtension.configure({
-    customTransformers: [HTML_EMBED_MARKDOWN_TRANSFORMER, HORIZONTAL_RULE_TRANSFORMER, UNDERLINE_TRANSFORMER]
+    customTransformers: [HTML_EMBED_MARKDOWN_TRANSFORMER, HORIZONTAL_RULE_TRANSFORMER, UNDERLINE_TRANSFORMER, TABLE_MARKDOWN_TRANSFORMER]
   }),
   htmlEmbedExtension,
   MyCustomExtension
