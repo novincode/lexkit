@@ -76,7 +76,7 @@ export class BlockFormatExtension extends BaseExtension<
           return $createHeadingNode(format);
         });
       }
-    }, { onError: (error: Error) => console.error('Block format error:', error) }); // Optional error handling
+    });
   }
 
   getStateQueries(editor: LexicalEditor): BlockFormatStateQueries {
