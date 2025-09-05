@@ -1,4 +1,4 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode, $createTextNode } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode, $createTextNode, $isNodeSelection } from 'lexical';
 import { 
   INSERT_TABLE_COMMAND, 
   TableNode, 
@@ -9,7 +9,11 @@ import {
   $isTableCellNode,
   $createTableNodeWithDimensions,
   $createTableRowNode,
-  $createTableCellNode
+  $createTableCellNode,
+  $insertTableRowAtSelection,
+  $insertTableColumnAtSelection,
+  $deleteTableRowAtSelection,
+  $deleteTableColumnAtSelection
 } from '@lexical/table';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
@@ -31,6 +35,14 @@ export type TableConfig = {
  */
 export type TableCommands = {
   insertTable: (config: TableConfig) => void;
+  table: {
+    insertRowAbove: () => void;
+    insertRowBelow: () => void;
+    insertColumnLeft: () => void;
+    insertColumnRight: () => void;
+    deleteRow: () => void;
+    deleteColumn: () => void;
+  };
 };
 
 /**
@@ -38,6 +50,7 @@ export type TableCommands = {
  */
 export type TableStateQueries = {
   isTableSelected: () => Promise<boolean>;
+  isInTableCell: () => Promise<boolean>;
 };
 
 /**
@@ -116,6 +129,38 @@ export class TableExtension extends BaseExtension<
           rows: config.rows.toString(),
           includeHeaders: config.includeHeaders ? { rows: true, columns: false } : false,
         });
+      },
+      table: {
+        insertRowAbove: () => {
+          editor.update(() => {
+            $insertTableRowAtSelection(false);
+          });
+        },
+        insertRowBelow: () => {
+          editor.update(() => {
+            $insertTableRowAtSelection(true);
+          });
+        },
+        insertColumnLeft: () => {
+          editor.update(() => {
+            $insertTableColumnAtSelection(false);
+          });
+        },
+        insertColumnRight: () => {
+          editor.update(() => {
+            $insertTableColumnAtSelection(true);
+          });
+        },
+        deleteRow: () => {
+          editor.update(() => {
+            $deleteTableRowAtSelection();
+          });
+        },
+        deleteColumn: () => {
+          editor.update(() => {
+            $deleteTableColumnAtSelection();
+          });
+        }
       }
     };
   }
@@ -132,10 +177,105 @@ export class TableExtension extends BaseExtension<
         new Promise((resolve) => {
           editor.getEditorState().read(() => {
             const selection = $getSelection();
-            if (selection && $isRangeSelection(selection)) {
-              const nodes = selection.getNodes();
-              const hasTable = nodes.some((node: any) => $isTableNode(node));
-              resolve(hasTable);
+            if (selection) {
+              if ($isRangeSelection(selection)) {
+                const nodes = selection.getNodes();
+                
+                // Check if any selected node or its ancestors is a table
+                for (const node of nodes) {
+                  let currentNode: any = node;
+                  while (currentNode) {
+                    if ($isTableNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              } else if ($isNodeSelection(selection)) {
+                // Handle node selection
+                const nodes = selection.getNodes();
+                for (const node of nodes) {
+                  let currentNode: any = node;
+                  while (currentNode) {
+                    if ($isTableNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              } else {
+                // For other selection types, check if we're in a table by traversing up the DOM
+                const nodes = selection.getNodes();
+                if (nodes.length > 0) {
+                  let currentNode: any = nodes[0];
+                  while (currentNode) {
+                    if ($isTableNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              }
+            } else {
+              resolve(false);
+            }
+          });
+        }),
+      isInTableCell: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (selection) {
+              if ($isRangeSelection(selection)) {
+                const nodes = selection.getNodes();
+                
+                // Check if any selected node or its ancestors is a table cell
+                for (const node of nodes) {
+                  let currentNode: any = node;
+                  while (currentNode) {
+                    if ($isTableCellNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              } else if ($isNodeSelection(selection)) {
+                // Handle node selection
+                const nodes = selection.getNodes();
+                for (const node of nodes) {
+                  let currentNode: any = node;
+                  while (currentNode) {
+                    if ($isTableCellNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              } else {
+                // For other selection types, check if we're in a table cell by traversing up the DOM
+                const nodes = selection.getNodes();
+                if (nodes.length > 0) {
+                  let currentNode: any = nodes[0];
+                  while (currentNode) {
+                    if ($isTableCellNode(currentNode)) {
+                      resolve(true);
+                      return;
+                    }
+                    currentNode = currentNode.getParent();
+                  }
+                }
+                resolve(false);
+              }
             } else {
               resolve(false);
             }

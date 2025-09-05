@@ -335,13 +335,60 @@ function Toolbar({
       {/* Table Section */}
       {hasExtension('table') && (
         <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => setShowTableDialog(true)}
-            className="lexkit-toolbar-button"
-            title="Insert Table"
-          >
-            <Table size={16} />
-          </button>
+          {!activeStates.isInTableCell ? (
+            <button
+              onClick={() => setShowTableDialog(true)}
+              className="lexkit-toolbar-button"
+              title="Insert Table"
+            >
+              <Table size={16} />
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => commands.table.insertRowAbove()}
+                className="lexkit-toolbar-button"
+                title="Insert Row Above"
+              >
+                ↥ Row
+              </button>
+              <button
+                onClick={() => commands.table.insertRowBelow()}
+                className="lexkit-toolbar-button"
+                title="Insert Row Below"
+              >
+                ↧ Row
+              </button>
+              <button
+                onClick={() => commands.table.insertColumnLeft()}
+                className="lexkit-toolbar-button"
+                title="Insert Column Left"
+              >
+                ← Col
+              </button>
+              <button
+                onClick={() => commands.table.insertColumnRight()}
+                className="lexkit-toolbar-button"
+                title="Insert Column Right"
+              >
+                → Col
+              </button>
+              <button
+                onClick={() => commands.table.deleteRow()}
+                className="lexkit-toolbar-button"
+                title="Delete Row"
+              >
+                ✕ Row
+              </button>
+              <button
+                onClick={() => commands.table.deleteColumn()}
+                className="lexkit-toolbar-button"
+                title="Delete Column"
+              >
+                ✕ Col
+              </button>
+            </>
+          )}
         </div>
       )}
 
