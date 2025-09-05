@@ -487,9 +487,9 @@ function EditorContent({
     }
   }, [isDark, editor]);
 
-  // Sync HTML content when switching to HTML mode (only if empty)
+  // Sync HTML content when switching to HTML mode
   useEffect(() => {
-    if (mode === 'html' && editor && hasExtension('html') && !htmlContent.trim()) {
+    if (mode === 'html' && editor && hasExtension('html')) {
       try {
         const html = commands.exportToHTML();
         setHtmlContent(html);
@@ -497,7 +497,7 @@ function EditorContent({
         console.error('Failed to export HTML:', error);
       }
     }
-  }, [mode, editor, hasExtension, commands, htmlContent]);
+  }, [mode, editor, hasExtension, commands]);
 
   // Import HTML changes back to visual editor
   const handleHtmlChange = (html: string) => {

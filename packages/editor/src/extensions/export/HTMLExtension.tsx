@@ -3,6 +3,7 @@ import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
+import { $getRoot, $createParagraphNode } from 'lexical';
 
 export type HTMLCommands = {
   exportToHTML: () => string;
@@ -41,33 +42,36 @@ export class HTMLExtension extends BaseExtension<
       importFromHTML: (html: string) => {
         editor.update(() => {
           try {
-            // Clear existing content properly
-            const root = editor.getRootElement();
-            if (root) {
-              // Clear all children
-              while (root.firstChild) {
-                root.removeChild(root.firstChild);
-              }
-            }
+            // Clear existing content
+            const root = $getRoot();
+            root.clear();
 
-            // Parse and insert HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const nodes = $generateNodesFromDOM(editor, doc);
+            if (html.trim()) {
+              // Parse and insert HTML
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+              const nodes = $generateNodesFromDOM(editor, doc);
 
-            // Insert nodes
-            if (nodes && nodes.length > 0) {
-              const rootNode = editor.getRootElement();
-              if (rootNode) {
+              // Insert nodes
+              if (nodes && nodes.length > 0) {
                 nodes.forEach((node: any) => {
                   if (node) {
-                    rootNode.appendChild(node);
+                    root.append(node);
                   }
                 });
               }
+            } else {
+              // If empty HTML, add a default paragraph
+              const paragraph = $createParagraphNode();
+              root.append(paragraph);
             }
           } catch (error) {
             console.error('Error importing HTML:', error);
+            // Fallback: clear and add empty paragraph
+            const root = $getRoot();
+            root.clear();
+            const paragraph = $createParagraphNode();
+            root.append(paragraph);
           }
         });
       },
