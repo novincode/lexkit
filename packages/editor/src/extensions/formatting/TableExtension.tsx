@@ -516,8 +516,14 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
         for (const cell of cells) {
           if (!$isTableCellNode(cell)) continue;
 
-          // Get text content from cell
-          const textContent = cell.getTextContent().trim();
+          // Get text content from cell more safely
+          let textContent = '';
+          try {
+            textContent = cell.getTextContent().trim();
+          } catch (error) {
+            console.warn('Error getting cell text content:', error);
+            textContent = '';
+          }
           rowData.push(textContent || ' ');
         }
 
@@ -526,24 +532,31 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
         }
       }
 
-      if (tableData.length === 0 || !tableData[0]) return null;
+      if (tableData.length === 0) return null;
 
-      // Generate markdown
+      // Generate markdown with better formatting
       const markdownLines: string[] = [];
 
-      // Header row
-      markdownLines.push('| ' + tableData[0].join(' | ') + ' |');
+      // First row (header)
+      if (tableData[0]) {
+        markdownLines.push('| ' + tableData[0].join(' | ') + ' |');
+      }
 
       // Separator row
-      const colCount = tableData[0].length;
+      const colCount = tableData[0]?.length || 1;
       const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
       markdownLines.push(separator);
 
-      // Data rows
+      // Data rows (skip first row since it's the header)
       for (let i = 1; i < tableData.length; i++) {
         const row = tableData[i];
-        if (row) {
-          markdownLines.push('| ' + row.join(' | ') + ' |');
+        if (row && row.length > 0) {
+          // Pad row to match column count
+          const paddedRow = [...row];
+          while (paddedRow.length < colCount) {
+            paddedRow.push(' ');
+          }
+          markdownLines.push('| ' + paddedRow.join(' | ') + ' |');
         }
       }
 
@@ -556,64 +569,87 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
   regExp: /^\|(.+)\|\s*\n\|[\s\-\|:]+\|\s*\n(?:\|(.+)\|\s*\n)*$/,
   replace: (parentNode: any, _children: any[], match: any) => {
     try {
+      console.log('🔧 TABLE_MARKDOWN_TRANSFORMER replace called with match:', match[0]);
+      
       const fullMatch = match[0];
       const lines = fullMatch.trim().split('\n');
 
-      if (lines.length < 2) return;
+      if (lines.length < 2) {
+        console.log('❌ Not enough lines for table');
+        return;
+      }
 
       // Parse all rows
       const tableData: string[][] = [];
-      let isHeader = true;
 
       for (const line of lines) {
         if (!line.trim()) continue;
 
         const cells = line.split('|').slice(1, -1).map((cell: string) => cell.trim());
 
-        // Skip separator line (contains only dashes)
-        if (cells.every((cell: string) => /^-+$/.test(cell))) {
-          isHeader = false;
+        // Skip separator line (contains only dashes, colons, spaces)
+        if (cells.every((cell: string) => /^[\s\-:]+$/.test(cell))) {
           continue;
         }
 
-        tableData.push(cells);
+        if (cells.length > 0) {
+          tableData.push(cells);
+        }
       }
 
-      if (tableData.length === 0) return;
+      if (tableData.length === 0) {
+        console.log('❌ No table data found');
+        return;
+      }
+
+      console.log('✅ Parsed table data:', tableData);
 
       const totalRows = tableData.length;
       const totalCols = Math.max(...tableData.map(row => row.length));
 
-      // Create table
+      // Create table node with proper dimensions
       const tableNode = $createTableNodeWithDimensions(totalRows, totalCols, true);
+      
+      // Fill table with data safely
       const tableRows = tableNode.getChildren();
 
-      // Fill table with data
       tableData.forEach((rowData, rowIndex) => {
-        if (tableRows[rowIndex] && $isTableRowNode(tableRows[rowIndex])) {
-          const rowCells = tableRows[rowIndex].getChildren();
+        const tableRow = tableRows[rowIndex];
+        if (tableRow && $isTableRowNode(tableRow)) {
+          const rowCells = tableRow.getChildren();
 
           rowData.forEach((cellText, colIndex) => {
-            if (rowCells[colIndex] && $isTableCellNode(rowCells[colIndex])) {
-              const cell = rowCells[colIndex] as any;
-              cell.clear();
+            const cell = rowCells[colIndex];
+            if (cell && $isTableCellNode(cell)) {
+              // Clear existing content safely
+              const children = cell.getChildren();
+              children.forEach(child => child.remove());
 
-              const paragraph = $createParagraphNode();
+              // Add new content
               if (cellText && cellText.trim()) {
+                const paragraph = $createParagraphNode();
                 paragraph.append($createTextNode(cellText.trim()));
+                cell.append(paragraph);
+              } else {
+                // Always add a paragraph, even if empty
+                const paragraph = $createParagraphNode();
+                cell.append(paragraph);
               }
-              cell.append(paragraph);
             }
           });
         }
       });
 
+      // For multiline-element transformers, we need to replace the parent node directly
       parentNode.replace(tableNode);
+      console.log('✅ Table node replaced successfully');
     } catch (error) {
-      console.error('Error importing table from markdown:', error);
+      console.error('❌ Error importing table from markdown:', error);
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'Unknown error');
+      // Don't replace if there's an error to prevent state corruption
     }
   },
-  type: 'multiline-element' as const,
+  type: 'element' as const, // Changed from 'multiline-element' to 'element'
 };
 
 /**

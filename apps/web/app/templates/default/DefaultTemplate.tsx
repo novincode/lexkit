@@ -713,12 +713,19 @@ function EditorContent({
     };
   }, [editor, commands]);
 
-  // Update theme dynamically
+  // Initial content sync when editor is ready
   useEffect(() => {
-    if (editor) {
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    if (!editor || !hasExtension('markdown') || !hasExtension('html')) return;
+
+    // Sync initial content from the editor
+    try {
+      const markdown = commands.exportToMarkdown();
+      const html = commands.exportToHTML();
+      setContent({ markdown, html });
+    } catch (error) {
+      console.error('Failed to sync initial content:', error);
     }
-  }, [isDark, editor]);
+  }, [editor, hasExtension]); // Remove commands from deps to prevent loops
 
   // Sync content when editor changes (only for non-markdown modes)
   useEffect(() => {
@@ -733,14 +740,8 @@ function EditorContent({
           console.error('Failed to export HTML:', error);
         }
       }
-      if (hasExtension('markdown')) {
-        try {
-          const markdown = commands.exportToMarkdown();
-          setContent(prev => ({ ...prev, markdown }));
-        } catch (error) {
-          console.error('Failed to export Markdown:', error);
-        }
-      }
+      // Don't sync markdown content here - it causes conflicts with mode switching
+      // Markdown content is only synced when entering/leaving markdown mode
     };
 
     const unregister = editor.registerUpdateListener(() => syncContent());
@@ -752,35 +753,33 @@ function EditorContent({
   // Simple handlers - no debouncing needed
   const handleHtmlChange = (html: string) => {
     setContent(prev => ({ ...prev, html }));
-    if (editor && hasExtension('html')) {
-      try {
-        commands.importFromHTML(html);
-      } catch (error) {
-        console.error('Failed to import HTML:', error);
-      }
-    }
+    // Don't import on every keystroke - let the mode change handle the import
+    // This prevents constant editor state corruption
   };
 
   const handleMarkdownChange = (markdown: string) => {
     setContent(prev => ({ ...prev, markdown }));
-    if (editor && hasExtension('markdown')) {
-      try {
-        commands.importFromMarkdown(markdown);
-      } catch (error) {
-        console.error('Failed to import Markdown:', error);
-      }
-    }
+    // Don't import on every keystroke - let the mode change handle the import
+    // This prevents constant editor state corruption
   };
 
   // Handle mode changes
   const handleModeChange = (newMode: EditorMode) => {
-    // If leaving markdown mode, sync the markdown content first
+    // If leaving markdown mode, import the markdown content into the editor immediately
     if (mode === 'markdown' && newMode !== 'markdown' && editor && hasExtension('markdown')) {
       try {
-        const markdown = commands.exportToMarkdown();
-        setContent(prev => ({ ...prev, markdown }));
+        commands.importFromMarkdown(content.markdown, true); // immediate = true
       } catch (error) {
-        console.error('Failed to export Markdown:', error);
+        console.error('Failed to import Markdown:', error);
+      }
+    }
+    
+    // If leaving HTML mode, import the HTML content into the editor
+    if (mode === 'html' && newMode !== 'html' && editor && hasExtension('html')) {
+      try {
+        commands.importFromHTML(content.html);
+      } catch (error) {
+        console.error('Failed to import HTML:', error);
       }
     }
     
@@ -791,6 +790,16 @@ function EditorContent({
         setContent(prev => ({ ...prev, markdown }));
       } catch (error) {
         console.error('Failed to export Markdown:', error);
+      }
+    }
+    
+    // If entering HTML mode, sync the current editor content to HTML
+    if (newMode === 'html' && mode !== 'html' && editor && hasExtension('html')) {
+      try {
+        const html = commands.exportToHTML();
+        setContent(prev => ({ ...prev, html }));
+      } catch (error) {
+        console.error('Failed to export HTML:', error);
       }
     }
     

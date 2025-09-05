@@ -22,7 +22,7 @@ export type MarkdownCommands = {
   /** Export the current editor content as Markdown string */
   exportToMarkdown: () => string;
   /** Import Markdown content into the editor, replacing current content */
-  importFromMarkdown: (markdown: string) => void;
+  importFromMarkdown: (markdown: string, immediate?: boolean) => void;
 };
 
 /**
@@ -121,24 +121,28 @@ export class MarkdownExtension extends BaseExtension<
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
+            const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
             return $convertToMarkdownString(transformers);
           } catch (error) {
             console.error('❌ Markdown export error:', error);
+            console.error('❌ Transformers being used:', this.config.customTransformers || [], TRANSFORMERS);
             return '';
           }
         });
       },
 
-      importFromMarkdown: (markdown: string) => {
+      importFromMarkdown: (markdown: string, immediate = false) => {
         // Clear existing debounce
         if (this.debounceTimeout) {
           clearTimeout(this.debounceTimeout);
         }
 
-        // Debounce the import to prevent constant re-parsing while typing
-        this.debounceTimeout = setTimeout(() => {
+        const performImport = () => {
           editor.update(() => {
             try {
+              const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
+              console.log('🔄 Markdown import - transformers:', transformers.length);
+              
               const root = $getRoot();
               root.clear();
 
@@ -157,7 +161,9 @@ export class MarkdownExtension extends BaseExtension<
                 return placeholder;
               });
 
+              console.log('🔄 About to call $convertFromMarkdownString with transformers');
               $convertFromMarkdownString(processedMarkdown, transformers);
+              console.log('✅ $convertFromMarkdownString completed successfully');
 
               // Replace placeholders with HTML embed nodes
               if (htmlEmbedBlocks.length > 0) {
@@ -185,11 +191,22 @@ export class MarkdownExtension extends BaseExtension<
               }
             } catch (error) {
               console.error('❌ Markdown import error:', error);
-              $getRoot().clear();
-              $getRoot().append($createParagraphNode());
+              console.error('❌ Error stack:', error instanceof Error ? error.stack : 'Unknown error');
+              console.error('❌ Transformers being used:', this.config.customTransformers || [], TRANSFORMERS);
+              const root = $getRoot();
+              root.clear();
+              root.append($createParagraphNode());
             }
           }, { discrete: true });
-        }, 500); // 500ms debounce - balanced for good UX
+        };
+
+        if (immediate) {
+          // For mode changes, import immediately
+          performImport();
+        } else {
+          // For typing, debounce to prevent constant re-parsing
+          this.debounceTimeout = setTimeout(performImport, 500);
+        }
       },
     };
   }
