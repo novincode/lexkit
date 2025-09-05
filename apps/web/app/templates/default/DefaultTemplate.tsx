@@ -323,7 +323,7 @@ function Toolbar({
         </>
       )}
       {hasExtension('myBlock') && commands.insertMyBlock && (
-        <button onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })} title="Insert Custom Block">
+        <button style={{width:'auto'}} onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })} title="Insert Custom Block">
           Insert Block
         </button>
       )}

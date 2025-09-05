@@ -9,7 +9,10 @@
     "**/.vscode": true,
     "**/node_modules": true,
     "**/dist": true,
-    "**/.turbo": true
+    "**/.turbo": true,
+    "**/.vercel": true,
+    "**/.next": true,
+    "**/.wrangler": true
   },
   "explorerExclude.backup": {}
 }
