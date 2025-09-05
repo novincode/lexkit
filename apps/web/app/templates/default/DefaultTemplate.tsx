@@ -550,7 +550,6 @@ function EditorContent({
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [content, setContent] = useState({ html: '', markdown: '' });
-  const debounceRef = useRef<NodeJS.Timeout>();
 
   // Update theme dynamically
   useEffect(() => {
@@ -559,8 +558,7 @@ function EditorContent({
     }
   }, [isDark, editor]);
 
-  // Centralized update listener: Editor state is the source of truth.
-  // Any change to the editor state will trigger an export to HTML and Markdown.
+  // Sync content when editor changes
   useEffect(() => {
     if (!editor) return;
 
@@ -583,58 +581,33 @@ function EditorContent({
       }
     };
 
-    // Initial sync
-    editor.getEditorState().read(() => {
-      syncContent();
-    });
-    
-    // Listen for editor changes
-    const unregister = editor.registerUpdateListener(({ editorState }) => {
-      // The editor state has changed, so we sync the content.
-      syncContent();
-    });
+    const unregister = editor.registerUpdateListener(() => syncContent());
+    syncContent(); // Initial sync
 
     return unregister;
   }, [editor, hasExtension, commands]);
 
-  // Debounced import for HTML source view
+  // Simple handlers - no debouncing needed
   const handleHtmlChange = (html: string) => {
     setContent(prev => ({ ...prev, html }));
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      if (editor && hasExtension('html')) {
-        try {
-          commands.importFromHTML(html);
-        } catch (error) {
-          console.error('Failed to import HTML:', error);
-        }
+    if (editor && hasExtension('html')) {
+      try {
+        commands.importFromHTML(html);
+      } catch (error) {
+        console.error('Failed to import HTML:', error);
       }
-    }, 300); // 300ms debounce
+    }
   };
 
-  // Debounced import for Markdown source view
   const handleMarkdownChange = (markdown: string) => {
     setContent(prev => ({ ...prev, markdown }));
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      if (editor && hasExtension('markdown')) {
-        try {
-          // Only import if the markdown has changed significantly (not just whitespace)
-          const normalizedNew = markdown.replace(/\s+/g, ' ').trim();
-          const normalizedCurrent = content.markdown.replace(/\s+/g, ' ').trim();
-          
-          if (normalizedNew !== normalizedCurrent) {
-            commands.importFromMarkdown(markdown);
-          }
-        } catch (error) {
-          console.error('Failed to import Markdown:', error);
-        }
+    if (editor && hasExtension('markdown')) {
+      try {
+        commands.importFromMarkdown(markdown);
+      } catch (error) {
+        console.error('Failed to import Markdown:', error);
       }
-    }, 2000); // 2000ms debounce - give users plenty of time to type
+    }
   };
 
   // Handle mode changes

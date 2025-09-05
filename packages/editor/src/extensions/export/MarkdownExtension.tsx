@@ -27,6 +27,8 @@ export class MarkdownExtension extends BaseExtension<
   MarkdownStateQueries,
   ReactNode[]
 > {
+  private debounceTimeout: NodeJS.Timeout | null = null;
+
   constructor() {
     super('markdown', [ExtensionCategory.Toolbar]);
     this.config = { customTransformers: [] };
@@ -38,22 +40,17 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    return () => {
-      // Cleanup if needed
-    };
+    return () => {};
   }
 
   getCommands(editor: LexicalEditor): MarkdownCommands {
-    // Put custom transformers BEFORE default ones to give them priority
     const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
 
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
-            // Use Lexical's built-in markdown conversion with all transformers
-            const markdown = $convertToMarkdownString(transformers);
-            return markdown;
+            return $convertToMarkdownString(transformers);
           } catch (error) {
             console.error('❌ Markdown export error:', error);
             return '';
@@ -62,68 +59,66 @@ export class MarkdownExtension extends BaseExtension<
       },
 
       importFromMarkdown: (markdown: string) => {
-        editor.update(() => {
-          try {
-            const root = $getRoot();
-            root.clear();
+        // Clear existing debounce
+        if (this.debounceTimeout) {
+          clearTimeout(this.debounceTimeout);
+        }
 
-            if (!markdown.trim()) {
-              root.append($createParagraphNode());
-              return;
-            }
-
-            // Pre-process markdown to handle our custom html-embed blocks
-            let processedMarkdown = markdown;
-            const htmlEmbedBlocks: { html: string; placeholder: string }[] = [];
-            
-            // Find and extract html-embed blocks, replace with safe placeholders that won't be processed by markdown
-            processedMarkdown = processedMarkdown.replace(/```html-embed\s*\n([\s\S]*?)\n```/g, (match, htmlContent) => {
-              const placeholder = `HTMLEMBEDPLACEHOLDER${htmlEmbedBlocks.length}HTMLEMBEDPLACEHOLDER`;
-              htmlEmbedBlocks.push({ html: htmlContent.trim(), placeholder });
-              return placeholder;
-            });
-
-            // Convert the processed markdown with standard transformers
-            $convertFromMarkdownString(processedMarkdown, transformers);
-
-            // Replace placeholders with actual HTML embed nodes
-            if (htmlEmbedBlocks.length > 0) {
+        // Debounce the import to prevent constant re-parsing while typing
+        this.debounceTimeout = setTimeout(() => {
+          editor.update(() => {
+            try {
               const root = $getRoot();
+              root.clear();
+
+              if (!markdown.trim()) {
+                root.append($createParagraphNode());
+                return;
+              }
+
+              // Pre-process html-embed blocks
+              let processedMarkdown = markdown;
+              const htmlEmbedBlocks: { html: string; placeholder: string }[] = [];
               
-              const traverseAndReplace = (node: any) => {
-                if (node.getTextContent && typeof node.getTextContent === 'function') {
-                  const text = node.getTextContent();
-                  
-                  for (const { html, placeholder } of htmlEmbedBlocks) {
-                    if (text === placeholder) {
-                      const payload = { html, preview: true };
-                      const embedNode = new HTMLEmbedNode(payload);
-                      
-                      // Only replace if it's not the root node
-                      if (node !== root && node.getParent && node.getParent()) {
-                        node.replace(embedNode);
-                        return;
+              processedMarkdown = processedMarkdown.replace(/```html-embed\s*\n([\s\S]*?)\n```/g, (match, htmlContent) => {
+                const placeholder = `HTMLEMBEDPLACEHOLDER${htmlEmbedBlocks.length}HTMLEMBEDPLACEHOLDER`;
+                htmlEmbedBlocks.push({ html: htmlContent.trim(), placeholder });
+                return placeholder;
+              });
+
+              $convertFromMarkdownString(processedMarkdown, transformers);
+
+              // Replace placeholders with HTML embed nodes
+              if (htmlEmbedBlocks.length > 0) {
+                const traverseAndReplace = (node: any) => {
+                  if (node.getTextContent?.()) {
+                    const text = node.getTextContent();
+                    for (const { html, placeholder } of htmlEmbedBlocks) {
+                      if (text === placeholder) {
+                        const payload = { html, preview: true };
+                        const embedNode = new HTMLEmbedNode(payload);
+                        if (node !== root && node.getParent?.()) {
+                          node.replace(embedNode);
+                          return;
+                        }
                       }
                     }
                   }
-                }
+                  
+                  if (node.getChildren?.()) {
+                    [...node.getChildren()].forEach(child => traverseAndReplace(child));
+                  }
+                };
                 
-                // Recursively check children
-                if (node.getChildren && typeof node.getChildren === 'function') {
-                  const children = [...node.getChildren()]; // Create a copy to avoid mutation issues
-                  children.forEach(child => traverseAndReplace(child));
-                }
-              };
-              
-              traverseAndReplace(root);
+                traverseAndReplace(root);
+              }
+            } catch (error) {
+              console.error('❌ Markdown import error:', error);
+              $getRoot().clear();
+              $getRoot().append($createParagraphNode());
             }
-          } catch (error) {
-            console.error('❌ Markdown import error:', error);
-            const root = $getRoot();
-            root.clear();
-            root.append($createParagraphNode());
-          }
-        }, { discrete: true });
+          }, { discrete: true });
+        }, 500); // 500ms debounce - balanced for good UX
       },
     };
   }
