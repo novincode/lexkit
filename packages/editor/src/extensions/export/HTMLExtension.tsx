@@ -3,7 +3,7 @@ import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-import { $getRoot, $createParagraphNode } from 'lexical';
+import { $getRoot, $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical';
 
 export type HTMLCommands = {
   exportToHTML: () => string;
@@ -42,36 +42,35 @@ export class HTMLExtension extends BaseExtension<
       importFromHTML: (html: string) => {
         editor.update(() => {
           try {
-            // Clear existing content
             const root = $getRoot();
             root.clear();
 
             if (html.trim()) {
-              // Parse and insert HTML
+              // Parse HTML properly to avoid wrapper issues
               const parser = new DOMParser();
-              const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+              const doc = parser.parseFromString(html, 'text/html');
+              
+              // Generate nodes from the body to avoid extra wrappers
               const nodes = $generateNodesFromDOM(editor, doc);
-
-              // Insert nodes
+              
+              // Insert nodes directly to root
               if (nodes && nodes.length > 0) {
                 nodes.forEach((node: any) => {
                   if (node) {
                     root.append(node);
                   }
                 });
+              } else {
+                root.append($createParagraphNode());
               }
             } else {
-              // If empty HTML, add a default paragraph
-              const paragraph = $createParagraphNode();
-              root.append(paragraph);
+              root.append($createParagraphNode());
             }
           } catch (error) {
             console.error('Error importing HTML:', error);
-            // Fallback: clear and add empty paragraph
             const root = $getRoot();
             root.clear();
-            const paragraph = $createParagraphNode();
-            root.append(paragraph);
+            root.append($createParagraphNode());
           }
         }, { discrete: true });
       },

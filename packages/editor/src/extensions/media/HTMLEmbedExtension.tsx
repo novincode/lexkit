@@ -101,12 +101,31 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
         }
         return {
           conversion: (element: HTMLElement): DOMConversionOutput => {
-            const html = element.getAttribute('data-html-content') || element.innerHTML || '';
+            const html = element.getAttribute('data-html-content') || '';
             const payload: HTMLEmbedPayload = { html, preview: true };
             return { node: new HTMLEmbedNode(payload) };
           },
           priority: 4,
         };
+      },
+      p: (domNode: HTMLElement) => {
+        // Check if this paragraph contains our html embed div
+        const embedDiv = domNode.querySelector('div[data-lexical-html-embed="true"]');
+        if (embedDiv) {
+          return {
+            conversion: (element: HTMLElement): DOMConversionOutput => {
+              const embedElement = element.querySelector('div[data-lexical-html-embed="true"]') as HTMLElement;
+              if (embedElement) {
+                const html = embedElement.getAttribute('data-html-content') || '';
+                const payload: HTMLEmbedPayload = { html, preview: true };
+                return { node: new HTMLEmbedNode(payload) };
+              }
+              return { node: null };
+            },
+            priority: 4, // Higher priority than normal paragraph conversion
+          };
+        }
+        return null;
       },
     };
   }
@@ -334,7 +353,7 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
     
     return null;
   },
-  regExp: /^```html-embed\n([\s\S]*?)\n```$/,
+  regExp: /^```html-embed\s*\n([\s\S]*?)\n```$/,
   replace: (parentNode: any, _children: any[], match: RegExpMatchArray) => {
     const html = match[1] || '';
     
