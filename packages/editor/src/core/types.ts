@@ -1,6 +1,6 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
 import { ReactNode, CSSProperties } from 'react';
-import { Extension, ExtensionCategory } from '@repo/editor/extensions';
+import { Extension, ExtensionCategory } from '@lexkit/editor/extensions';
 
 export type { Extension, ExtensionCategory } from '../extensions';
 

@@ -108,7 +108,7 @@ State queries are async functions that return the current editor state.
 Provides bold text formatting.
 
 ```tsx
-import { boldExtension } from '@repo/editor/extensions';
+import { boldExtension } from '@lexkit/editor/extensions';
 ```
 
 #### ItalicExtension

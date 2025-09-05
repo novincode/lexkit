@@ -2,8 +2,8 @@ import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
 import { $setBlocksType } from '@lexical/selection';
 import { $createCodeNode, $isCodeNode, CodeNode } from '@lexical/code';
 import { $createParagraphNode } from 'lexical';
-import { BaseExtension } from '@repo/editor/extensions/base';
-import { ExtensionCategory } from '@repo/editor/extensions/types';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import { ReactNode } from 'react';
 
 /**
@@ -34,7 +34,7 @@ export type CodeStateQueries = {
  *
  * @example
  * ```tsx
- * import { codeExtension } from '@repo/editor/extensions/formatting/CodeExtension';
+ * import { codeExtension } from '@lexkit/editor/extensions/formatting/CodeExtension';
  *
  * const extensions = [codeExtension];
  * const editor = createEditorSystem(extensions);

@@ -1,12 +1,70 @@
-# shadcn/ui monorepo template
+# LexKit
 
-This template is for creating a monorepo with shadcn/ui.
+A headless, extensible rich text editor built on [Lexical](https://lexical.dev).
 
-## Usage
+## Packages
+
+- **`lexkit`** - Main package (recommended for most users)
+- **`@lexkit/editor`** - Core editor package
+- **`@lexkit/ui`** - UI components (coming soon)
+
+## Installation
 
 ```bash
-pnpm dlx shadcn@latest init
+# Main package (recommended)
+npm install lexkit
+
+# Or scoped package
+npm install @lexkit/editor
 ```
+
+## Quick Start
+
+```tsx
+import { createEditorSystem, boldExtension } from 'lexkit';
+
+const extensions = [boldExtension];
+const editor = createEditorSystem(extensions);
+
+// Use in your React component
+function MyEditor() {
+  const { editor, commands } = useEditor();
+
+  return (
+    <div>
+      <button onClick={() => commands.toggleBold()}>
+        Bold
+      </button>
+      {/* Your editor content */}
+    </div>
+  );
+}
+```
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Build all packages
+pnpm build
+
+# Lint
+pnpm lint
+```
+
+## Documentation
+
+- [API Reference](./packages/editor/docs/api-reference.md)
+- [Architecture](./packages/editor/docs/architecture.md)
+
+## License
+
+MIT
 
 ## Adding components
 

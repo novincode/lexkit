@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@repo/editor/extensions/base';
+import { TextFormatExtension } from '@lexkit/editor/extensions/base';
 
 /**
  * CodeFormatExtension - Provides inline code text formatting functionality
@@ -9,7 +9,7 @@ import { TextFormatExtension } from '@repo/editor/extensions/base';
  *
  * @example
  * ```tsx
- * import { codeFormatExtension } from '@repo/editor/extensions/formatting/CodeFormatExtension';
+ * import { codeFormatExtension } from '@lexkit/editor/extensions/formatting/CodeFormatExtension';
  *
  * const extensions = [codeFormatExtension];
  * const editor = createEditorSystem(extensions);

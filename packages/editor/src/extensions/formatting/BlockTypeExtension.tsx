@@ -61,7 +61,7 @@ export type BlockFormatStateQueries = {
  *
  * @example
  * ```tsx
- * import { blockFormatExtension } from '@repo/editor/extensions/formatting/BlockTypeExtension';
+ * import { blockFormatExtension } from '@lexkit/editor/extensions/formatting/BlockTypeExtension';
  *
  * const extensions = [blockFormatExtension];
  * const editor = createEditorSystem(extensions);

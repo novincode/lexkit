@@ -1,7 +1,7 @@
 import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, CAN_UNDO_COMMAND, CAN_REDO_COMMAND } from 'lexical';
 import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@repo/editor/extensions/base';
-import { ExtensionCategory } from '@repo/editor/extensions/types';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import { ReactNode } from 'react';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 

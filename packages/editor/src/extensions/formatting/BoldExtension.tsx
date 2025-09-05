@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@repo/editor/extensions/base';
+import { TextFormatExtension } from '@lexkit/editor/extensions/base';
 
 /**
  * Bold text formatting extension.

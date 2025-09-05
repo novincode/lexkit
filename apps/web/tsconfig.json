@@ -6,8 +6,8 @@
       "@/*": ["./*"],
       "@repo/ui": ["../../packages/ui/src"],
       "@repo/ui/*": ["../../packages/ui/src/*"],
-      "@repo/editor": ["../../packages/editor/src"],
-      "@repo/editor/*": ["../../packages/editor/src/*"]
+      "@lexkit/editor": ["../../packages/editor/src"],
+      "@lexkit/editor/*": ["../../packages/editor/src/*"]
     },
     "plugins": [
       {

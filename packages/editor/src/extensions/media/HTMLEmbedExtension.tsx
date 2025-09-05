@@ -15,8 +15,8 @@ import {
   SerializedLexicalNode,
   Spread
 } from 'lexical';
-import { BaseExtension } from '@repo/editor/extensions/base';
-import { ExtensionCategory } from '@repo/editor/extensions/types';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import { ReactNode } from 'react';
 
 /**

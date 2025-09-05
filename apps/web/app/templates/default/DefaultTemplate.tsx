@@ -14,14 +14,14 @@ import {
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension
-} from '@repo/editor/extensions';
-import { HTML_EMBED_MARKDOWN_TRANSFORMER } from '@repo/editor/extensions/media/HTMLEmbedExtension';
+} from '@lexkit/editor/extensions';
+import { HTML_EMBED_MARKDOWN_TRANSFORMER } from '@lexkit/editor/extensions/media/HTMLEmbedExtension';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
-import { ImageNode } from '@repo/editor/extensions/media';
+import { ImageNode } from '@lexkit/editor/extensions/media';
 import { defaultTheme } from './theme';
 import './styles.css';
 import { 
@@ -49,8 +49,8 @@ import {
   Pencil
 } from 'lucide-react';
 import { Select, Dropdown } from './components';
-import { createEditorSystem } from '@repo/editor';
-import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
+import { createEditorSystem } from '@lexkit/editor';
+import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
 
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {

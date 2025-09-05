@@ -7,7 +7,7 @@
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
     "paths": {
-      "@repo/editor/*": ["./src/*"]
+      "@lexkit/editor/*": ["./src/*"]
     }
   },
   "include": ["src"],

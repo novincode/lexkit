@@ -23,8 +23,8 @@ import {
 import { ReactNode, useEffect, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { BaseExtension } from '@repo/editor/extensions/base';
-import { BaseExtensionConfig, ExtensionCategory } from '@repo/editor/extensions/types';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { BaseExtensionConfig, ExtensionCategory } from '@lexkit/editor/extensions/types';
 
 // JSX to DOM converter - the magic happens here!
 function jsxToDOM(jsxElement: React.ReactElement): HTMLElement {

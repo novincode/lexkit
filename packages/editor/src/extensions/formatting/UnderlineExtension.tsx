@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@repo/editor/extensions/base';
+import { TextFormatExtension } from '@lexkit/editor/extensions/base';
 
 /**
  * UnderlineExtension - Provides underline text formatting functionality
@@ -9,7 +9,7 @@ import { TextFormatExtension } from '@repo/editor/extensions/base';
  *
  * @example
  * ```tsx
- * import { underlineExtension } from '@repo/editor/extensions/formatting/UnderlineExtension';
+ * import { underlineExtension } from '@lexkit/editor/extensions/formatting/UnderlineExtension';
  *
  * const extensions = [underlineExtension];
  * const editor = createEditorSystem(extensions);

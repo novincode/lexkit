@@ -13,7 +13,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@repo/ui", "@repo/editor"],
+  transpilePackages: ["@repo/ui", "@lexkit/editor"],
 
   images: {
     remotePatterns: [

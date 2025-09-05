@@ -18,8 +18,8 @@ LexKit is a powerful editor framework that provides a clean, type-safe API for b
 ## Quick Start
 
 ```tsx
-import { createEditorSystem } from '@repo/editor';
-import { boldExtension, italicExtension } from '@repo/editor/extensions';
+import { createEditorSystem } from '@lexkit/editor';
+import { boldExtension, italicExtension } from '@lexkit/editor/extensions';
 
 const extensions = [boldExtension, italicExtension] as const;
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -93,7 +93,7 @@ Extensions are the building blocks of LexKit. Each extension provides:
 ### Custom Extensions
 
 ```tsx
-import { BaseExtension } from '@repo/editor/extensions/base';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
 
 class MyExtension extends BaseExtension<'myExtension'> {
   constructor() {

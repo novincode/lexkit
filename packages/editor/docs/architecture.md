@@ -79,8 +79,8 @@ abstract class TextFormatExtension<Name extends TextFormatType>
 ### Basic Setup
 
 ```tsx
-import { createEditorSystem } from '@repo/editor';
-import { boldExtension, italicExtension } from '@repo/editor/extensions';
+import { createEditorSystem } from '@lexkit/editor';
+import { boldExtension, italicExtension } from '@lexkit/editor/extensions';
 
 const extensions = [boldExtension, italicExtension] as const;
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -98,7 +98,7 @@ function Editor() {
 ### Custom Extensions
 
 ```tsx
-import { BaseExtension } from '@repo/editor/extensions/base';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
 
 class MyExtension extends BaseExtension<'myExtension'> {
   getCommands(editor) {

@@ -1,5 +1,5 @@
 import { ComponentType, CSSProperties } from 'react';
-import { BaseExtensionConfig } from '@repo/editor/extensions/types';
+import { BaseExtensionConfig } from '@lexkit/editor/extensions/types';
 
 /**
  * Supported alignment options for media elements

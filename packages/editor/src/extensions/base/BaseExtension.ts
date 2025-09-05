@@ -1,6 +1,6 @@
 import { LexicalEditor, TextFormatType } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
-import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from '@repo/editor/extensions/types';
+import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from '@lexkit/editor/extensions/types';
 
 /**
  * Abstract base class for all LexKit extensions.
