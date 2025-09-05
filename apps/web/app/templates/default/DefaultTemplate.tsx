@@ -587,9 +587,9 @@ function EditorContent({
     }
   }, [isDark, editor]);
 
-  // Sync content when editor changes
+  // Sync content when editor changes (only for non-markdown modes)
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || mode === 'markdown') return;
 
     const syncContent = () => {
       if (hasExtension('html')) {
@@ -614,7 +614,7 @@ function EditorContent({
     syncContent(); // Initial sync
 
     return unregister;
-  }, [editor, hasExtension, commands]);
+  }, [editor, hasExtension, commands, mode]);
 
   // Simple handlers - no debouncing needed
   const handleHtmlChange = (html: string) => {
@@ -641,6 +641,26 @@ function EditorContent({
 
   // Handle mode changes
   const handleModeChange = (newMode: EditorMode) => {
+    // If leaving markdown mode, sync the markdown content first
+    if (mode === 'markdown' && newMode !== 'markdown' && editor && hasExtension('markdown')) {
+      try {
+        const markdown = commands.exportToMarkdown();
+        setContent(prev => ({ ...prev, markdown }));
+      } catch (error) {
+        console.error('Failed to export Markdown:', error);
+      }
+    }
+    
+    // If entering markdown mode, sync the current editor content to markdown
+    if (newMode === 'markdown' && mode !== 'markdown' && editor && hasExtension('markdown')) {
+      try {
+        const markdown = commands.exportToMarkdown();
+        setContent(prev => ({ ...prev, markdown }));
+      } catch (error) {
+        console.error('Failed to export Markdown:', error);
+      }
+    }
+    
     setMode(newMode);
   };
 
