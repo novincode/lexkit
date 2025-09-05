@@ -6,6 +6,7 @@ import {
   underlineExtension,
   strikethroughExtension,
   linkExtension,
+  horizontalRuleExtension,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -43,6 +44,7 @@ import {
   Upload, 
   Link,
   Unlink,
+  Minus,
   Code,
   Terminal,
   Type,
@@ -84,6 +86,7 @@ const extensions = [
   underlineExtension,
   strikethroughExtension,
   linkExtension,
+  horizontalRuleExtension,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -302,6 +305,19 @@ function Toolbar({
             title="Numbered List"
           >
             <ListOrdered size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Horizontal Rule Section */}
+      {hasExtension('horizontalRule') && (
+        <div className="lexkit-toolbar-section">
+          <button 
+            onClick={() => commands.insertHorizontalRule()} 
+            className="lexkit-toolbar-button"
+            title="Insert Horizontal Rule"
+          >
+            <Minus size={16} />
           </button>
         </div>
       )}

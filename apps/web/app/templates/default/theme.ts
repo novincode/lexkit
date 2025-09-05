@@ -64,4 +64,5 @@ export const defaultTheme = {
     code: 'lexkit-text-code',
   },
   image: 'lexical-image',
+  horizontalRule: 'lexkit-hr',
 };

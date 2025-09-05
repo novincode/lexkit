@@ -449,6 +449,15 @@
   font-style: italic;
 }
 
+/* Horizontal Rule Styles */
+.lexkit-hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 1px solid var(--lexkit-border);
+  height: 1px;
+  background: none;
+}
+
 .lexical-image.align-left figcaption {
   text-align: left;
 }

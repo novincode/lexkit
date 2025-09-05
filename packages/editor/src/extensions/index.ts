@@ -14,6 +14,7 @@ export { ItalicExtension, italicExtension } from './formatting/ItalicExtension';
 export { UnderlineExtension, underlineExtension } from './formatting/UnderlineExtension';
 export { StrikethroughExtension, strikethroughExtension } from './formatting/StrikethroughExtension';
 export { LinkExtension, linkExtension } from './formatting/LinkExtension';
+export { HorizontalRuleExtension, horizontalRuleExtension } from './formatting/HorizontalRuleExtension';
 
 // Structure Extensions
 export { ListExtension, listExtension } from './formatting/ListExtension';
