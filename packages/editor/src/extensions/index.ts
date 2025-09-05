@@ -11,6 +11,7 @@ export { HTMLExtension, htmlExtension } from './export/HTMLExtension';
 export { MarkdownExtension, markdownExtension } from './export/MarkdownExtension';
 export { TextFormatExtension } from './base/TextFormatExtension';
 export { ImageExtension, imageExtension } from './media/ImageExtension';
+export { HTMLEmbedExtension, htmlEmbedExtension } from './media/HTMLEmbedExtension';
 export { createCustomNodeExtension } from './custom/CustomNodeExtension';
 export * from './types';
 export * from './base/BaseExtension';

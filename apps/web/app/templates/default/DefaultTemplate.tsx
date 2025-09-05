@@ -12,7 +12,8 @@ import {
   htmlExtension,
   markdownExtension,
   codeExtension,
-  codeFormatExtension
+  codeFormatExtension,
+  htmlEmbedExtension
 } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -41,7 +42,8 @@ import {
   Link,
   Code,
   Terminal,
-  Type
+  Type,
+  FileCode
 } from 'lucide-react';
 import { Select, Dropdown } from './components';
 import { createEditorSystem } from '@repo/editor';
@@ -84,6 +86,7 @@ const extensions = [
   codeFormatExtension,
   htmlExtension,
   markdownExtension,
+  htmlEmbedExtension,
   MyCustomExtension
 ] as const;
 
@@ -387,6 +390,28 @@ function Toolbar({
         </div>
       )}
 
+      {/* HTML Embed Section */}
+      {hasExtension('htmlEmbed') && (
+        <div className="lexkit-toolbar-section">
+          <button 
+            onClick={() => commands.insertHTMLEmbed()}
+            className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? 'active' : ''}`}
+            title="Insert HTML Embed"
+          >
+            <FileCode size={16} />
+          </button>
+          {activeStates.isHTMLEmbedSelected && (
+            <button 
+              onClick={() => commands.toggleHTMLPreview()}
+              className="lexkit-toolbar-button"
+              title="Toggle HTML Preview/Edit"
+            >
+              {activeStates.isHTMLPreviewMode ? '✏️' : '👁️'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* History Section */}
       {hasExtension('history') && (
         <div className="lexkit-toolbar-section">
@@ -519,8 +544,8 @@ function EditorContent({
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
-  const [htmlContent, setHtmlContent] = useState('');
-  const [markdownContent, setMarkdownContent] = useState('');
+  const [content, setContent] = useState({ html: '', markdown: '' });
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Update theme dynamically
   useEffect(() => {
@@ -529,83 +554,94 @@ function EditorContent({
     }
   }, [isDark, editor]);
 
-  // Sync HTML content when switching to HTML mode
+  // Sync content between all modes
   useEffect(() => {
-    if (mode === 'html' && editor && hasExtension('html')) {
-      const unsubscribe = editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
+    if (!editor || isUpdating) return;
+
+    const syncContent = () => {
+      if (mode === 'visual') {
+        // Export from visual to HTML and Markdown
+        if (hasExtension('html')) {
           try {
             const html = commands.exportToHTML();
-            setHtmlContent(html);
+            setContent(prev => ({ ...prev, html }));
           } catch (error) {
             console.error('Failed to export HTML:', error);
           }
-        });
-      });
-      
-      // Initial export
-      try {
-        const html = commands.exportToHTML();
-        setHtmlContent(html);
-      } catch (error) {
-        console.error('Failed to export HTML:', error);
-      }
-      
-      return unsubscribe;
-    }
-  }, [mode, editor, hasExtension, commands]);
-
-  // Sync Markdown content when switching to Markdown mode
-  useEffect(() => {
-    if (mode === 'markdown' && editor && hasExtension('markdown')) {
-      const unsubscribe = editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
+        }
+        if (hasExtension('markdown')) {
           try {
             const markdown = commands.exportToMarkdown();
-            setMarkdownContent(markdown);
+            setContent(prev => ({ ...prev, markdown }));
           } catch (error) {
             console.error('Failed to export Markdown:', error);
           }
-        });
-      });
-      
-      // Initial export
-      try {
-        const markdown = commands.exportToMarkdown();
-        setMarkdownContent(markdown);
-      } catch (error) {
-        console.error('Failed to export Markdown:', error);
+        }
       }
-      
-      return unsubscribe;
-    }
-  }, [mode, editor, hasExtension, commands]);
+    };
 
-  // Import HTML changes back to visual editor
+    const unregister = editor.registerUpdateListener(() => {
+      syncContent();
+    });
+
+    // Initial sync
+    syncContent();
+
+    return unregister;
+  }, [mode, editor, hasExtension, commands, isUpdating]);
+
+  // Handle HTML content changes
   const handleHtmlChange = (html: string) => {
-    setHtmlContent(html);
-  };
-
-  // Import Markdown changes back to visual editor
-  const handleMarkdownChange = (markdown: string) => {
-    setMarkdownContent(markdown);
-  };
-
-  // Import HTML/Markdown when switching back to visual mode
-  const handleModeChange = (newMode: EditorMode) => {
-    if (newMode === 'visual' && mode === 'html' && hasExtension('html') && editor) {
+    setContent(prev => ({ ...prev, html }));
+    if (mode === 'html' && hasExtension('html') && editor) {
+      setIsUpdating(true);
       try {
-        commands.importFromHTML(htmlContent);
+        commands.importFromHTML(html);
+        // Also sync to Markdown after importing HTML
+        if (hasExtension('markdown')) {
+          setTimeout(() => {
+            try {
+              const markdown = commands.exportToMarkdown();
+              setContent(prev => ({ ...prev, markdown }));
+            } catch (error) {
+              console.error('Failed to sync Markdown from HTML:', error);
+            }
+          }, 0);
+        }
       } catch (error) {
         console.error('Failed to import HTML:', error);
       }
-    } else if (newMode === 'visual' && mode === 'markdown' && hasExtension('markdown') && editor) {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle Markdown content changes
+  const handleMarkdownChange = (markdown: string) => {
+    setContent(prev => ({ ...prev, markdown }));
+    if (mode === 'markdown' && hasExtension('markdown') && editor) {
+      setIsUpdating(true);
       try {
-        commands.importFromMarkdown(markdownContent);
+        commands.importFromMarkdown(markdown);
+        // Also sync to HTML after importing Markdown
+        if (hasExtension('html')) {
+          setTimeout(() => {
+            try {
+              const html = commands.exportToHTML();
+              setContent(prev => ({ ...prev, html }));
+            } catch (error) {
+              console.error('Failed to sync HTML from Markdown:', error);
+            }
+          }, 0);
+        }
       } catch (error) {
         console.error('Failed to import Markdown:', error);
       }
+      setIsUpdating(false);
     }
+  };
+
+  // Handle mode changes
+  const handleModeChange = (newMode: EditorMode) => {
     setMode(newMode);
   };
 
@@ -633,12 +669,12 @@ function EditorContent({
           />
         ) : mode === 'html' ? (
           <HTMLSourceView 
-            htmlContent={htmlContent} 
+            htmlContent={content.html} 
             onHtmlChange={handleHtmlChange}
           />
         ) : mode === 'markdown' ? (
           <MarkdownSourceView 
-            markdownContent={markdownContent} 
+            markdownContent={content.markdown} 
             onMarkdownChange={handleMarkdownChange}
           />
         ) : null}
