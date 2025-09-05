@@ -2,10 +2,11 @@ import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 
 export type HTMLCommands = {
-  exportToHTML: () => Promise<string>;
-  importFromHTML: (html: string) => Promise<void>;
+  exportToHTML: () => string;
+  importFromHTML: (html: string) => void;
 };
 
 export type HTMLStateQueries = {
@@ -19,18 +20,11 @@ export class HTMLExtension extends BaseExtension<
   HTMLStateQueries,
   ReactNode[]
 > {
-  private htmlPlugin: any = null;
-
   constructor() {
     super('html', [ExtensionCategory.Toolbar]);
   }
 
   register(editor: LexicalEditor): () => void {
-    // Lazy load HTML plugin
-    import('@lexical/html').then(({ $generateHtmlFromNodes, $generateNodesFromDOM }) => {
-      this.htmlPlugin = { $generateHtmlFromNodes, $generateNodesFromDOM };
-    });
-
     return () => {
       // Cleanup if needed
     };
@@ -38,40 +32,43 @@ export class HTMLExtension extends BaseExtension<
 
   getCommands(editor: LexicalEditor): HTMLCommands {
     return {
-      exportToHTML: async () => {
-        if (!this.htmlPlugin) {
-          throw new Error('HTML plugin not loaded');
-        }
-
-        return new Promise((resolve) => {
-          editor.getEditorState().read(() => {
-            const html = this.htmlPlugin.$generateHtmlFromNodes(editor);
-            resolve(html);
-          });
+      exportToHTML: () => {
+        return editor.getEditorState().read(() => {
+          return $generateHtmlFromNodes(editor);
         });
       },
 
-      importFromHTML: async (html: string) => {
-        if (!this.htmlPlugin) {
-          throw new Error('HTML plugin not loaded');
-        }
-
+      importFromHTML: (html: string) => {
         editor.update(() => {
-          // Clear existing content
-          const root = editor.getRootElement();
-          if (root) {
-            root.innerHTML = '';
+          try {
+            // Clear existing content properly
+            const root = editor.getRootElement();
+            if (root) {
+              // Clear all children
+              while (root.firstChild) {
+                root.removeChild(root.firstChild);
+              }
+            }
+
+            // Parse and insert HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const nodes = $generateNodesFromDOM(editor, doc);
+
+            // Insert nodes
+            if (nodes && nodes.length > 0) {
+              const rootNode = editor.getRootElement();
+              if (rootNode) {
+                nodes.forEach((node: any) => {
+                  if (node) {
+                    rootNode.appendChild(node);
+                  }
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error importing HTML:', error);
           }
-
-          // Parse and insert HTML
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const nodes = this.htmlPlugin.$generateNodesFromDOM(editor, doc.body);
-
-          // Insert nodes
-          nodes.forEach((node: any) => {
-            editor.getRootElement()?.appendChild(node);
-          });
         });
       },
     };
@@ -79,9 +76,7 @@ export class HTMLExtension extends BaseExtension<
 
   getStateQueries(editor: LexicalEditor): HTMLStateQueries {
     return {
-      canExportHTML: async () => {
-        return this.htmlPlugin !== null;
-      },
+      canExportHTML: async () => true,
     };
   }
 }

@@ -34,25 +34,6 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     // Plugins: Collect inferred
     const plugins = useMemo(() => extensions.flatMap(ext => ext.getPlugins?.() || []), [extensions]);
 
-    // Lazy exports - use extensions if available
-    const [lazyExports, setLazyExports] = useState({
-      toHTML: async () => {
-        const htmlExt = extensions.find(ext => ext.name === 'html');
-        if (htmlExt && 'exportToHTML' in commands) {
-          return (commands as any).exportToHTML();
-        }
-        return '';
-      },
-      toMarkdown: async () => '',
-      fromHTML: async (html: string) => {
-        const htmlExt = extensions.find(ext => ext.name === 'html');
-        if (htmlExt && 'importFromHTML' in commands) {
-          return (commands as any).importFromHTML(html);
-        }
-      },
-      fromMarkdown: async (md: string) => {},
-    });
-
     // Register extensions (this was missing!)
     useEffect(() => {
       if (!editor) return;
@@ -157,13 +138,13 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
         registerPaste: (listener: (event: ClipboardEvent) => boolean) => editor?.registerCommand(PASTE_COMMAND, listener, 4) || (() => {}),
       },
       export: {
-        toHTML: lazyExports.toHTML,
-        toMarkdown: lazyExports.toMarkdown,
+        toHTML: async () => '',
+        toMarkdown: async () => '',
         toJSON: () => editor?.getEditorState().toJSON(),
       },
       import: {
-        fromHTML: lazyExports.fromHTML,
-        fromMarkdown: lazyExports.fromMarkdown,
+        fromHTML: async () => {},
+        fromMarkdown: async () => {},
         fromJSON: (json: any) => editor?.setEditorState(editor.parseEditorState(json)),
       },
       lexical: editor,

@@ -487,29 +487,39 @@ function EditorContent({
     }
   }, [isDark, editor]);
 
-  // Sync HTML content when switching to HTML mode
+  // Sync HTML content when switching to HTML mode (only if empty)
   useEffect(() => {
-    if (mode === 'html' && editor && hasExtension('html')) {
-      commands.exportToHTML().then(setHtmlContent).catch(console.error);
+    if (mode === 'html' && editor && hasExtension('html') && !htmlContent.trim()) {
+      try {
+        const html = commands.exportToHTML();
+        setHtmlContent(html);
+      } catch (error) {
+        console.error('Failed to export HTML:', error);
+      }
     }
-  }, [mode, editor, hasExtension, commands]);
+  }, [mode, editor, hasExtension, commands, htmlContent]);
 
   // Import HTML changes back to visual editor
-  const handleHtmlChange = async (html: string) => {
+  const handleHtmlChange = (html: string) => {
     setHtmlContent(html);
-    if (hasExtension('html') && editor) {
+  };
+
+  // Import HTML when switching back to visual mode
+  const handleModeChange = (newMode: EditorMode) => {
+    if (newMode === 'visual' && mode === 'html' && hasExtension('html') && editor) {
       try {
-        await commands.importFromHTML(html);
+        commands.importFromHTML(htmlContent);
       } catch (error) {
         console.error('Failed to import HTML:', error);
       }
     }
+    setMode(newMode);
   };
 
   return (
     <>
       <div className="lexkit-editor-header">
-        <ModeTabs mode={mode} onModeChange={setMode} />
+        <ModeTabs mode={mode} onModeChange={handleModeChange} />
         {mode === 'visual' && (
           <Toolbar 
             commands={commands} 
