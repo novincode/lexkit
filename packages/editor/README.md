@@ -8,7 +8,7 @@
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://badge.fury.io/js/%40lexkit%2Feditor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 Documentation](https://lexkit.codeideal.com) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [� Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [�💬 Discord](https://discord.gg/lexkit)
+[📚 Documentation](https://lexkit.codeideal.com) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [� Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [�💬 Discord](https://discord.gg/hAvRFC9Y)
 
 </div>
 
@@ -685,7 +685,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 - **[🚀 Interactive Demo](https://lexkit.codeideal.com/demo)** - Try it live
 - **[� Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
 - **[�📝 Examples](https://lexkit.codeideal.com/examples)** - Real-world implementations
-- **[💬 Discord Community](https://discord.gg/lexkit)** - Get help and share ideas
+- **[💬 Discord Community](https://discord.gg/hAvRFC9Y)** - Get help and share ideas
 
 *📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*
 
