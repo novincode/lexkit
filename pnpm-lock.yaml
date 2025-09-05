@@ -50,6 +50,12 @@ importers:
       '@lexical/rich-text':
         specifier: ^0.34.0
         version: 0.34.0
+      '@lexical/selection':
+        specifier: ^0.34.0
+        version: 0.34.0
+      '@lexical/utils':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@repo/editor':
         specifier: workspace:*
         version: link:../../packages/editor
@@ -112,6 +118,12 @@ importers:
         specifier: ^0.34.0
         version: 0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
       '@lexical/rich-text':
+        specifier: ^0.34.0
+        version: 0.34.0
+      '@lexical/selection':
+        specifier: ^0.34.0
+        version: 0.34.0
+      '@lexical/utils':
         specifier: ^0.34.0
         version: 0.34.0
       lexical:

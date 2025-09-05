@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react';
-import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension, headingExtension } from '@repo/editor/extensions';
+import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension, blockFormatExtension } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -39,7 +39,7 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Define the extensions array as a const to maintain literal types
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, headingExtension, MyCustomExtension] as const;
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, blockFormatExtension, MyCustomExtension] as const;
 
 // Create a typed editor system for these specific extensions
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -220,17 +220,17 @@ function Toolbar({
           <Italic size={20} />
         </button>
       )}
-      {hasExtension('heading') && (
+      {hasExtension('blockFormat') && (
         <Select 
           value={activeStates.isH1 ? 'h1' : activeStates.isH2 ? 'h2' : activeStates.isH3 ? 'h3' : activeStates.isH4 ? 'h4' : activeStates.isH5 ? 'h5' : activeStates.isH6 ? 'h6' : activeStates.isQuote ? 'quote' : 'p'} 
           onValueChange={(value) => {
             if (value === 'p') commands.toggleParagraph();
-            else if (value === 'h1') commands.toggleH1();
-            else if (value === 'h2') commands.toggleH2();
-            else if (value === 'h3') commands.toggleH3();
-            else if (value === 'h4') commands.toggleH4();
-            else if (value === 'h5') commands.toggleH5();
-            else if (value === 'h6') commands.toggleH6();
+            else if (value === 'h1') commands.toggleHeading('h1');
+            else if (value === 'h2') commands.toggleHeading('h2');
+            else if (value === 'h3') commands.toggleHeading('h3');
+            else if (value === 'h4') commands.toggleHeading('h4');
+            else if (value === 'h5') commands.toggleHeading('h5');
+            else if (value === 'h6') commands.toggleHeading('h6');
             else if (value === 'quote') commands.toggleQuote();
           }}
         >

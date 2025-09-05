@@ -2,7 +2,7 @@ export { BoldExtension, boldExtension } from './formatting/BoldExtension';
 export { ItalicExtension, italicExtension } from './formatting/ItalicExtension';
 export { ListExtension, listExtension } from './formatting/ListExtension';
 export { HistoryExtension, historyExtension } from './formatting/HistoryExtension';
-export { HeadingExtension, headingExtension } from './formatting/HeadingExtension';
+export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockTypeExtension';
 export { TextFormatExtension } from './base/TextFormatExtension';
 export { ImageExtension, imageExtension } from './media/ImageExtension';
 export { createCustomNodeExtension } from './custom/CustomNodeExtension';
