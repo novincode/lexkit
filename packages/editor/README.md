@@ -63,6 +63,9 @@ function MyEditor() {
 ### 🚀 **Production Features Out-of-the-Box**
 - **HTML & Markdown export/import** with custom transformers
 - **Image handling** with upload, paste, and alignment
+- **Table support** with context menus, row/column manipulation, and GitHub Flavored Markdown
+- **Command palette** with searchable commands and keyboard shortcuts
+- **Context menus** and floating toolbars for contextual actions
 - **Undo/Redo** with full history
 - **Multi-format editing** (Visual, HTML, Markdown modes)
 - **Error boundaries** and robust error handling
@@ -352,6 +355,55 @@ export default function App() {
 
 ---
 
+## 🎉 **Latest Features**
+
+### 📊 **Advanced Table Support**
+Comprehensive table functionality with context menus and GitHub Flavored Markdown:
+
+```tsx
+const extensions = [
+  tableExtension,
+  // ... other extensions
+] as const;
+
+function MyEditor() {
+  const { commands, activeStates } = useEditor();
+
+  // Right-click on table cells for context menu
+  // Or use commands programmatically
+  return (
+    <button onClick={() => commands.table.insertRowAbove()}>
+      Insert Row Above
+    </button>
+  );
+}
+```
+
+### 🎯 **Command Palette**
+Searchable command interface with keyboard shortcuts:
+
+```tsx
+const extensions = [
+  commandPaletteExtension,
+  // ... other extensions
+] as const;
+
+function MyEditor() {
+  const { commands } = useEditor();
+
+  return (
+    <button onClick={() => commands.showCommandPalette()}>
+      ⌘ Search Commands
+    </button>
+  );
+}
+```
+
+### 📋 **Context Menus & Floating Toolbars**
+Headless contextual UI components for building rich interactions.
+
+---
+
 ## 📋 Extensions & Commands Reference
 
 LexKit provides **25+ extensions** with typed commands and state queries:
@@ -371,12 +423,25 @@ LexKit provides **25+ extensions** with typed commands and state queries:
 | `listExtension` | `toggleUnorderedList()`, `toggleOrderedList()` | `unorderedList`, `orderedList` |
 | `blockFormatExtension` | `toggleHeading('h1'-'h6')`, `toggleQuote()` | `isH1`, `isH2`, ..., `isQuote` |
 | `codeFormatExtension` | `toggleCodeBlock()` | `isInCodeBlock` |
+| `horizontalRuleExtension` | `insertHorizontalRule()` | - |
+
+### Tables
+| Extension | Commands | State Queries |
+|-----------|----------|---------------|
+| `tableExtension` | `insertTable()`, `table.*` (row/column operations) | `isTableSelected`, `isInTableCell` |
 
 ### Media & Embeds
 | Extension | Commands | State Queries |
 |-----------|----------|---------------|
 | `imageExtension` | `insertImage({...})`, `setImageAlignment()`, `setImageCaption()` | `imageSelected` |
 | `htmlEmbedExtension` | `insertHTMLEmbed()`, `toggleHTMLPreview()` | `isHTMLEmbedSelected`, `isHTMLPreviewMode` |
+
+### Core System
+| Extension | Commands | State Queries |
+|-----------|----------|---------------|
+| `commandPaletteExtension` | `showCommandPalette()`, `registerCommand()` | `isCommandPaletteOpen` |
+| `contextMenuExtension` | `showContextMenu()`, `hideContextMenu()` | `isContextMenuOpen` |
+| `floatingToolbarExtension` | `showFloatingToolbar()`, `hideFloatingToolbar()` | `isFloatingToolbarOpen` |
 
 ### History & Utils
 | Extension | Commands | State Queries |

@@ -51,6 +51,9 @@ function MyEditor() {
 ### 🚀 **Production Features Out-of-the-Box**
 - **HTML & Markdown export/import** with custom transformers
 - **Image handling** with upload, paste, and alignment
+- **Table support** with context menus, row/column manipulation, and GitHub Flavored Markdown
+- **Command palette** with searchable commands and keyboard shortcuts
+- **Context menus** and floating toolbars for contextual actions
 - **Undo/Redo** with full history
 - **Multi-format editing** (Visual, HTML, Markdown modes)
 - **Error boundaries** and robust error handling
@@ -345,6 +348,120 @@ export default function App() {
 
 ---
 
+## 🎉 **New in Latest Version**
+
+### 📊 **Advanced Table Support**
+LexKit now includes comprehensive table functionality:
+
+```tsx
+const extensions = [
+  tableExtension,
+  // ... other extensions
+] as const;
+
+function MyEditor() {
+  const { commands, activeStates } = useEditor();
+
+  return (
+    <div>
+      {/* Insert table */}
+      <button onClick={() => commands.insertTable({ rows: 3, columns: 3 })}>
+        Insert Table
+      </button>
+
+      {/* Table commands (when in table cell) */}
+      {activeStates.isInTableCell && (
+        <div>
+          <button onClick={() => commands.table.insertRowAbove()}>
+            Insert Row Above
+          </button>
+          <button onClick={() => commands.table.insertRowBelow()}>
+            Insert Row Below
+          </button>
+          <button onClick={() => commands.table.insertColumnLeft()}>
+            Insert Column Left
+          </button>
+          <button onClick={() => commands.table.insertColumnRight()}>
+            Insert Column Right
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+**Features:**
+- ✅ Right-click context menus on table cells
+- ✅ Row and column manipulation commands
+- ✅ GitHub Flavored Markdown table support
+- ✅ Table selection and styling
+- ✅ Keyboard shortcuts for table operations
+
+### 🎯 **Command Palette**
+Searchable command interface with keyboard shortcuts:
+
+```tsx
+const extensions = [
+  commandPaletteExtension,
+  // ... other extensions
+] as const;
+
+function MyEditor() {
+  const { commands } = useEditor();
+
+  return (
+    <div>
+      {/* Command palette button */}
+      <button onClick={() => commands.showCommandPalette()}>
+        ⌘ Search Commands
+      </button>
+    </div>
+  );
+}
+```
+
+**Features:**
+- ✅ Search all available commands
+- ✅ Keyboard shortcuts (Ctrl+K / Cmd+K)
+- ✅ Categorized command groups
+- ✅ Custom command registration
+
+### 📋 **Context Menus & Floating Toolbars**
+Headless contextual UI components:
+
+```tsx
+const extensions = [
+  contextMenuExtension,
+  floatingToolbarExtension,
+  // ... other extensions
+] as const;
+
+function MyEditor() {
+  const { commands } = useEditor();
+
+  const showContextMenu = () => {
+    commands.showContextMenu({
+      items: [
+        { label: 'Copy', action: () => console.log('Copy') },
+        { label: 'Paste', action: () => console.log('Paste') },
+        { separator: true },
+        { label: 'Delete', action: () => console.log('Delete') }
+      ],
+      position: { x: 100, y: 100 }
+    });
+  };
+
+  return (
+    <button onClick={showContextMenu}>
+      Show Context Menu
+    </button>
+  );
+}
+```
+
+---
+
 ## 📦 Packages
 
 LexKit is organized as a monorepo with the following packages:
@@ -387,6 +504,7 @@ LexKit provides **25+ extensions** with typed commands and state queries:
 | `underlineExtension` | `toggleUnderline()` | `underline: boolean` |
 | `strikethroughExtension` | `toggleStrikethrough()` | `strikethrough: boolean` |
 | `codeExtension` | `formatText('code')` | `code: boolean` |
+| `linkExtension` | `insertLink()`, `removeLink()` | `isLink: boolean` |
 
 ### Structure & Blocks
 | Extension | Commands | State Queries |
@@ -394,12 +512,25 @@ LexKit provides **25+ extensions** with typed commands and state queries:
 | `listExtension` | `toggleUnorderedList()`, `toggleOrderedList()` | `unorderedList`, `orderedList` |
 | `blockFormatExtension` | `toggleHeading('h1'-'h6')`, `toggleQuote()` | `isH1`, `isH2`, ..., `isQuote` |
 | `codeFormatExtension` | `toggleCodeBlock()` | `isInCodeBlock` |
+| `horizontalRuleExtension` | `insertHorizontalRule()` | - |
+
+### Tables
+| Extension | Commands | State Queries |
+|-----------|----------|---------------|
+| `tableExtension` | `insertTable()`, `table.*` (row/column operations) | `isTableSelected`, `isInTableCell` |
 
 ### Media & Embeds
 | Extension | Commands | State Queries |
 |-----------|----------|---------------|
 | `imageExtension` | `insertImage({...})`, `setImageAlignment()`, `setImageCaption()` | `imageSelected` |
 | `htmlEmbedExtension` | `insertHTMLEmbed()`, `toggleHTMLPreview()` | `isHTMLEmbedSelected`, `isHTMLPreviewMode` |
+
+### Core System
+| Extension | Commands | State Queries |
+|-----------|----------|---------------|
+| `commandPaletteExtension` | `showCommandPalette()`, `registerCommand()` | `isCommandPaletteOpen` |
+| `contextMenuExtension` | `showContextMenu()`, `hideContextMenu()` | `isContextMenuOpen` |
+| `floatingToolbarExtension` | `showFloatingToolbar()`, `hideFloatingToolbar()` | `isFloatingToolbarOpen` |
 
 ### History & Utils
 | Extension | Commands | State Queries |
