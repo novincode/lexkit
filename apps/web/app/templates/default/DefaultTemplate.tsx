@@ -8,7 +8,8 @@ import {
   listExtension, 
   historyExtension, 
   imageExtension, 
-  blockFormatExtension 
+  blockFormatExtension,
+  htmlExtension
 } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -35,10 +36,10 @@ import {
   AlignRight, 
   Upload, 
   Link,
-  ChevronDown,
   Code,
   Type
 } from 'lucide-react';
+import { Select, Dropdown } from './components';
 import { createEditorSystem } from '@repo/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
@@ -74,7 +75,8 @@ const extensions = [
   listExtension, 
   historyExtension, 
   imageExtension, 
-  blockFormatExtension, 
+  blockFormatExtension,
+  htmlExtension,
   MyCustomExtension
 ] as const;
 
@@ -88,103 +90,6 @@ type ExtensionNames = typeof extensions[number]['name'];
 
 // Editor Mode Types
 type EditorMode = 'visual' | 'html';
-
-// Custom Select Component
-function Select({ 
-  value, 
-  onValueChange, 
-  options, 
-  placeholder = "Select..." 
-}: {
-  value: string;
-  onValueChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-  placeholder?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  return (
-    <div className="lexkit-select" ref={selectRef}>
-      <button
-        className={`lexkit-select-trigger ${isOpen ? 'open' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
-        <span>{selectedOption?.label || placeholder}</span>
-        <ChevronDown size={14} />
-      </button>
-      {isOpen && (
-        <div className="lexkit-select-dropdown">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              className={`lexkit-select-option ${value === option.value ? 'selected' : ''}`}
-              onClick={() => {
-                onValueChange(option.value);
-                setIsOpen(false);
-              }}
-              type="button"
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Custom Dropdown Component
-function Dropdown({ 
-  trigger, 
-  children, 
-  isOpen, 
-  onOpenChange 
-}: {
-  trigger: React.ReactNode;
-  children: React.ReactNode;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onOpenChange(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onOpenChange]);
-
-  return (
-    <div className="lexkit-dropdown" ref={dropdownRef}>
-      <div onClick={() => onOpenChange(!isOpen)}>
-        {trigger}
-      </div>
-      {isOpen && (
-        <div className="lexkit-dropdown-content">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Custom hook for image handling
 function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
@@ -545,10 +450,10 @@ function ModeTabs({
 // HTML Source View Component
 function HTMLSourceView({ 
   htmlContent, 
-  onHtmlChange 
+  onHtmlChange
 }: { 
   htmlContent: string; 
-  onHtmlChange: (html: string) => void; 
+  onHtmlChange: (html: string) => void;
 }) {
   return (
     <textarea
@@ -584,23 +489,22 @@ function EditorContent({
 
   // Sync HTML content when switching to HTML mode
   useEffect(() => {
-    if (mode === 'html' && editor) {
-      editor.getEditorState().read(() => {
-        const root = $getRoot();
-        const html = root.getTextContent(); // For now, just get text content
-        // TODO: Implement proper HTML serialization
-        setHtmlContent(html);
-      });
+    if (mode === 'html' && editor && hasExtension('html')) {
+      commands.exportToHTML().then(setHtmlContent).catch(console.error);
     }
-  }, [mode, editor]);
+  }, [mode, editor, hasExtension, commands]);
 
-  // Apply HTML content when switching back to visual mode
-  useEffect(() => {
-    if (mode === 'visual' && htmlContent && editor) {
-      // TODO: Implement proper HTML parsing and application
-      // For now, we'll skip this to avoid complexity
+  // Import HTML changes back to visual editor
+  const handleHtmlChange = async (html: string) => {
+    setHtmlContent(html);
+    if (hasExtension('html') && editor) {
+      try {
+        await commands.importFromHTML(html);
+      } catch (error) {
+        console.error('Failed to import HTML:', error);
+      }
     }
-  }, [mode, htmlContent, editor]);
+  };
 
   return (
     <>
@@ -627,7 +531,7 @@ function EditorContent({
         ) : (
           <HTMLSourceView 
             htmlContent={htmlContent} 
-            onHtmlChange={setHtmlContent} 
+            onHtmlChange={handleHtmlChange}
           />
         )}
         <HistoryPlugin />

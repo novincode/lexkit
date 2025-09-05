@@ -19,18 +19,8 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   editor: LexicalEditor | null;
   config: EditorConfig;
   extensions: Exts;
-  commands: {
-    formatText: (format: TextFormatType, value?: boolean | string) => void;
-    insertNode?: (type: string, payload: any) => void;
-    undo: () => void;
-    redo: () => void;
-    clearHistory: () => void;
-    insertUnorderedList: () => void;
-    insertOrderedList: () => void;
-    toggleUnorderedList: () => void;
-    toggleOrderedList: () => void;
-    isActive: (type: string) => boolean;
-  };
+  commands: any; // Dynamic commands from extensions
+  activeStates: any; // Dynamic states from extensions
   listeners: {
     registerUpdate: (listener: (state: any) => void) => () => void;
     registerMutation?: (listener: (mutations: any) => void) => () => void;
@@ -45,11 +35,6 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
     fromHTML: (html: string) => Promise<void>;
     fromMarkdown: (md: string) => Promise<void>;
     fromJSON: (json: any) => void;
-  };
-  history: {
-    undo: () => void;
-    redo: () => void;
-    clear: () => void;
   };
   lexical: LexicalEditor | null;
   extensionsAPI: {

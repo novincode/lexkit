@@ -34,31 +34,24 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     // Plugins: Collect inferred
     const plugins = useMemo(() => extensions.flatMap(ext => ext.getPlugins?.() || []), [extensions]);
 
-    // Lazy exports
+    // Lazy exports - use extensions if available
     const [lazyExports, setLazyExports] = useState({
-      toHTML: async () => '',
+      toHTML: async () => {
+        const htmlExt = extensions.find(ext => ext.name === 'html');
+        if (htmlExt && 'exportToHTML' in commands) {
+          return (commands as any).exportToHTML();
+        }
+        return '';
+      },
       toMarkdown: async () => '',
-      fromHTML: async (html: string) => {},
+      fromHTML: async (html: string) => {
+        const htmlExt = extensions.find(ext => ext.name === 'html');
+        if (htmlExt && 'importFromHTML' in commands) {
+          return (commands as any).importFromHTML(html);
+        }
+      },
       fromMarkdown: async (md: string) => {},
     });
-
-    useEffect(() => {
-      Promise.all([
-        import('@lexical/html'),
-        import('@lexical/markdown'),
-      ]).then(([{ $generateHtmlFromNodes }, { $convertToMarkdownString, $convertFromMarkdownString }]) => {
-        setLazyExports({
-          toHTML: async () => editor ? $generateHtmlFromNodes(editor) : '',
-          toMarkdown: async () => editor ? $convertToMarkdownString() : '',
-          fromHTML: async (html: string) => {
-            // Implement if needed
-          },
-          fromMarkdown: async (md: string) => {
-            editor?.update(() => $convertFromMarkdownString(md));
-          },
-        });
-      });
-    }, [editor]);
 
     // Register extensions (this was missing!)
     useEffect(() => {
