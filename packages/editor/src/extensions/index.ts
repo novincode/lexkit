@@ -1,5 +1,7 @@
 export { BoldExtension, boldExtension } from './formatting/BoldExtension';
 export { ItalicExtension, italicExtension } from './formatting/ItalicExtension';
+export { UnderlineExtension, underlineExtension } from './formatting/UnderlineExtension';
+export { StrikethroughExtension, strikethroughExtension } from './formatting/StrikethroughExtension';
 export { ListExtension, listExtension } from './formatting/ListExtension';
 export { HistoryExtension, historyExtension } from './formatting/HistoryExtension';
 export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockTypeExtension';

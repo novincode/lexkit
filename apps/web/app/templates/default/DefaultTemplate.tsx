@@ -1,17 +1,44 @@
 'use client'
-import React, { useState, useEffect, useMemo } from 'react';
-import { boldExtension, italicExtension, listExtension, historyExtension, imageExtension, blockFormatExtension } from '@repo/editor/extensions';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { 
+  boldExtension, 
+  italicExtension, 
+  underlineExtension,
+  strikethroughExtension,
+  listExtension, 
+  historyExtension, 
+  imageExtension, 
+  blockFormatExtension 
+} from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
 import { ImageNode } from '@repo/editor/extensions/media';
 import { defaultTheme } from './theme';
 import './styles.css';
-import { Bold, Italic, List, ListOrdered, Undo, Redo, Sun, Moon, Image, AlignLeft, AlignCenter, AlignRight, Edit, Upload, Link } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select';
+import { 
+  Bold, 
+  Italic, 
+  Underline,
+  Strikethrough,
+  List, 
+  ListOrdered, 
+  Undo, 
+  Redo, 
+  Sun, 
+  Moon, 
+  Image, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight, 
+  Upload, 
+  Link,
+  ChevronDown,
+  Code,
+  Type
+} from 'lucide-react';
 import { createEditorSystem } from '@repo/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@repo/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
@@ -39,7 +66,17 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Define the extensions array as a const to maintain literal types
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, imageExtension, blockFormatExtension, MyCustomExtension] as const;
+const extensions = [
+  boldExtension, 
+  italicExtension, 
+  underlineExtension,
+  strikethroughExtension,
+  listExtension, 
+  historyExtension, 
+  imageExtension, 
+  blockFormatExtension, 
+  MyCustomExtension
+] as const;
 
 // Create a typed editor system for these specific extensions
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -49,10 +86,109 @@ type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
 type ExtensionNames = typeof extensions[number]['name'];
 
-// Custom hook for toolbar state and handlers
-function useToolbarState(commands: EditorCommands, activeStates: EditorStateQueries, editor: LexicalEditor | null) {
-  const [showImageMenu, setShowImageMenu] = useState(false);
-  const [showReplaceMenu, setShowReplaceMenu] = useState(false);
+// Editor Mode Types
+type EditorMode = 'visual' | 'html';
+
+// Custom Select Component
+function Select({ 
+  value, 
+  onValueChange, 
+  options, 
+  placeholder = "Select..." 
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  placeholder?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="lexkit-select" ref={selectRef}>
+      <button
+        className={`lexkit-select-trigger ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        <span>{selectedOption?.label || placeholder}</span>
+        <ChevronDown size={14} />
+      </button>
+      {isOpen && (
+        <div className="lexkit-select-dropdown">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              className={`lexkit-select-option ${value === option.value ? 'selected' : ''}`}
+              onClick={() => {
+                onValueChange(option.value);
+                setIsOpen(false);
+              }}
+              type="button"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Custom Dropdown Component
+function Dropdown({ 
+  trigger, 
+  children, 
+  isOpen, 
+  onOpenChange 
+}: {
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onOpenChange(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onOpenChange]);
+
+  return (
+    <div className="lexkit-dropdown" ref={dropdownRef}>
+      <div onClick={() => onOpenChange(!isOpen)}>
+        {trigger}
+      </div>
+      {isOpen && (
+        <div className="lexkit-dropdown-content">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Custom hook for image handling
+function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlers = useMemo(() => ({
     insertImageFromUrl: () => {
@@ -60,310 +196,447 @@ function useToolbarState(commands: EditorCommands, activeStates: EditorStateQuer
       if (!src) return;
       const alt = prompt('Enter alt text:') || '';
       const caption = prompt('Enter caption (optional):') || undefined;
-      console.log('Inserting image from URL:', { src, alt, caption });
       commands.insertImage({ src, alt, caption });
-      setShowImageMenu(false);
     },
 
-    fileUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
+    insertImageFromFile: () => {
+      fileInputRef.current?.click();
+    },
+
+    handleFileUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file && imageExtension.config.uploadHandler) {
         try {
           const src = await imageExtension.config.uploadHandler(file);
-          console.log('Inserting uploaded image:', { src, alt: file.name });
           commands.insertImage({ src, alt: file.name, file });
         } catch (error) {
           alert('Failed to upload image');
         }
       } else if (file) {
         const src = URL.createObjectURL(file);
-        console.log('Inserting local image:', { src, alt: file.name });
         commands.insertImage({ src, alt: file.name, file });
       }
-      setShowImageMenu(false);
       e.target.value = '';
     },
 
-    setCaption: () => {
-      if (activeStates.imageSelected) {
-        const newCaption = prompt('Enter new caption:') || '';
-        commands.setImageCaption(newCaption);
-      }
+    setImageAlignment: (alignment: 'left' | 'center' | 'right' | 'none') => {
+      commands.setImageAlignment(alignment);
     },
 
-    replaceFromUrl: () => {
-      const src = prompt('Enter new image URL:');
-      if (!src || !editor) return;
-      editor.update(() => {
-        const selection = $getSelection();
-        if ($isNodeSelection(selection)) {
-          const nodes = selection.getNodes();
-          for (const node of nodes) {
-            if (node instanceof ImageNode) {
-              (node as ImageNode).setSrc(src);
-            }
-          }
-        }
-      });
+    setImageCaption: () => {
+      const newCaption = prompt('Enter caption:') || '';
+      commands.setImageCaption(newCaption);
     },
+  }), [commands]);
 
-    replaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file && editor) {
-        const src = URL.createObjectURL(file);
-        editor.update(() => {
-          const selection = $getSelection();
-          if ($isNodeSelection(selection)) {
-            const nodes = selection.getNodes();
-            for (const node of nodes) {
-              if (node instanceof ImageNode) {
-                (node as ImageNode).setSrc(src);
-              }
-            }
-          }
-        });
-      }
-      e.target.value = '';
-    },
-  }), [commands, activeStates, editor]);
-
-  return {
-    showImageMenu,
-    setShowImageMenu,
-    showReplaceMenu,
-    setShowReplaceMenu,
-    handlers,
-  };
+  return { handlers, fileInputRef };
 }
 
-function EditorContent({ className, isDark, toggleTheme }: { className?: string; isDark: boolean; toggleTheme: () => void }) {
-  const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
-  const { showImageMenu, setShowImageMenu, showReplaceMenu, setShowReplaceMenu, handlers } = useToolbarState(commands, activeStates, editor);
-
-  
-  // Update theme dynamically without resetting editor
-  useEffect(() => {
-    if (editor) {
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    }
-  }, [isDark, editor]);
-
-  // Catch global errors
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      console.error('Global error caught:', event.error);
-    };
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-
-  return (
-    <>
-      <Toolbar 
-        commands={commands} 
-        hasExtension={hasExtension} 
-        activeStates={activeStates} 
-        isDark={isDark} 
-        toggleTheme={toggleTheme}
-        imageMenu={{ show: showImageMenu, setShow: setShowImageMenu }}
-        replaceMenu={{ show: showReplaceMenu, setShow: setShowReplaceMenu }}
-        handlers={handlers}
-      />
-      <div className={defaultTheme.editor}>
-        <RichTextPlugin
-          contentEditable={<ContentEditable className={defaultTheme.contentEditable} />}
-          placeholder={<div className="lexkit-placeholder">Start typing...</div>}
-          ErrorBoundary={ErrorBoundary}
-        />
-        <HistoryPlugin />
-        {/* DecoratorPlugin removed - was only used for debugging image nodes */}
-      </div>
-    </>
-  );
-}
-
+// Toolbar Component
 function Toolbar({ 
   commands, 
   hasExtension, 
   activeStates, 
   isDark, 
-  toggleTheme, 
-  imageMenu,
-  replaceMenu,
-  handlers 
+  toggleTheme 
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   isDark: boolean;
   toggleTheme: () => void;
-  imageMenu: { show: boolean; setShow: (show: boolean) => void };
-  replaceMenu: { show: boolean; setShow: (show: boolean) => void };
-  handlers: {
-    insertImageFromUrl: () => void;
-    fileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    setCaption: () => void;
-    replaceFromUrl: () => void;
-    replaceFromFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  };
 }) {
+  const { commands: editorCommands, lexical: editor } = useEditor();
+  const { handlers, fileInputRef } = useImageHandlers(commands, editor);
+  const [showImageDropdown, setShowImageDropdown] = useState(false);
+  const [showAlignDropdown, setShowAlignDropdown] = useState(false);
+
+  // Block format options
+  const blockFormatOptions = [
+    { value: 'p', label: 'Paragraph' },
+    { value: 'h1', label: 'Heading 1' },
+    { value: 'h2', label: 'Heading 2' },
+    { value: 'h3', label: 'Heading 3' },
+    { value: 'h4', label: 'Heading 4' },
+    { value: 'h5', label: 'Heading 5' },
+    { value: 'h6', label: 'Heading 6' },
+    { value: 'quote', label: 'Quote' },
+  ];
+
+  // Get current block format
+  const currentBlockFormat = activeStates.isH1 ? 'h1' 
+    : activeStates.isH2 ? 'h2'
+    : activeStates.isH3 ? 'h3'
+    : activeStates.isH4 ? 'h4'
+    : activeStates.isH5 ? 'h5'
+    : activeStates.isH6 ? 'h6'
+    : activeStates.isQuote ? 'quote'
+    : 'p';
+
+  const handleBlockFormatChange = (value: string) => {
+    if (value === 'p') commands.toggleParagraph();
+    else if (value === 'h1') commands.toggleHeading('h1');
+    else if (value === 'h2') commands.toggleHeading('h2');
+    else if (value === 'h3') commands.toggleHeading('h3');
+    else if (value === 'h4') commands.toggleHeading('h4');
+    else if (value === 'h5') commands.toggleHeading('h5');
+    else if (value === 'h6') commands.toggleHeading('h6');
+    else if (value === 'quote') commands.toggleQuote();
+  };
 
   return (
-    <div className={defaultTheme.toolbar}>
-      {hasExtension('bold') && (
-        <button onClick={() => commands.toggleBold()} className={activeStates.bold ? 'active' : ''} title="Bold">
-          <Bold size={20} />
-        </button>
-      )}
-      {hasExtension('italic') && (
-        <button onClick={() => commands.toggleItalic()} className={activeStates.italic ? 'active' : ''} title="Italic">
-          <Italic size={20} />
-        </button>
-      )}
-      {hasExtension('blockFormat') && (
-        <Select 
-          value={activeStates.isH1 ? 'h1' : activeStates.isH2 ? 'h2' : activeStates.isH3 ? 'h3' : activeStates.isH4 ? 'h4' : activeStates.isH5 ? 'h5' : activeStates.isH6 ? 'h6' : activeStates.isQuote ? 'quote' : 'p'} 
-          onValueChange={(value) => {
-            if (value === 'p') commands.toggleParagraph();
-            else if (value === 'h1') commands.toggleHeading('h1');
-            else if (value === 'h2') commands.toggleHeading('h2');
-            else if (value === 'h3') commands.toggleHeading('h3');
-            else if (value === 'h4') commands.toggleHeading('h4');
-            else if (value === 'h5') commands.toggleHeading('h5');
-            else if (value === 'h6') commands.toggleHeading('h6');
-            else if (value === 'quote') commands.toggleQuote();
-          }}
-        >
-          <SelectTrigger className="w-[120px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="p">Paragraph</SelectItem>
-            <SelectItem value="h1">Heading 1</SelectItem>
-            <SelectItem value="h2">Heading 2</SelectItem>
-            <SelectItem value="h3">Heading 3</SelectItem>
-            <SelectItem value="h4">Heading 4</SelectItem>
-            <SelectItem value="h5">Heading 5</SelectItem>
-            <SelectItem value="h6">Heading 6</SelectItem>
-            <SelectItem value="quote">Quote</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-      {hasExtension('list') && (
-        <>
-          <button onClick={() => commands.toggleUnorderedList()} className={activeStates.unorderedList ? 'active' : ''} title="Bulleted List">
-            <List size={20} />
-          </button>
-          <button onClick={() => commands.toggleOrderedList()} className={activeStates.orderedList ? 'active' : ''} title="Numbered List">
-            <ListOrdered size={20} />
-          </button>
-        </>
-      )}
-      {hasExtension('image') && (
-        <div className="image-menu-container">
+    <div className="lexkit-toolbar">
+      {/* Text Formatting Section */}
+      <div className="lexkit-toolbar-section">
+        {hasExtension('bold') && (
           <button 
-            onClick={() => imageMenu.setShow(!imageMenu.show)} 
-            className={activeStates.imageSelected ? 'active' : ''} 
-            title="Insert Image"
+            onClick={() => commands.toggleBold()} 
+            className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
+            title="Bold (Ctrl+B)"
           >
-            <Image size={20} />
+            <Bold size={16} />
           </button>
-          {imageMenu.show && (
-            <div className="image-dropdown">
-              <button onClick={handlers.insertImageFromUrl} title="Insert from URL">
-                <Link size={16} />
-                <span>From URL</span>
-              </button>
-              <label className="file-upload-button" title="Upload from computer">
-                <Upload size={16} />
-                <span>Upload</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlers.fileUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-          )}
-          {activeStates.imageSelected && (
-            <>
-              <button
-                onClick={() => commands.setImageAlignment('left')}
-                className={activeStates.isImageAlignedLeft ? 'active' : ''}
-                title="Align Left"
-              >
-                <AlignLeft size={20} />
-              </button>
-              <button
-                onClick={() => commands.setImageAlignment('center')}
-                className={activeStates.isImageAlignedCenter ? 'active' : ''}
-                title="Align Center"
-              >
-                <AlignCenter size={20} />
-              </button>
-              <button
-                onClick={() => commands.setImageAlignment('right')}
-                className={activeStates.isImageAlignedRight ? 'active' : ''}
-                title="Align Right"
-              >
-                <AlignRight size={20} />
-              </button>
-              <button onClick={handlers.setCaption} title="Edit Caption">
-                <Edit size={20} />
-              </button>
-              <div className="replace-menu-container">
-                <button 
-                  onClick={() => replaceMenu.setShow(!replaceMenu.show)} 
-                  title="Replace Image"
-                >
-                  <Upload size={20} />
-                </button>
-                {replaceMenu.show && (
-                  <div className="replace-dropdown">
-                    <button onClick={handlers.replaceFromUrl} title="Replace from URL">
-                      <Link size={16} />
-                      <span>From URL</span>
-                    </button>
-                    <label className="file-upload-button" title="Replace from computer">
-                      <Upload size={16} />
-                      <span>Upload</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlers.replaceFromFile}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+        )}
+        {hasExtension('italic') && (
+          <button 
+            onClick={() => commands.toggleItalic()} 
+            className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
+            title="Italic (Ctrl+I)"
+          >
+            <Italic size={16} />
+          </button>
+        )}
+        {hasExtension('underline') && (
+          <button 
+            onClick={() => commands.toggleUnderline()} 
+            className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
+            title="Underline (Ctrl+U)"
+          >
+            <Underline size={16} />
+          </button>
+        )}
+        {hasExtension('strikethrough') && (
+          <button 
+            onClick={() => commands.toggleStrikethrough()} 
+            className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
+            title="Strikethrough"
+          >
+            <Strikethrough size={16} />
+          </button>
+        )}
+        <button 
+          onClick={() => commands.formatText('code')} 
+          className="lexkit-toolbar-button"
+          title="Inline Code"
+        >
+          <Code size={16} />
+        </button>
+      </div>
+
+      {/* Block Format Section */}
+      {hasExtension('blockFormat') && (
+        <div className="lexkit-toolbar-section">
+          <Select
+            value={currentBlockFormat}
+            onValueChange={handleBlockFormatChange}
+            options={blockFormatOptions}
+            placeholder="Format"
+          />
         </div>
       )}
+
+      {/* List Section */}
+      {hasExtension('list') && (
+        <div className="lexkit-toolbar-section">
+          <button 
+            onClick={() => commands.toggleUnorderedList()} 
+            className={`lexkit-toolbar-button ${activeStates.unorderedList ? 'active' : ''}`}
+            title="Bullet List"
+          >
+            <List size={16} />
+          </button>
+          <button 
+            onClick={() => commands.toggleOrderedList()} 
+            className={`lexkit-toolbar-button ${activeStates.orderedList ? 'active' : ''}`}
+            title="Numbered List"
+          >
+            <ListOrdered size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Media Section */}
+      {hasExtension('image') && (
+        <div className="lexkit-toolbar-section">
+          <Dropdown
+            trigger={
+              <button 
+                className={`lexkit-toolbar-button ${activeStates.imageSelected ? 'active' : ''}`}
+                title="Insert Image"
+              >
+                <Image size={16} />
+              </button>
+            }
+            isOpen={showImageDropdown}
+            onOpenChange={setShowImageDropdown}
+          >
+            <button 
+              className="lexkit-dropdown-item"
+              onClick={() => {
+                handlers.insertImageFromUrl();
+                setShowImageDropdown(false);
+              }}
+            >
+              <Link size={16} />
+              From URL
+            </button>
+            <button 
+              className="lexkit-dropdown-item"
+              onClick={() => {
+                handlers.insertImageFromFile();
+                setShowImageDropdown(false);
+              }}
+            >
+              <Upload size={16} />
+              Upload File
+            </button>
+          </Dropdown>
+
+          {/* Image Alignment when image is selected */}
+          {activeStates.imageSelected && (
+            <Dropdown
+              trigger={
+                <button className="lexkit-toolbar-button" title="Align Image">
+                  <AlignCenter size={16} />
+                </button>
+              }
+              isOpen={showAlignDropdown}
+              onOpenChange={setShowAlignDropdown}
+            >
+              <button 
+                className="lexkit-dropdown-item"
+                onClick={() => {
+                  handlers.setImageAlignment('left');
+                  setShowAlignDropdown(false);
+                }}
+              >
+                <AlignLeft size={16} />
+                Align Left
+              </button>
+              <button 
+                className="lexkit-dropdown-item"
+                onClick={() => {
+                  handlers.setImageAlignment('center');
+                  setShowAlignDropdown(false);
+                }}
+              >
+                <AlignCenter size={16} />
+                Align Center
+              </button>
+              <button 
+                className="lexkit-dropdown-item"
+                onClick={() => {
+                  handlers.setImageAlignment('right');
+                  setShowAlignDropdown(false);
+                }}
+              >
+                <AlignRight size={16} />
+                Align Right
+              </button>
+              <button 
+                className="lexkit-dropdown-item"
+                onClick={() => {
+                  handlers.setImageCaption();
+                  setShowAlignDropdown(false);
+                }}
+              >
+                <Type size={16} />
+                Set Caption
+              </button>
+            </Dropdown>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlers.handleFileUpload}
+            className="lexkit-file-input"
+          />
+        </div>
+      )}
+
+      {/* History Section */}
       {hasExtension('history') && (
-        <>
-          <button onClick={() => commands.undo()} disabled={!activeStates.canUndo} className={activeStates.canUndo ? '' : 'disabled'} title="Undo">
-            <Undo size={20} />
+        <div className="lexkit-toolbar-section">
+          <button 
+            onClick={() => commands.undo()} 
+            disabled={!activeStates.canUndo}
+            className="lexkit-toolbar-button"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo size={16} />
           </button>
-          <button onClick={() => commands.redo()} disabled={!activeStates.canRedo} className={activeStates.canRedo ? '' : 'disabled'} title="Redo">
-            <Redo size={20} />
+          <button 
+            onClick={() => commands.redo()} 
+            disabled={!activeStates.canRedo}
+            className="lexkit-toolbar-button"
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo size={16} />
           </button>
-        </>
+        </div>
       )}
+
+      {/* Custom Extension */}
       {hasExtension('myBlock') && commands.insertMyBlock && (
-        <button style={{width:'auto'}} onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })} title="Insert Custom Block">
-          Insert Block
-        </button>
+        <div className="lexkit-toolbar-section">
+          <button 
+            onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })}
+            className="lexkit-toolbar-button"
+            title="Insert Custom Block"
+            style={{ width: 'auto', padding: '0 8px', fontSize: '12px' }}
+          >
+            Custom
+          </button>
+        </div>
       )}
-      <button onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}>
-        {isDark ? <Sun size={20} /> : <Moon size={20} />}
+
+      {/* Theme Toggle */}
+      <div className="lexkit-toolbar-section">
+        <button 
+          onClick={toggleTheme} 
+          className="lexkit-toolbar-button"
+          title={isDark ? 'Light Mode' : 'Dark Mode'}
+        >
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Mode Tabs Component
+function ModeTabs({ 
+  mode, 
+  onModeChange 
+}: { 
+  mode: EditorMode; 
+  onModeChange: (mode: EditorMode) => void; 
+}) {
+  return (
+    <div className="lexkit-mode-tabs">
+      <button
+        className={`lexkit-mode-tab ${mode === 'visual' ? 'active' : ''}`}
+        onClick={() => onModeChange('visual')}
+      >
+        Visual
+      </button>
+      <button
+        className={`lexkit-mode-tab ${mode === 'html' ? 'active' : ''}`}
+        onClick={() => onModeChange('html')}
+      >
+        HTML
       </button>
     </div>
   );
 }
 
+// HTML Source View Component
+function HTMLSourceView({ 
+  htmlContent, 
+  onHtmlChange 
+}: { 
+  htmlContent: string; 
+  onHtmlChange: (html: string) => void; 
+}) {
+  return (
+    <textarea
+      className="lexkit-html-view"
+      value={htmlContent}
+      onChange={(e) => onHtmlChange(e.target.value)}
+      placeholder="Enter HTML content..."
+      spellCheck={false}
+    />
+  );
+}
+
+// Main Editor Content Component
+function EditorContent({ 
+  className, 
+  isDark, 
+  toggleTheme 
+}: { 
+  className?: string; 
+  isDark: boolean; 
+  toggleTheme: () => void; 
+}) {
+  const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
+  const [mode, setMode] = useState<EditorMode>('visual');
+  const [htmlContent, setHtmlContent] = useState('');
+
+  // Update theme dynamically
+  useEffect(() => {
+    if (editor) {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+  }, [isDark, editor]);
+
+  // Sync HTML content when switching to HTML mode
+  useEffect(() => {
+    if (mode === 'html' && editor) {
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const html = root.getTextContent(); // For now, just get text content
+        // TODO: Implement proper HTML serialization
+        setHtmlContent(html);
+      });
+    }
+  }, [mode, editor]);
+
+  // Apply HTML content when switching back to visual mode
+  useEffect(() => {
+    if (mode === 'visual' && htmlContent && editor) {
+      // TODO: Implement proper HTML parsing and application
+      // For now, we'll skip this to avoid complexity
+    }
+  }, [mode, htmlContent, editor]);
+
+  return (
+    <>
+      <div className="lexkit-editor-header">
+        <ModeTabs mode={mode} onModeChange={setMode} />
+        {mode === 'visual' && (
+          <Toolbar 
+            commands={commands} 
+            hasExtension={hasExtension} 
+            activeStates={activeStates} 
+            isDark={isDark} 
+            toggleTheme={toggleTheme}
+          />
+        )}
+      </div>
+      
+      <div className="lexkit-editor">
+        {mode === 'visual' ? (
+          <RichTextPlugin
+            contentEditable={<ContentEditable className="lexkit-content-editable" />}
+            placeholder={<div className="lexkit-placeholder">Start typing...</div>}
+            ErrorBoundary={ErrorBoundary}
+          />
+        ) : (
+          <HTMLSourceView 
+            htmlContent={htmlContent} 
+            onHtmlChange={setHtmlContent} 
+          />
+        )}
+        <HistoryPlugin />
+      </div>
+    </>
+  );
+}
+
+// Main Template Component
 interface DefaultTemplateProps {
   className?: string;
 }
@@ -371,36 +644,29 @@ interface DefaultTemplateProps {
 export function DefaultTemplate({ className }: DefaultTemplateProps) {
   const [isDark, setIsDark] = useState(false);
 
-  // Configure image extension with upload handler
+  // Configure image extension
   useEffect(() => {
-    console.log('🔧 Configuring image extension...');
     imageExtension.configure({
       uploadHandler: async (file: File) => {
-        console.log('📤 Upload handler called with file:', file.name, 'size:', file.size);
         // For testing, create object URL
         const objectUrl = URL.createObjectURL(file);
-        console.log('🔗 Created object URL:', objectUrl);
         return objectUrl;
       },
       defaultAlignment: 'center',
       resizable: true,
-      pasteListener: { insert: true, replace: true },  // New: Enable paste features
-      debug: true,  // Optional: For testing
+      pasteListener: { insert: true, replace: true },
+      debug: false,
     });
-    console.log('✅ Image extension configured');
   }, []);
 
-  // Handle theme change without causing re-renders that affect the editor
   const toggleTheme = () => {
     setIsDark(!isDark);
   };
 
   return (
-    <div className={`lexkit-editor-wrapper ${className || ''}`} style={{ width: '100%',  display: 'flex', flexDirection: 'column' }}>
+    <div className={`lexkit-editor-wrapper ${className || ''}`}>
       <Provider extensions={extensions} config={{ theme: defaultTheme }}>
-        <div style={{ flex: 1, display: 'flex',maxHeight:'100vh', flexDirection: 'column', position: 'relative' }}>
-          <EditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} />
-        </div>
+        <EditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} />
       </Provider>
     </div>
   );
