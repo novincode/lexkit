@@ -16,7 +16,20 @@
 
 ## ✨ What Makes LexKit Special
 
-LexKit is not just another rich text editor—it's a **type-safe, scalable framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
+LexKit is not just another rich text editor—it's a **type-safe## 📚 Documentation & Examples
+
+- **[🚀 Getting Started](./docs/getting-started.md)** - Quick setup guide
+- **[🎨 Styling Guide](./docs/styling.md)** - Complete theming guide
+- **[🚀 Performance Guide](./docs/performance.md)** - Optimization tips
+- **[🔧 Troubleshooting](./docs/troubleshooting.md)** - Common issues & solutions
+- **[📚 API Reference](./docs/api-reference.md)** - Complete API docs
+- **[🏗️ Architecture](./docs/architecture.md)** - System design and concepts
+- **[📝 Extensions Guide](./docs/extensions.md)** - Using and creating extensions
+- **[🚀 Interactive Demo](https://lexkit.codeideal.com/demo)** - Try it live
+- **[⚡ Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
+- **[💬 Discord Community](https://discord.gg/hAvRFC9Y)** - Get help and share ideas
+
+*📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*e framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
 
 ### 🎯 **Type-Safe Commands & State**
 Commands and state queries are **automatically typed** based on your extensions:
