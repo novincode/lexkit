@@ -1,9 +1,14 @@
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
+import { BaseExtensionConfig } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
-import { $convertToMarkdownString, $convertFromMarkdownString } from '@lexical/markdown';
+import { $convertToMarkdownString, $convertFromMarkdownString, TRANSFORMERS } from '@lexical/markdown';
 import { $getRoot, $createParagraphNode } from 'lexical';
+
+export type MarkdownConfig = {
+  customTransformers?: Array<any>;
+};
 
 export type MarkdownCommands = {
   exportToMarkdown: () => string;
@@ -16,13 +21,19 @@ export type MarkdownStateQueries = {
 
 export class MarkdownExtension extends BaseExtension<
   'markdown',
-  {},
+  MarkdownConfig & BaseExtensionConfig,
   MarkdownCommands,
   MarkdownStateQueries,
   ReactNode[]
 > {
   constructor() {
     super('markdown', [ExtensionCategory.Toolbar]);
+    this.config = {};
+  }
+
+  configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
+    this.config = { ...this.config, ...config };
+    return this;
   }
 
   register(editor: LexicalEditor): () => void {
@@ -32,10 +43,12 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): MarkdownCommands {
+    const transformers = [...TRANSFORMERS, ...(this.config.customTransformers || [])];
+
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
-          return $convertToMarkdownString();
+          return $convertToMarkdownString(transformers);
         });
       },
 
@@ -51,7 +64,7 @@ export class MarkdownExtension extends BaseExtension<
             }
 
             // Convert markdown to Lexical nodes
-            $convertFromMarkdownString(markdown);
+            $convertFromMarkdownString(markdown, transformers);
           } catch (error) {
             console.error('Markdown import error:', error);
             const root = $getRoot();

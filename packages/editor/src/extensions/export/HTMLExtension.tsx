@@ -73,7 +73,7 @@ export class HTMLExtension extends BaseExtension<
             const paragraph = $createParagraphNode();
             root.append(paragraph);
           }
-        });
+        }, { discrete: true });
       },
     };
   }

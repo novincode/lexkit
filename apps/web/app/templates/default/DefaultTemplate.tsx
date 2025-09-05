@@ -15,6 +15,7 @@ import {
   codeFormatExtension,
   htmlEmbedExtension
 } from '@repo/editor/extensions';
+import { HTML_EMBED_MARKDOWN_TRANSFORMER } from '@repo/editor/extensions/media/HTMLEmbedExtension';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -704,6 +705,11 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
       resizable: true,
       pasteListener: { insert: true, replace: true },
       debug: false,
+    });
+
+    // Configure markdown extension with HTML embed transformer
+    markdownExtension.configure({
+      customTransformers: [HTML_EMBED_MARKDOWN_TRANSFORMER]
     });
   }, []);
 

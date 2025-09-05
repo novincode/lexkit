@@ -17,6 +17,8 @@ import {
   $insertNodes,
   $getRoot,
   LexicalEditor,
+  DOMConversionMap,
+  DOMExportOutput,
 } from 'lexical';
 import { ReactNode, useEffect, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -76,6 +78,8 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
   }) => React.ReactElement;
   createDOM?: (config: EditorConfig, node: LexicalNode) => HTMLElement;
   updateDOM?: (prevNode: LexicalNode, dom: HTMLElement, config: EditorConfig) => boolean;
+  importDOM?: () => DOMConversionMap;
+  exportDOM?: (editor: LexicalEditor, options: { element: HTMLElement; node: LexicalNode }) => DOMExportOutput;
   commands?: (editor: LexicalEditor) => CustomCommands;
   stateQueries?: (editor: LexicalEditor) => CustomStateQueries;
 }
@@ -183,6 +187,20 @@ export function createCustomNodeExtension<
       return node;
     }
 
+    static importDOM() {
+      return userConfig.importDOM ? userConfig.importDOM() : {};
+    }
+
+    static exportDOM(editor: LexicalEditor, { node }: { node: LexicalNode }): DOMExportOutput {
+      if (userConfig.exportDOM) {
+        const element = document.createElement('div');
+        return userConfig.exportDOM(editor, { element, node });
+      }
+      const element = document.createElement('div');
+      element.setAttribute('data-custom-node-type', userConfig.nodeType);
+      return { element };
+    }
+
     exportJSON(): SerializedElementNode {
       return {
         type: this.__nodeType,
@@ -282,6 +300,20 @@ export function createCustomNodeExtension<
     static importJSON(serialized: SerializedCustomNode): CustomDecoratorNode {
       const { payload } = serialized;
       return new CustomDecoratorNode(payload, serialized.type);
+    }
+
+    static importDOM() {
+      return userConfig.importDOM ? userConfig.importDOM() : {};
+    }
+
+    static exportDOM(editor: LexicalEditor, { node }: { node: LexicalNode }): DOMExportOutput {
+      if (userConfig.exportDOM) {
+        const element = document.createElement('span');
+        return userConfig.exportDOM(editor, { element, node });
+      }
+      const element = document.createElement('span');
+      element.setAttribute('data-custom-node-type', userConfig.nodeType);
+      return { element };
     }
 
     exportJSON(): SerializedLexicalNode {
