@@ -11,16 +11,39 @@ interface ProviderProps<Exts extends readonly Extension[]> {
   extensions: Exts;
 }
 
-// Factory: Creates typed Provider/useEditor per Exts
+/**
+ * Creates a typed editor system based on the provided extensions array.
+ * This factory function generates a Provider component and useEditor hook
+ * that are strongly typed based on the extensions passed to it.
+ *
+ * @template Exts - Array of extensions that define the editor's capabilities
+ * @returns Object containing Provider component and useEditor hook
+ *
+ * @example
+ * ```tsx
+ * const extensions = [boldExtension, italicExtension] as const;
+ * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+ * ```
+ */
 export function createEditorSystem<Exts extends readonly Extension[]>() {
   const EditorContext = createContext<EditorContextType<Exts> | null>(null);
 
+  /**
+   * Hook to access the editor context. Must be used within a Provider.
+   *
+   * @returns Editor context with commands, state, and utilities
+   * @throws Error if used outside of Provider
+   */
   function useEditor() {
     const ctx = useContext(EditorContext);
     if (!ctx) throw new Error('useEditor must be used within Provider');
     return ctx;
   }
 
+  /**
+   * Internal provider component that sets up the editor context.
+   * Handles extension registration, command aggregation, and state management.
+   */
   function ProviderInner({ children, config = {}, extensions }: ProviderProps<Exts>) {
     const [editor] = useLexicalComposerContext();
 
@@ -127,6 +150,10 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       };
     }, [editor, hasHistory]);
 
+    /**
+     * Context value containing all editor functionality and state.
+     * This is the main interface that components use via the useEditor hook.
+     */
     const contextValue: EditorContextType<Exts> = {
       editor,
       config,
@@ -160,31 +187,37 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     return <EditorContext.Provider value={contextValue}>{plugins}{children}</EditorContext.Provider>;
   }
 
-function Provider(props: ProviderProps<Exts>) {
-  const nodes = useMemo(() => {
-    const allNodes = props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []);
-    console.log('🔧 Registering nodes with Lexical:', allNodes.map(node => node?.getType?.() || 'unknown'));
-    return allNodes;
-  }, [props.extensions]);
+  /**
+   * Main Provider component that wraps the editor in LexicalComposer.
+   * This component should be used at the root of your editor component tree.
+   *
+   * @param props - Provider props including children, config, and extensions
+   * @returns React component that provides editor context
+   */
+  function Provider(props: ProviderProps<Exts>) {
+    const nodes = useMemo(() => {
+      const allNodes = props.extensions.flatMap((ext: Extension) => ext.getNodes?.() || []);
+      return allNodes;
+    }, [props.extensions]);
 
-  const initialConfig = useMemo(
-    () => ({
-      namespace: 'modern-editor',
-      theme: props.config?.theme || {},
-      onError: (error: Error) => {
-        console.error('❌ Lexical error:', error);
-      },
-      nodes,
-    }),
-    [props.config?.theme, nodes]
-  );
+    const initialConfig = useMemo(
+      () => ({
+        namespace: 'modern-editor',
+        theme: props.config?.theme || {},
+        onError: (error: Error) => {
+          console.error('Lexical error:', error);
+        },
+        nodes,
+      }),
+      [props.config?.theme, nodes]
+    );
 
-  return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <ProviderInner {...props} />
-    </LexicalComposer>
-  );
-}  return { Provider, useEditor };
+    return (
+      <LexicalComposer initialConfig={initialConfig}>
+        <ProviderInner {...props} />
+      </LexicalComposer>
+    );
+  }  return { Provider, useEditor };
 }
 
 // Base system for untyped use

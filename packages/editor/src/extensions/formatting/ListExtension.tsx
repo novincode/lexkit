@@ -7,12 +7,46 @@ import { ListNode, ListItemNode, $isListNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import React from 'react';
 
-// Define types for inference
+/**
+ * Commands provided by the list extension.
+ */
 export type ListCommands = {
+  /** Toggle unordered (bullet) list for the current selection */
   toggleUnorderedList: () => void;
+  /** Toggle ordered (numbered) list for the current selection */
   toggleOrderedList: () => void;
 };
 
+/**
+ * List extension for creating and managing ordered and unordered lists.
+ * Provides functionality to convert paragraphs to lists and vice versa.
+ *
+ * @example
+ * ```tsx
+ * const extensions = [listExtension] as const;
+ * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+ *
+ * function MyEditor() {
+ *   const { commands, activeStates } = useEditor();
+ *   return (
+ *     <div>
+ *       <button
+ *         onClick={() => commands.toggleUnorderedList()}
+ *         className={activeStates.unorderedList ? 'active' : ''}
+ *       >
+ *         Bullet List
+ *       </button>
+ *       <button
+ *         onClick={() => commands.toggleOrderedList()}
+ *         className={activeStates.orderedList ? 'active' : ''}
+ *       >
+ *         Numbered List
+ *       </button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export class ListExtension extends BaseExtension<
   'list',
   any,
@@ -20,23 +54,48 @@ export class ListExtension extends BaseExtension<
   { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> },
   ReactNode[]
 > {
+  /**
+   * Creates a new list extension instance.
+   */
   constructor() {
     super('list', [ExtensionCategory.Toolbar]);
   }
 
+  /**
+   * Registers the extension with the Lexical editor.
+   * No special registration needed as Lexical handles list commands internally.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Cleanup function (no-op for lists)
+   */
   register(editor: LexicalEditor): () => void {
-    // No need to register commands, Lexical handles them
     return () => {};
   }
 
+  /**
+   * Returns the Lexical nodes required for list functionality.
+   *
+   * @returns Array containing ListNode and ListItemNode
+   */
   getNodes(): any[] {
     return [ListNode, ListItemNode];
   }
 
+  /**
+   * Returns the React plugins required for list functionality.
+   *
+   * @returns Array containing the ListPlugin component
+   */
   getPlugins(): React.ReactNode[] {
     return [<ListPlugin key="list-plugin" />];
   }
 
+  /**
+   * Returns the commands provided by this extension.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing list toggle commands
+   */
   getCommands(editor: LexicalEditor): ListCommands {
     return {
       toggleUnorderedList: () => {
@@ -86,6 +145,12 @@ export class ListExtension extends BaseExtension<
     };
   }
 
+  /**
+   * Returns state query functions to check current list state.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing state query functions for list types
+   */
   getStateQueries(editor: LexicalEditor): { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> } {
     return {
       unorderedList: () =>
@@ -130,4 +195,8 @@ export class ListExtension extends BaseExtension<
   }
 }
 
+/**
+ * Pre-configured list extension instance.
+ * Ready to use in extension arrays.
+ */
 export const listExtension = new ListExtension();

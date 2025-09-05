@@ -7,29 +7,71 @@ import { BaseExtension } from '../base/BaseExtension';
 import { ExtensionCategory } from '../types';
 import { $getNearestNodeOfType } from '@lexical/utils'; // For better state queries
 
-// Define supported formats as a type for scalability/type-safety
+/**
+ * Supported block formats for the BlockFormatExtension
+ */
 export type BlockFormat = 'p' | HeadingTagType | 'quote';
 
-// Commands: Use a single toggleBlockFormat for scalability, plus shorthands
+/**
+ * Commands provided by the BlockFormatExtension for block-level formatting
+ */
 export type BlockFormatCommands = {
+  /** Toggle to a specific block format */
   toggleBlockFormat: (format: BlockFormat) => void;
+  /** Toggle to paragraph format */
   toggleParagraph: () => void;
+  /** Toggle to a heading format */
   toggleHeading: (tag: HeadingTagType) => void;
+  /** Toggle to quote format */
   toggleQuote: () => void;
 };
 
-// State Queries: One per format
+/**
+ * State queries provided by the BlockFormatExtension for checking block formats
+ */
 export type BlockFormatStateQueries = {
+  /** Check if current selection is in a paragraph */
   isParagraph: () => Promise<boolean>;
+  /** Check if current selection is in an H1 heading */
   isH1: () => Promise<boolean>;
+  /** Check if current selection is in an H2 heading */
   isH2: () => Promise<boolean>;
+  /** Check if current selection is in an H3 heading */
   isH3: () => Promise<boolean>;
+  /** Check if current selection is in an H4 heading */
   isH4: () => Promise<boolean>;
+  /** Check if current selection is in an H5 heading */
   isH5: () => Promise<boolean>;
+  /** Check if current selection is in an H6 heading */
   isH6: () => Promise<boolean>;
+  /** Check if current selection is in a quote block */
   isQuote: () => Promise<boolean>;
 };
 
+/**
+ * BlockFormatExtension - Provides block-level formatting functionality
+ *
+ * This extension enables users to change block-level elements like paragraphs,
+ * headings (H1-H6), and quotes. It provides a comprehensive set of commands
+ * for toggling between different block formats and state queries for checking
+ * the current block format.
+ *
+ * The extension supports true toggling - if you apply the same format that's
+ * already active, it will revert to a paragraph.
+ *
+ * @example
+ * ```tsx
+ * import { blockFormatExtension } from '@repo/editor/extensions/formatting/BlockTypeExtension';
+ *
+ * const extensions = [blockFormatExtension];
+ * const editor = createEditorSystem(extensions);
+ *
+ * // Use in component
+ * const { commands } = useEditor();
+ * commands.toggleHeading('h1'); // Convert selection to H1
+ * commands.toggleQuote(); // Convert selection to quote block
+ * ```
+ */
 export class BlockFormatExtension extends BaseExtension<
   'blockFormat',
   {}, // No extra config needed
@@ -40,15 +82,29 @@ export class BlockFormatExtension extends BaseExtension<
     super('blockFormat', [ExtensionCategory.Toolbar]);
   }
 
+  /**
+   * Register the extension with the Lexical editor
+   * @param editor - The Lexical editor instance
+   * @returns Cleanup function
+   */
   register(editor: LexicalEditor): () => void {
     // No custom commands to register; we use editor.update for changes
     return () => {};
   }
 
+  /**
+   * Get the Lexical nodes required by this extension
+   * @returns Array of node classes
+   */
   getNodes() {
     return [ParagraphNode, HeadingNode, QuoteNode]; // Include ParagraphNode if overriding
   }
 
+  /**
+   * Get the commands provided by this extension
+   * @param editor - The Lexical editor instance
+   * @returns Object containing available commands
+   */
   getCommands(editor: LexicalEditor): BlockFormatCommands {
     return {
       toggleBlockFormat: (format: BlockFormat) => this.toggleBlockFormat(editor, format),
@@ -58,6 +114,11 @@ export class BlockFormatExtension extends BaseExtension<
     };
   }
 
+  /**
+   * Toggle the block format for the current selection
+   * @param editor - The Lexical editor instance
+   * @param format - The target block format
+   */
   private toggleBlockFormat(editor: LexicalEditor, format: BlockFormat) {
     editor.update(() => {
       const selection = $getSelection();
@@ -79,6 +140,11 @@ export class BlockFormatExtension extends BaseExtension<
     });
   }
 
+  /**
+   * Get the state queries provided by this extension
+   * @param editor - The Lexical editor instance
+   * @returns Object containing available state queries
+   */
   getStateQueries(editor: LexicalEditor): BlockFormatStateQueries {
     return {
       isParagraph: () => Promise.resolve(this.isFormat('p', editor)),
@@ -92,7 +158,11 @@ export class BlockFormatExtension extends BaseExtension<
     };
   }
 
-  // Helper: Get the nearest block node
+  /**
+   * Get the nearest block node from the given node
+   * @param node - The starting node
+   * @returns The nearest block node or null
+   */
   private getBlockNode(node: any): ParagraphNode | HeadingNode | QuoteNode | null {
     let current = node;
     while (current) {
@@ -104,7 +174,12 @@ export class BlockFormatExtension extends BaseExtension<
     return null;
   }
 
-  // Helper: Check if all blocks in selection match format (better than anchor-only)
+  /**
+   * Check if all blocks in the current selection match the specified format
+   * @param format - The format to check for
+   * @param editor - The Lexical editor instance
+   * @returns True if all selected blocks match the format
+   */
   private isFormat(format: BlockFormat, editor: LexicalEditor): boolean {
     let matches = true;
     editor.getEditorState().read(() => {
@@ -130,7 +205,11 @@ export class BlockFormatExtension extends BaseExtension<
     return matches;
   }
 
-  // Helper: Get format of a node
+  /**
+   * Get the format type of a given block node
+   * @param node - The block node to check
+   * @returns The format type or null
+   */
   private getNodeFormat(node: ParagraphNode | HeadingNode | QuoteNode): BlockFormat | null {
     if ($isParagraphNode(node)) return 'p';
     if ($isHeadingNode(node)) return node.getTag();
@@ -138,7 +217,11 @@ export class BlockFormatExtension extends BaseExtension<
     return null;
   }
 
-  // Helper: Get current format (uses anchor if mixed; null if mixed)
+  /**
+   * Get the current block format of the selection
+   * @param editor - The Lexical editor instance
+   * @returns The current format or null
+   */
   private getCurrentFormat(editor: LexicalEditor): BlockFormat | null {
     let format: BlockFormat | null = null;
     editor.getEditorState().read(() => {
@@ -154,7 +237,10 @@ export class BlockFormatExtension extends BaseExtension<
     return format;
   }
 
-  // Sync version for use inside update()
+  /**
+   * Get the current block format synchronously (for use inside editor.update())
+   * @returns The current format or null
+   */
   private getCurrentFormatSync(): BlockFormat | null {
     const selection = $getSelection();
     if (!$isRangeSelection(selection)) return null;

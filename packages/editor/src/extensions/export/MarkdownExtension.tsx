@@ -7,19 +7,68 @@ import { $convertToMarkdownString, $convertFromMarkdownString, TRANSFORMERS } fr
 import { $getRoot, $createParagraphNode } from 'lexical';
 import { HTMLEmbedNode } from '../media/HTMLEmbedExtension';
 
+/**
+ * Configuration options for the Markdown extension.
+ */
 export type MarkdownConfig = {
+  /** Custom transformers to extend Markdown parsing */
   customTransformers?: Array<any>;
 };
 
+/**
+ * Commands provided by the Markdown extension.
+ */
 export type MarkdownCommands = {
+  /** Export the current editor content as Markdown string */
   exportToMarkdown: () => string;
+  /** Import Markdown content into the editor, replacing current content */
   importFromMarkdown: (markdown: string) => void;
 };
 
+/**
+ * State queries provided by the Markdown extension.
+ */
 export type MarkdownStateQueries = {
+  /** Check if Markdown export is available (always true) */
   canExportMarkdown: () => Promise<boolean>;
 };
 
+/**
+ * Markdown extension for importing and exporting Markdown content.
+ * Provides functionality to convert between Lexical editor state and Markdown strings,
+ * with support for custom transformers and HTML embed blocks.
+ *
+ * @example
+ * ```tsx
+ * const extensions = [
+ *   markdownExtension.configure({
+ *     customTransformers: [customTransformer]
+ *   })
+ * ] as const;
+ * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+ *
+ * function MyEditor() {
+ *   const { commands } = useEditor();
+ *
+ *   const handleExport = () => {
+ *     const markdown = commands.exportToMarkdown();
+ *     console.log('Exported Markdown:', markdown);
+ *   };
+ *
+ *   const handleImport = () => {
+ *     const markdown = '# Hello World\n\nThis is **bold** text.';
+ *     commands.importFromMarkdown(markdown);
+ *   };
+ *
+ *   return (
+ *     <div>
+ *       <button onClick={handleExport}>Export Markdown</button>
+ *       <button onClick={handleImport}>Import Markdown</button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export class MarkdownExtension extends BaseExtension<
   'markdown',
   MarkdownConfig & BaseExtensionConfig,
@@ -29,20 +78,42 @@ export class MarkdownExtension extends BaseExtension<
 > {
   private debounceTimeout: NodeJS.Timeout | null = null;
 
+  /**
+   * Creates a new Markdown extension instance.
+   */
   constructor() {
     super('markdown', [ExtensionCategory.Toolbar]);
     this.config = { customTransformers: [] };
   }
 
+  /**
+   * Configures the Markdown extension with custom settings.
+   *
+   * @param config - Configuration options
+   * @returns This extension instance for chaining
+   */
   configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
     this.config = { ...this.config, ...config };
     return this;
   }
 
+  /**
+   * Registers the extension with the Lexical editor.
+   * No special registration needed for Markdown functionality.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Cleanup function
+   */
   register(editor: LexicalEditor): () => void {
     return () => {};
   }
 
+  /**
+   * Returns the commands provided by this extension.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing Markdown import/export commands
+   */
   getCommands(editor: LexicalEditor): MarkdownCommands {
     const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
 
@@ -123,6 +194,12 @@ export class MarkdownExtension extends BaseExtension<
     };
   }
 
+  /**
+   * Returns state query functions for this extension.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing state query functions
+   */
   getStateQueries(editor: LexicalEditor): MarkdownStateQueries {
     return {
       canExportMarkdown: async () => true,
@@ -130,4 +207,8 @@ export class MarkdownExtension extends BaseExtension<
   }
 }
 
+/**
+ * Pre-configured Markdown extension instance.
+ * Ready to use in extension arrays.
+ */
 export const markdownExtension = new MarkdownExtension();

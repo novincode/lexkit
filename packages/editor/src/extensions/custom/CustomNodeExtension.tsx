@@ -85,6 +85,35 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
 }
 
 // Factory function
+/**
+ * Creates a custom node extension for the LexKit editor system.
+ * This factory allows you to define custom Lexical nodes with React rendering,
+ * commands, and state queries.
+ *
+ * @template Name - The literal name type for the extension
+ * @template Commands - Commands provided by this custom extension
+ * @template StateQueries - State query functions for this extension
+ * @param userConfig - Configuration object defining the custom node behavior
+ * @returns Object containing the extension and helper functions
+ *
+ * @example
+ * ```tsx
+ * const { extension, $createCustomNode } = createCustomNodeExtension({
+ *   nodeType: 'myBlock',
+ *   render: ({ payload, isSelected }) => (
+ *     <div className={isSelected ? 'selected' : ''}>
+ *       {payload.text}
+ *     </div>
+ *   ),
+ *   commands: (editor) => ({
+ *     insertMyBlock: (data) => {
+ *       const node = $createCustomNode(data);
+ *       editor.dispatchCommand(INSERT_CUSTOM_NODE, node);
+ *     }
+ *   })
+ * });
+ * ```
+ */
 export function createCustomNodeExtension<
   Name extends string,
   Commands extends Record<string, any> = {},

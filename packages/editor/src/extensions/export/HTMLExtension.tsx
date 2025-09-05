@@ -5,15 +5,55 @@ import { ReactNode } from 'react';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { $getRoot, $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical';
 
+/**
+ * Commands provided by the HTML extension.
+ */
 export type HTMLCommands = {
+  /** Export the current editor content as HTML string */
   exportToHTML: () => string;
+  /** Import HTML content into the editor, replacing current content */
   importFromHTML: (html: string) => void;
 };
 
+/**
+ * State queries provided by the HTML extension.
+ */
 export type HTMLStateQueries = {
+  /** Check if HTML export is available (always true) */
   canExportHTML: () => Promise<boolean>;
 };
 
+/**
+ * HTML extension for importing and exporting HTML content.
+ * Provides functionality to convert between Lexical editor state and HTML strings.
+ *
+ * @example
+ * ```tsx
+ * const extensions = [htmlExtension] as const;
+ * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+ *
+ * function MyEditor() {
+ *   const { commands } = useEditor();
+ *
+ *   const handleExport = () => {
+ *     const html = commands.exportToHTML();
+ *     console.log('Exported HTML:', html);
+ *   };
+ *
+ *   const handleImport = () => {
+ *     const html = '<p>Hello <strong>world</strong>!</p>';
+ *     commands.importFromHTML(html);
+ *   };
+ *
+ *   return (
+ *     <div>
+ *       <button onClick={handleExport}>Export HTML</button>
+ *       <button onClick={handleImport}>Import HTML</button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export class HTMLExtension extends BaseExtension<
   'html',
   {},
@@ -21,16 +61,32 @@ export class HTMLExtension extends BaseExtension<
   HTMLStateQueries,
   ReactNode[]
 > {
+  /**
+   * Creates a new HTML extension instance.
+   */
   constructor() {
     super('html', [ExtensionCategory.Toolbar]);
   }
 
+  /**
+   * Registers the extension with the Lexical editor.
+   * No special registration needed for HTML functionality.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Cleanup function
+   */
   register(editor: LexicalEditor): () => void {
     return () => {
       // Cleanup if needed
     };
   }
 
+  /**
+   * Returns the commands provided by this extension.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing HTML import/export commands
+   */
   getCommands(editor: LexicalEditor): HTMLCommands {
     return {
       exportToHTML: () => {
@@ -77,6 +133,12 @@ export class HTMLExtension extends BaseExtension<
     };
   }
 
+  /**
+   * Returns state query functions for this extension.
+   *
+   * @param editor - The Lexical editor instance
+   * @returns Object containing state query functions
+   */
   getStateQueries(editor: LexicalEditor): HTMLStateQueries {
     return {
       canExportHTML: async () => true,
@@ -84,4 +146,8 @@ export class HTMLExtension extends BaseExtension<
   }
 }
 
+/**
+ * Pre-configured HTML extension instance.
+ * Ready to use in extension arrays.
+ */
 export const htmlExtension = new HTMLExtension();

@@ -2,13 +2,13 @@
 // Clean, scalable, headless HTML embed extension that works across all tabs
 
 import React, { useState } from 'react';
-import { 
-  LexicalEditor, 
-  DecoratorNode, 
-  NodeKey, 
-  $getSelection, 
-  $isRangeSelection, 
-  $getRoot, 
+import {
+  LexicalEditor,
+  DecoratorNode,
+  NodeKey,
+  $getSelection,
+  $isRangeSelection,
+  $getRoot,
   $getNodeByKey,
   DOMConversionMap,
   DOMConversionOutput,
@@ -19,50 +19,102 @@ import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
 
-// Types
+/**
+ * Payload interface for HTML embed content
+ */
 export type HTMLEmbedPayload = {
+  /** The HTML content to embed */
   html: string;
+  /** Whether to show preview mode or edit mode */
   preview: boolean;
 };
 
+/**
+ * Commands provided by the HTMLEmbedExtension
+ */
 export type HTMLEmbedCommands = {
+  /** Insert a new HTML embed with optional initial HTML */
   insertHTMLEmbed: (html?: string) => void;
+  /** Toggle between preview and edit mode */
   toggleHTMLPreview: () => void;
 };
 
+/**
+ * State queries provided by the HTMLEmbedExtension
+ */
 export type HTMLEmbedQueries = {
+  /** Check if an HTML embed is currently selected */
   isHTMLEmbedSelected: () => Promise<boolean>;
+  /** Check if HTML preview mode is active */
   isHTMLPreviewMode: () => Promise<boolean>;
 };
 
+/**
+ * Serialized representation of an HTMLEmbedNode
+ */
 type SerializedHTMLEmbedNode = Spread<
   {
+    /** The HTML content */
     html: string;
+    /** Preview mode state */
     preview: boolean;
+    /** Node type identifier */
     type: 'html-embed';
+    /** Version for migration support */
     version: 1;
   },
   SerializedLexicalNode
 >;
 
-// HTML Embed Node - Using DecoratorNode for React-based rendering
+/**
+ * HTMLEmbedNode - A Lexical DecoratorNode for embedding custom HTML
+ *
+ * This node allows users to embed custom HTML content within the editor.
+ * It supports both preview mode (showing rendered HTML) and edit mode
+ * (showing editable HTML source).
+ *
+ * @example
+ * ```typescript
+ * const node = new HTMLEmbedNode({
+ *   html: '<div>Hello World</div>',
+ *   preview: true
+ * });
+ * ```
+ */
 export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
   __payload: HTMLEmbedPayload;
 
+  /**
+   * Get the node type identifier
+   * @returns The node type string
+   */
   static getType(): string {
     return 'html-embed';
   }
 
+  /**
+   * Clone the node
+   * @param node - The node to clone
+   * @returns New cloned node instance
+   */
   static clone(node: HTMLEmbedNode): HTMLEmbedNode {
     return new HTMLEmbedNode(node.__payload, node.__key);
   }
 
+  /**
+   * Constructor for HTMLEmbedNode
+   * @param payload - The HTML embed payload
+   * @param key - Optional node key
+   */
   constructor(payload: HTMLEmbedPayload, key?: NodeKey) {
     super(key);
     this.__payload = payload;
   }
 
-  // DOM creation for Lexical
+  /**
+   * Create the DOM element for this node
+   * @returns The DOM element
+   */
   createDOM(): HTMLElement {
     const div = document.createElement('div');
     div.setAttribute('data-lexical-html-embed', 'true');
@@ -70,11 +122,19 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
     return div;
   }
 
+  /**
+   * Update the DOM element (not needed for React rendering)
+   * @returns Always false to let React handle updates
+   */
   updateDOM(): boolean {
     return false; // Let React handle all updates
   }
 
-  // Serialization for editor state persistence
+  /**
+   * Import node from JSON serialization
+   * @param serialized - The serialized node data
+   * @returns New HTMLEmbedNode instance
+   */
   static importJSON(serialized: SerializedHTMLEmbedNode): HTMLEmbedNode {
     const payload: HTMLEmbedPayload = {
       html: serialized.html || '<div style="padding: 20px; background: #f0f0f0; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
@@ -83,6 +143,10 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
     return new HTMLEmbedNode(payload);
   }
 
+  /**
+   * Export node to JSON serialization
+   * @returns Serialized node data
+   */
   exportJSON(): SerializedHTMLEmbedNode {
     return {
       type: 'html-embed',

@@ -7,8 +7,30 @@ import { ExtensionCategory, BaseExtensionConfig } from '@repo/editor/extensions/
 import { ImagePayload, ImageComponentProps, SerializedImageNode, ImageExtensionConfig, ImageCommands, ImageStateQueries, Alignment } from './types';
 import { ImageTranslator, importImageDOM, exportImageDOM, importImageJSON, exportImageJSON } from './ImageTranslator';
 
+/**
+ * Command for inserting images into the editor
+ */
 const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>('insert-image');
 
+/**
+ * Default image component for rendering images in the editor
+ */
+let defaultImageComponent: ComponentType<ImageComponentProps> = ImageComponent;
+
+/**
+ * ImageComponent - React component for rendering and interacting with images
+ *
+ * This component provides a rich image editing experience with:
+ * - Image display with proper alignment and styling
+ * - Resizable handles for adjusting image dimensions
+ * - Selection state management
+ * - Touch and mouse support for resizing
+ * - Aspect ratio preservation with shift key
+ * - Caption support
+ *
+ * @param props - Image component properties
+ * @returns React element for the image
+ */
 function ImageComponent({
   src,
   alt,
@@ -21,7 +43,7 @@ function ImageComponent({
   height,
   resizable = true,
   uploading = false,
-}: ImageComponentProps) {
+}: ImageComponentProps): ReactNode {
   const [editor] = useLexicalComposerContext();
   const imageRef = useRef<HTMLImageElement>(null);
   const resizerRef = useRef<HTMLDivElement>(null);
@@ -261,17 +283,24 @@ function ImageComponent({
   );
 }
 
-let defaultImageComponent: ComponentType<ImageComponentProps> = ImageComponent;
-
 export class ImageNode extends DecoratorNode<ReactNode> {
+  /** Image source URL */
   __src: string;
+  /** Alt text for accessibility */
   __alt: string;
+  /** Optional caption text */
   __caption?: string;
+  /** Image alignment */
   __alignment: Alignment;
+  /** CSS class name */
   __className?: string;
+  /** Inline CSS styles */
   __style?: CSSProperties;
+  /** Image width in pixels */
   __width?: number;
+  /** Image height in pixels */
   __height?: number;
+  /** Whether the image is currently uploading */
   __uploading?: boolean;
 
   static getType(): string {
@@ -326,7 +355,6 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__width = width;
     this.__height = height;
     this.__uploading = uploading;
-    console.log('Creating ImageNode:', { src: this.__src, alt: this.__alt, caption: this.__caption, alignment: this.__alignment, uploading: this.__uploading });
   }
 
   // Required for DecoratorNode: creates the DOM container for the React component
@@ -343,7 +371,6 @@ export class ImageNode extends DecoratorNode<ReactNode> {
       const themeClass = config.theme?.image || '';
       dom.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
     }
-    console.log('🔄 updateDOM called for ImageNode');
     return false; // No full re-render needed
   }
 
@@ -421,14 +448,6 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   }
 
   decorate(): ReactNode {
-    console.log('🎨 ImageNode.decorate() called for node:', this.__key, {
-      src: this.__src,
-      alt: this.__alt,
-      caption: this.__caption,
-      alignment: this.__alignment,
-      isValidSrc: !!this.__src && this.__src.length > 0
-    });
-
     // Ensure we have a valid src
     if (!this.__src || this.__src.length === 0) {
       console.error('❌ No src provided to ImageNode');
@@ -501,7 +520,8 @@ export class ImageExtension extends BaseExtension<
   ImageStateQueries,
   ReactNode[]
 > {
-  private recentImages: Set<string> = new Set(); // Track recent image src to prevent duplicates
+  /** Track recent image sources to prevent duplicate insertions */
+  private recentImages: Set<string> = new Set();
 
   constructor() {
     super('image', [ExtensionCategory.Toolbar]);
@@ -541,11 +561,9 @@ export class ImageExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    console.log('🔧 Registering ImageExtension');
     const removeCommand = editor.registerCommand<ImagePayload>(
       INSERT_IMAGE_COMMAND,
       (payload) => {
-        console.log('📸 Inserting image:', payload);
         editor.update(() => {
           try {
             let src = payload.src || (payload.file ? URL.createObjectURL(payload.file) : '');
@@ -553,7 +571,6 @@ export class ImageExtension extends BaseExtension<
 
             // Check for duplicates
             if (this.recentImages.has(src)) {
-              console.log('🚫 Duplicate image src detected, skipping:', src);
               return true;
             }
             this.recentImages.add(src);
@@ -607,13 +624,11 @@ export class ImageExtension extends BaseExtension<
               const paragraph = $createParagraphNode();
               paragraph.append(imageNode);
               $getRoot().append(paragraph);
-              console.log('✅ Appended to root');
               // Add another paragraph after
               const nextPara = $createParagraphNode();
               $getRoot().append(nextPara);
               nextPara.select();
             } else {
-              console.log('✅ Inserted via selection');
               // Add paragraph after the image
               const nextPara = $createParagraphNode();
               imageNode.insertAfter(nextPara);
@@ -627,7 +642,6 @@ export class ImageExtension extends BaseExtension<
       },
       COMMAND_PRIORITY_EDITOR
     );
-    console.log('✅ ImageExtension registered');
     const removeDelete = editor.registerCommand(
       KEY_DELETE_COMMAND,
       () => {
@@ -774,7 +788,6 @@ export class ImageExtension extends BaseExtension<
   }
 
   getNodes(): any[] {
-    console.log('📝 ImageExtension getNodes() called, returning ImageNode');
     return [ImageNode];
   }
 
