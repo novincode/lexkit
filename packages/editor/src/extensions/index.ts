@@ -15,6 +15,7 @@ export { UnderlineExtension, underlineExtension } from './formatting/UnderlineEx
 export { StrikethroughExtension, strikethroughExtension } from './formatting/StrikethroughExtension';
 export { LinkExtension, linkExtension } from './formatting/LinkExtension';
 export { HorizontalRuleExtension, horizontalRuleExtension } from './formatting/HorizontalRuleExtension';
+export { TableExtension, tableExtension, type TableConfig } from './formatting/TableExtension';
 
 // Structure Extensions
 export { ListExtension, listExtension } from './formatting/ListExtension';

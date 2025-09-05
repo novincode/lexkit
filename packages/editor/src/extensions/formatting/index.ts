@@ -8,3 +8,4 @@ export { CodeExtension, codeExtension } from './CodeExtension';
 export { CodeFormatExtension, codeFormatExtension } from './CodeFormatExtension';
 export { LinkExtension, linkExtension } from './LinkExtension';
 export { HorizontalRuleExtension, horizontalRuleExtension } from './HorizontalRuleExtension';
+export { TableExtension, tableExtension } from './TableExtension';

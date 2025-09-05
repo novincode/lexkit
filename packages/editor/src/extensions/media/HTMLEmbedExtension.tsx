@@ -399,7 +399,7 @@ export class HTMLEmbedExtension extends BaseExtension<
   }
 }
 
-// Markdown Transformer - Properly implemented for Lexical 0.34
+// Markdown Transformer - Properly implemented for Lexical 0.35
 export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
   dependencies: [HTMLEmbedNode],
   export: (node: any) => {

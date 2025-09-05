@@ -7,6 +7,8 @@ import {
   strikethroughExtension,
   linkExtension,
   horizontalRuleExtension,
+  tableExtension,
+  type TableConfig,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -52,9 +54,10 @@ import {
   Type,
   FileCode,
   Eye,
-  Pencil
+  Pencil,
+  Table
 } from 'lucide-react';
-import { Select, Dropdown } from './components';
+import { Select, Dropdown, Dialog } from './components';
 import { createEditorSystem } from '@lexkit/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
 import { LexicalEditor } from 'lexical';
@@ -89,6 +92,7 @@ const extensions = [
   strikethroughExtension,
   linkExtension,
   horizontalRuleExtension,
+  tableExtension,
   listExtension, 
   historyExtension, 
   imageExtension, 
@@ -179,6 +183,12 @@ function Toolbar({
   
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
+  const [tableConfig, setTableConfig] = useState<TableConfig>({
+    rows: 3,
+    columns: 3,
+    includeHeaders: false
+  });
   // Block format options
   const blockFormatOptions = [
     { value: 'p', label: 'Paragraph' },
@@ -320,6 +330,19 @@ function Toolbar({
             title="Insert Horizontal Rule"
           >
             <Minus size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Table Section */}
+      {hasExtension('table') && (
+        <div className="lexkit-toolbar-section">
+          <button
+            onClick={() => setShowTableDialog(true)}
+            className="lexkit-toolbar-button"
+            title="Insert Table"
+          >
+            <Table size={16} />
           </button>
         </div>
       )}
@@ -494,6 +517,74 @@ function Toolbar({
         </button>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {toolbar}
+      
+      {/* Table Dialog */}
+      <Dialog
+        isOpen={showTableDialog}
+        onClose={() => setShowTableDialog(false)}
+        title="Insert Table"
+      >
+        <div className="lexkit-table-dialog">
+          <div className="lexkit-form-group">
+            <label htmlFor="table-rows">Rows:</label>
+            <input
+              id="table-rows"
+              type="number"
+              min="1"
+              max="20"
+              value={tableConfig.rows}
+              onChange={(e) => setTableConfig(prev => ({ ...prev, rows: parseInt(e.target.value) || 1 }))}
+              className="lexkit-input"
+            />
+          </div>
+          <div className="lexkit-form-group">
+            <label htmlFor="table-columns">Columns:</label>
+            <input
+              id="table-columns"
+              type="number"
+              min="1"
+              max="20"
+              value={tableConfig.columns}
+              onChange={(e) => setTableConfig(prev => ({ ...prev, columns: parseInt(e.target.value) || 1 }))}
+              className="lexkit-input"
+            />
+          </div>
+          <div className="lexkit-form-group">
+            <label className="lexkit-checkbox-label">
+              <input
+                type="checkbox"
+                checked={tableConfig.includeHeaders || false}
+                onChange={(e) => setTableConfig(prev => ({ ...prev, includeHeaders: e.target.checked }))}
+                className="lexkit-checkbox"
+              />
+              Include headers
+            </label>
+          </div>
+          <div className="lexkit-dialog-actions">
+            <button
+              onClick={() => setShowTableDialog(false)}
+              className="lexkit-button-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                commands.insertTable(tableConfig);
+                setShowTableDialog(false);
+              }}
+              className="lexkit-button-primary"
+            >
+              Insert Table
+            </button>
+          </div>
+        </div>
+      </Dialog>
+    </>
   );
 }
 
