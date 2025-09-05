@@ -102,7 +102,29 @@ const extensions = [
 // 2. Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
-// 3. Configure extensions (optional)
+// 3. Error Boundary (required by Lexical)
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+  try {
+    return <>{children}</>;
+  } catch (error) {
+    console.error('Editor Error:', error);
+    return (
+      <div style={{
+        color: 'red',
+        border: '1px solid red',
+        padding: '20px',
+        backgroundColor: '#ffe6e6',
+        borderRadius: '4px',
+        margin: '10px 0'
+      }}>
+        <h3>Editor Error</h3>
+        <p>Something went wrong. Please refresh the page.</p>
+      </div>
+    );
+  }
+};
+
+// 4. Configure extensions (optional)
 imageExtension.configure({
   uploadHandler: async (file: File) => {
     // Your upload logic here
@@ -118,7 +140,23 @@ imageExtension.configure({
   debug: false
 });
 
-// 4. Create your toolbar component
+// 4. Configure extensions (optional)
+imageExtension.configure({
+  uploadHandler: async (file: File) => {
+    // Your upload logic here
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/upload', { method: 'POST', body: formData });
+    const { url } = await response.json();
+    return url;
+  },
+  defaultAlignment: 'center',
+  resizable: true,
+  pasteListener: { insert: true, replace: true }, // Auto-insert pasted images
+  debug: false
+});
+
+// 5. Create your toolbar component
 function Toolbar() {
   const { commands, activeStates, hasExtension } = useEditor();
 
@@ -192,7 +230,7 @@ function Toolbar() {
   );
 }
 
-// 5. Create your editor component
+// 6. Create your editor component
 function Editor() {
   const { commands, hasExtension } = useEditor();
   const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
@@ -275,6 +313,7 @@ function Editor() {
                 Start writing...
               </div>
             }
+            ErrorBoundary={ErrorBoundary}
           />
         ) : (
           <textarea
@@ -299,7 +338,7 @@ function Editor() {
   );
 }
 
-// 6. Use it in your app
+// 7. Use it in your app
 export default function App() {
   return (
     <Provider extensions={extensions}>
@@ -528,6 +567,86 @@ const customTheme = {
   <YourEditor />
 </Provider>
 ```
+
+### 🎨 Styling Your Editor
+
+LexKit is **headless by design** - you control all the styling! Here are your options:
+
+#### Option 1: CSS Classes (Recommended)
+Use the default theme structure and style with CSS:
+
+```tsx
+// In your theme configuration
+const theme = {
+  toolbar: 'my-toolbar',
+  editor: 'my-editor',
+  contentEditable: 'my-content',
+  paragraph: 'my-paragraph',
+  heading: {
+    h1: 'my-h1',
+    h2: 'my-h2',
+    // ... etc
+  },
+  text: {
+    bold: 'my-bold',
+    italic: 'my-italic',
+    // ... etc
+  }
+};
+
+// Then in your CSS file
+.my-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  background: #f9f9f9;
+}
+
+.my-editor {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 200px;
+}
+
+.my-content {
+  padding: 16px;
+  outline: none;
+  min-height: 200px;
+}
+
+.my-bold { font-weight: bold; }
+.my-italic { font-style: italic; }
+// ... etc
+```
+
+#### Option 2: Tailwind CSS Classes
+Use Tailwind classes directly in your theme:
+
+```tsx
+const theme = {
+  toolbar: 'flex gap-2 p-2 border-b border-gray-300 bg-gray-50',
+  editor: 'border border-gray-300 rounded min-h-[200px]',
+  contentEditable: 'p-4 outline-none min-h-[200px]',
+  paragraph: 'mb-4',
+  heading: {
+    h1: 'text-3xl font-bold mb-4 text-blue-600',
+    h2: 'text-2xl font-semibold mb-3 text-blue-500',
+    h3: 'text-xl font-medium mb-2 text-blue-400',
+  },
+  text: {
+    bold: 'font-bold text-red-600',
+    italic: 'italic text-green-600',
+    underline: 'underline decoration-blue-500',
+    strikethrough: 'line-through text-gray-500'
+  }
+};
+```
+
+#### Option 3: Inline Styles
+For quick prototyping, use inline styles as shown in the example above.
+
+**💡 Pro Tip:** Check out the [default theme](https://github.com/novincode/lexkit/blob/main/apps/web/app/templates/default/theme.ts) and [styles](https://github.com/novincode/lexkit/blob/main/apps/web/app/templates/default/styles.css) for a complete reference!
 
 ---
 

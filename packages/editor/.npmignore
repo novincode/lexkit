@@ -1,0 +1,15 @@
+# Source files - not needed in production package
+src/
+docs/
+
+# Build artifacts and cache
+.turbo/
+node_modules/
+
+# Development files
+tsconfig.json
+tsup.config.ts
+.DS_Store
+
+# Only include dist/ and package.json, README.md
+*
