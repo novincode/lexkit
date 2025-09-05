@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
     "pages:build": "pnpm next-on-pages",
-    "deploy": "pnpm pages:build && npx cfman wrangler --account shayanmoradi  pages deploy"
+    "deploy": "pnpm pages:build && npx cfman wrangler --account shayanpng  pages deploy"
   },
   "dependencies": {
     "@lexical/react": "^0.34.0",

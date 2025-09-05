@@ -227,8 +227,8 @@ importers:
         specifier: ^0.34.0
         version: 0.34.0
       '@lexkit/editor':
-        specifier: workspace:*
-        version: link:../editor
+        specifier: ^0.0.1
+        version: 0.0.1(@lexical/code@0.34.0)(@lexical/html@0.34.0)(@lexical/list@0.34.0)(@lexical/markdown@0.34.0)(@lexical/react@0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.34.0)(@lexical/selection@0.34.0)(@lexical/utils@0.34.0)(lexical@0.34.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       lexical:
         specifier: ^0.34.0
         version: 0.34.0
@@ -1267,6 +1267,21 @@ packages:
     resolution: {integrity: sha512-nnymAhO16k82ssiP9F0ph6Yq2icDImRgWeyI76SyRsYn1HqeOwaWUZV/bx03rFgYC0DNNtBQ6TS8me4CBjcVhA==}
     peerDependencies:
       yjs: '>=13.5.22'
+
+  '@lexkit/editor@0.0.1':
+    resolution: {integrity: sha512-IeiygM4wXSZo/8Fsztx1iLV8sDtQ8GIvhwVtdbMIwmIkJ4Br9+mVI1YHdQDf42lToael1TVBF2l2hedZlPObXg==}
+    peerDependencies:
+      '@lexical/code': ^0.34.0
+      '@lexical/html': ^0.34.0
+      '@lexical/list': ^0.34.0
+      '@lexical/markdown': ^0.34.0
+      '@lexical/react': ^0.34.0
+      '@lexical/rich-text': ^0.34.0
+      '@lexical/selection': ^0.34.0
+      '@lexical/utils': ^0.34.0
+      lexical: ^0.34.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   '@mapbox/node-pre-gyp@2.0.0':
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
@@ -5938,6 +5953,20 @@ snapshots:
       '@lexical/selection': 0.34.0
       lexical: 0.34.0
       yjs: 13.6.27
+
+  '@lexkit/editor@0.0.1(@lexical/code@0.34.0)(@lexical/html@0.34.0)(@lexical/list@0.34.0)(@lexical/markdown@0.34.0)(@lexical/react@0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.34.0)(@lexical/selection@0.34.0)(@lexical/utils@0.34.0)(lexical@0.34.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+    dependencies:
+      '@lexical/code': 0.34.0
+      '@lexical/html': 0.34.0
+      '@lexical/list': 0.34.0
+      '@lexical/markdown': 0.34.0
+      '@lexical/react': 0.34.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
+      '@lexical/rich-text': 0.34.0
+      '@lexical/selection': 0.34.0
+      '@lexical/utils': 0.34.0
+      lexical: 0.34.0
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
 
   '@mapbox/node-pre-gyp@2.0.0':
     dependencies:
