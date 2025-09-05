@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND, LexicalEditor, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
+import { FORMAT_TEXT_COMMAND, INSERT_PARAGRAPH_COMMAND, INSERT_LINE_BREAK_COMMAND, LexicalEditor, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
 import { ReactNode } from 'react';
@@ -15,7 +15,7 @@ export type TextFormatCommands<Name extends TextFormatType> = {
  * Base extension for text formatting (bold, italic, underline, etc.).
  * Provides common functionality for text format extensions.
  *
- * @template Name - The text format type (e.g., 'bold', 'italic')
+ * @template Name - The text format name (e.g., 'bold', 'italic')
  */
 export abstract class TextFormatExtension<Name extends TextFormatType> extends BaseExtension<
   Name,
@@ -36,13 +36,43 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
 
   /**
    * Registers the extension with the editor.
-   * Text format extensions don't need special registration beyond the base.
+   * Text format extensions register listeners for INSERT_PARAGRAPH_COMMAND and INSERT_LINE_BREAK_COMMAND
+   * to handle formatting behavior when Enter/Shift+Enter is pressed.
    *
    * @param editor - The Lexical editor instance
-   * @returns Cleanup function (no-op for text formats)
+   * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
-    return () => {};
+    // Register listener for INSERT_PARAGRAPH_COMMAND to clear formatting when Enter is pressed
+    const unregisterParagraph = editor.registerCommand(
+      INSERT_PARAGRAPH_COMMAND,
+      () => {
+        // Only toggle off the format if it's currently active
+        editor.getEditorState().read(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection) && selection.hasFormat(this.name)) {
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, this.name);
+          }
+        });
+        return false; // Allow the default paragraph insertion to continue
+      },
+      1 // COMMAND_PRIORITY_LOW
+    );
+
+    // Register listener for INSERT_LINE_BREAK_COMMAND to preserve formatting when Shift+Enter is pressed
+    const unregisterLineBreak = editor.registerCommand(
+      INSERT_LINE_BREAK_COMMAND,
+      () => {
+        // Don't clear formatting when Shift+Enter is pressed (preserves formatting for line break)
+        return false; // Allow the default line break insertion to continue
+      },
+      1 // COMMAND_PRIORITY_LOW
+    );
+
+    return () => {
+      unregisterParagraph();
+      unregisterLineBreak();
+    };
   }
 
   /**
