@@ -11,7 +11,8 @@ import {
   blockFormatExtension,
   htmlExtension,
   markdownExtension,
-  codeExtension
+  codeExtension,
+  codeFormatExtension
 } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -39,7 +40,7 @@ import {
   Upload, 
   Link,
   Code,
-  Code2,
+  Terminal,
   Type
 } from 'lucide-react';
 import { Select, Dropdown } from './components';
@@ -80,6 +81,7 @@ const extensions = [
   imageExtension, 
   blockFormatExtension,
   codeExtension,
+  codeFormatExtension,
   htmlExtension,
   markdownExtension,
   MyCustomExtension
@@ -158,9 +160,9 @@ function Toolbar({
 }) {
   const { commands: editorCommands, lexical: editor } = useEditor();
   const { handlers, fileInputRef } = useImageHandlers(commands, editor);
+  
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
-
   // Block format options
   const blockFormatOptions = [
     { value: 'p', label: 'Paragraph' },
@@ -236,20 +238,11 @@ function Toolbar({
         )}
         <button 
           onClick={() => commands.formatText('code')} 
-          className="lexkit-toolbar-button"
+          className={`lexkit-toolbar-button ${commands.hasFormatText("bold") ? 'active' : ''}`}
           title="Inline Code"
         >
           <Code size={16} />
         </button>
-        {hasExtension('code') && (
-          <button 
-            onClick={() => commands.toggleCodeBlock()} 
-            className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
-            title="Code Block"
-          >
-            <Code2 size={16} />
-          </button>
-        )}
       </div>
 
       {/* Block Format Section */}
@@ -261,6 +254,15 @@ function Toolbar({
             options={blockFormatOptions}
             placeholder="Format"
           />
+          {hasExtension('code') && (
+            <button 
+              onClick={() => commands.toggleCodeBlock()} 
+              className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
+              title="Code Block"
+            >
+              <Terminal size={16} />
+            </button>
+          )}
         </div>
       )}
 

@@ -4,6 +4,7 @@ export { UnderlineExtension, underlineExtension } from './formatting/UnderlineEx
 export { StrikethroughExtension, strikethroughExtension } from './formatting/StrikethroughExtension';
 export { ListExtension, listExtension } from './formatting/ListExtension';
 export { CodeExtension, codeExtension } from './formatting/CodeExtension';
+export { CodeFormatExtension, codeFormatExtension } from './formatting/CodeFormatExtension';
 export { HistoryExtension, historyExtension } from './core/HistoryExtension';
 export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockTypeExtension';
 export { HTMLExtension, htmlExtension } from './export/HTMLExtension';

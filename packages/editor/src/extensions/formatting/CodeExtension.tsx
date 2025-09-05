@@ -3,7 +3,8 @@ import { BaseExtension } from '@repo/editor/extensions/base';
 import { ExtensionCategory } from '@repo/editor/extensions/types';
 import { ReactNode } from 'react';
 import { $createCodeNode, $isCodeNode, CodeNode } from '@lexical/code';
-import { $getSelection, $isRangeSelection, $createRangeSelection } from 'lexical';
+import { $getSelection, $isRangeSelection, $createParagraphNode } from 'lexical';
+import { $setBlocksType } from '@lexical/selection';
 
 export type CodeCommands = {
   insertCodeBlock: (language?: string) => void;
@@ -52,11 +53,8 @@ export class CodeExtension extends BaseExtension<
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
             if (this.isSelectionInCodeBlock(selection)) {
-              // If already in code block, exit it by inserting a paragraph
-              const paragraphNode = $createRangeSelection();
-              // For now, just insert a new code block (we can improve this later)
-              const codeNode = $createCodeNode();
-              selection.insertNodes([codeNode]);
+              // If already in code block, exit it by converting to paragraph
+              $setBlocksType(selection, () => $createParagraphNode());
             } else {
               // Insert new code block
               const codeNode = $createCodeNode();
