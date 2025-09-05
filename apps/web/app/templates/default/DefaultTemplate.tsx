@@ -9,7 +9,9 @@ import {
   historyExtension, 
   imageExtension, 
   blockFormatExtension,
-  htmlExtension
+  htmlExtension,
+  markdownExtension,
+  codeExtension
 } from '@repo/editor/extensions';
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -37,6 +39,7 @@ import {
   Upload, 
   Link,
   Code,
+  Code2,
   Type
 } from 'lucide-react';
 import { Select, Dropdown } from './components';
@@ -76,7 +79,9 @@ const extensions = [
   historyExtension, 
   imageExtension, 
   blockFormatExtension,
+  codeExtension,
   htmlExtension,
+  markdownExtension,
   MyCustomExtension
 ] as const;
 
@@ -89,7 +94,7 @@ type EditorStateQueries = ExtractStateQueries<typeof extensions>;
 type ExtensionNames = typeof extensions[number]['name'];
 
 // Editor Mode Types
-type EditorMode = 'visual' | 'html';
+type EditorMode = 'visual' | 'html' | 'markdown';
 
 // Custom hook for image handling
 function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
@@ -236,6 +241,15 @@ function Toolbar({
         >
           <Code size={16} />
         </button>
+        {hasExtension('code') && (
+          <button 
+            onClick={() => commands.toggleCodeBlock()} 
+            className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
+            title="Code Block"
+          >
+            <Code2 size={16} />
+          </button>
+        )}
       </div>
 
       {/* Block Format Section */}
@@ -443,6 +457,12 @@ function ModeTabs({
       >
         HTML
       </button>
+      <button
+        className={`lexkit-mode-tab ${mode === 'markdown' ? 'active' : ''}`}
+        onClick={() => onModeChange('markdown')}
+      >
+        Markdown
+      </button>
     </div>
   );
 }
@@ -466,6 +486,25 @@ function HTMLSourceView({
   );
 }
 
+// Markdown Source View Component
+function MarkdownSourceView({ 
+  markdownContent, 
+  onMarkdownChange
+}: { 
+  markdownContent: string; 
+  onMarkdownChange: (markdown: string) => void;
+}) {
+  return (
+    <textarea
+      className="lexkit-html-view"
+      value={markdownContent}
+      onChange={(e) => onMarkdownChange(e.target.value)}
+      placeholder="Enter Markdown content..."
+      spellCheck={false}
+    />
+  );
+}
+
 // Main Editor Content Component
 function EditorContent({ 
   className, 
@@ -479,6 +518,7 @@ function EditorContent({
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [htmlContent, setHtmlContent] = useState('');
+  const [markdownContent, setMarkdownContent] = useState('');
 
   // Update theme dynamically
   useEffect(() => {
@@ -490,12 +530,52 @@ function EditorContent({
   // Sync HTML content when switching to HTML mode
   useEffect(() => {
     if (mode === 'html' && editor && hasExtension('html')) {
+      const unsubscribe = editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          try {
+            const html = commands.exportToHTML();
+            setHtmlContent(html);
+          } catch (error) {
+            console.error('Failed to export HTML:', error);
+          }
+        });
+      });
+      
+      // Initial export
       try {
         const html = commands.exportToHTML();
         setHtmlContent(html);
       } catch (error) {
         console.error('Failed to export HTML:', error);
       }
+      
+      return unsubscribe;
+    }
+  }, [mode, editor, hasExtension, commands]);
+
+  // Sync Markdown content when switching to Markdown mode
+  useEffect(() => {
+    if (mode === 'markdown' && editor && hasExtension('markdown')) {
+      const unsubscribe = editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          try {
+            const markdown = commands.exportToMarkdown();
+            setMarkdownContent(markdown);
+          } catch (error) {
+            console.error('Failed to export Markdown:', error);
+          }
+        });
+      });
+      
+      // Initial export
+      try {
+        const markdown = commands.exportToMarkdown();
+        setMarkdownContent(markdown);
+      } catch (error) {
+        console.error('Failed to export Markdown:', error);
+      }
+      
+      return unsubscribe;
     }
   }, [mode, editor, hasExtension, commands]);
 
@@ -504,13 +584,24 @@ function EditorContent({
     setHtmlContent(html);
   };
 
-  // Import HTML when switching back to visual mode
+  // Import Markdown changes back to visual editor
+  const handleMarkdownChange = (markdown: string) => {
+    setMarkdownContent(markdown);
+  };
+
+  // Import HTML/Markdown when switching back to visual mode
   const handleModeChange = (newMode: EditorMode) => {
     if (newMode === 'visual' && mode === 'html' && hasExtension('html') && editor) {
       try {
         commands.importFromHTML(htmlContent);
       } catch (error) {
         console.error('Failed to import HTML:', error);
+      }
+    } else if (newMode === 'visual' && mode === 'markdown' && hasExtension('markdown') && editor) {
+      try {
+        commands.importFromMarkdown(markdownContent);
+      } catch (error) {
+        console.error('Failed to import Markdown:', error);
       }
     }
     setMode(newMode);
@@ -538,12 +629,17 @@ function EditorContent({
             placeholder={<div className="lexkit-placeholder">Start typing...</div>}
             ErrorBoundary={ErrorBoundary}
           />
-        ) : (
+        ) : mode === 'html' ? (
           <HTMLSourceView 
             htmlContent={htmlContent} 
             onHtmlChange={handleHtmlChange}
           />
-        )}
+        ) : mode === 'markdown' ? (
+          <MarkdownSourceView 
+            markdownContent={markdownContent} 
+            onMarkdownChange={handleMarkdownChange}
+          />
+        ) : null}
         <HistoryPlugin />
       </div>
     </>

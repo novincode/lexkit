@@ -105,6 +105,9 @@ importers:
 
   packages/editor:
     dependencies:
+      '@lexical/code':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@lexical/html':
         specifier: ^0.34.0
         version: 0.34.0

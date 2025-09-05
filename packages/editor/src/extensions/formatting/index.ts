@@ -5,3 +5,4 @@ export { StrikethroughExtension, strikethroughExtension } from './StrikethroughE
 export { ListExtension, listExtension } from './ListExtension';
 export { BlockFormatExtension, blockFormatExtension } from './BlockTypeExtension';
 export { HTMLExtension, htmlExtension } from './HTMLExtension';
+export { CodeExtension, codeExtension } from './CodeExtension';
