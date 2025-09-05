@@ -320,15 +320,11 @@ export class HTMLEmbedExtension extends BaseExtension<
 export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
   dependencies: [HTMLEmbedNode],
   export: (node: any) => {
-    console.log('🔍 Transformer export called for node:', node?.getType?.());
-    
     // Check if this is our HTML embed node
     if (node && typeof node.getType === 'function' && node.getType() === 'html-embed') {
-      console.log('✅ Exporting HTML embed node');
       try {
         const payload = node.getPayload();
         const result = '```html-embed\n' + payload.html + '\n```';
-        console.log('🔄 HTML embed markdown result:', result);
         return result;
       } catch (error) {
         console.error('❌ Error exporting HTML embed:', error);
@@ -340,14 +336,12 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
   },
   regExp: /^```html-embed\n([\s\S]*?)\n```$/,
   replace: (parentNode: any, _children: any[], match: RegExpMatchArray) => {
-    console.log('🔄 Importing HTML embed from markdown, match:', match[1]);
     const html = match[1] || '';
     
     try {
       const payload: HTMLEmbedPayload = { html, preview: true };
       const node = new HTMLEmbedNode(payload);
       parentNode.replace(node);
-      console.log('✅ HTML embed node created and replaced');
     } catch (error) {
       console.error('❌ Error creating HTML embed node:', error);
     }

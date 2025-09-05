@@ -88,7 +88,9 @@ const extensions = [
   codeExtension,
   codeFormatExtension,
   htmlExtension,
-  markdownExtension,
+  markdownExtension.configure({
+    customTransformers: [HTML_EMBED_MARKDOWN_TRANSFORMER]
+  }),
   htmlEmbedExtension,
   MyCustomExtension
 ] as const;
@@ -707,11 +709,6 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
       resizable: true,
       pasteListener: { insert: true, replace: true },
       debug: false,
-    });
-
-    // Configure markdown extension with HTML embed transformer
-    markdownExtension.configure({
-      customTransformers: [HTML_EMBED_MARKDOWN_TRANSFORMER]
     });
   }, []);
 

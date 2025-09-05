@@ -32,7 +32,6 @@ export class MarkdownExtension extends BaseExtension<
   }
 
   configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
-    console.log('🔧 Configuring MarkdownExtension with custom transformers:', config.customTransformers?.length || 0);
     this.config = { ...this.config, ...config };
     return this;
   }
@@ -46,26 +45,13 @@ export class MarkdownExtension extends BaseExtension<
   getCommands(editor: LexicalEditor): MarkdownCommands {
     // Combine default and custom transformers
     const transformers = [...TRANSFORMERS, ...(this.config.customTransformers || [])];
-    
-    console.log('🔧 MarkdownExtension getCommands - Total transformers:', transformers.length);
-    console.log('🔧 Custom transformers added:', this.config.customTransformers?.length || 0);
 
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
-            console.log('🔄 Starting markdown export with', transformers.length, 'transformers');
-            
-            // Debug: Log transformer types
-            transformers.forEach((t, i) => {
-              console.log(`Transformer ${i}: type=${t.type}, deps=${t.dependencies?.length || 0}`);
-            });
-            
             // Use Lexical's built-in markdown conversion with all transformers
             const markdown = $convertToMarkdownString(transformers);
-            
-            console.log('✅ Markdown export completed, result length:', markdown.length);
-            console.log('✅ Markdown content:', markdown);
             return markdown;
           } catch (error) {
             console.error('❌ Markdown export error:', error);
@@ -85,12 +71,7 @@ export class MarkdownExtension extends BaseExtension<
               return;
             }
 
-            console.log('🔄 Importing markdown with', transformers.length, 'transformers');
-            console.log('🔄 Markdown to import:', markdown);
-            
             $convertFromMarkdownString(markdown, transformers);
-            
-            console.log('✅ Markdown import completed');
           } catch (error) {
             console.error('❌ Markdown import error:', error);
             const root = $getRoot();
