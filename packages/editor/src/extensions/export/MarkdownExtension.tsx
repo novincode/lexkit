@@ -122,6 +122,9 @@ export class MarkdownExtension extends BaseExtension<
         return editor.getEditorState().read(() => {
           try {
             const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
+            console.log('🔄 Markdown export - custom transformers:', this.config.customTransformers?.length || 0);
+            console.log('🔄 Markdown export - total transformers:', transformers.length);
+            console.log('🔄 Markdown export - has TABLE_MARKDOWN_TRANSFORMER:', transformers.some(t => t.type === 'element' && t.regExp));
             return $convertToMarkdownString(transformers);
           } catch (error) {
             console.error('❌ Markdown export error:', error);
@@ -162,6 +165,8 @@ export class MarkdownExtension extends BaseExtension<
               });
 
               console.log('🔄 About to call $convertFromMarkdownString with transformers');
+              console.log('🔄 Processed markdown preview:', processedMarkdown.substring(0, 300) + (processedMarkdown.length > 300 ? '...' : ''));
+              console.log('🔄 Full markdown content:', processedMarkdown);
               $convertFromMarkdownString(processedMarkdown, transformers);
               console.log('✅ $convertFromMarkdownString completed successfully');
 
