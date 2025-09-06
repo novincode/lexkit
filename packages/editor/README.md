@@ -8,7 +8,7 @@
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://badge.fury.io/js/%40lexkit%2Feditor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 Documentation](https://lexkit.codeideal.com) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [� Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [�💬 Discord](https://discord.gg/hAvRFC9Y)
+[📚 Documentation](https://github.com/novincode/lexkit/tree/main/packages/editor/docs) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [⚡ Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [💬 Discord](https://discord.gg/hAvRFC9Y)
 
 </div>
 
@@ -16,20 +16,7 @@
 
 ## ✨ What Makes LexKit Special
 
-LexKit is not just another rich text editor—it's a **type-safe## 📚 Documentation & Examples
-
-- **[🚀 Getting Started](./docs/getting-started.md)** - Quick setup guide
-- **[🎨 Styling Guide](./docs/styling.md)** - Complete theming guide
-- **[🚀 Performance Guide](./docs/performance.md)** - Optimization tips
-- **[🔧 Troubleshooting](./docs/troubleshooting.md)** - Common issues & solutions
-- **[📚 API Reference](./docs/api-reference.md)** - Complete API docs
-- **[🏗️ Architecture](./docs/architecture.md)** - System design and concepts
-- **[📝 Extensions Guide](./docs/extensions.md)** - Using and creating extensions
-- **[🚀 Interactive Demo](https://lexkit.codeideal.com/demo)** - Try it live
-- **[⚡ Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
-- **[💬 Discord Community](https://discord.gg/hAvRFC9Y)** - Get help and share ideas
-
-*📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*e framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
+LexKit is not just another rich text editor—it's a **type-safe framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
 
 ### 🎯 **Type-Safe Commands & State**
 Commands and state queries are **automatically typed** based on your extensions:
@@ -759,10 +746,10 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 
 ## 📚 Documentation & Examples
 
-- **[📖 Full Documentation](https://lexkit.codeideal.com)** - Complete API reference
+- **[📖 Full Documentation](https://github.com/novincode/lexkit/tree/main/packages/editor/docs)** - Complete API reference
 - **[🚀 Interactive Demo](https://lexkit.codeideal.com/demo)** - Try it live
-- **[� Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
-- **[�📝 Examples](https://lexkit.codeideal.com/examples)** - Real-world implementations
+- **[⚡ Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
+- **[📝 Examples](https://lexkit.codeideal.com/examples)** - Real-world implementations
 - **[💬 Discord Community](https://discord.gg/hAvRFC9Y)** - Get help and share ideas
 
 *📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*
@@ -771,7 +758,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 
 ## 🤝 Contributing
 
-We welcome contributions! See our [Contributing Guide](./CONTRIBUTING.md) and [Development Notes](./docs/improvement_NOTES.md).
+We welcome contributions! See our [Contributing Guide](./CONTRIBUTING.md) and [Development Notes](https://github.com/novincode/lexkit/blob/main/packages/editor/docs/improvement_NOTES.md).
 
 ---
 

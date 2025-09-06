@@ -5,11 +5,11 @@
 **A headless, extensible rich text editor built on Lexical**  
 *Type-safe • Scalable • Production-ready*
 
-[![npm version](https://badge.fury.io/js/lexkit)](https://www.npmjs.com/package/lexkit)
-[![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://www.npmjs.com/package/@lexkit/editor)
+[![npm version](https://badge.fury.io/js/lexkit)](https://github.com/novincode/lexkit)
+[![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://github.com/novincode/lexkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 Documentation](https://lexkit.codeideal.com) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [⚡ Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [💬 Discord](https://discord.gg/hAvRFC9Y)
+[📚 Documentation](https://github.com/novincode/lexkit/tree/main/packages/editor/docs) • [🚀 Demo](https://lexkit.codeideal.com/demo) • [⚡ Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [💬 Discord](https://discord.gg/hAvRFC9Y)
 
 </div>
 
@@ -618,7 +618,7 @@ import { Button } from "@repo/ui/components/button"
 - **[Performance Guide](https://github.com/novincode/lexkit/blob/main/packages/editor/docs/performance.md)** - Optimization and performance tips
 
 ### 🔧 Troubleshooting
-- **[Troubleshooting Guide](https://github.com/novincode/lexkit/blob/main/packages/editor/docs/troubleshooting.md)** - Common issues and solutions
+- **[Troubleshooting Guide](https://github.com/novincode/main/packages/editor/docs/troubleshooting.md)** - Common issues and solutions
 
 ### 🚀 Examples & Tutorials
 - **[Quick Start Examples](https://github.com/novincode/lexkit/tree/main/examples)** - Code examples
