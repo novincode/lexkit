@@ -121,14 +121,9 @@ export class MarkdownExtension extends BaseExtension<
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
-            const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
-            console.log('🔄 Markdown export - custom transformers:', this.config.customTransformers?.length || 0);
-            console.log('🔄 Markdown export - total transformers:', transformers.length);
-            console.log('🔄 Markdown export - has TABLE_MARKDOWN_TRANSFORMER:', transformers.some(t => t.type === 'element' && t.regExp));
             return $convertToMarkdownString(transformers);
           } catch (error) {
             console.error('❌ Markdown export error:', error);
-            console.error('❌ Transformers being used:', this.config.customTransformers || [], TRANSFORMERS);
             return '';
           }
         });
@@ -144,7 +139,6 @@ export class MarkdownExtension extends BaseExtension<
           editor.update(() => {
             try {
               const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
-              console.log('🔄 Markdown import - transformers:', transformers.length);
               
               const root = $getRoot();
               root.clear();
@@ -164,11 +158,7 @@ export class MarkdownExtension extends BaseExtension<
                 return placeholder;
               });
 
-              console.log('🔄 About to call $convertFromMarkdownString with transformers');
-              console.log('🔄 Processed markdown preview:', processedMarkdown.substring(0, 300) + (processedMarkdown.length > 300 ? '...' : ''));
-              console.log('🔄 Full markdown content:', processedMarkdown);
               $convertFromMarkdownString(processedMarkdown, transformers);
-              console.log('✅ $convertFromMarkdownString completed successfully');
 
               // Replace placeholders with HTML embed nodes
               if (htmlEmbedBlocks.length > 0) {
@@ -196,8 +186,6 @@ export class MarkdownExtension extends BaseExtension<
               }
             } catch (error) {
               console.error('❌ Markdown import error:', error);
-              console.error('❌ Error stack:', error instanceof Error ? error.stack : 'Unknown error');
-              console.error('❌ Transformers being used:', this.config.customTransformers || [], TRANSFORMERS);
               const root = $getRoot();
               root.clear();
               root.append($createParagraphNode());
@@ -206,10 +194,8 @@ export class MarkdownExtension extends BaseExtension<
         };
 
         if (immediate) {
-          // For mode changes, import immediately
           performImport();
         } else {
-          // For typing, debounce to prevent constant re-parsing
           this.debounceTimeout = setTimeout(performImport, 500);
         }
       },

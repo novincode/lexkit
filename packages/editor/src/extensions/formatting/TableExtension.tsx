@@ -332,6 +332,8 @@ export class TableExtension extends BaseExtension<
 
   /**
    * Returns markdown transformers provided by this extension.
+   * Note: Table import is handled separately in MarkdownExtension for multi-line support.
+   * This transformer is only used for export.
    *
    * @returns Array containing table markdown transformers
    */
@@ -425,7 +427,7 @@ export class TableExtension extends BaseExtension<
   private showTableFloatingToolbar(editor: LexicalEditor) {
     // For now, we'll use a simple approach
     // In a real implementation, this would integrate with the floating toolbar extension
-    console.log('Table floating toolbar would show here');
+    // console.log('Table floating toolbar would show here');
   }
 
   /**
@@ -433,7 +435,8 @@ export class TableExtension extends BaseExtension<
    */
   private hideTableFloatingToolbar(editor: LexicalEditor) {
     // For now, we'll use a simple approach
-    console.log('Table floating toolbar would hide here');
+    // In a real implementation, this would integrate with the floating toolbar extension
+    // console.log('Table floating toolbar would hide here');
   }
 
   /**
@@ -493,7 +496,8 @@ export class TableExtension extends BaseExtension<
 
 /**
  * Table Markdown Transformer
- * Supports standard GitHub Flavored Markdown table syntax
+ * Supports standard GitHub Flavored Markdown table syntax.
+ * Uses proper transformer pattern like other extensions.
  */
 export const TABLE_MARKDOWN_TRANSFORMER = {
   dependencies: [TableNode, TableRowNode, TableCellNode],
@@ -524,7 +528,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
             console.warn('Error getting cell text content:', error);
             textContent = '';
           }
-          rowData.push(textContent || ' ');
+          rowData.push(textContent || '');
         }
 
         if (rowData.length > 0) {
@@ -554,7 +558,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
           // Pad row to match column count
           const paddedRow = [...row];
           while (paddedRow.length < colCount) {
-            paddedRow.push(' ');
+            paddedRow.push('');
           }
           markdownLines.push('| ' + paddedRow.join(' | ') + ' |');
         }
@@ -566,20 +570,15 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       return null;
     }
   },
-  regExp: /^\|(.+)\|\s*\n\|[\s\-\|:]+\|\s*\n(?:\|(.+)\|\s*\n)*$/,
+  regExp: /^\|(.+)\|[ \t]*$\n\|[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|[ \t]*$(?:\n\|(.+)\|[ \t]*$)*/,
   replace: (parentNode: any, _children: any[], match: any) => {
     try {
-      console.log('🔧 TABLE_MARKDOWN_TRANSFORMER replace called with match:', match[0]);
-      
       const fullMatch = match[0];
       const lines = fullMatch.trim().split('\n');
 
-      if (lines.length < 2) {
-        console.log('❌ Not enough lines for table');
-        return;
-      }
+      if (lines.length < 2) return;
 
-      // Parse all rows
+      // Parse table data
       const tableData: string[][] = [];
 
       for (const line of lines) {
@@ -597,20 +596,15 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
         }
       }
 
-      if (tableData.length === 0) {
-        console.log('❌ No table data found');
-        return;
-      }
-
-      console.log('✅ Parsed table data:', tableData);
+      if (tableData.length === 0) return;
 
       const totalRows = tableData.length;
       const totalCols = Math.max(...tableData.map(row => row.length));
 
-      // Create table node with proper dimensions
+      // Create table node
       const tableNode = $createTableNodeWithDimensions(totalRows, totalCols, true);
       
-      // Fill table with data safely
+      // Fill with data
       const tableRows = tableNode.getChildren();
 
       tableData.forEach((rowData, rowIndex) => {
@@ -621,35 +615,26 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
           rowData.forEach((cellText, colIndex) => {
             const cell = rowCells[colIndex];
             if (cell && $isTableCellNode(cell)) {
-              // Clear existing content safely
-              const children = cell.getChildren();
-              children.forEach(child => child.remove());
+              // Clear existing content
+              cell.getChildren().forEach(child => child.remove());
 
               // Add new content
+              const paragraph = $createParagraphNode();
               if (cellText && cellText.trim()) {
-                const paragraph = $createParagraphNode();
                 paragraph.append($createTextNode(cellText.trim()));
-                cell.append(paragraph);
-              } else {
-                // Always add a paragraph, even if empty
-                const paragraph = $createParagraphNode();
-                cell.append(paragraph);
               }
+              cell.append(paragraph);
             }
           });
         }
       });
 
-      // For multiline-element transformers, we need to replace the parent node directly
       parentNode.replace(tableNode);
-      console.log('✅ Table node replaced successfully');
     } catch (error) {
       console.error('❌ Error importing table from markdown:', error);
-      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'Unknown error');
-      // Don't replace if there's an error to prevent state corruption
     }
   },
-  type: 'element' as const, // Changed from 'multiline-element' to 'element'
+  type: 'element' as const,
 };
 
 /**
