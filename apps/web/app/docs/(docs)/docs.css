@@ -1,0 +1,58 @@
+/* Docs specific styles */
+.docs-container {
+  min-height: 100vh;
+}
+
+/* Code block styles for syntax highlighting */
+pre {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* Inline code */
+:not(pre) > code {
+  background: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+/* Syntax highlighting tokens */
+[data-rehype-pretty-code-fragment] {
+  display: block;
+}
+
+[data-line] {
+  display: block;
+  padding: 0 1rem;
+}
+
+[data-highlighted-line] {
+  background: rgba(200, 200, 255, 0.1);
+}
+
+[data-highlighted-chars] {
+  background: rgba(200, 200, 255, 0.2);
+  border-radius: 0.25rem;
+}
+
+/* Dark mode adjustments */
+.dark pre {
+  background: hsl(var(--muted));
+}
+
+/* Responsive docs layout */
+@media (max-width: 768px) {
+  .docs-container {
+    padding: 1rem;
+  }
+}
