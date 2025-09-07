@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@repo/ui/components/sidebar"
 import { DocsSidebar } from "./components/docs-sidebar"
 import "./docs.css"
+import "./styles/prism.css"
 
 const inter = Inter({ subsets: ['latin'] })
 

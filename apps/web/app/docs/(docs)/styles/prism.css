@@ -1,0 +1,150 @@
+/* Custom Prism.js theme for dark code blocks */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #64748b;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #94a3b8;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #f87171;
+}
+
+.token.boolean,
+.token.number {
+  color: #fbbf24;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #34d399;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+  color: #60a5fa;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+  color: #a78bfa;
+}
+
+.token.keyword {
+  color: #f472b6;
+}
+
+.token.regex,
+.token.important {
+  color: #fb7185;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* JSX/TSX specific tokens */
+.language-jsx .token.tag,
+.language-tsx .token.tag {
+  color: #60a5fa;
+}
+
+.language-jsx .token.tag .token.punctuation,
+.language-tsx .token.tag .token.punctuation {
+  color: #94a3b8;
+}
+
+.language-jsx .token.tag .token.class-name,
+.language-tsx .token.tag .token.class-name {
+  color: #fbbf24;
+}
+
+.language-jsx .token.attr-name,
+.language-tsx .token.attr-name {
+  color: #34d399;
+}
+
+.language-jsx .token.attr-value,
+.language-tsx .token.attr-value {
+  color: #a78bfa;
+}
+
+/* TypeScript specific */
+.language-typescript .token.keyword,
+.language-tsx .token.keyword {
+  color: #f472b6;
+}
+
+.language-typescript .token.builtin,
+.language-tsx .token.builtin {
+  color: #60a5fa;
+}
+
+/* Bash/Shell specific */
+.language-bash .token.function {
+  color: #34d399;
+}
+
+.language-bash .token.keyword {
+  color: #f472b6;
+}
+
+.language-bash .token.string {
+  color: #fbbf24;
+}
+
+/* JSON specific */
+.language-json .token.property {
+  color: #60a5fa;
+}
+
+.language-json .token.string {
+  color: #34d399;
+}
+
+.language-json .token.number,
+.language-json .token.boolean {
+  color: #fbbf24;
+}
+
+/* CSS specific */
+.language-css .token.selector {
+  color: #f472b6;
+}
+
+.language-css .token.property {
+  color: #60a5fa;
+}
+
+.language-css .token.string,
+.language-css .token.url {
+  color: #34d399;
+}
