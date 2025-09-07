@@ -169,18 +169,13 @@ function MyEditor() {
         {/* Toolbar buttons */}
       </div>
 
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable style={{
-            padding: '16px',
-            outline: 'none',
-            minHeight: '200px'
-          }} />
-        }
-        placeholder={<div style={{ color: '#999', padding: '16px' }}>
-          Start writing...
-        </div>}
-        ErrorBoundary={ErrorBoundary}
+      <RichText
+        placeholder="Start writing..."
+        style={{
+          padding: '16px',
+          outline: 'none',
+          minHeight: '200px'
+        }}
       />
     </div>
   );

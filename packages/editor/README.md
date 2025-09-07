@@ -77,6 +77,7 @@ Here's a **complete, working example** that showcases LexKit's power:
 import React, { useState } from 'react';
 import {
   createEditorSystem,
+  richTextExtension,
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -86,11 +87,10 @@ import {
   markdownExtension,
   historyExtension
 } from '@lexkit/editor';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
+  richTextExtension,    // 👈 Rich text editor with built-in error handling
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -104,29 +104,7 @@ const extensions = [
 // 2. Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
-// 3. Error Boundary (required by Lexical)
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  try {
-    return <>{children}</>;
-  } catch (error) {
-    console.error('Editor Error:', error);
-    return (
-      <div style={{
-        color: 'red',
-        border: '1px solid red',
-        padding: '20px',
-        backgroundColor: '#ffe6e6',
-        borderRadius: '4px',
-        margin: '10px 0'
-      }}>
-        <h3>Editor Error</h3>
-        <p>Something went wrong. Please refresh the page.</p>
-      </div>
-    );
-  }
-};
-
-// 4. Configure extensions (optional)
+// 3. Configure extensions (optional)
 imageExtension.configure({
   uploadHandler: async (file: File) => {
     // Your upload logic here
@@ -142,7 +120,7 @@ imageExtension.configure({
   debug: false
 });
 
-// 5. Create your toolbar component
+// 4. Create your toolbar component
 function Toolbar() {
   const { commands, activeStates, hasExtension } = useEditor();
 
@@ -216,7 +194,7 @@ function Toolbar() {
   );
 }
 
-// 6. Create your editor component
+// 5. Create your editor component
 function Editor() {
   const { commands, hasExtension } = useEditor();
   const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
@@ -284,22 +262,14 @@ function Editor() {
       {/* Editor Content */}
       <div style={{ minHeight: '200px' }}>
         {mode === 'visual' ? (
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                style={{
-                  padding: '16px',
-                  outline: 'none',
-                  minHeight: '200px'
-                }}
-              />
-            }
-            placeholder={
-              <div style={{ color: '#999', padding: '16px' }}>
-                Start writing...
-              </div>
-            }
-            ErrorBoundary={ErrorBoundary}
+          <RichText
+            placeholder="Start writing..."
+            className="editor-content"
+            style={{
+              padding: '16px',
+              outline: 'none',
+              minHeight: '200px'
+            }}
           />
         ) : (
           <textarea
@@ -322,7 +292,7 @@ function Editor() {
   );
 }
 
-// 7. Use it in your app
+// 6. Use it in your app
 export default function App() {
   return (
     <Provider extensions={extensions}>
@@ -574,9 +544,8 @@ function MultiFormatEditor() {
 
       {/* Content Area */}
       {mode === 'visual' ? (
-        <RichTextPlugin
-          contentEditable={<ContentEditable />}
-          placeholder={<div>Start writing...</div>}
+        <RichText
+          placeholder="Start writing..."
         />
       ) : (
         <textarea

@@ -19,26 +19,15 @@ Here's the minimal setup to get LexKit working:
 
 ```tsx
 import React from 'react';
-import { createEditorSystem, boldExtension } from '@lexkit/editor';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { createEditorSystem, richTextExtension, boldExtension } from '@lexkit/editor';
 
 // 1. Define extensions (as const is required for type safety)
-const extensions = [boldExtension] as const;
+const extensions = [richTextExtension, boldExtension] as const;
 
 // 2. Create the editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
-// 3. Error boundary (required by Lexical)
-const ErrorBoundary = ({ children }) => {
-  try {
-    return <>{children}</>;
-  } catch (error) {
-    return <div>Error: {error.message}</div>;
-  }
-};
-
-// 4. Your editor component
+// 3. Your editor component
 function MyEditor() {
   const { commands } = useEditor();
 
@@ -48,16 +37,14 @@ function MyEditor() {
         Toggle Bold
       </button>
 
-      <RichTextPlugin
-        contentEditable={<ContentEditable />}
-        placeholder={<div>Type something...</div>}
-        ErrorBoundary={ErrorBoundary}
+      <RichText
+        placeholder="Type something..."
       />
     </div>
   );
 }
 
-// 5. Use it in your app
+// 4. Use it in your app
 export default function App() {
   return (
     <Provider extensions={extensions}>
@@ -73,6 +60,8 @@ Let's enhance our editor with more extensions:
 
 ```tsx
 import {
+  createEditorSystem,
+  richTextExtension,
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -82,6 +71,7 @@ import {
 } from '@lexkit/editor';
 
 const extensions = [
+  richTextExtension,
   boldExtension,
   italicExtension,
   underlineExtension,

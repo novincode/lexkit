@@ -83,6 +83,7 @@ Here's a **complete, working example** that showcases LexKit's power:
 import React, { useState } from 'react';
 import {
   createEditorSystem,
+  richTextExtension,
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -92,12 +93,250 @@ import {
   markdownExtension,
   historyExtension
 } from '@lexkit/editor';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
+  richTextExtension,    // 👈 Rich text editor with built-in error handling
+  boldExtension,
+  italicExtension,
+  underlineExtension,
+  listExtension,
+  imageExtension,
+  htmlExtension,
+  markdownExtension,
+  historyExtension
+] as const;
+
+// 2. Create your editor system
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+
+// 3. Create a simple toolbar
+function Toolbar() {
+  const { commands, activeStates, hasExtension } = useEditor();
+
+  return (
+    <div style={{ padding: '8px', borderBottom: '1px solid #ccc', display: 'flex', gap: '4px' }}>
+      <button
+        onClick={() => commands.toggleBold()}
+        style={{
+          fontWeight: activeStates.bold ? 'bold' : 'normal',
+          padding: '4px 8px',
+          border: '1px solid #ccc',
+          background: activeStates.bold ? '#e0e0e0' : 'white'
+        }}
+      >
+        B
+      </button>
+
+      <button
+        onClick={() => commands.toggleItalic()}
+        style={{
+          fontStyle: activeStates.italic ? 'italic' : 'normal',
+          padding: '4px 8px',
+          border: '1px solid #ccc',
+          background: activeStates.italic ? '#e0e0e0' : 'white'
+        }}
+      >
+        I
+      </button>
+
+      <button
+        onClick={() => commands.toggleUnderline()}
+        style={{
+          textDecoration: activeStates.underline ? 'underline' : 'none',
+          padding: '4px 8px',
+          border: '1px solid #ccc',
+          background: activeStates.underline ? '#e0e0e0' : 'white'
+        }}
+      >
+        U
+      </button>
+
+      <button
+        onClick={() => commands.toggleUnorderedList()}
+        style={{
+          padding: '4px 8px',
+          border: '1px solid #ccc',
+          background: activeStates.unorderedList ? '#e0e0e0' : 'white'
+        }}
+      >
+        • List
+      </button>
+
+      <button
+        onClick={() => commands.toggleOrderedList()}
+        style={{
+          padding: '4px 8px',
+          border: '1px solid #ccc',
+          background: activeStates.orderedList ? '#e0e0e0' : 'white'
+        }}
+      >
+        1. List
+      </button>
+
+      {hasExtension('image') && (
+        <button
+          onClick={() => {
+            const src = prompt('Enter image URL:');
+            if (src) commands.insertImage({ src, alt: 'Image' });
+          }}
+          style={{ padding: '4px 8px', border: '1px solid #ccc' }}
+        >
+          📷 Image
+        </button>
+      )}
+
+      {hasExtension('history') && (
+        <>
+          <button
+            onClick={() => commands.undo()}
+            disabled={!activeStates.canUndo}
+            style={{
+              padding: '4px 8px',
+              border: '1px solid #ccc',
+              background: activeStates.canUndo ? 'white' : '#f5f5f5',
+              color: activeStates.canUndo ? 'black' : '#999'
+            }}
+          >
+            ↶ Undo
+          </button>
+          <button
+            onClick={() => commands.redo()}
+            disabled={!activeStates.canRedo}
+            style={{
+              padding: '4px 8px',
+              border: '1px solid #ccc',
+              background: activeStates.canRedo ? 'white' : '#f5f5f5',
+              color: activeStates.canRedo ? 'black' : '#999'
+            }}
+          >
+            ↷ Redo
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// 4. Create your editor component
+function Editor() {
+  const { commands, hasExtension } = useEditor();
+  const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
+  const [content, setContent] = useState('');
+
+  const handleModeChange = (newMode: typeof mode) => {
+    if (newMode === 'html' && hasExtension('html')) {
+      setContent(commands.exportToHTML());
+    } else if (newMode === 'markdown' && hasExtension('markdown')) {
+      setContent(commands.exportToMarkdown());
+    }
+    setMode(newMode);
+  };
+
+  const handleContentChange = (value: string) => {
+    setContent(value);
+    if (mode === 'html' && hasExtension('html')) {
+      commands.importFromHTML(value);
+    } else if (mode === 'markdown' && hasExtension('markdown')) {
+      commands.importFromMarkdown(value);
+    }
+  };
+
+  return (
+    <div style={{ border: '1px solid #ccc', borderRadius: '4px' }}>
+      {/* Mode Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
+        <button
+          onClick={() => handleModeChange('visual')}
+          style={{
+            padding: '8px 16px',
+            background: mode === 'visual' ? '#f0f0f0' : 'white',
+            border: 'none',
+            borderRight: '1px solid #ccc'
+          }}
+        >
+          Visual
+        </button>
+        <button
+          onClick={() => handleModeChange('html')}
+          style={{
+            padding: '8px 16px',
+            background: mode === 'html' ? '#f0f0f0' : 'white',
+            border: 'none',
+            borderRight: '1px solid #ccc'
+          }}
+        >
+          HTML
+        </button>
+        <button
+          onClick={() => handleModeChange('markdown')}
+          style={{
+            padding: '8px 16px',
+            background: mode === 'markdown' ? '#f0f0f0' : 'white',
+            border: 'none'
+          }}
+        >
+          Markdown
+        </button>
+      </div>
+
+      {/* Toolbar (only in visual mode) */}
+      {mode === 'visual' && <Toolbar />}
+
+      {/* Editor Content */}
+      <div style={{ minHeight: '200px' }}>
+        {mode === 'visual' ? (
+          <RichText
+            placeholder="Start writing..."
+            className="editor-content"
+            style={{
+              padding: '16px',
+              outline: 'none',
+              minHeight: '200px'
+            }}
+          />
+        ) : (
+          <textarea
+            value={content}
+            onChange={(e) => handleContentChange(e.target.value)}
+            style={{
+              width: '100%',
+              minHeight: '200px',
+              padding: '16px',
+              border: 'none',
+              outline: 'none',
+              fontFamily: 'monospace',
+              resize: 'vertical'
+            }}
+            placeholder={`Enter ${mode.toUpperCase()} content...`}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 5. Use it in your app
+export default function App() {
+  return (
+    <Provider extensions={extensions}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+        <h1>My LexKit Editor</h1>
+        <Editor />
+      </div>
+    </Provider>
+  );
+}
+```
+
+**This example works out-of-the-box!** 🎉
+
+### 🎯 **Key Changes in This Version**
+
+- **Simplified Setup**: No more manual `RichTextPlugin`, `ContentEditable`, or `HistoryPlugin` setup
+- **Built-in Error Handling**: The `richTextExtension` includes automatic error boundaries
+- **Type-Safe**: All commands and state queries are fully typed
+- **Flexible**: Use `RichText` as a standalone component or as part of the extension system
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -111,29 +350,7 @@ const extensions = [
 // 2. Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
-// 3. Error Boundary (required by Lexical)
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  try {
-    return <>{children}</>;
-  } catch (error) {
-    console.error('Editor Error:', error);
-    return (
-      <div style={{
-        color: 'red',
-        border: '1px solid red',
-        padding: '20px',
-        backgroundColor: '#ffe6e6',
-        borderRadius: '4px',
-        margin: '10px 0'
-      }}>
-        <h3>Editor Error</h3>
-        <p>Something went wrong. Please refresh the page.</p>
-      </div>
-    );
-  }
-};
-
-// 4. Configure extensions (optional)
+// 3. Configure extensions (optional)
 imageExtension.configure({
   uploadHandler: async (file: File) => {
     // Your upload logic here
@@ -223,7 +440,7 @@ function Toolbar() {
   );
 }
 
-// 6. Create your editor component
+// 4. Create your editor component
 function Editor() {
   const { commands, hasExtension } = useEditor();
   const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
@@ -291,22 +508,14 @@ function Editor() {
       {/* Editor Content */}
       <div style={{ minHeight: '200px' }}>
         {mode === 'visual' ? (
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                style={{
-                  padding: '16px',
-                  outline: 'none',
-                  minHeight: '200px'
-                }}
-              />
-            }
-            placeholder={
-              <div style={{ color: '#999', padding: '16px' }}>
-                Start writing...
-              </div>
-            }
-            ErrorBoundary={ErrorBoundary}
+          <RichText
+            placeholder="Start writing..."
+            className="editor-content"
+            style={{
+              padding: '16px',
+              outline: 'none',
+              minHeight: '200px'
+            }}
           />
         ) : (
           <textarea
@@ -325,13 +534,11 @@ function Editor() {
           />
         )}
       </div>
-
-      <HistoryPlugin />
     </div>
   );
 }
 
-// 7. Use it in your app
+// 5. Use it in your app
 export default function App() {
   return (
     <Provider extensions={extensions}>
@@ -344,11 +551,78 @@ export default function App() {
 }
 ```
 
-**This example works out-of-the-box!** 🎉
+### 🎯 **Key Changes in This Version**
 
----
+- **Simplified Setup**: No more manual `RichTextPlugin`, `ContentEditable`, or `HistoryPlugin` setup
+- **Built-in Error Handling**: The `richTextExtension` includes automatic error boundaries
+- **Type-Safe**: All commands and state queries are fully typed
+- **Flexible**: Use `RichText` as a standalone component or as part of the extension system
 
-## 🎉 **New in Latest Version**
+### 📝 **Standalone RichText Component**
+
+You can also use `RichText` as a standalone component without the extension system:
+
+```tsx
+import React from 'react';
+import { RichText } from '@lexkit/editor';
+
+function SimpleEditor() {
+  return (
+    <div style={{ border: '1px solid #ccc', borderRadius: '4px' }}>
+      <RichText
+        placeholder="Start writing..."
+        className="my-editor"
+        style={{
+          padding: '16px',
+          minHeight: '200px',
+          outline: 'none'
+        }}
+        onChange={(editorState) => {
+          // Handle content changes
+          console.log('Content changed:', editorState);
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### � **Custom Styling & Theming**
+
+LexKit supports custom classNames and styles:
+
+```tsx
+// With custom className
+<RichText
+  className="my-custom-editor"
+  placeholder="Custom styled editor..."
+/>
+
+// With inline styles
+<RichText
+  style={{
+    padding: '20px',
+    border: '2px solid #007acc',
+    borderRadius: '8px',
+    fontFamily: 'Arial, sans-serif'
+  }}
+  placeholder="Styled editor..."
+/>
+
+// With theme integration
+const theme = {
+  richText: {
+    container: 'editor-container',
+    content: 'editor-content',
+    placeholder: 'editor-placeholder'
+  }
+};
+
+<RichText
+  className={theme.richText.content}
+  placeholderClassName={theme.richText.placeholder}
+/>
+```
 
 ### 📊 **Advanced Table Support**
 LexKit now includes comprehensive table functionality:

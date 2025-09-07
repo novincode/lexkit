@@ -8,7 +8,7 @@
 
 **Solutions**:
 
-1. **Check ErrorBoundary**: Always wrap your editor with an ErrorBoundary:
+1. **Built-in Error Handling**: The `richTextExtension` includes automatic error boundaries, but you can still add your own for additional safety:
 ```tsx
 import { ErrorBoundary } from 'react-error-boundary';
 
