@@ -1,0 +1,166 @@
+/* Themed Editor Styles - Dark Theme */
+.themed-editor {
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1f2937;
+}
+
+.themed-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #374151;
+  background: #111827;
+  flex-wrap: wrap;
+}
+
+.themed-toolbar > div {
+  display: flex;
+  gap: 4px;
+}
+
+.themed-toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #4b5563;
+  background: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #f9fafb;
+}
+
+.themed-toolbar button:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.themed-toolbar button:active {
+  background: #6b7280;
+}
+
+.themed-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.themed-content {
+  padding: 16px;
+  outline: none;
+  min-height: 300px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #f9fafb;
+  background: #1f2937;
+}
+
+.themed-placeholder {
+  color: #6b7280;
+  padding: 16px;
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  font-size: 16px;
+}
+
+/* Themed elements */
+.lexkit-toolbar {
+  background: #111827 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.lexkit-editor {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.lexkit-content-editable {
+  color: #f9fafb !important;
+  background: #1f2937 !important;
+}
+
+.lexkit-paragraph {
+  color: #f9fafb !important;
+  margin: 0 0 1em 0;
+}
+
+.lexkit-heading-h1 {
+  color: #f9fafb !important;
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+}
+
+.lexkit-heading-h2 {
+  color: #f9fafb !important;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.83em 0;
+}
+
+.lexkit-heading-h3 {
+  color: #f9fafb !important;
+  font-size: 1.17em;
+  font-weight: bold;
+  margin: 1em 0;
+}
+
+.lexkit-list-ul {
+  color: #f9fafb !important;
+  padding-left: 1.5em;
+}
+
+.lexkit-list-ol {
+  color: #f9fafb !important;
+  padding-left: 1.5em;
+}
+
+.lexkit-list-li {
+  color: #f9fafb !important;
+  margin: 0.25em 0;
+}
+
+.lexkit-link {
+  color: #3b82f6 !important;
+  text-decoration: underline;
+}
+
+.lexkit-link:hover {
+  color: #60a5fa !important;
+}
+
+.lexkit-text-bold {
+  font-weight: bold;
+}
+
+.lexkit-text-italic {
+  font-style: italic;
+}
+
+.lexkit-text-underline {
+  text-decoration: underline;
+}
+
+.themed-toolbar button.active {
+  background: #4b5563 !important;
+}
+
+.themed-toolbar button.active:nth-child(1) {
+  font-weight: bold;
+}
+
+.themed-toolbar button.active:nth-child(2) {
+  font-style: italic;
+}
+
+.themed-toolbar button.active:nth-child(3) {
+  text-decoration: underline;
+}
+
+.themed-toolbar button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

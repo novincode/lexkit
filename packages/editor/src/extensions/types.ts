@@ -1,4 +1,4 @@
-import { LexicalEditor, TextFormatType } from 'lexical';
+import { LexicalEditor, TextFormatType, EditorThemeClasses } from 'lexical';
 import { ComponentType, CSSProperties, ReactNode } from 'react';
 
 /** Categories that extensions can belong to */
@@ -170,6 +170,6 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
 
 // Assuming EditorConfig is defined elsewhere, add if needed
 export interface EditorConfig {
-  theme?: any;
+  theme?: EditorThemeClasses;
   [key: string]: any;
 }

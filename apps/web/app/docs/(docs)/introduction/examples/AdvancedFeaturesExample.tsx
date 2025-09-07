@@ -2,12 +2,11 @@
 
 import React, { useState } from "react"
 import { Button } from "@repo/ui/components/button"
-import { Input } from "@repo/ui/components/input"
-import { Card, CardHeader, CardTitle, CardContent } from "@repo/ui/components/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
 import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension } from "@lexkit/editor"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
+import "./advanced-editor.css"
 
 // Define extensions as const for type safety
 const extensions = [
@@ -52,88 +51,50 @@ function AdvancedToolbar() {
   const { commands, activeStates } = useEditor()
 
   return (
-    <div style={{ display: 'flex', gap: '8px', padding: '12px', borderBottom: '1px solid #e5e7eb', flexWrap: 'wrap' }}>
+    <div className="advanced-toolbar">
       {/* Text Formatting */}
-      <div style={{ display: 'flex', gap: '4px' }}>
+      <div>
         <button
           onClick={() => commands.toggleBold()}
-          style={{
-            fontWeight: activeStates.bold ? 'bold' : 'normal',
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: activeStates.bold ? '#f3f4f6' : 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+          className={activeStates.bold ? 'active' : ''}
         >
           Bold
         </button>
 
         <button
           onClick={() => commands.toggleItalic()}
-          style={{
-            fontStyle: activeStates.italic ? 'italic' : 'normal',
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: activeStates.italic ? '#f3f4f6' : 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+          className={activeStates.italic ? 'active' : ''}
         >
           Italic
         </button>
 
         <button
           onClick={() => commands.toggleUnderline()}
-          style={{
-            textDecoration: activeStates.underline ? 'underline' : 'none',
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: activeStates.underline ? '#f3f4f6' : 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+          className={activeStates.underline ? 'active' : ''}
         >
           Underline
         </button>
       </div>
 
       {/* Lists */}
-      <div style={{ display: 'flex', gap: '4px' }}>
+      <div>
         <button
           onClick={() => commands.toggleUnorderedList()}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+          className={activeStates.unorderedList ? 'active' : ''}
         >
           • List
         </button>
 
         <button
           onClick={() => commands.toggleOrderedList()}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
+          className={activeStates.orderedList ? 'active' : ''}
         >
           1. List
         </button>
       </div>
 
       {/* Media */}
-      <div style={{ display: 'flex', gap: '4px' }}>
+      <div>
         <button
           onClick={() => {
             const src = prompt('Enter image URL:')
@@ -141,14 +102,6 @@ function AdvancedToolbar() {
               const alt = prompt('Enter alt text:') || 'Image'
               commands.insertImage({ src, alt })
             }
-          }}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
           }}
         >
           📷 Image
@@ -162,33 +115,17 @@ function AdvancedToolbar() {
               commands.insertLink(url, text)
             }
           }}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: 'white',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
         >
           🔗 Link
         </button>
       </div>
 
       {/* History */}
-      <div style={{ display: 'flex', gap: '4px' }}>
+      <div>
         <button
           onClick={() => commands.undo()}
           disabled={!activeStates.canUndo}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: activeStates.canUndo ? 'white' : '#f9fafb',
-            borderRadius: '6px',
-            cursor: activeStates.canUndo ? 'pointer' : 'not-allowed',
-            opacity: activeStates.canUndo ? 1 : 0.5,
-            fontSize: '14px'
-          }}
+          className={!activeStates.canUndo ? 'disabled' : ''}
         >
           ↶ Undo
         </button>
@@ -196,15 +133,7 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.redo()}
           disabled={!activeStates.canRedo}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            background: activeStates.canRedo ? 'white' : '#f9fafb',
-            borderRadius: '6px',
-            cursor: activeStates.canRedo ? 'pointer' : 'not-allowed',
-            opacity: activeStates.canRedo ? 1 : 0.5,
-            fontSize: '14px'
-          }}
+          className={!activeStates.canRedo ? 'disabled' : ''}
         >
           ↷ Redo
         </button>
@@ -216,23 +145,15 @@ function AdvancedToolbar() {
 // Advanced Editor Component
 function AdvancedEditor() {
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+    <div className="advanced-editor">
       <AdvancedToolbar />
 
       <RichTextPlugin
         contentEditable={
-          <ContentEditable
-            style={{
-              padding: '16px',
-              outline: 'none',
-              minHeight: '300px',
-              fontSize: '16px',
-              lineHeight: '1.6'
-            }}
-          />
+          <ContentEditable className="advanced-content" />
         }
         placeholder={
-          <div style={{ color: '#9ca3af', padding: '16px' }}>
+          <div className="advanced-placeholder">
             Start writing your advanced content here... Try adding images, links, and formatting!
           </div>
         }
@@ -244,8 +165,6 @@ function AdvancedEditor() {
 
 // Internal component that uses the editor
 function AdvancedFeaturesExampleInner() {
-  const [title, setTitle] = useState("Advanced Document Editor")
-  const [content, setContent] = useState("This is a sample document with advanced features.")
   const [htmlDialogOpen, setHtmlDialogOpen] = useState(false)
   const [markdownDialogOpen, setMarkdownDialogOpen] = useState(false)
   const [exportedHtml, setExportedHtml] = useState("")
@@ -277,61 +196,43 @@ function AdvancedFeaturesExampleInner() {
   }
 
   return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader>
-        <CardTitle>Advanced Document Editor</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <label className="text-sm font-medium mb-2 block">Document Title</label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter document title"
-            className="w-full"
-          />
-        </div>
+    <div className="space-y-6">
+      <AdvancedEditor />
 
-        <div>
-          <label className="text-sm font-medium mb-2 block">Content Editor</label>
-          <AdvancedEditor />
-        </div>
+      <div className="flex gap-3">
+        <Dialog open={htmlDialogOpen} onOpenChange={setHtmlDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline" onClick={handleExportHtml}>
+              Export HTML
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Exported HTML</DialogTitle>
+            </DialogHeader>
+            <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
+              {exportedHtml}
+            </pre>
+          </DialogContent>
+        </Dialog>
 
-        <div className="flex gap-3">
-          <Dialog open={htmlDialogOpen} onOpenChange={setHtmlDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" onClick={handleExportHtml}>
-                Export HTML
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
-              <DialogHeader>
-                <DialogTitle>Exported HTML</DialogTitle>
-              </DialogHeader>
-              <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
-                {exportedHtml}
-              </pre>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={markdownDialogOpen} onOpenChange={setMarkdownDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" onClick={handleExportMarkdown}>
-                Export Markdown
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
-              <DialogHeader>
-                <DialogTitle>Exported Markdown</DialogTitle>
-              </DialogHeader>
-              <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
-                {exportedMarkdown}
-              </pre>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardContent>
-    </Card>
+        <Dialog open={markdownDialogOpen} onOpenChange={setMarkdownDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline" onClick={handleExportMarkdown}>
+              Export Markdown
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Exported Markdown</DialogTitle>
+            </DialogHeader>
+            <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
+              {exportedMarkdown}
+            </pre>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
   )
 }
 

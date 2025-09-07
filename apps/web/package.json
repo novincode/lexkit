@@ -5,13 +5,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "pnpm preload:code && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
     "pages:build": "pnpm next-on-pages",
-    "deploy": "pnpm pages:build && npx cfman wrangler --account shayanpng  pages deploy"
+    "deploy": "pnpm pages:build && npx cfman wrangler --account shayanpng  pages deploy",
+    "preload:code": "tsx lib/preload-code.ts"
   },
   "dependencies": {
     "@lexical/code": "^0.35.0",
@@ -44,6 +45,7 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }

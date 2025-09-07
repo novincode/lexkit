@@ -1,4 +1,4 @@
-import { LexicalEditor, TextFormatType } from 'lexical';
+import { LexicalEditor, TextFormatType, EditorThemeClasses } from 'lexical';
 import { ReactNode, CSSProperties } from 'react';
 import { Extension, ExtensionCategory } from '@lexkit/editor/extensions';
 
@@ -19,7 +19,7 @@ export interface NodeTheme {
  */
 export interface EditorConfig {
   /** Theme configuration for different node types */
-  theme?: Record<string, any>;
+  theme?: EditorThemeClasses;
   /** Placeholder text to display when editor is empty */
   placeholder?: string;
   /** Additional configuration options */
