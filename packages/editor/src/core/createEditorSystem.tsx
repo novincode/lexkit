@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalEditor, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection, CAN_UNDO_COMMAND, CAN_REDO_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LexicalEditor, FORMAT_TEXT_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW } from 'lexical';
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
@@ -81,16 +80,10 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       {} as Record<string, () => Promise<boolean>>
     ), [extensions, editor]);
 
-    const hasHistory = useMemo(() => extensions.some(ext => ext.name === 'history'), [extensions]);
-
     // Batched active states
     const [activeStates, setActiveStates] = useState<ExtractStateQueries<Exts>>(() => {
       const obj: Record<string, boolean> = {};
       Object.keys(stateQueries).forEach(key => obj[key] = false);
-      if (hasHistory) {
-        obj.canUndo = false;
-        obj.canRedo = false;
-      }
       return obj as ExtractStateQueries<Exts>;
     });
 
@@ -122,41 +115,9 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 
       Promise.all(promises).then((results) => {
         const newStates = Object.fromEntries(results);
-        if (hasHistory) {
-          newStates.canUndo = false;
-          newStates.canRedo = false;
-        }
         setActiveStates(newStates as ExtractStateQueries<Exts>);
       });
-    }, [editor, stateQueries, hasHistory]);
-
-    // Event listeners for history states (if extension present)
-    useEffect(() => {
-      if (!editor || !hasHistory) return;
-
-      const unregisterUndo = editor.registerCommand(
-        CAN_UNDO_COMMAND,
-        (payload: boolean) => {
-          setActiveStates((prev) => ({ ...prev, canUndo: payload } as ExtractStateQueries<Exts>));
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      );
-
-      const unregisterRedo = editor.registerCommand(
-        CAN_REDO_COMMAND,
-        (payload: boolean) => {
-          setActiveStates((prev) => ({ ...prev, canRedo: payload } as ExtractStateQueries<Exts>));
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
-      );
-
-      return () => {
-        unregisterUndo();
-        unregisterRedo();
-      };
-    }, [editor, hasHistory]);
+    }, [editor, stateQueries]);
 
     /**
      * Context value containing all editor functionality and state.

@@ -103,7 +103,7 @@ type UnionKeys<T> = T extends unknown ? keyof T : never;
 // Extract state queries similarly
 export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQueries<
   ReturnType<NonNullable<Exts[number]['getStateQueries']>>
-> & ('history' extends ExtractNames<Exts> ? { canUndo: boolean; canRedo: boolean } : {});
+>;
 
 // Base commands (always available)
 export interface BaseCommands {

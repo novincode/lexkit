@@ -1,4 +1,4 @@
-import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, CAN_UNDO_COMMAND, CAN_REDO_COMMAND } from 'lexical';
+import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, CAN_UNDO_COMMAND, CAN_REDO_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
 import { LexicalEditor } from 'lexical';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
@@ -52,9 +52,12 @@ export class HistoryExtension extends BaseExtension<
   'history',
   any,
   HistoryCommands,
-  {},
+  { canUndo: () => Promise<boolean>; canRedo: () => Promise<boolean> },
   ReactNode[]
 > {
+  private canUndoState: boolean = false;
+  private canRedoState: boolean = false;
+
   /**
    * Creates a new history extension instance.
    */
@@ -64,13 +67,34 @@ export class HistoryExtension extends BaseExtension<
 
   /**
    * Registers the extension with the Lexical editor.
-   * No special registration needed as history is handled by Lexical internally.
+   * Sets up listeners for undo/redo state changes.
    *
    * @param editor - The Lexical editor instance
-   * @returns Cleanup function (no-op for history)
+   * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
-    return () => {};
+    const unregisterUndo = editor.registerCommand(
+      CAN_UNDO_COMMAND,
+      (payload: boolean) => {
+        this.canUndoState = payload;
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    const unregisterRedo = editor.registerCommand(
+      CAN_REDO_COMMAND,
+      (payload: boolean) => {
+        this.canRedoState = payload;
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
+
+    return () => {
+      unregisterUndo();
+      unregisterRedo();
+    };
   }
 
   /**
@@ -103,14 +127,16 @@ export class HistoryExtension extends BaseExtension<
   }
 
   /**
-   * Returns state query functions.
-   * History states (canUndo, canRedo) are handled via event listeners in createEditorSystem.
+   * Returns state query functions for undo/redo availability.
    *
    * @param editor - The Lexical editor instance
-   * @returns Empty object as states are handled externally
+   * @returns Object containing state query functions
    */
-  getStateQueries(editor: LexicalEditor): {} {
-    return {};
+  getStateQueries(editor: LexicalEditor): { canUndo: () => Promise<boolean>; canRedo: () => Promise<boolean> } {
+    return {
+      canUndo: async () => this.canUndoState,
+      canRedo: async () => this.canRedoState,
+    };
   }
 }
 
