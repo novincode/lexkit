@@ -14,6 +14,7 @@ export enum ExtensionCategory {
 export interface BaseExtensionConfig {
   showInToolbar?: boolean;
   category?: ExtensionCategory[];
+  position?: 'before' | 'after';
   [key: string]: any;
 }
 

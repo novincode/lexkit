@@ -2,9 +2,7 @@
 
 import React from "react"
 import { Button } from "@repo/ui/components/button"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension } from "@lexkit/editor"
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
-import { ContentEditable } from "@lexical/react/LexicalContentEditable"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, richTextExtension, errorBoundaryExtension } from "@lexkit/editor"
 import { EditorThemeClasses } from "lexical"
 import "./themed-editor.css"
 
@@ -38,33 +36,17 @@ const extensions = [
   underlineExtension,
   listExtension,
   linkExtension,
-  historyExtension
+  historyExtension,
+  richTextExtension({
+    placeholder: "Experience the power of theming! This editor uses custom CSS classes for complete control over appearance.",
+    contentEditableClassName: "themed-content",
+    placeholderClassName: "themed-placeholder"
+  }),
+  errorBoundaryExtension()
 ] as const
 
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
-
-// Error Boundary (required by Lexical)
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  try {
-    return <>{children}</>
-  } catch (error) {
-    console.error('Editor Error:', error)
-    return (
-      <div style={{
-        color: 'red',
-        border: '1px solid red',
-        padding: '20px',
-        backgroundColor: '#ffe6e6',
-        borderRadius: '4px',
-        margin: '10px 0'
-      }}>
-        <h3>Editor Error</h3>
-        <p>Something went wrong. Please refresh the page.</p>
-      </div>
-    )
-  }
-}
 
 // Themed Toolbar Component
 function ThemedToolbar() {
@@ -163,18 +145,9 @@ function ThemedEditor() {
   return (
     <div className="themed-editor">
       <ThemedToolbar />
-
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable className="themed-content" />
-        }
-        placeholder={
-          <div className="themed-placeholder">
-            Experience the power of theming! This editor uses custom CSS classes for complete control over appearance.
-          </div>
-        }
-        ErrorBoundary={ErrorBoundary}
-      />
+      <div className="editor-container">
+        {/* RichTextPlugin is automatically included via richTextExtension */}
+      </div>
     </div>
   )
 }

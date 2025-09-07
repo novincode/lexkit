@@ -54,8 +54,16 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     const extensionCommands = useMemo(() => extensions.reduce((acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }), {}), [extensions, editor]);
     const commands = { ...baseCommands, ...extensionCommands } as BaseCommands & ExtractCommands<Exts>;
 
-    // Plugins: Collect inferred
+    // Plugins: Collect and separate by position
     const plugins = useMemo(() => extensions.flatMap(ext => ext.getPlugins?.() || []), [extensions]);
+    const pluginsBefore = useMemo(() =>
+      extensions.filter(ext => (ext.config?.position || 'before') === 'before').flatMap(ext => ext.getPlugins?.() || []),
+      [extensions]
+    );
+    const pluginsAfter = useMemo(() =>
+      extensions.filter(ext => (ext.config?.position || 'before') === 'after').flatMap(ext => ext.getPlugins?.() || []),
+      [extensions]
+    );
 
     // Register extensions (this was missing!)
     useEffect(() => {
@@ -184,7 +192,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       hasExtension: (name: Exts[number]['name']) => extensions.some(ext => ext.name === name),
     };
 
-    return <EditorContext.Provider value={contextValue}>{plugins}{children}</EditorContext.Provider>;
+    return <EditorContext.Provider value={contextValue}>{pluginsBefore}{children}{pluginsAfter}</EditorContext.Provider>;
   }
 
   /**

@@ -3,9 +3,7 @@
 import React, { useState } from "react"
 import { Button } from "@repo/ui/components/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension } from "@lexkit/editor"
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
-import { ContentEditable } from "@lexical/react/LexicalContentEditable"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, richTextExtension, errorBoundaryExtension } from "@lexkit/editor"
 import "./advanced-editor.css"
 
 // Define extensions as const for type safety
@@ -18,33 +16,17 @@ const extensions = [
   linkExtension,
   htmlExtension,
   markdownExtension,
-  historyExtension
+  historyExtension,
+  richTextExtension({
+    placeholder: "Start writing with advanced features like images, links, HTML export, and Markdown support...",
+    contentEditableClassName: "advanced-content",
+    placeholderClassName: "advanced-placeholder"
+  }),
+  errorBoundaryExtension()
 ] as const
 
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
-
-// Error Boundary (required by Lexical)
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  try {
-    return <>{children}</>
-  } catch (error) {
-    console.error('Editor Error:', error)
-    return (
-      <div style={{
-        color: 'red',
-        border: '1px solid red',
-        padding: '20px',
-        backgroundColor: '#ffe6e6',
-        borderRadius: '4px',
-        margin: '10px 0'
-      }}>
-        <h3>Editor Error</h3>
-        <p>Something went wrong. Please refresh the page.</p>
-      </div>
-    )
-  }
-}
 
 // Advanced Toolbar Component
 function AdvancedToolbar() {
@@ -147,18 +129,9 @@ function AdvancedEditor() {
   return (
     <div className="advanced-editor">
       <AdvancedToolbar />
-
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable className="advanced-content" />
-        }
-        placeholder={
-          <div className="advanced-placeholder">
-            Start writing your advanced content here... Try adding images, links, and formatting!
-          </div>
-        }
-        ErrorBoundary={ErrorBoundary}
-      />
+      <div className="editor-container">
+        {/* RichTextPlugin is automatically included via richTextExtension */}
+      </div>
     </div>
   )
 }

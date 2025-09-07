@@ -1,8 +1,10 @@
 import { LexicalEditor, TextFormatType, EditorThemeClasses } from 'lexical';
 import { ReactNode, CSSProperties } from 'react';
 import { Extension, ExtensionCategory } from '@lexkit/editor/extensions';
+import { LexKitTheme } from './theme';
 
 export type { Extension, ExtensionCategory } from '../extensions';
+export type { LexKitTheme, defaultLexKitTheme, mergeThemes, isLexKitTheme } from './theme';
 
 /**
  * Theme configuration for individual nodes
@@ -19,7 +21,7 @@ export interface NodeTheme {
  */
 export interface EditorConfig {
   /** Theme configuration for different node types */
-  theme?: EditorThemeClasses;
+  theme?: LexKitTheme;
   /** Placeholder text to display when editor is empty */
   placeholder?: string;
   /** Additional configuration options */
@@ -85,6 +87,10 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   };
   /** React plugins from extensions */
   plugins: ReactNode[];
+  /** Plugins that render before children */
+  pluginsBefore: ReactNode[];
+  /** Plugins that render after children */
+  pluginsAfter: ReactNode[];
   /** Check if a specific extension is registered */
   hasExtension: (name: Exts[number]['name']) => boolean;
 }

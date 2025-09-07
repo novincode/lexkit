@@ -2,10 +2,20 @@
 
 import React from "react"
 import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, richTextExtension } from "@lexkit/editor"
-import "./basic-editor.css"
+import "./modern-editor.css"
 
 // Define extensions as const for type safety
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, richTextExtension()] as const
+const extensions = [
+  boldExtension,
+  italicExtension,
+  listExtension,
+  historyExtension,
+  richTextExtension({
+    placeholder: "Start writing with the modern editor...",
+    contentEditableClassName: "modern-editor-input",
+    placeholderClassName: "modern-editor-placeholder",
+  })
+] as const
 
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
@@ -15,7 +25,7 @@ function Toolbar() {
   const { commands, activeStates } = useEditor()
 
   return (
-    <div className="basic-toolbar">
+    <div className="modern-toolbar">
       <button
         onClick={() => commands.toggleBold()}
         className={activeStates.bold ? 'active' : ''}
@@ -40,19 +50,11 @@ function Toolbar() {
       >
         1. List
       </button>
-      <button
-        onClick={() => commands.undo()}
-        disabled={!activeStates.canUndo}
-        className={!activeStates.canUndo ? 'disabled' : ''}
-      >
-        ↶ Undo
+      <button onClick={() => commands.undo()}>
+        Undo
       </button>
-      <button
-        onClick={() => commands.redo()}
-        disabled={!activeStates.canRedo}
-        className={!activeStates.canRedo ? 'disabled' : ''}
-      >
-        ↷ Redo
+      <button onClick={() => commands.redo()}>
+        Redo
       </button>
     </div>
   )
@@ -61,7 +63,7 @@ function Toolbar() {
 // Editor Component
 function Editor() {
   return (
-    <div className="basic-editor">
+    <div className="modern-editor">
       <Toolbar />
       <div className="editor-container">
         {/* RichTextPlugin is automatically included via richTextExtension */}
@@ -71,7 +73,7 @@ function Editor() {
 }
 
 // Main Component
-export function BasicEditorExample() {
+export function ModernEditorExample() {
   return (
     <Provider extensions={extensions}>
       <Editor />
