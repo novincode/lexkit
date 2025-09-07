@@ -1,25 +1,32 @@
 "use client"
 
+// Advanced Features Example - Full-Featured Editor
+// This example shows advanced features like images, tables, code blocks, and more
 import React, { useState } from "react"
 import { Button } from "@repo/ui/components/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, RichText } from "@lexkit/editor"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/select"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, tableExtension, codeExtension, codeFormatExtension, blockFormatExtension, RichText, defaultLexKitTheme } from "@lexkit/editor"
 import "./advanced-editor.css"
 
-// Define extensions as const for type safety
+// 1. Define your extensions (as const for type safety)
 const extensions = [
   boldExtension,
   italicExtension,
   underlineExtension,
   listExtension,
   imageExtension,
-  linkExtension,
+  linkExtension.configure({ pasteListener: { insert: true, replace: true } }),
+  tableExtension,
+  codeExtension,
+  codeFormatExtension,
+  blockFormatExtension,
   htmlExtension,
   markdownExtension,
   historyExtension
 ] as const
 
-// Create typed editor system
+// 2. Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 
 // Advanced Toolbar Component
@@ -33,6 +40,7 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.toggleBold()}
           className={activeStates.bold ? 'active' : ''}
+          title="Bold (Ctrl+B)"
         >
           Bold
         </button>
@@ -40,6 +48,7 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.toggleItalic()}
           className={activeStates.italic ? 'active' : ''}
+          title="Italic (Ctrl+I)"
         >
           Italic
         </button>
@@ -47,9 +56,32 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.toggleUnderline()}
           className={activeStates.underline ? 'active' : ''}
+          title="Underline (Ctrl+U)"
         >
           Underline
         </button>
+      </div>
+
+      {/* Paragraph Types */}
+      <div>
+        <Select onValueChange={(value) => {
+          if (value === 'h1') commands.toggleHeading('h1')
+          else if (value === 'h2') commands.toggleHeading('h2')
+          else if (value === 'h3') commands.toggleHeading('h3')
+          else if (value === 'quote') commands.toggleQuote()
+          else if (value === 'paragraph') commands.toggleParagraph()
+        }}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="paragraph">Paragraph</SelectItem>
+            <SelectItem value="h1">Heading 1</SelectItem>
+            <SelectItem value="h2">Heading 2</SelectItem>
+            <SelectItem value="h3">Heading 3</SelectItem>
+            <SelectItem value="quote">Quote</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Lists */}
@@ -57,6 +89,7 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.toggleUnorderedList()}
           className={activeStates.unorderedList ? 'active' : ''}
+          title="Bullet List"
         >
           • List
         </button>
@@ -64,8 +97,30 @@ function AdvancedToolbar() {
         <button
           onClick={() => commands.toggleOrderedList()}
           className={activeStates.orderedList ? 'active' : ''}
+          title="Numbered List"
         >
           1. List
+        </button>
+      </div>
+
+      {/* Code */}
+      <div>
+        <button
+          onClick={() => commands.toggleCodeBlock()}
+          className={activeStates.isInCodeBlock ? 'active' : ''}
+          title="Code Block"
+        >
+          Code
+        </button>
+      </div>
+
+      {/* Tables */}
+      <div>
+        <button
+          onClick={() => commands.insertTable({ rows: 4, columns: 4, includeHeaders: true })}
+          title="Insert 4x4 Table with Headers"
+        >
+          📊
         </button>
       </div>
 
@@ -79,6 +134,7 @@ function AdvancedToolbar() {
               commands.insertImage({ src, alt })
             }
           }}
+          title="Insert Image"
         >
           📷 Image
         </button>
@@ -91,6 +147,7 @@ function AdvancedToolbar() {
               commands.insertLink(url, text)
             }
           }}
+          title="Insert Link"
         >
           🔗 Link
         </button>
@@ -102,6 +159,7 @@ function AdvancedToolbar() {
           onClick={() => commands.undo()}
           disabled={!activeStates.canUndo}
           className={!activeStates.canUndo ? 'disabled' : ''}
+          title="Undo (Ctrl+Z)"
         >
           ↶ Undo
         </button>
@@ -110,6 +168,7 @@ function AdvancedToolbar() {
           onClick={() => commands.redo()}
           disabled={!activeStates.canRedo}
           className={!activeStates.canRedo ? 'disabled' : ''}
+          title="Redo (Ctrl+Y)"
         >
           ↷ Redo
         </button>
@@ -209,7 +268,10 @@ function AdvancedFeaturesExampleInner() {
 
 export function AdvancedFeaturesExample() {
   return (
-    <Provider extensions={extensions}>
+    <Provider 
+      extensions={extensions}
+      config={{ theme: defaultLexKitTheme }}
+    >
       <AdvancedFeaturesExampleInner />
     </Provider>
   )

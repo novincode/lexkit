@@ -80,55 +80,70 @@
   border-bottom: 1px solid #374151 !important;
 }
 
-.lexkit-editor {
-  background: #1f2937 !important;
-  color: #f9fafb !important;
-}
-
-.lexkit-content-editable {
-  color: #f9fafb !important;
-  background: #1f2937 !important;
-}
-
-.lexkit-paragraph {
-  color: #f9fafb !important;
-  margin: 0 0 1em 0;
-}
-
-.lexkit-heading-h1 {
+.themed-heading-h1 {
   color: #f9fafb !important;
   font-size: 2em;
   font-weight: bold;
   margin: 0.67em 0;
 }
 
-.lexkit-heading-h2 {
+.themed-heading-h2 {
   color: #f9fafb !important;
   font-size: 1.5em;
   font-weight: bold;
   margin: 0.83em 0;
 }
 
-.lexkit-heading-h3 {
+.themed-heading-h3 {
   color: #f9fafb !important;
   font-size: 1.17em;
   font-weight: bold;
   margin: 1em 0;
 }
 
-.lexkit-list-ul {
+.themed-list-ul {
   color: #f9fafb !important;
-  padding-left: 1.5em;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  list-style-type: disc;
 }
 
-.lexkit-list-ol {
+.themed-list-ol {
   color: #f9fafb !important;
-  padding-left: 1.5em;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  list-style-type: decimal;
 }
 
-.lexkit-list-li {
+.themed-list-li {
   color: #f9fafb !important;
-  margin: 0.25em 0;
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+/* Enhanced nested list styles */
+.themed-content ul ul {
+  list-style-type: circle;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ul ul ul {
+  list-style-type: square;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ol ol ol {
+  list-style-type: lower-roman;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
 }
 
 .lexkit-link {

@@ -1,24 +1,26 @@
 "use client"
 
+// Themed Editor Example - Shows how to customize editor appearance
+// This example demonstrates theming and dark mode support
 import React from "react"
 import { Button } from "@repo/ui/components/button"
 import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, RichText } from "@lexkit/editor"
-import { EditorThemeClasses } from "lexical"
+import { LexKitTheme } from "@lexkit/editor"
 import "./themed-editor.css"
 
-// Define a simple theme with classnames
-const simpleTheme: EditorThemeClasses = {
+// Define a custom theme with classnames
+const simpleTheme: LexKitTheme = {
   // Editor content styles
   paragraph: 'lexkit-paragraph',
   heading: {
-    h1: 'lexkit-heading-h1',
-    h2: 'lexkit-heading-h2',
-    h3: 'lexkit-heading-h3',
+    h1: 'themed-heading-h1',
+    h2: 'themed-heading-h2',
+    h3: 'themed-heading-h3',
   },
   list: {
-    ul: 'lexkit-list-ul',
-    ol: 'lexkit-list-ol',
-    listitem: 'lexkit-list-li',
+    ul: 'themed-list-ul',
+    ol: 'themed-list-ol',
+    listitem: 'themed-list-li',
   },
   quote: 'lexkit-quote',
   link: 'lexkit-link',
@@ -35,7 +37,7 @@ const extensions = [
   italicExtension,
   underlineExtension,
   listExtension,
-  linkExtension,
+  linkExtension.configure({ pasteListener: { insert: true, replace: true } }),
   historyExtension
 ] as const
 

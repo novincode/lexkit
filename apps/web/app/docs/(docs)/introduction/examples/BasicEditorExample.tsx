@@ -1,16 +1,23 @@
 "use client"
 
-import React from "react"
-import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, RichText } from "@lexkit/editor"
+// Basic Editor Example - Getting Started
+// This is the simplest LexKit editor with essential text formatting
+import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText, defaultLexKitTheme } from "@lexkit/editor"
 import "./basic-editor.css"
 
-// Define extensions as const for type safety
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension] as const
+// 1. Define your extensions (as const for type safety)
+const extensions = [
+  boldExtension,
+  italicExtension,
+  listExtension,
+  linkExtension.configure({ pasteListener: { insert: true, replace: true } }),
+  historyExtension
+] as const
 
-// Create typed editor system
+// 2. Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 
-// Toolbar Component
+// Toolbar Component - Shows basic text formatting buttons
 function Toolbar() {
   const { commands, activeStates } = useEditor()
 
@@ -19,24 +26,28 @@ function Toolbar() {
       <button
         onClick={() => commands.toggleBold()}
         className={activeStates.bold ? 'active' : ''}
+        title="Bold (Ctrl+B)"
       >
         Bold
       </button>
       <button
         onClick={() => commands.toggleItalic()}
         className={activeStates.italic ? 'active' : ''}
+        title="Italic (Ctrl+I)"
       >
         Italic
       </button>
       <button
         onClick={() => commands.toggleUnorderedList()}
         className={activeStates.unorderedList ? 'active' : ''}
+        title="Bullet List"
       >
         • List
       </button>
       <button
         onClick={() => commands.toggleOrderedList()}
         className={activeStates.orderedList ? 'active' : ''}
+        title="Numbered List"
       >
         1. List
       </button>
@@ -44,6 +55,7 @@ function Toolbar() {
         onClick={() => commands.undo()}
         disabled={!activeStates.canUndo}
         className={!activeStates.canUndo ? 'disabled' : ''}
+        title="Undo (Ctrl+Z)"
       >
         ↶ Undo
       </button>
@@ -51,6 +63,7 @@ function Toolbar() {
         onClick={() => commands.redo()}
         disabled={!activeStates.canRedo}
         className={!activeStates.canRedo ? 'disabled' : ''}
+        title="Redo (Ctrl+Y)"
       >
         ↷ Redo
       </button>
@@ -58,7 +71,7 @@ function Toolbar() {
   )
 }
 
-// Editor Component
+// Editor Component - Renders the actual editor with toolbar
 function Editor() {
   return (
     <div className="basic-editor">
@@ -69,6 +82,7 @@ function Editor() {
           contentEditable: "basic-content",
           placeholder: "basic-placeholder"
         }}
+        placeholder="Start writing your content here..."
       />
     </div>
   )
@@ -77,7 +91,10 @@ function Editor() {
 // Main Component
 export function BasicEditorExample() {
   return (
-    <Provider extensions={extensions}>
+    <Provider 
+      extensions={extensions}
+      config={{ theme: defaultLexKitTheme }}
+    >
       <Editor />
     </Provider>
   )

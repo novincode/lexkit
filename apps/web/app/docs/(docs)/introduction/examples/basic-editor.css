@@ -5,6 +5,7 @@
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: white;
+  color:black
 }
 
 .basic-editor-container {
@@ -81,6 +82,48 @@
   user-select: none;
   font-size: 14px;
   background: transparent;
+}
+
+/* List Styles */
+.basic-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.basic-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.basic-content li {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.basic-content ul ul {
+  list-style-type: circle;
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.basic-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.basic-content ul ul ul {
+  list-style-type: square;
+  margin: 0.125rem 0;
+  padding-left: 1rem;
+}
+
+.basic-content ol ol ol {
+  list-style-type: lower-roman;
+  margin: 0.125rem 0;
+  padding-left: 1rem;
 }
 
 /* Responsive design */
