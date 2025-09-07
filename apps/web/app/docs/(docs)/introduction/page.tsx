@@ -122,24 +122,27 @@ export default function IntroductionPage() {
         </div>
 
         <DynamicCodeExample
-          exampleName="BasicEditorExample"
+          codes={['BasicEditorExample.tsx', 'basic-editor.css']}
           title="Basic Editor"
           description="Start with essential formatting features"
           preview={<BasicEditorExample />}
+          tabs={['preview', 'component']} // Only show Preview and Code tabs
         />
 
         <DynamicCodeExample
-          exampleName="AdvancedFeaturesExample"
+          codes={['AdvancedFeaturesExample.tsx', 'advanced-editor.css']}
           title="Advanced Features"
           description="Comprehensive editing capabilities with custom extensions"
           preview={<AdvancedFeaturesExample />}
+          tabs={['preview', 'component']} // Only show Preview and Code tabs
         />
 
         <DynamicCodeExample
-          exampleName="ThemedEditorExample"
+          codes={['ThemedEditorExample.tsx', 'themed-editor.css']}
           title="Themed Editor"
           description="Complete theming control with dark mode support"
           preview={<ThemedEditorExample />}
+          tabs={['preview', 'component', 'css']} // Show all three tabs, including CSS
         />
       </div>
 

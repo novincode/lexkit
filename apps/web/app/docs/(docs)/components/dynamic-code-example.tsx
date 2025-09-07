@@ -1,31 +1,83 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
+import { Button } from "@repo/ui/components/button"
+import { ScrollArea } from "@repo/ui/components/scroll-area"
 import { cn } from "@repo/ui/lib/utils"
-import { getExample } from "../../../../lib/generated/code-registry"
+import { getRawCode, getHighlightedCode } from "../../../../lib/generated/code-registry"
+import { Copy, Check } from "lucide-react"
 
 interface DynamicCodeExampleProps {
-  exampleName: string
+  codes: string[]
   title?: string
   description?: string
   preview: React.ReactNode
   className?: string
+  tabs?: string[] // Optional: array of tab IDs to show (e.g., ['preview', 'component', 'css'])
+}
+
+// CopyButton component
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy text: ', err)
+    }
+  }
+
+  return (
+    <Button
+      onClick={handleCopy}
+      size="sm"
+      variant="outline"
+      className="absolute top-2 right-2 z-10 !border-foreground/20 !border-2"
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3 w-3" />
+          Copied!
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3" />
+          Copy
+        </>
+      )}
+    </Button>
+  )
 }
 
 export function DynamicCodeExample({
-  exampleName,
+  codes,
   title,
   description,
   preview,
-  className
+  className,
+  tabs
 }: DynamicCodeExampleProps) {
-  const exampleData = useMemo(() => getExample(exampleName), [exampleName])
+  const codeData = useMemo(() => {
+    const data: Record<string, { raw: string; highlighted: string }> = {}
+    codes.forEach(code => {
+      const raw = getRawCode(code)
+      const highlighted = getHighlightedCode(code)
+      if (raw && highlighted) {
+        data[code] = { raw, highlighted }
+      }
+    })
+    return data
+  }, [codes])
 
-  const tabs = []
+  const filteredTabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
 
-  // Preview tab
-  tabs.push({
+  // Always add preview tab
+  const previewTab = {
     id: "preview",
     label: "Preview",
     content: (
@@ -34,58 +86,63 @@ export function DynamicCodeExample({
           {preview}
         </div>
       </div>
-    )
+    ),
+    alwaysShow: true
+  }
+
+  if (!tabs || tabs.includes("preview")) {
+    filteredTabs.push(previewTab)
+  }
+
+  // Add code tabs
+  codes.forEach(code => {
+    const codeInfo = codeData[code]
+    if (codeInfo) {
+      const ext = code.split('.').pop() || ''
+      const baseName = code.replace(/\.[^/.]+$/, "")
+      const label = ext === 'tsx' ? 'Component' : ext === 'css' ? 'CSS' : baseName
+      const tabId = code // use the code path as id
+
+      const tab = {
+        id: tabId,
+        label,
+        content: (
+          <ScrollArea className="relative h-[80vh] overflow-hidden rounded-lg">
+            <div className="">
+              <CopyButton text={codeInfo.raw} />
+                <div
+                  className="w-full overflow-x-scroll"
+                  dangerouslySetInnerHTML={{ __html: codeInfo.highlighted }}
+                />
+            </div>
+          </ScrollArea>
+        ),
+        alwaysShow: true
+      }
+
+      if (!tabs || tabs.includes(tabId) || tabs.includes(label.toLowerCase())) {
+        filteredTabs.push(tab)
+      }
+    }
   })
-
-  // Component code tab
-  if (exampleData?.component) {
-    tabs.push({
-      id: "component",
-      label: "Code",
-      content: (
-        <div className="rounded-lg border bg-muted p-4 overflow-x-auto">
-          <div
-            className="text-sm"
-            dangerouslySetInnerHTML={{ __html: exampleData.component }}
-          />
-        </div>
-      )
-    })
-  }
-
-  // CSS tab
-  if (exampleData?.css) {
-    tabs.push({
-      id: "css",
-      label: "CSS",
-      content: (
-        <div className="rounded-lg border bg-muted p-4 overflow-x-auto">
-          <div
-            className="text-sm"
-            dangerouslySetInnerHTML={{ __html: exampleData.css }}
-          />
-        </div>
-      )
-    })
-  }
 
   return (
     <div className={cn("not-prose my-6", className)}>
-      {(title || exampleData?.name) && (
+      {title && (
         <h4 className="mb-2 text-lg font-semibold">
-          {title || exampleData?.name}
+          {title}
         </h4>
       )}
 
-      {(description || exampleData?.description) && (
+      {description && (
         <p className="mb-4 text-sm text-muted-foreground">
-          {description || exampleData?.description}
+          {description}
         </p>
       )}
 
       <Tabs defaultValue="preview" className="w-full">
         <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-auto overflow-x-auto">
-          {tabs.map((tab) => (
+          {filteredTabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
@@ -96,7 +153,7 @@ export function DynamicCodeExample({
           ))}
         </TabsList>
 
-        {tabs.map((tab) => (
+        {filteredTabs.map((tab) => (
           <TabsContent key={tab.id} value={tab.id} className="mt-0">
             {tab.content}
           </TabsContent>
