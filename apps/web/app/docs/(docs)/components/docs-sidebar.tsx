@@ -20,12 +20,13 @@ import {
 import { Badge } from "@repo/ui/components/badge"
 import { Button } from "@repo/ui/components/button"
 import { docsConfig } from "../lib/docs-config"
+import { cn } from "@repo/ui/lib/utils"
 
-export function DocsSidebar() {
+export function DocsSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
 
   return (
-    <Sidebar className="border-r" collapsible="offcanvas">
+    <Sidebar className={cn(className)} collapsible="offcanvas">
       <SidebarHeader className="border-b">
         <div className="flex items-center gap-2 px-2 py-2">
           <BookOpen className="h-6 w-6 text-primary" />
@@ -73,8 +74,8 @@ export function DocsSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link 
-                href="https://github.com/novincode/lexkit" 
+              <Link
+                href="https://github.com/novincode/lexkit"
                 target="_blank"
                 className="flex items-center gap-2"
               >
@@ -86,8 +87,8 @@ export function DocsSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link 
-                href="https://lexkit.codeideal.com/demo" 
+              <Link
+                href="https://lexkit.codeideal.com/demo"
                 target="_blank"
                 className="flex items-center gap-2"
               >

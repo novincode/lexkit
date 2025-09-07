@@ -196,9 +196,7 @@ function AdvancedEditor() {
 // Internal component that uses the editor
 function AdvancedFeaturesExampleInner() {
   const [htmlDialogOpen, setHtmlDialogOpen] = useState(false)
-  const [markdownDialogOpen, setMarkdownDialogOpen] = useState(false)
   const [exportedHtml, setExportedHtml] = useState("")
-  const [exportedMarkdown, setExportedMarkdown] = useState("")
 
   // Get commands from the editor context
   const { commands } = useEditor()
@@ -211,17 +209,6 @@ function AdvancedFeaturesExampleInner() {
     } catch (error) {
       console.error('Failed to export HTML:', error)
       alert('Failed to export HTML')
-    }
-  }
-
-  const handleExportMarkdown = async () => {
-    try {
-      const markdown = await commands.exportToMarkdown()
-      setExportedMarkdown(markdown)
-      setMarkdownDialogOpen(true)
-    } catch (error) {
-      console.error('Failed to export Markdown:', error)
-      alert('Failed to export Markdown')
     }
   }
 
@@ -242,22 +229,6 @@ function AdvancedFeaturesExampleInner() {
             </DialogHeader>
             <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
               {exportedHtml}
-            </pre>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={markdownDialogOpen} onOpenChange={setMarkdownDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline" onClick={handleExportMarkdown}>
-              Export Markdown
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
-            <DialogHeader>
-              <DialogTitle>Exported Markdown</DialogTitle>
-            </DialogHeader>
-            <pre className="text-xs bg-muted p-4 rounded overflow-auto whitespace-pre-wrap">
-              {exportedMarkdown}
             </pre>
           </DialogContent>
         </Dialog>

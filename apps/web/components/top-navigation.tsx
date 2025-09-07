@@ -6,13 +6,15 @@ import { Button } from "@repo/ui/components/button"
 import { ThemeToggle } from "./theme-toggle"
 import { useState } from "react"
 import { cn } from "@repo/ui/lib/utils"
+import { SidebarTrigger } from "@repo/ui/components/sidebar"
 
 export function TopNavigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className=" top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className=" top-0 z-50 w-full border-b bg-background">
       <div className="px-4 flex h-16 items-center">
+        <SidebarTrigger className="md:hidden mr-2" />
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">

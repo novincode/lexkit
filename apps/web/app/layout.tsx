@@ -2,8 +2,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "@repo/ui/globals.css"
 import { Providers } from "@/components/providers"
-import { TopNavigation } from "@/components/top-navigation"
-import { Footer } from "@/components/footer"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -27,11 +25,11 @@ export default function RootLayout({
       >
         <Providers>
           <div className="flex min-h-screen flex-col">
-            <TopNavigation />
+            {/* <TopNavigation /> */}
             <main className="flex-1">
               {children}
             </main>
-            <Footer />
+            {/* <Footer /> */}
           </div>
         </Providers>
       </body>
