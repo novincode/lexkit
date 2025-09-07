@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button } from "@repo/ui/components/button"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, richTextExtension, errorBoundaryExtension } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, errorBoundaryExtension, RichText } from "@lexkit/editor"
 import { EditorThemeClasses } from "lexical"
 import "./themed-editor.css"
 
@@ -37,13 +37,6 @@ const extensions = [
   listExtension,
   linkExtension,
   historyExtension,
-  richTextExtension({
-    placeholder: "Experience the power of theming! This editor uses custom CSS classes for complete control over appearance.",
-    classNames: {
-      contentEditable: "themed-content",
-      placeholder: "themed-placeholder"
-    }
-  }),
   errorBoundaryExtension()
 ] as const
 
@@ -147,9 +140,14 @@ function ThemedEditor() {
   return (
     <div className="themed-editor">
       <ThemedToolbar />
-      <div className="editor-container">
-        {/* RichTextPlugin is automatically included via richTextExtension */}
-      </div>
+      <RichText
+        placeholder="Experience the power of theming! This editor uses custom CSS classes for complete control over appearance."
+        classNames={{
+          container: "themed-editor-container",
+          contentEditable: "themed-content",
+          placeholder: "themed-placeholder"
+        }}
+      />
     </div>
   )
 }

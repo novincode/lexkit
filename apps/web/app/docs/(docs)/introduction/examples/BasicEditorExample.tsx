@@ -1,16 +1,11 @@
 "use client"
 
 import React from "react"
-import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, richTextExtension } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, RichText } from "@lexkit/editor"
 import "./basic-editor.css"
 
 // Define extensions as const for type safety
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, richTextExtension({
-  classNames: {
-    contentEditable: "basic-content",
-    placeholder: "basic-placeholder"
-  }
-})] as const
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension] as const
 
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
@@ -68,9 +63,13 @@ function Editor() {
   return (
     <div className="basic-editor">
       <Toolbar />
-      <div className="editor-container">
-        {/* RichTextPlugin is automatically included via richTextExtension */}
-      </div>
+      <RichText
+        classNames={{
+          container: "basic-editor-container",
+          contentEditable: "basic-content",
+          placeholder: "basic-placeholder"
+        }}
+      />
     </div>
   )
 }
