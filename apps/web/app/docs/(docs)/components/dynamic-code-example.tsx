@@ -140,8 +140,8 @@ export function DynamicCodeExample({
         </p>
       )}
 
-      <Tabs defaultValue="preview" className="w-full">
-        <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-auto overflow-x-auto">
+      <Tabs defaultValue="preview" >
+        <TabsList className="inline-flex self-baseline h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-auto overflow-x-auto">
           {filteredTabs.map((tab) => (
             <TabsTrigger
               key={tab.id}

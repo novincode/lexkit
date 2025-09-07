@@ -43,7 +43,7 @@ export function InstallCommand({ packages, devDependencies = false, className }:
   ]
 
   return (
-    <Card className={`p-0 overflow-hidden ${className} gap-0`}>
+    <Card className={`p-0 overflow-hidden ${className} gap-0 max-w-full`}>
       {/* Package Manager Tabs */}
       <div className="flex border-b bg-muted/50">
         {managers.map((manager) => (
@@ -63,7 +63,7 @@ export function InstallCommand({ packages, devDependencies = false, className }:
 
       {/* Command Display */}
       <div className="relative">
-        <pre className="p-4 bg-background font-mono text-sm overflow-x-auto">
+        <pre className="p-4 bg-background text-wrap max-w-full font-mono text-sm overflow-x-auto">
           <code>{command}</code>
         </pre>
         <Button

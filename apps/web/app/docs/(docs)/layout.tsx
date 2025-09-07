@@ -22,7 +22,7 @@ export default function DocsLayout({
             <h1 className="ml-4 text-lg font-semibold">LexKit Docs</h1>
           </div>
           
-          <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-4xl mx-auto">
+          <main className="flex-1 p-6 md:p-8 lg:p-12 max-w-full mx-auto">
             {children}
           </main>
         </SidebarInset>

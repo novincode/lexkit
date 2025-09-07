@@ -58,11 +58,7 @@ const tailwindTheme: LexKitTheme = {
   tableCell: 'border border-gray-600 px-4 py-2 text-gray-100',
   tableCellHeader: 'border border-gray-600 px-4 py-2 bg-gray-700 text-white font-semibold',
 
-  // Rich text specific styles
-  richText: {
-    contentEditable: 'p-4 min-h-[300px] relative  outline-none text-base leading-relaxed text-gray-100 bg-gray-800',
-    placeholder: 'text-gray-500 left-10 top-10',
-  },
+
 }
 
 // 2. Define your extensions (as const for type safety)
@@ -206,6 +202,15 @@ function TailwindEditor() {
       <TailwindToolbar />
       <RichText
         placeholder="Start writing with Tailwind-styled editor..."
+        classNames={{
+            contentEditable: 'p-4 min-h-[300px] relative  outline-none text-base leading-relaxed text-gray-100 bg-gray-800'
+        }}
+        styles={{
+            placeholder:{
+                left:16,
+                top:16
+            }
+        }}
       />
     </div>
   )

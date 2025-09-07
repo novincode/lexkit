@@ -4,12 +4,11 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { Extension, BaseExtensionConfig, ExtensionCategory } from '../types'
 import { defaultLexKitTheme } from '../../core/theme'
 
-export interface RichTextConfig extends BaseExtensionConfig {
+// Base RichText props interface - shared between config and component
+export interface BaseRichTextProps {
   contentEditable?: React.ReactElement
   placeholder?: React.ReactElement | string
   className?: string
-  contentEditableClassName?: string
-  placeholderClassName?: string
   classNames?: {
     container?: string
     contentEditable?: string
@@ -23,40 +22,23 @@ export interface RichTextConfig extends BaseExtensionConfig {
   errorBoundary?: React.ComponentType<{ children: React.JSX.Element; onError: (error: Error) => void }>
 }
 
-// Shared component that both extension and standalone use
-interface SharedRichTextProps {
-  contentEditable?: React.ReactElement
-  placeholder?: React.ReactElement | string
-  className?: string
-  contentEditableClassName?: string
-  placeholderClassName?: string
-  classNames?: {
-    container?: string
-    contentEditable?: string
-    placeholder?: string
-  }
-  styles?: {
-    container?: React.CSSProperties
-    contentEditable?: React.CSSProperties
-    placeholder?: React.CSSProperties
-  }
-  errorBoundary?: React.ComponentType<{ children: React.JSX.Element; onError: (error: Error) => void }>
-}
+export interface RichTextConfig extends BaseExtensionConfig, BaseRichTextProps {}
+
+// Shared component props - extends base props
+interface SharedRichTextProps extends BaseRichTextProps {}
 
 const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
   const {
     contentEditable,
     placeholder,
     className,
-    contentEditableClassName,
-    placeholderClassName,
     classNames,
     styles,
     errorBoundary
   } = props
 
   // Extract common placeholder props
-  const placeholderClassNameFinal = classNames?.placeholder || placeholderClassName || defaultLexKitTheme.richText?.placeholder || 'lexkit-placeholder'
+  const placeholderClassNameFinal = classNames?.placeholder || defaultLexKitTheme.richText?.placeholder || 'lexkit-placeholder'
   const placeholderStyle = {
     position: 'absolute' as const,
     top: 0,
@@ -79,7 +61,7 @@ const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
         contentEditable={
           contentEditable || (
             <ContentEditable
-              className={classNames?.contentEditable || contentEditableClassName || defaultLexKitTheme.richText?.contentEditable || 'lexkit-content-editable'}
+              className={classNames?.contentEditable || defaultLexKitTheme.richText?.contentEditable || 'lexkit-content-editable'}
               style={styles?.contentEditable}
             />
           )
