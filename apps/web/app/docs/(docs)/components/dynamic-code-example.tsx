@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
 import { cn } from "@repo/ui/lib/utils"
+import { getExample } from "../../../../lib/generated/code-registry"
 
 interface DynamicCodeExampleProps {
   exampleName: string
@@ -12,11 +13,6 @@ interface DynamicCodeExampleProps {
   className?: string
 }
 
-interface CodeData {
-  component?: string
-  css?: string
-}
-
 export function DynamicCodeExample({
   exampleName,
   title,
@@ -24,31 +20,7 @@ export function DynamicCodeExample({
   preview,
   className
 }: DynamicCodeExampleProps) {
-  const [codeContent, setCodeContent] = useState<CodeData>({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function fetchCode() {
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/examples/${exampleName}`)
-        const result = await response.json()
-
-        if (result.success) {
-          setCodeContent(result.data)
-        } else {
-          setError(result.error || 'Failed to load code')
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load code')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCode()
-  }, [exampleName])
+  const exampleData = useMemo(() => getExample(exampleName), [exampleName])
 
   const tabs = []
 
@@ -64,44 +36,32 @@ export function DynamicCodeExample({
   })
 
   // Component code tab
-  if (codeContent.component) {
+  if (exampleData?.component) {
     tabs.push({
       id: "component",
       label: "Code",
       content: (
         <div className="rounded-lg border bg-muted p-4 overflow-x-auto">
-          {loading ? (
-            <div className="text-sm text-muted-foreground">Loading code...</div>
-          ) : error ? (
-            <div className="text-sm text-red-500">Error: {error}</div>
-          ) : (
-            <div
-              className="text-sm"
-              dangerouslySetInnerHTML={{ __html: codeContent.component }}
-            />
-          )}
+          <div
+            className="text-sm"
+            dangerouslySetInnerHTML={{ __html: exampleData.component }}
+          />
         </div>
       )
     })
   }
 
   // CSS tab
-  if (codeContent.css) {
+  if (exampleData?.css) {
     tabs.push({
       id: "css",
       label: "CSS",
       content: (
         <div className="rounded-lg border bg-muted p-4 overflow-x-auto">
-          {loading ? (
-            <div className="text-sm text-muted-foreground">Loading CSS...</div>
-          ) : error ? (
-            <div className="text-sm text-red-500">Error: {error}</div>
-          ) : (
-            <div
-              className="text-sm"
-              dangerouslySetInnerHTML={{ __html: codeContent.css }}
-            />
-          )}
+          <div
+            className="text-sm"
+            dangerouslySetInnerHTML={{ __html: exampleData.css }}
+          />
         </div>
       )
     })
@@ -109,15 +69,15 @@ export function DynamicCodeExample({
 
   return (
     <div className={cn("not-prose my-6", className)}>
-      {(title || exampleName) && (
+      {(title || exampleData?.name) && (
         <h4 className="mb-2 text-lg font-semibold">
-          {title || exampleName.replace(/([A-Z])/g, ' $1').trim()}
+          {title || exampleData?.name}
         </h4>
       )}
 
-      {description && (
+      {(description || exampleData?.description) && (
         <p className="mb-4 text-sm text-muted-foreground">
-          {description}
+          {description || exampleData?.description}
         </p>
       )}
 

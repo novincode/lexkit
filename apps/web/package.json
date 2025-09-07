@@ -5,14 +5,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "pnpm preload:code && next build",
+    "build": "pnpm generate:registry && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
     "pages:build": "pnpm next-on-pages",
     "deploy": "pnpm pages:build && npx cfman wrangler --account shayanpng  pages deploy",
-    "preload:code": "tsx lib/preload-code.ts"
+    "generate:registry": "tsx scripts/generate-registry.ts"
   },
   "dependencies": {
     "@lexical/code": "^0.35.0",
