@@ -65,6 +65,10 @@ export const defaultLexKitTheme: LexKitTheme = {
   },
   container: 'lexkit-editor-container',
   wrapper: 'lexkit-editor-wrapper',
+  richText: {
+    contentEditable: 'lexkit-content-editable',
+    placeholder: 'lexkit-placeholder',
+  },
 }
 
 /**
@@ -93,6 +97,10 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
     toolbar: {
       ...baseTheme.toolbar,
       ...overrideTheme.toolbar,
+    },
+    richText: {
+      ...baseTheme.richText,
+      ...overrideTheme.richText,
     },
   }
 }

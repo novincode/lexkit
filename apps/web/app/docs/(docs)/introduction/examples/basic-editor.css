@@ -54,6 +54,7 @@
   cursor: not-allowed;
 }
 
+/* LexKit Rich Text Extension Styles */
 .basic-content {
   padding: 16px;
   outline: none;
@@ -61,6 +62,7 @@
   font-size: 14px;
   line-height: 1.6;
   color: #111827;
+  background: transparent;
 }
 
 .basic-placeholder {
@@ -70,6 +72,7 @@
   pointer-events: none;
   user-select: none;
   font-size: 14px;
+  background: transparent;
 }
 
 /* Responsive design */
@@ -85,6 +88,11 @@
   }
 
   .basic-content {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .basic-placeholder {
     padding: 12px;
     font-size: 13px;
   }

@@ -12,8 +12,10 @@ const extensions = [
   historyExtension,
   richTextExtension({
     placeholder: "Start writing with the modern editor...",
-    contentEditableClassName: "modern-editor-input",
-    placeholderClassName: "modern-editor-placeholder",
+    classNames: {
+      contentEditable: "modern-editor-input",
+      placeholder: "modern-editor-placeholder"
+    }
   })
 ] as const
 

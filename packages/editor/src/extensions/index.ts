@@ -38,7 +38,7 @@ export { htmlEmbedExtension } from './media/HTMLEmbedExtension';
 export { createCustomNodeExtension } from './custom/CustomNodeExtension';
 
 // Core Extensions
-export { richTextExtension, type RichTextConfig } from './core/RichTextExtension';
+export { richTextExtension, RichText, type RichTextConfig, type RichTextComponentProps } from './core/RichTextExtension';
 export { errorBoundaryExtension, type ErrorBoundaryConfig } from './core/ErrorBoundaryExtension';
 export * from './core';
 

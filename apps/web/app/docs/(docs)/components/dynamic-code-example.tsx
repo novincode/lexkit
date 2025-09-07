@@ -30,7 +30,9 @@ export function DynamicCodeExample({
     label: "Preview",
     content: (
       <div className="flex min-h-[400px] items-center justify-center rounded-lg border bg-background p-8">
-        {preview}
+        <div>
+          {preview}
+        </div>
       </div>
     )
   })

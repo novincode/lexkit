@@ -47,6 +47,7 @@
   cursor: not-allowed;
 }
 
+/* LexKit Rich Text Extension Styles */
 .themed-content {
   padding: 16px;
   outline: none;
@@ -54,7 +55,7 @@
   font-size: 16px;
   line-height: 1.6;
   color: #f9fafb;
-  background: #1f2937;
+  background: transparent;
 }
 
 .themed-placeholder {
@@ -64,6 +65,7 @@
   pointer-events: none;
   user-select: none;
   font-size: 16px;
+  background: transparent;
 }
 
 /* Themed elements */
@@ -79,7 +81,7 @@
 
 .lexkit-content-editable {
   color: #f9fafb !important;
-  background: #1f2937 !important;
+  background: transparent !important;
 }
 
 .lexkit-paragraph {

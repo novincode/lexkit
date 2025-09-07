@@ -5,7 +5,12 @@ import { createEditorSystem, boldExtension, italicExtension, historyExtension, l
 import "./basic-editor.css"
 
 // Define extensions as const for type safety
-const extensions = [boldExtension, italicExtension, listExtension, historyExtension, richTextExtension()] as const
+const extensions = [boldExtension, italicExtension, listExtension, historyExtension, richTextExtension({
+  classNames: {
+    contentEditable: "basic-content",
+    placeholder: "basic-placeholder"
+  }
+})] as const
 
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()

@@ -58,6 +58,12 @@
   text-decoration: underline;
 }
 
+.advanced-toolbar button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* LexKit Rich Text Extension Styles */
 .advanced-content {
   padding: 16px;
   outline: none;
@@ -65,6 +71,7 @@
   font-size: 16px;
   line-height: 1.6;
   color: #111827;
+  background: transparent;
 }
 
 .advanced-placeholder {
@@ -74,6 +81,7 @@
   pointer-events: none;
   user-select: none;
   font-size: 16px;
+  background: transparent;
 }
 
 /* Responsive design */
@@ -89,6 +97,11 @@
   }
 
   .advanced-content {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .advanced-placeholder {
     padding: 12px;
     font-size: 14px;
   }

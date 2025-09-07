@@ -39,8 +39,10 @@ const extensions = [
   historyExtension,
   richTextExtension({
     placeholder: "Experience the power of theming! This editor uses custom CSS classes for complete control over appearance.",
-    contentEditableClassName: "themed-content",
-    placeholderClassName: "themed-placeholder"
+    classNames: {
+      contentEditable: "themed-content",
+      placeholder: "themed-placeholder"
+    }
   }),
   errorBoundaryExtension()
 ] as const

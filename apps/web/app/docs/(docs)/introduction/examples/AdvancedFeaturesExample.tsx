@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { Button } from "@repo/ui/components/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, richTextExtension, errorBoundaryExtension } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, richTextExtension, errorBoundaryExtension, RichText } from "@lexkit/editor"
 import "./advanced-editor.css"
 
 // Define extensions as const for type safety
@@ -17,11 +17,6 @@ const extensions = [
   htmlExtension,
   markdownExtension,
   historyExtension,
-  richTextExtension({
-    placeholder: "Start writing with advanced features like images, links, HTML export, and Markdown support...",
-    contentEditableClassName: "advanced-content",
-    placeholderClassName: "advanced-placeholder"
-  }),
   errorBoundaryExtension()
 ] as const
 
@@ -129,9 +124,13 @@ function AdvancedEditor() {
   return (
     <div className="advanced-editor">
       <AdvancedToolbar />
-      <div className="editor-container">
-        {/* RichTextPlugin is automatically included via richTextExtension */}
-      </div>
+      <RichText
+        placeholder="Start writing with advanced features like images, links, HTML export, and Markdown support..."
+        classNames={{
+          contentEditable: "advanced-content",
+          placeholder: "advanced-placeholder"
+        }}
+      />
     </div>
   )
 }
