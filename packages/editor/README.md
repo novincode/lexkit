@@ -88,7 +88,6 @@ import {
 } from '@lexkit/editor';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
@@ -319,8 +318,6 @@ function Editor() {
           />
         )}
       </div>
-
-      <HistoryPlugin />
     </div>
   );
 }

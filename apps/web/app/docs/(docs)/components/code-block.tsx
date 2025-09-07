@@ -95,13 +95,19 @@ export function CodeBlock({
         <Button
           size="sm"
           variant="ghost"
-          className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={copyToClipboard}
+          className={cn(
+            "absolute right-3 top-3 z-10 h-8 w-8 p-0 transition-all duration-200",
+            "opacity-0 group-hover:opacity-100",
+            "hover:bg-white/10 hover:scale-105 backdrop-blur-sm",
+            "border border-white/10 hover:border-white/20",
+            copied && "bg-green-500/20 border-green-400/50 text-green-400 opacity-100"
+          )}
         >
           {copied ? (
-            <Check className="h-3 w-3" />
+            <Check className="h-3.5 w-3.5" />
           ) : (
-            <Copy className="h-3 w-3" />
+            <Copy className="h-3.5 w-3.5" />
           )}
         </Button>
 

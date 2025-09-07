@@ -3,7 +3,10 @@ import { ArrowRight, Zap, Shield, Puzzle, Rocket } from "lucide-react"
 import { Button } from "@repo/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { Badge } from "@repo/ui/components/badge"
+import { CodeExample } from "../components/code-example"
 import { CodeBlock } from "../components/code-block"
+import { BasicEditorExample } from "./examples/BasicEditorExample"
+import { AdvancedFeaturesExample } from "./examples/AdvancedFeaturesExample"
 
 export default function IntroductionPage() {
   return (
@@ -135,91 +138,188 @@ if (activeStates.bold) { /* styled */ }`}
           Here's a complete, working example that showcases LexKit's power:
         </p>
         
-        <CodeBlock 
-          language="tsx" 
-          title="app/page.tsx"
-          className="mb-6"
-        >
-{`import React from 'react';
-import {
-  createEditorSystem,
-  boldExtension,
-  italicExtension,
-  listExtension,
-  markdownExtension,
-} from '@lexkit/editor';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+        <CodeExample
+          title="Basic Editor Setup"
+          preview={<BasicEditorExample />}
+          code={
+            <CodeBlock 
+              language="tsx" 
+              title="BasicEditor.tsx"
+            >
+{`import { useState } from "react"
+import { Button } from "@repo/ui/components/button"
 
-// 1. Define your extensions (as const for type safety)
-const extensions = [
-  boldExtension,
-  italicExtension,
-  listExtension,
-  markdownExtension,
-] as const;
-
-// 2. Create typed editor system
-const { Provider, useEditor } = createEditorSystem<typeof extensions>();
-
-// 3. Create your toolbar
-function Toolbar() {
-  const { commands, activeStates } = useEditor();
+export function BasicEditorExample() {
+  const [content, setContent] = useState("")
 
   return (
-    <div className="flex gap-2 p-2 border-b">
-      <button
-        onClick={() => commands.toggleBold()}
-        className={activeStates.bold ? 'bg-blue-100' : ''}
-      >
-        Bold
-      </button>
-      <button
-        onClick={() => commands.toggleItalic()}
-        className={activeStates.italic ? 'bg-blue-100' : ''}
-      >
-        Italic
-      </button>
-    </div>
-  );
-}
-
-// 4. Create your editor
-function Editor() {
-  return (
-    <div className="border rounded-lg">
-      <Toolbar />
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable className="p-4 min-h-[200px] outline-none" />
-        }
-        placeholder={<div className="text-gray-400 p-4">Start writing...</div>}
-        ErrorBoundary={() => <div>Something went wrong!</div>}
-      />
-    </div>
-  );
-}
-
-// 5. Use it in your app
-export default function App() {
-  return (
-    <Provider extensions={extensions}>
-      <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-6">My LexKit Editor</h1>
-        <Editor />
+    <div className="space-y-4">
+      <div className="border rounded-lg p-4 min-h-[200px]">
+        <h3 className="text-lg font-semibold mb-2">LexKit Editor</h3>
+        <div className="prose prose-sm">
+          <p>Start typing your content here...</p>
+          <p>This is a placeholder for the actual editor.</p>
+        </div>
       </div>
-    </Provider>
-  );
+      <div className="flex items-center gap-2">
+        <Button 
+          onClick={() => console.log("Clear")}
+          variant="outline"
+          size="sm"
+        >
+          Clear
+        </Button>
+        <Button 
+          onClick={() => console.log("Focus")}
+          variant="outline"
+          size="sm"
+        >
+          Focus
+        </Button>
+      </div>
+    </div>
+  )
 }`}
-        </CodeBlock>
+            </CodeBlock>
+          }
+        />
 
-        <div className="bg-muted/50 border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-2">
-            <strong>✅ This example works out-of-the-box!</strong>
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Copy and paste this into a Next.js page and you'll have a fully functional editor with type-safe commands.
-          </p>
+              </div>
+
+      {/* Advanced Features Example */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Advanced Features</h2>
+        <p className="text-muted-foreground mb-6">
+          LexKit comes with powerful features out of the box. Here's an example showing document management:
+        </p>
+        
+        <CodeExample
+          title="Document Management"
+          preview={<AdvancedFeaturesExample />}
+          code={
+            <CodeBlock 
+              language="tsx" 
+              title="AdvancedFeatures.tsx"
+              highlightLines={[15, 20, 25]}
+            >
+{`import { useState } from "react"
+import { Button } from "@repo/ui/components/button"
+import { Input } from "@repo/ui/components/input"
+import { Card, CardHeader, CardTitle, CardContent } from "@repo/ui/components/card"
+
+export function AdvancedFeaturesExample() {
+  const [title, setTitle] = useState("My Document")
+  const [content, setContent] = useState("This is a sample document with advanced features.")
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Document Editor</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="text-sm font-medium">Title</label>
+          <Input 
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter document title"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Content</label>
+          <textarea 
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full p-2 border rounded-md resize-none"
+            rows={4}
+            placeholder="Enter your content"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm">Save</Button>
+          <Button size="sm" variant="outline">Preview</Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}`}
+            </CodeBlock>
+          }
+        />
+      </div>
+
+      {/* What Makes LexKit Special */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">What Makes LexKit Special</h2>
+        
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-lg font-medium mb-3">🎯 Type-Safe Commands & State</h3>
+            <p className="text-muted-foreground mb-4">
+              Commands and state queries are automatically typed based on your extensions. 
+              No more runtime errors from typos in command names.
+            </p>
+            <CodeBlock language="tsx" title="Type Safety Example">
+{`const extensions = [boldExtension, imageExtension] as const;
+const { commands, activeStates } = useEditor();
+
+// ✅ TypeScript knows these exist and their signatures
+commands.toggleBold();        // ✅ Available
+commands.insertImage({});     // ✅ Available with proper types
+commands.nonExistent();       // ❌ TypeScript error
+
+// ✅ State queries are also typed
+if (activeStates.bold) { /* ... */ }        // ✅ Available
+if (activeStates.nonExistent) { /* ... */ }  // ❌ TypeScript error`}
+            </CodeBlock>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium mb-3">🔌 Extension System</h3>
+            <p className="text-muted-foreground mb-4">
+              Build custom extensions or use our extensive library. Everything is composable and reusable.
+            </p>
+            <CodeBlock language="tsx" title="Custom Extension">
+{`// Create your own extension
+const customExtension = createExtension({
+  name: 'custom',
+  nodes: [CustomNode],
+  commands: {
+    insertCustom: () => ({ state, dispatch }) => {
+      // Custom command logic
+    }
+  },
+  toolbar: CustomToolbarComponent
+});
+
+// Use it in your editor
+const extensions = [customExtension, ...otherExtensions] as const;`}
+            </CodeBlock>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium mb-3">📱 Production Features</h3>
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div className="text-sm">
+                <strong>Editor Features:</strong>
+                <ul className="mt-2 space-y-1 text-muted-foreground">
+                  <li>• Real-time collaboration ready</li>
+                  <li>• Image upload & management</li>
+                  <li>• Table editing with GFM support</li>
+                  <li>• Markdown import/export</li>
+                </ul>
+              </div>
+              <div className="text-sm">
+                <strong>Developer Features:</strong>
+                <ul className="mt-2 space-y-1 text-muted-foreground">
+                  <li>• Zero-config setup</li>
+                  <li>• Tree-shakeable packages</li>
+                  <li>• Comprehensive testing utilities</li>
+                  <li>• Error boundaries and robust error handling</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

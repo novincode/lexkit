@@ -24,7 +24,6 @@ import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/tran
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
 import { ImageNode } from '@lexkit/editor/extensions/media';
 import { defaultTheme } from './theme';
@@ -839,7 +838,6 @@ function EditorContent({
             onMarkdownChange={handleMarkdownChange}
           />
         ) : null}
-        <HistoryPlugin />
       </div>
 
       {/* Command Palette */}
