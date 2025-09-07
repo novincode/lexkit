@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button } from "@repo/ui/components/button"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, errorBoundaryExtension, RichText } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, linkExtension, historyExtension, RichText } from "@lexkit/editor"
 import { EditorThemeClasses } from "lexical"
 import "./themed-editor.css"
 
@@ -36,8 +36,7 @@ const extensions = [
   underlineExtension,
   listExtension,
   linkExtension,
-  historyExtension,
-  errorBoundaryExtension()
+  historyExtension
 ] as const
 
 // Create typed editor system

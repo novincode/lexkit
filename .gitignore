@@ -27,6 +27,9 @@ out/
 build
 dist
 
+# Generated Files
+**/generated/
+**/lib/generated/
 
 # Debug
 npm-debug.log*

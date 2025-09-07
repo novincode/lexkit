@@ -39,7 +39,6 @@ export { createCustomNodeExtension } from './custom/CustomNodeExtension';
 
 // Core Extensions
 export { richTextExtension, RichText, type RichTextConfig, type RichTextComponentProps } from './core/RichTextExtension';
-export { errorBoundaryExtension, type ErrorBoundaryConfig } from './core/ErrorBoundaryExtension';
 export * from './core';
 
 // Base Classes & Types

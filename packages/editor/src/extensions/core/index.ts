@@ -2,7 +2,6 @@ export { ContextMenuExtension, contextMenuExtension } from './ContextMenuExtensi
 export { FloatingToolbarExtension, floatingToolbarExtension } from './FloatingToolbarExtension';
 export { CommandPaletteExtension, commandPaletteExtension } from './CommandPaletteExtension';
 export { richTextExtension, type RichTextConfig } from './RichTextExtension';
-export { errorBoundaryExtension, type ErrorBoundaryConfig } from './ErrorBoundaryExtension';
 
 export type {
   ContextMenuItem,

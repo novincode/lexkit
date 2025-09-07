@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { Button } from "@repo/ui/components/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, richTextExtension, errorBoundaryExtension, RichText } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, RichText } from "@lexkit/editor"
 import "./advanced-editor.css"
 
 // Define extensions as const for type safety
@@ -16,8 +16,7 @@ const extensions = [
   linkExtension,
   htmlExtension,
   markdownExtension,
-  historyExtension,
-  errorBoundaryExtension()
+  historyExtension
 ] as const
 
 // Create typed editor system
