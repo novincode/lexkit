@@ -1,18 +1,18 @@
 'use client'
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { 
-  boldExtension, 
-  italicExtension, 
+import {
+  boldExtension,
+  italicExtension,
   underlineExtension,
   strikethroughExtension,
   linkExtension,
   horizontalRuleExtension,
   tableExtension,
   type TableConfig,
-  listExtension, 
-  historyExtension, 
-  imageExtension, 
+  listExtension,
+  historyExtension,
+  imageExtension,
   blockFormatExtension,
   htmlExtension,
   markdownExtension,
@@ -28,33 +28,34 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
 import { ImageNode } from '@lexkit/editor/extensions/media';
 import './styles.css';
-import { 
-  Bold, 
-  Italic, 
+import {
+  Bold,
+  Italic,
   Underline,
   Strikethrough,
-  List, 
-  ListOrdered, 
-  Undo, 
-  Redo, 
-  Sun, 
-  Moon, 
-  Image, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
-  Upload, 
+  List,
+  ListOrdered,
+  Undo,
+  Redo,
+  Sun,
+  Moon,
+  Image,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Upload,
   Link,
   Unlink,
   Minus,
   Code,
   Terminal,
-  Type,
+  Table,
   FileCode,
   Eye,
   Pencil,
-  Table,
-  Command
+  Command,
+  Type,
+  ArrowRight
 } from 'lucide-react';
 import { Select, Dropdown, Dialog } from './components';
 import { createEditorSystem } from '@lexkit/editor';
@@ -63,47 +64,25 @@ import { LexicalEditor } from 'lexical';
 import { commandsToCommandPaletteItems, registerKeyboardShortcuts } from './commands';
 import { CommandPalette } from './CommandPalette';
 
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  try {
-    return <>{children}</>;
-  } catch (error) {
-    console.error('🚨 Editor Error Boundary caught error:', error);
-    return (
-      <div style={{
-        color: 'red',
-        border: '1px solid red',
-        padding: '20px',
-        backgroundColor: '#ffe6e6',
-        borderRadius: '4px',
-        margin: '10px 0'
-      }}>
-        <h3>Editor Error</h3>
-        <p>{String(error)}</p>
-        <p>Please refresh the page and try again.</p>
-      </div>
-    );
-  }
-};
-
-// Define the extensions array as a const to maintain literal types
+// Extensions array
 const extensions = [
-  boldExtension, 
-  italicExtension, 
+  boldExtension,
+  italicExtension,
   underlineExtension,
   strikethroughExtension,
   linkExtension,
   horizontalRuleExtension,
   tableExtension,
-  listExtension, 
-  historyExtension, 
-  imageExtension, 
+  listExtension,
+  historyExtension,
+  imageExtension,
   blockFormatExtension,
-  codeExtension,
-  codeFormatExtension,
   htmlExtension,
   markdownExtension.configure({
     customTransformers: ALL_MARKDOWN_TRANSFORMERS
   }),
+  codeExtension,
+  codeFormatExtension,
   htmlEmbedExtension,
   MyCustomExtension,
   floatingToolbarExtension,
@@ -121,6 +100,14 @@ type ExtensionNames = typeof extensions[number]['name'];
 
 // Editor Mode Types
 type EditorMode = 'visual' | 'html' | 'markdown';
+
+// Ref interface for parent control
+export interface DefaultTemplateRef {
+  injectMarkdown: (content: string) => void;
+  injectHTML: (content: string) => void;
+  getMarkdown: () => string;
+  getHTML: () => string;
+}
 
 // Custom hook for image handling
 function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
@@ -169,12 +156,12 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
 }
 
 // Toolbar Component
-function Toolbar({ 
-  commands, 
-  hasExtension, 
-  activeStates, 
-  isDark, 
-  toggleTheme 
+function Toolbar({
+  commands,
+  hasExtension,
+  activeStates,
+  isDark,
+  toggleTheme
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
@@ -182,9 +169,9 @@ function Toolbar({
   isDark: boolean;
   toggleTheme: () => void;
 }) {
-  const { commands: editorCommands, lexical: editor } = useEditor();
+  const { lexical: editor } = useEditor();
   const { handlers, fileInputRef } = useImageHandlers(commands, editor);
-  
+
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -193,6 +180,7 @@ function Toolbar({
     columns: 3,
     includeHeaders: false
   });
+
   // Block format options
   const blockFormatOptions = [
     { value: 'p', label: 'Paragraph' },
@@ -206,7 +194,7 @@ function Toolbar({
   ];
 
   // Get current block format
-  const currentBlockFormat = activeStates.isH1 ? 'h1' 
+  const currentBlockFormat = activeStates.isH1 ? 'h1'
     : activeStates.isH2 ? 'h2'
     : activeStates.isH3 ? 'h3'
     : activeStates.isH4 ? 'h4'
@@ -231,8 +219,8 @@ function Toolbar({
       {/* Text Formatting Section */}
       <div className="lexkit-toolbar-section">
         {hasExtension('bold') && (
-          <button 
-            onClick={() => commands.toggleBold()} 
+          <button
+            onClick={() => commands.toggleBold()}
             className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
             title="Bold (Ctrl+B)"
           >
@@ -240,8 +228,8 @@ function Toolbar({
           </button>
         )}
         {hasExtension('italic') && (
-          <button 
-            onClick={() => commands.toggleItalic()} 
+          <button
+            onClick={() => commands.toggleItalic()}
             className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
             title="Italic (Ctrl+I)"
           >
@@ -249,8 +237,8 @@ function Toolbar({
           </button>
         )}
         {hasExtension('underline') && (
-          <button 
-            onClick={() => commands.toggleUnderline()} 
+          <button
+            onClick={() => commands.toggleUnderline()}
             className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
             title="Underline (Ctrl+U)"
           >
@@ -258,24 +246,24 @@ function Toolbar({
           </button>
         )}
         {hasExtension('strikethrough') && (
-          <button 
-            onClick={() => commands.toggleStrikethrough()} 
+          <button
+            onClick={() => commands.toggleStrikethrough()}
             className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
             title="Strikethrough"
           >
             <Strikethrough size={16} />
           </button>
         )}
-        <button 
-          onClick={() => commands.formatText('code')} 
+        <button
+          onClick={() => commands.formatText('code')}
           className={`lexkit-toolbar-button ${activeStates.code ? 'active' : ''}`}
           title="Inline Code"
         >
           <Code size={16} />
         </button>
         {hasExtension('link') && (
-          <button 
-            onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()} 
+          <button
+            onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()}
             className={`lexkit-toolbar-button ${activeStates.isLink ? 'active' : ''}`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
@@ -294,8 +282,8 @@ function Toolbar({
             placeholder="Format"
           />
           {hasExtension('code') && (
-            <button 
-              onClick={() => commands.toggleCodeBlock()} 
+            <button
+              onClick={() => commands.toggleCodeBlock()}
               className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
               title="Code Block"
             >
@@ -308,15 +296,15 @@ function Toolbar({
       {/* List Section */}
       {hasExtension('list') && (
         <div className="lexkit-toolbar-section">
-          <button 
-            onClick={() => commands.toggleUnorderedList()} 
+          <button
+            onClick={() => commands.toggleUnorderedList()}
             className={`lexkit-toolbar-button ${activeStates.unorderedList ? 'active' : ''}`}
             title="Bullet List"
           >
             <List size={16} />
           </button>
-          <button 
-            onClick={() => commands.toggleOrderedList()} 
+          <button
+            onClick={() => commands.toggleOrderedList()}
             className={`lexkit-toolbar-button ${activeStates.orderedList ? 'active' : ''}`}
             title="Numbered List"
           >
@@ -328,8 +316,8 @@ function Toolbar({
       {/* Horizontal Rule Section */}
       {hasExtension('horizontalRule') && (
         <div className="lexkit-toolbar-section">
-          <button 
-            onClick={() => commands.insertHorizontalRule()} 
+          <button
+            onClick={() => commands.insertHorizontalRule()}
             className="lexkit-toolbar-button"
             title="Insert Horizontal Rule"
           >
@@ -356,7 +344,7 @@ function Toolbar({
         <div className="lexkit-toolbar-section">
           <Dropdown
             trigger={
-              <button 
+              <button
                 className={`lexkit-toolbar-button ${activeStates.imageSelected ? 'active' : ''}`}
                 title="Insert Image"
               >
@@ -366,7 +354,7 @@ function Toolbar({
             isOpen={showImageDropdown}
             onOpenChange={setShowImageDropdown}
           >
-            <button 
+            <button
               className="lexkit-dropdown-item"
               onClick={() => {
                 handlers.insertImageFromUrl();
@@ -376,7 +364,7 @@ function Toolbar({
               <Link size={16} />
               From URL
             </button>
-            <button 
+            <button
               className="lexkit-dropdown-item"
               onClick={() => {
                 handlers.insertImageFromFile();
@@ -399,7 +387,7 @@ function Toolbar({
               isOpen={showAlignDropdown}
               onOpenChange={setShowAlignDropdown}
             >
-              <button 
+              <button
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.setImageAlignment('left');
@@ -409,7 +397,7 @@ function Toolbar({
                 <AlignLeft size={16} />
                 Align Left
               </button>
-              <button 
+              <button
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.setImageAlignment('center');
@@ -419,7 +407,7 @@ function Toolbar({
                 <AlignCenter size={16} />
                 Align Center
               </button>
-              <button 
+              <button
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.setImageAlignment('right');
@@ -429,7 +417,7 @@ function Toolbar({
                 <AlignRight size={16} />
                 Align Right
               </button>
-              <button 
+              <button
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.setImageCaption();
@@ -455,7 +443,7 @@ function Toolbar({
       {/* HTML Embed Section */}
       {hasExtension('htmlEmbed') && (
         <div className="lexkit-toolbar-section">
-          <button 
+          <button
             onClick={() => commands.insertHTMLEmbed()}
             className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? 'active' : ''}`}
             title="Insert HTML Embed"
@@ -463,7 +451,7 @@ function Toolbar({
             <FileCode size={16} />
           </button>
           {activeStates.isHTMLEmbedSelected && (
-            <button 
+            <button
               onClick={() => commands.toggleHTMLPreview()}
               className="lexkit-toolbar-button"
               title="Toggle Preview/Edit"
@@ -477,16 +465,16 @@ function Toolbar({
       {/* History Section */}
       {hasExtension('history') && (
         <div className="lexkit-toolbar-section">
-          <button 
-            onClick={() => commands.undo()} 
+          <button
+            onClick={() => commands.undo()}
             disabled={!activeStates.canUndo}
             className="lexkit-toolbar-button"
             title="Undo (Ctrl+Z)"
           >
             <Undo size={16} />
           </button>
-          <button 
-            onClick={() => commands.redo()} 
+          <button
+            onClick={() => commands.redo()}
             disabled={!activeStates.canRedo}
             className="lexkit-toolbar-button"
             title="Redo (Ctrl+Y)"
@@ -499,7 +487,7 @@ function Toolbar({
       {/* Custom Extension */}
       {hasExtension('myBlock') && commands.insertMyBlock && (
         <div className="lexkit-toolbar-section">
-          <button 
+          <button
             onClick={() => commands.insertMyBlock({ text: 'Custom Block', color: 'red' })}
             className="lexkit-toolbar-button"
             title="Insert Custom Block"
@@ -512,8 +500,8 @@ function Toolbar({
 
       {/* Command Palette */}
       <div className="lexkit-toolbar-section">
-        <button 
-          onClick={() => commands.showCommandPalette()} 
+        <button
+          onClick={() => commands.showCommandPalette()}
           className="lexkit-toolbar-button"
           title="Command Palette (Ctrl+K)"
         >
@@ -523,8 +511,8 @@ function Toolbar({
 
       {/* Theme Toggle */}
       <div className="lexkit-toolbar-section">
-        <button 
-          onClick={toggleTheme} 
+        <button
+          onClick={toggleTheme}
           className="lexkit-toolbar-button"
           title={isDark ? 'Light Mode' : 'Dark Mode'}
         >
@@ -537,7 +525,7 @@ function Toolbar({
   return (
     <>
       {toolbar}
-      
+
       {/* Table Dialog */}
       <Dialog
         isOpen={showTableDialog}
@@ -604,12 +592,12 @@ function Toolbar({
 }
 
 // Mode Tabs Component
-function ModeTabs({ 
-  mode, 
-  onModeChange 
-}: { 
-  mode: EditorMode; 
-  onModeChange: (mode: EditorMode) => void; 
+function ModeTabs({
+  mode,
+  onModeChange
+}: {
+  mode: EditorMode;
+  onModeChange: (mode: EditorMode) => void;
 }) {
   return (
     <div className="lexkit-mode-tabs">
@@ -636,11 +624,11 @@ function ModeTabs({
 }
 
 // HTML Source View Component
-function HTMLSourceView({ 
-  htmlContent, 
+function HTMLSourceView({
+  htmlContent,
   onHtmlChange
-}: { 
-  htmlContent: string; 
+}: {
+  htmlContent: string;
   onHtmlChange: (html: string) => void;
 }) {
   return (
@@ -655,11 +643,11 @@ function HTMLSourceView({
 }
 
 // Markdown Source View Component
-function MarkdownSourceView({ 
-  markdownContent, 
+function MarkdownSourceView({
+  markdownContent,
   onMarkdownChange
-}: { 
-  markdownContent: string; 
+}: {
+  markdownContent: string;
   onMarkdownChange: (markdown: string) => void;
 }) {
   return (
@@ -673,20 +661,51 @@ function MarkdownSourceView({
   );
 }
 
+// Error Boundary Component
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
 // Main Editor Content Component
-function EditorContent({ 
-  className, 
-  isDark, 
-  toggleTheme 
-}: { 
-  className?: string; 
-  isDark: boolean; 
-  toggleTheme: () => void; 
+function EditorContent({
+  className,
+  isDark,
+  toggleTheme,
+  onReady
+}: {
+  className?: string;
+  isDark: boolean;
+  toggleTheme: () => void;
+  onReady?: (methods: DefaultTemplateRef) => void;
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [content, setContent] = useState({ html: '', markdown: '' });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Use ref to store latest commands to avoid dependency issues
+  const commandsRef = React.useRef(commands);
+
+  // Update ref when commands change
+  React.useEffect(() => {
+    commandsRef.current = commands;
+  }, [commands]);
+
+  // Create methods object that uses the ref
+  const methods = React.useMemo(() => ({
+    injectMarkdown: (content: string) => {
+      commandsRef.current.importFromMarkdown(content);
+    },
+    injectHTML: (content: string) => {
+      commandsRef.current.importFromHTML(content);
+    },
+    getMarkdown: () => {
+      return commandsRef.current.exportToMarkdown();
+    },
+    getHTML: () => {
+      return commandsRef.current.exportToHTML();
+    }
+  }), []); // Empty dependency array - only create once
 
   // Register command palette commands and keyboard shortcuts
   useEffect(() => {
@@ -705,61 +724,26 @@ function EditorContent({
     // Register keyboard shortcuts
     const unregisterShortcuts = registerKeyboardShortcuts(commands, document.body);
 
+    // Call onReady with methods immediately when editor is ready
+    if (onReady) {
+      console.log('🎉 Editor ready - calling onReady with methods');
+      onReady(methods);
+    }
+
     return () => {
       unregisterShortcuts();
       // Restore original command
       (commands as any).showCommandPalette = originalShowCommand;
     };
-  }, [editor, commands]);
-
-  // Initial content sync when editor is ready
-  useEffect(() => {
-    if (!editor || !hasExtension('markdown') || !hasExtension('html')) return;
-
-    // Sync initial content from the editor
-    try {
-      const markdown = commands.exportToMarkdown();
-      const html = commands.exportToHTML();
-      setContent({ markdown, html });
-    } catch (error) {
-      console.error('Failed to sync initial content:', error);
-    }
-  }, [editor, hasExtension]); // Remove commands from deps to prevent loops
-
-  // Sync content when editor changes (only for non-markdown modes)
-  useEffect(() => {
-    if (!editor || mode === 'markdown') return;
-
-    const syncContent = () => {
-      if (hasExtension('html')) {
-        try {
-          const html = commands.exportToHTML();
-          setContent(prev => ({ ...prev, html }));
-        } catch (error) {
-          console.error('Failed to export HTML:', error);
-        }
-      }
-      // Don't sync markdown content here - it causes conflicts with mode switching
-      // Markdown content is only synced when entering/leaving markdown mode
-    };
-
-    const unregister = editor.registerUpdateListener(() => syncContent());
-    syncContent(); // Initial sync
-
-    return unregister;
-  }, [editor, hasExtension, commands, mode]);
+  }, [editor, methods, onReady]);
 
   // Simple handlers - no debouncing needed
   const handleHtmlChange = (html: string) => {
     setContent(prev => ({ ...prev, html }));
-    // Don't import on every keystroke - let the mode change handle the import
-    // This prevents constant editor state corruption
   };
 
   const handleMarkdownChange = (markdown: string) => {
     setContent(prev => ({ ...prev, markdown }));
-    // Don't import on every keystroke - let the mode change handle the import
-    // This prevents constant editor state corruption
   };
 
   // Handle mode changes
@@ -767,12 +751,12 @@ function EditorContent({
     // If leaving markdown mode, import the markdown content into the editor immediately
     if (mode === 'markdown' && newMode !== 'markdown' && editor && hasExtension('markdown')) {
       try {
-        commands.importFromMarkdown(content.markdown, true); // immediate = true
+        commands.importFromMarkdown(content.markdown, true);
       } catch (error) {
         console.error('Failed to import Markdown:', error);
       }
     }
-    
+
     // If leaving HTML mode, import the HTML content into the editor
     if (mode === 'html' && newMode !== 'html' && editor && hasExtension('html')) {
       try {
@@ -781,7 +765,7 @@ function EditorContent({
         console.error('Failed to import HTML:', error);
       }
     }
-    
+
     // If entering markdown mode, sync the current editor content to markdown
     if (newMode === 'markdown' && mode !== 'markdown' && editor && hasExtension('markdown')) {
       try {
@@ -791,7 +775,7 @@ function EditorContent({
         console.error('Failed to export Markdown:', error);
       }
     }
-    
+
     // If entering HTML mode, sync the current editor content to HTML
     if (newMode === 'html' && mode !== 'html' && editor && hasExtension('html')) {
       try {
@@ -801,25 +785,27 @@ function EditorContent({
         console.error('Failed to export HTML:', error);
       }
     }
-    
+
     setMode(newMode);
   };
+
+
 
   return (
     <>
       <div className="lexkit-editor-header">
         <ModeTabs mode={mode} onModeChange={handleModeChange} />
         {mode === 'visual' && (
-          <Toolbar 
-            commands={commands} 
-            hasExtension={hasExtension} 
-            activeStates={activeStates} 
-            isDark={isDark} 
+          <Toolbar
+            commands={commands}
+            hasExtension={hasExtension}
+            activeStates={activeStates}
+            isDark={isDark}
             toggleTheme={toggleTheme}
           />
         )}
       </div>
-      
+
       <div className="lexkit-editor">
         {mode === 'visual' ? (
           <RichTextPlugin
@@ -828,13 +814,13 @@ function EditorContent({
             ErrorBoundary={ErrorBoundary}
           />
         ) : mode === 'html' ? (
-          <HTMLSourceView 
-            htmlContent={content.html} 
+          <HTMLSourceView
+            htmlContent={content.html}
             onHtmlChange={handleHtmlChange}
           />
         ) : mode === 'markdown' ? (
-          <MarkdownSourceView 
-            markdownContent={content.markdown} 
+          <MarkdownSourceView
+            markdownContent={content.markdown}
             onMarkdownChange={handleMarkdownChange}
           />
         ) : null}
@@ -850,48 +836,92 @@ function EditorContent({
   );
 }
 
-// Main Template Component
+// Main Template Component - Truly Headless
 interface DefaultTemplateProps {
   className?: string;
+  onReady?: (methods: DefaultTemplateRef) => void; // Callback when editor is ready with methods
 }
 
-export function DefaultTemplate({ className }: DefaultTemplateProps) {
-  const { theme: globalTheme } = useTheme();
-  const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
+export const DefaultTemplate = React.forwardRef<DefaultTemplateRef, DefaultTemplateProps>(
+  ({ className, onReady }, ref) => {
+    const { theme: globalTheme } = useTheme();
+    const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
+    const [editorMethods, setEditorMethods] = useState<DefaultTemplateRef | null>(null);
 
-  // Initialize editor theme from global theme on mount
-  useEffect(() => {
-    if (globalTheme === 'dark' || globalTheme === 'light') {
-      setEditorTheme(globalTheme);
-    }
-  }, [globalTheme]);
+    // Initialize editor theme from global theme on mount
+    useEffect(() => {
+      if (globalTheme === 'dark' || globalTheme === 'light') {
+        setEditorTheme(globalTheme);
+      }
+    }, [globalTheme]);
 
-  const isDark = editorTheme === 'dark';
+    const isDark = editorTheme === 'dark';
 
-  // Configure image extension
-  useEffect(() => {
-    imageExtension.configure({
-      uploadHandler: async (file: File) => {
-        // For testing, create object URL
-        const objectUrl = URL.createObjectURL(file);
-        return objectUrl;
+    // Configure image extension
+    useEffect(() => {
+      imageExtension.configure({
+        uploadHandler: async (file: File) => {
+          // For testing, create object URL
+          const objectUrl = URL.createObjectURL(file);
+          return objectUrl;
+        },
+        defaultAlignment: 'center',
+        resizable: true,
+        pasteListener: { insert: true, replace: true },
+        debug: false,
+      });
+    }, []);
+
+    const toggleTheme = () => {
+      setEditorTheme(isDark ? 'light' : 'dark');
+    };
+
+    // Handle when editor is ready - store methods and expose via ref
+    const handleEditorReady = React.useCallback((methods: DefaultTemplateRef) => {
+      console.log('🎯 Editor ready - storing methods');
+      setEditorMethods(methods);
+      
+      // Call parent callback with methods
+      if (onReady) {
+        console.log('📞 Calling parent onReady with methods');
+        onReady(methods);
+      }
+    }, [onReady]);
+
+    // Expose methods to parent via ref
+    React.useImperativeHandle(ref, () => ({
+      injectMarkdown: (content: string) => {
+        if (editorMethods) {
+          console.log('💉 Injecting markdown content via ref:', content.substring(0, 50) + '...');
+          editorMethods.injectMarkdown(content);
+        } else {
+          console.log('❌ Cannot inject via ref - editor methods not available');
+        }
       },
-      defaultAlignment: 'center',
-      resizable: true,
-      pasteListener: { insert: true, replace: true },
-      debug: false,
-    });
-  }, []);
+      injectHTML: (content: string) => {
+        if (editorMethods) {
+          editorMethods.injectHTML(content);
+        }
+      },
+      getMarkdown: () => {
+        return editorMethods ? editorMethods.getMarkdown() : '';
+      },
+      getHTML: () => {
+        return editorMethods ? editorMethods.getHTML() : '';
+      }
+    }), [editorMethods]);
 
-  const toggleTheme = () => {
-    setEditorTheme(isDark ? 'light' : 'dark');
-  };
-
-  return (
-    <div className={`lexkit-editor-wrapper ${className || ''}`} data-editor-theme={editorTheme}>
-      <Provider extensions={extensions}>
-        <EditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} />
-      </Provider>
-    </div>
-  );
-}
+    return (
+      <div className={`lexkit-editor-wrapper ${className || ''}`} data-editor-theme={editorTheme}>
+        <Provider extensions={extensions} >
+          <EditorContent
+            className={className}
+            isDark={isDark}
+            toggleTheme={toggleTheme}
+            onReady={handleEditorReady}
+          />
+        </Provider>
+      </div>
+    );
+  }
+);

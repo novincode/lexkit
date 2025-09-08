@@ -1,10 +1,12 @@
+'use client'
+
 import React from "react"
 import { DynamicCodeExample } from "../components/dynamic-code-example"
 import { BasicEditorExample } from "./examples/BasicEditorExample"
 import { AdvancedFeaturesExample } from "./examples/AdvancedFeaturesExample"
 import { ThemedEditorExample } from "./examples/ThemedEditorExample"
 import { TailwindBasedExample } from "./examples/TailwindBasedExample"
-import { DefaultTemplate } from "../../../templates/default/DefaultTemplate"
+import { DefaultTemplate, DefaultTemplateRef } from "../../../templates/default/DefaultTemplate"
 import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { CheckCircle, Zap, Palette, Code2, Download, Play, Shield, Puzzle, Rocket, Github, BookOpen } from "lucide-react"
@@ -12,6 +14,22 @@ import { Button } from "@repo/ui/components/button"
 import { InstallCommand } from "@/components/install-command"
 
 export default function IntroductionPage() {
+  const editorRef = React.useRef<DefaultTemplateRef>(null);
+
+  // Handle when editor is ready - inject content immediately
+  const handleEditorReady = React.useCallback((methods: DefaultTemplateRef) => {
+    console.log('🎯 Editor ready - injecting content immediately');
+    methods.injectMarkdown(`# A Developer's Journey with Rich Text Editors
+
+As a developer who's always valued clean, maintainable code, I found rich text editors to be one of the most challenging areas to work with. Complex APIs, inconsistent behaviors, and endless edge cases made building reliable editors feel like an uphill battle.
+
+That's why I built LexKit — a clean, type-safe abstraction on top of Meta's Lexical that makes rich text editing approachable and enjoyable. It's designed to eliminate the frustration and let you focus on building great user experiences.
+
+Your support means everything to me. Whether it's starring the repo, reporting bugs, suggesting features, or contributing code — every bit helps keep this project alive and growing. As an independent developer, your engagement directly impacts what I can build and maintain.
+
+Ready to try it? Pick your package manager above and let's build something amazing together! 🚀`);
+  }, []);
+
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -36,22 +54,11 @@ export default function IntroductionPage() {
             Fully Customizable
           </Badge>
         </div>
-        {/* DefaultTemplate Demo */}
-        <div className="max-w-4xl mx-auto mt-8 p-6 border rounded-lg">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 justify-center">
-            <Play className="h-4 w-4" />
-            Try LexKit in Action: Default Editor Demo
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4 text-center">
-            Try it live: type, format, add images. See LexKit in action.
-          </p>
-          <div className="border rounded-md overflow-hidden text-left">
-            <DefaultTemplate />
-          </div>
-          <p className="text-sm text-muted-foreground mt-4 text-center">
-            Ready to use. No setup needed. Just works.
-          </p>
-        </div>
+      </div>
+
+      {/* DefaultTemplate Demo */}
+      <div className="max-w-4xl mx-auto">
+        <DefaultTemplate ref={editorRef} onReady={handleEditorReady} />
       </div>
 
       {/* What Makes LexKit Tick? */}
