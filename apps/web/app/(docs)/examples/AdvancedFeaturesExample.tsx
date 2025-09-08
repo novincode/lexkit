@@ -51,7 +51,7 @@ function AdvancedToolbar() {
       {/* Text Formatting */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant={activeStates.bold ? "default" : "outline"}
+          variant={activeStates.bold ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleBold()}
           title="Bold (Ctrl+B)"
@@ -60,7 +60,7 @@ function AdvancedToolbar() {
         </Button>
 
         <Button
-          variant={activeStates.italic ? "default" : "outline"}
+          variant={activeStates.italic ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleItalic()}
           title="Italic (Ctrl+I)"
@@ -69,7 +69,7 @@ function AdvancedToolbar() {
         </Button>
 
         <Button
-          variant={activeStates.underline ? "default" : "outline"}
+          variant={activeStates.underline ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleUnderline()}
           title="Underline (Ctrl+U)"
@@ -103,7 +103,7 @@ function AdvancedToolbar() {
       {/* Lists */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant={activeStates.unorderedList ? "default" : "outline"}
+          variant={activeStates.unorderedList ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleUnorderedList()}
           title="Bullet List"
@@ -112,7 +112,7 @@ function AdvancedToolbar() {
         </Button>
 
         <Button
-          variant={activeStates.orderedList ? "default" : "outline"}
+          variant={activeStates.orderedList ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleOrderedList()}
           title="Numbered List"
@@ -124,7 +124,7 @@ function AdvancedToolbar() {
       {/* Code */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant={activeStates.isInCodeBlock ? "default" : "outline"}
+          variant={activeStates.isInCodeBlock ? "default" : "ghost"}
           size="sm"
           onClick={() => commands.toggleCodeBlock()}
           title="Code Block"
@@ -136,7 +136,7 @@ function AdvancedToolbar() {
       {/* Tables */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => commands.insertTable({ rows: 4, columns: 4, includeHeaders: true })}
           title="Insert 4x4 Table with Headers"
@@ -148,7 +148,7 @@ function AdvancedToolbar() {
       {/* Media */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => {
             const src = prompt('Enter image URL:')
@@ -163,7 +163,7 @@ function AdvancedToolbar() {
         </Button>
 
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => {
             const url = prompt('Enter link URL:')
@@ -181,7 +181,7 @@ function AdvancedToolbar() {
       {/* History */}
       <div className="advanced-editor-toolbar-group">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => commands.undo()}
           disabled={!activeStates.canUndo}
@@ -191,7 +191,7 @@ function AdvancedToolbar() {
         </Button>
 
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => commands.redo()}
           disabled={!activeStates.canRedo}
@@ -246,7 +246,7 @@ function AdvancedFeaturesExampleInner() {
       <div className="flex gap-3">
         <Dialog open={htmlDialogOpen} onOpenChange={setHtmlDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline" onClick={handleExportHtml}>
+            <Button size="sm" variant="ghost" onClick={handleExportHtml}>
               Export HTML
             </Button>
           </DialogTrigger>

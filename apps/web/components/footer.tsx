@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button"
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
-      <div className="container py-8 md:py-12">
+      <div className=" py-8 p-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-3">

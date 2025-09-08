@@ -46,7 +46,7 @@ export function DocsSidebar({
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
                           isActive
-                            ? "bg-primary text-primary-foreground font-medium"
+                            ? "bg-secondary border border-border  font-medium"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         )}
                         onClick={isMobile ? onClose : undefined}

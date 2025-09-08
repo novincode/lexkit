@@ -30,19 +30,13 @@ export function TopNavigation({
       <div className="px-4 flex h-16 items-center">
         {/* Before children (mobile) */}
         {beforeChildren && (
-          <div className="md:hidden mr-2">
+          <div className="md:hidden mr-4">
             {beforeChildren}
           </div>
         )}
 
 
 
-        {/* Before children (desktop) */}
-        {beforeChildren && (
-          <div className="hidden md:flex mr-2">
-            {beforeChildren}
-          </div>
-        )}
 
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
@@ -103,20 +97,15 @@ export function TopNavigation({
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden mr-2"
+              className="md:hidden mr-2 h-auto size-10"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
             </Button>
           )}
           <ThemeToggle />
 
-          {/* After children (desktop) */}
-          {afterChildren && (
-            <div className="hidden md:flex ml-2">
-              {afterChildren}
-            </div>
-          )}
+       
         </div>
       </div>
 
