@@ -1,6 +1,7 @@
 'use client'
 
 import React from "react"
+import Link from "next/link"
 import { DynamicCodeExample } from "../components/dynamic-code-example"
 import { BasicEditorExample } from "./examples/BasicEditorExample"
 import { AdvancedFeaturesExample } from "./examples/AdvancedFeaturesExample"
@@ -189,39 +190,31 @@ Ready to try it? Pick your package manager above and let's build something amazi
           </div>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-muted rounded-lg mt-1">
-                <BookOpen className="h-5 w-5 text-primary" />
-              </div>
-              <div className="space-y-3">
-                <h4 className="font-semibold">A Developer&apos;s Journey with Rich Text Editors</h4>
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>
-                    As a developer who&apos;s always valued clean, maintainable code, I found rich text editors
-                    to be one of the most challenging areas to work with. Complex APIs, inconsistent behaviors,
-                    and endless edge cases made building reliable editors feel like an uphill battle.
-                  </p>
-                  <p>
-                    That&apos;s why I built LexKit — a clean, type-safe abstraction on top of Meta&apos;s Lexical
-                    that makes rich text editing approachable and enjoyable. It&apos;s designed to eliminate
-                    the frustration and let you focus on building great user experiences.
-                  </p>
-                  <p>
-                    <strong>Your support means everything to me.</strong> Whether it&apos;s starring the repo,
-                    reporting bugs, suggesting features, or contributing code — every bit helps keep this
-                    project alive and growing. As an independent developer, your engagement directly impacts
-                    what I can build and maintain.
-                  </p>
-                  <p className="font-medium text-foreground">
-                    Ready to try it? Pick your package manager above and let&apos;s build something amazing together! 🚀
-                  </p>
-                </div>
-              </div>
+        <div className="bg-muted/50 rounded-lg p-6 text-center space-y-4">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-lg">Brought to you with ❤️</h4>
+            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              LexKit is free, open-source software built by developers, for developers.
+              Your support keeps this project alive — whether it's a GitHub star, bug report,
+              feature suggestion, or a small donation. Every contribution helps maintain and improve LexKit for everyone.
+            </p>
+            <div className="flex items-center justify-center gap-6 pt-2">
+              <a
+                href="https://github.com/novincode/lexkit"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                ⭐ Star on GitHub
+              </a>
+              <span className="text-muted-foreground">•</span>
+              <a
+                href="#"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                💝 Support the project
+              </a>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Examples Section */}
@@ -268,25 +261,43 @@ Ready to try it? Pick your package manager above and let's build something amazi
         </div>
       </div>
 
-      {/* Call to Action */}
+      {/* Navigation Links */}
       <Card>
-        <CardContent className="relative text-center py-12 space-y-6">
+        <CardContent className="text-center py-12 space-y-6">
           <div className="space-y-3">
-            <h3 className="text-2xl font-bold">Ready to ship rich text features faster?</h3>
+            <h3 className="text-2xl font-bold">Continue your journey</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Build better editors with less code. Try it now.
+              Ready to build something amazing? Explore our documentation and examples.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Badge variant="outline" asChild>
-              <a href="/docs/getting-started">📚 Documentation</a>
-            </Badge>
-            <Badge variant="outline" asChild>
-              <a href="/docs/api-reference">🔧 API Reference</a>
-            </Badge>
-            <Badge variant="outline" asChild>
-              <a href="https://github.com/novincode/lexkit">⭐ GitHub</a>
-            </Badge>
+          <div className="flex items-center justify-center gap-6 flex-wrap">
+            <Link
+              href="/docs/getting-started"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+            >
+              🚀 Quick Start
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link
+              href="/docs/extensions"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+            >
+              🧩 Extensions
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link
+              href="/docs/examples"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+            >
+              💡 Examples
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link
+              href="https://github.com/novincode/lexkit"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+            >
+              ⭐ GitHub
+            </Link>
           </div>
         </CardContent>
       </Card>

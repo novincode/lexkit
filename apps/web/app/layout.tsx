@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono,Fira_Code } from "next/font/google"
 
 import "@repo/ui/globals.css"
 import { Providers } from "@/components/providers"
@@ -12,6 +12,10 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+const fontFira = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-mono",
+})
 
 export default function RootLayout({
   children,
@@ -21,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
+        className={`${fontSans.variable} ${fontMono.variable} font-sans ${fontFira.className} antialiased`}
       >
         <Providers>
           <div className="flex min-h-screen flex-col">

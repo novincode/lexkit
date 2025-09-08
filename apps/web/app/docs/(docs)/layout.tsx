@@ -1,10 +1,8 @@
-import { Inter } from 'next/font/google'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@repo/ui/components/sidebar"
 import { DocsSidebar } from "./components/docs-sidebar"
 import "./docs.css"
 import "./styles/prism.css"
 
-const inter = Inter({ subsets: ['latin'] })
 
 export default function DocsLayout({
   children,
@@ -12,7 +10,7 @@ export default function DocsLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className={inter.className}>
+    <div >
       <SidebarProvider defaultOpen={true}>
         <DocsSidebar />
         <SidebarInset>
