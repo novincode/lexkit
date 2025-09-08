@@ -1,29 +1,59 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
-import { Github, ExternalLink, Menu } from "lucide-react"
+import { Github, ExternalLink, Menu, X } from "lucide-react"
 import { Button } from "@repo/ui/components/button"
 import { ThemeToggle } from "./theme-toggle"
 import { useState } from "react"
 import { cn } from "@repo/ui/lib/utils"
-import { SidebarTrigger } from "@repo/ui/components/sidebar"
 
-export function TopNavigation() {
+interface TopNavigationProps {
+  className?: string
+  children?: React.ReactNode
+  beforeChildren?: React.ReactNode
+  afterChildren?: React.ReactNode
+  showMobileMenu?: boolean
+}
+
+export function TopNavigation({
+  className,
+  children,
+  beforeChildren,
+  afterChildren,
+  showMobileMenu = true
+}: TopNavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className=" top-0 z-50 w-full border-b bg-background">
+    <header className={cn(" z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
       <div className="px-4 flex h-16 items-center">
-        <SidebarTrigger className="md:hidden mr-2" />
+        {/* Before children (mobile) */}
+        {beforeChildren && (
+          <div className="md:hidden mr-2">
+            {beforeChildren}
+          </div>
+        )}
+
+
+
+        {/* Before children (desktop) */}
+        {beforeChildren && (
+          <div className="hidden md:flex mr-2">
+            {beforeChildren}
+          </div>
+        )}
+
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">L</span>
+              <span className="text-primary-foreground font-extralight text-xl">L</span>
             </div>
             <span className="font-bold text-xl">LexKit</span>
           </Link>
         </div>
+
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
@@ -58,8 +88,8 @@ export function TopNavigation() {
         {/* Right Side */}
         <div className="ml-auto flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild className="hidden md:flex">
-            <Link 
-              href="https://github.com/novincode/lexkit" 
+            <Link
+              href="https://github.com/novincode/lexkit"
               target="_blank"
               className="flex items-center gap-2"
             >
@@ -67,25 +97,33 @@ export function TopNavigation() {
               GitHub
             </Link>
           </Button>
-          
-          <ThemeToggle />
-          
+
           {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
+          {showMobileMenu && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden mr-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </Button>
+          )}
+          <ThemeToggle />
+
+          {/* After children (desktop) */}
+          {afterChildren && (
+            <div className="hidden md:flex ml-2">
+              {afterChildren}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden border-t">
-          <nav className="container py-4 space-y-3">
+        <div className="md:hidden border-t bg-background">
+          <nav className="px-4 py-4 space-y-3">
             <Link
               href="/docs"
               className="block text-foreground/60 hover:text-foreground transition-colors"
@@ -123,6 +161,13 @@ export function TopNavigation() {
             >
               GitHub
             </Link>
+
+            {/* After children (mobile) */}
+            {afterChildren && (
+              <div className="md:hidden pt-2 border-t">
+                {afterChildren}
+              </div>
+            )}
           </nav>
         </div>
       )}

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ta
 import { Button } from "@repo/ui/components/button"
 import { ScrollArea } from "@repo/ui/components/scroll-area"
 import { cn } from "@repo/ui/lib/utils"
-import { getRawCode, getHighlightedCode } from "../../../../lib/generated/code-registry"
+import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry"
 import { Copy, Check } from "lucide-react"
 
 interface DynamicCodeExampleProps {

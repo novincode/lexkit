@@ -2,17 +2,17 @@
 
 import React from "react"
 import Link from "next/link"
-import { DynamicCodeExample } from "../components/dynamic-code-example"
-import { BasicEditorExample } from "./examples/BasicEditorExample"
-import { AdvancedFeaturesExample } from "./examples/AdvancedFeaturesExample"
-import { ThemedEditorExample } from "./examples/ThemedEditorExample"
-import { TailwindBasedExample } from "./examples/TailwindBasedExample"
+import { BasicEditorExample } from "../../examples/BasicEditorExample"
+import { AdvancedFeaturesExample } from "../../examples/AdvancedFeaturesExample"
+import { ThemedEditorExample } from "../../examples/ThemedEditorExample"
+import { TailwindBasedExample } from "../../examples/TailwindBasedExample"
 import { DefaultTemplate, DefaultTemplateRef } from "../../../templates/default/DefaultTemplate"
 import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { CheckCircle, Zap, Palette, Code2, Download, Play, Shield, Puzzle, Rocket, Github, BookOpen } from "lucide-react"
 import { Button } from "@repo/ui/components/button"
 import { InstallCommand } from "@/components/install-command"
+import { DynamicCodeExample } from "../../components/dynamic-code-example"
 
 export default function IntroductionPage() {
   const editorRef = React.useRef<DefaultTemplateRef>(null);
