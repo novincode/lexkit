@@ -2,7 +2,7 @@
 
 // Basic Editor Example - Getting Started
 // This is the simplest LexKit editor with essential text formatting
-import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText, defaultLexKitTheme } from "@lexkit/editor"
+import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText } from "@lexkit/editor"
 import "./basic-editor.css"
 
 // 1. Define your extensions (as const for type safety)
@@ -93,7 +93,6 @@ export function BasicEditorExample() {
   return (
     <Provider 
       extensions={extensions}
-      config={{ theme: defaultLexKitTheme }}
     >
       <Editor />
     </Provider>

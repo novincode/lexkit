@@ -1,4 +1,4 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_NORMAL, COMMAND_PRIORITY_EDITOR, KEY_ENTER_COMMAND, INSERT_PARAGRAPH_COMMAND } from 'lexical';
 import { $setBlocksType } from '@lexical/selection'; // Key import!
 import { $createParagraphNode, $isParagraphNode, ParagraphNode } from 'lexical';
 import { $createHeadingNode, $isHeadingNode, HeadingNode, HeadingTagType } from '@lexical/rich-text';
@@ -24,6 +24,8 @@ export type BlockFormatCommands = {
   toggleHeading: (tag: HeadingTagType) => void;
   /** Toggle to quote format */
   toggleQuote: () => void;
+  /** Get the current block type as a string ('p', 'h1', 'h2', etc.) */
+  getCurrentBlockType: () => BlockFormat;
 };
 
 /**
@@ -88,8 +90,58 @@ export class BlockFormatExtension extends BaseExtension<
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
-    // No custom commands to register; we use editor.update for changes
-    return () => {};
+    // Register INSERT_PARAGRAPH_COMMAND to handle transitions from headings/quotes
+    const unregisterParagraph = editor.registerCommand(
+      INSERT_PARAGRAPH_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode();
+          const blockNode = this.getBlockNode(anchorNode);
+
+          // If we're in a heading or quote, ensure we create a proper paragraph
+          if (blockNode && ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))) {
+            // Let the default INSERT_PARAGRAPH_COMMAND run, but ensure proper state
+            return false; // Allow default behavior but we'll modify the result
+          }
+        }
+
+        return false; // Allow default behavior for other cases
+      },
+      COMMAND_PRIORITY_NORMAL
+    );
+
+    // Also register KEY_ENTER_COMMAND with higher priority to prevent conflicts
+    const unregisterEnter = editor.registerCommand(
+      KEY_ENTER_COMMAND,
+      (event: KeyboardEvent | null) => {
+        // If Shift+Enter, let default behavior handle line breaks
+        if (event && event.shiftKey) {
+          return false;
+        }
+
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode();
+          const blockNode = this.getBlockNode(anchorNode);
+
+          // If we're in a heading or quote, handle the transition
+          if (blockNode && ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))) {
+            // Use the proper toggleParagraph command instead of manual insertion
+            this.toggleBlockFormat(editor, 'p');
+            return true; // Prevent default behavior
+          }
+        }
+
+        return false; // Let default behavior handle other cases
+      },
+      COMMAND_PRIORITY_EDITOR // Highest priority to override other handlers
+    );
+
+    return () => {
+      unregisterParagraph();
+      unregisterEnter();
+    };
   }
 
   /**
@@ -111,6 +163,7 @@ export class BlockFormatExtension extends BaseExtension<
       toggleParagraph: () => this.toggleBlockFormat(editor, 'p'),
       toggleHeading: (tag: HeadingTagType) => this.toggleBlockFormat(editor, tag),
       toggleQuote: () => this.toggleBlockFormat(editor, 'quote'),
+      getCurrentBlockType: () => this.getCurrentFormat(editor) || 'p',
     };
   }
 

@@ -1,21 +1,35 @@
 /* LexKit Editor - Clean Framework-Agnostic Styles */
 
-/* CSS Variables for Theme */
+/* CSS Variables for Theme - Auto-sync with Next.js theme */
 :root {
-  --lexkit-bg: #ffffff;
-  --lexkit-fg: #374151;
-  --lexkit-border: #d1d5db;
-  --lexkit-border-hover: #9ca3af;
-  --lexkit-border-active: #6b7280;
-  --lexkit-accent: #3b82f6;
-  --lexkit-accent-hover: #1d4ed8;
+  --lexkit-bg: var(--background);
+  --lexkit-fg: var(--foreground);
+  --lexkit-border: var(--border);
+  --lexkit-border-hover: var(--border);
+  --lexkit-border-active: var(--ring);
+  --lexkit-accent: var(--primary);
+  --lexkit-accent-hover: var(--primary);
   --lexkit-shadow: rgba(0, 0, 0, 0.1);
-  --lexkit-muted: #f9fafb;
-  --lexkit-muted-fg: #6b7280;
+  --lexkit-muted: var(--muted);
+  --lexkit-muted-fg: var(--muted-foreground);
 }
 
-/* Dark Mode */
+/* Dark Mode - Auto-sync with Next.js dark theme */
 [data-theme="dark"] {
+  --lexkit-bg: var(--background);
+  --lexkit-fg: var(--foreground);
+  --lexkit-border: var(--border);
+  --lexkit-border-hover: var(--border);
+  --lexkit-border-active: var(--ring);
+  --lexkit-accent: var(--primary);
+  --lexkit-accent-hover: var(--primary);
+  --lexkit-shadow: rgba(0, 0, 0, 0.3);
+  --lexkit-muted: var(--muted);
+  --lexkit-muted-fg: var(--muted-foreground);
+}
+
+/* Editor-specific theme overrides */
+.lexkit-editor-wrapper[data-editor-theme="dark"] {
   --lexkit-bg: #1f2937;
   --lexkit-fg: #f9fafb;
   --lexkit-border: #374151;
@@ -26,6 +40,19 @@
   --lexkit-shadow: rgba(0, 0, 0, 0.3);
   --lexkit-muted: #374151;
   --lexkit-muted-fg: #9ca3af;
+}
+
+.lexkit-editor-wrapper[data-editor-theme="light"] {
+  --lexkit-bg: #ffffff;
+  --lexkit-fg: #374151;
+  --lexkit-border: #d1d5db;
+  --lexkit-border-hover: #9ca3af;
+  --lexkit-border-active: #6b7280;
+  --lexkit-accent: #3b82f6;
+  --lexkit-accent-hover: #1d4ed8;
+  --lexkit-shadow: rgba(0, 0, 0, 0.1);
+  --lexkit-muted: #f9fafb;
+  --lexkit-muted-fg: #6b7280;
 }
 
 /* Editor Wrapper */

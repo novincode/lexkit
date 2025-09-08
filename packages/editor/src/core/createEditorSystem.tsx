@@ -3,6 +3,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalEditor, FORMAT_TEXT_COMMAND, PASTE_COMMAND, TextFormatType, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW } from 'lexical';
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
+import { defaultLexKitTheme } from './theme';
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -172,7 +173,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     const initialConfig = useMemo(
       () => ({
         namespace: 'modern-editor',
-        theme: props.config?.theme || {},
+        theme: props.config?.theme || defaultLexKitTheme,
         onError: (error: Error) => {
           console.error('Lexical error:', error);
         },

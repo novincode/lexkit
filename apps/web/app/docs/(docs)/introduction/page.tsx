@@ -188,11 +188,29 @@ export default function IntroductionPage() {
               <div className="p-2 bg-muted rounded-lg mt-1">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">Ready to dive in?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Pick your package manager and copy the command.
-                </p>
+              <div className="space-y-3">
+                <h4 className="font-semibold">A Developer&apos;s Journey with Rich Text Editors</h4>
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p>
+                    As a developer who&apos;s always valued clean, maintainable code, I found rich text editors
+                    to be one of the most challenging areas to work with. Complex APIs, inconsistent behaviors,
+                    and endless edge cases made building reliable editors feel like an uphill battle.
+                  </p>
+                  <p>
+                    That&apos;s why I built LexKit — a clean, type-safe abstraction on top of Meta&apos;s Lexical
+                    that makes rich text editing approachable and enjoyable. It&apos;s designed to eliminate
+                    the frustration and let you focus on building great user experiences.
+                  </p>
+                  <p>
+                    <strong>Your support means everything to me.</strong> Whether it&apos;s starring the repo,
+                    reporting bugs, suggesting features, or contributing code — every bit helps keep this
+                    project alive and growing. As an independent developer, your engagement directly impacts
+                    what I can build and maintain.
+                  </p>
+                  <p className="font-medium text-foreground">
+                    Ready to try it? Pick your package manager above and let&apos;s build something amazing together! 🚀
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>

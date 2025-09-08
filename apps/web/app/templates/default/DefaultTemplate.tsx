@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useTheme } from 'next-themes';
 import { 
   boldExtension, 
   italicExtension, 
@@ -26,7 +27,6 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
 import { ImageNode } from '@lexkit/editor/extensions/media';
-import { defaultTheme } from './theme';
 import './styles.css';
 import { 
   Bold, 
@@ -856,7 +856,17 @@ interface DefaultTemplateProps {
 }
 
 export function DefaultTemplate({ className }: DefaultTemplateProps) {
-  const [isDark, setIsDark] = useState(false);
+  const { theme: globalTheme } = useTheme();
+  const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
+
+  // Initialize editor theme from global theme on mount
+  useEffect(() => {
+    if (globalTheme === 'dark' || globalTheme === 'light') {
+      setEditorTheme(globalTheme);
+    }
+  }, [globalTheme]);
+
+  const isDark = editorTheme === 'dark';
 
   // Configure image extension
   useEffect(() => {
@@ -874,12 +884,12 @@ export function DefaultTemplate({ className }: DefaultTemplateProps) {
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setEditorTheme(isDark ? 'light' : 'dark');
   };
 
   return (
-    <div className={`lexkit-editor-wrapper ${className || ''}`}>
-      <Provider extensions={extensions} config={{ theme: defaultTheme }}>
+    <div className={`lexkit-editor-wrapper ${className || ''}`} data-editor-theme={editorTheme}>
+      <Provider extensions={extensions}>
         <EditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} />
       </Provider>
     </div>
