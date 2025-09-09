@@ -99,8 +99,8 @@ export function TopNavigation({
               className={cn(
                 "flex items-center gap-1 transition-colors",
                 isActive(item)
-                  ? "text-primary underline underline-offset-4 font-semibold"
-                  : "text-foreground/60 hover:text-foreground"
+                  ? "text-primary underline  underline-offset-4 "
+                  : "text-foreground/60 hover:text-foreground font-light"
               )}
             >
               {item.label}
