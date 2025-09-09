@@ -15,7 +15,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="sm"
-      className="md:hidden mr-2 h-auto size-10"
+      className=" mr-2 h-auto size-10"
       onClick={toggleTheme}
       title="Toggle theme"
     >
