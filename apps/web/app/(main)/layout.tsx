@@ -16,12 +16,10 @@ export default function DocsLayoutClient({ children }: Props) {
 
 
 
-                {/* Main Content */}
-                <div className="flex-1 overflow-y-auto">
-                    <main className="p-4 md:p-8 lg:p-12 max-w-full mx-auto">
-                        {children}
-                    </main>
-                </div>
+            {/* Main Content */}
+            <div className="flex-1 ">
+                {children}
+            </div>
 
             <Footer />
         </div>

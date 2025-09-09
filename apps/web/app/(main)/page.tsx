@@ -1,12 +1,6 @@
 import React from 'react'
+import { HomePageClient } from './page.client'
 
-const page = () => {
-  return (
-    <div>
-      Docs Will be here soon. 
-      
-    </div>
-  )
+export default function HomePage() {
+  return <HomePageClient />
 }
-
-export default page

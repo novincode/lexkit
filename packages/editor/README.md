@@ -2,7 +2,12 @@
 
 <div align="center">
 
-**A headless, extensible rich text editor built on Lexical**  
+**A headless, ### ✅ **Production Ready for React**
+- **Battle-tested in React production** - Comprehensive documentation, examples, and active community support
+- **Multi-format support** (HTML, Markdown, JSON)
+- **Image handling** with upload and paste support
+- **Undo/Redo** with full history
+- **Theme system** for consistent stylinge React rich text editor built on Lexical**  
 *Type-safe • Scalable • Production-ready*
 
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://badge.fury.io/js/%40lexkit%2Feditor)
@@ -16,7 +21,10 @@
 
 ## ✨ What Makes LexKit Special
 
-LexKit is not just another rich text editor—it's a **type-safe framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
+LexKit is not just anothe### ✅ **React Developer Experience**
+- Commands and state queries are **automatically typed** based on your extensions
+- No more runtime errors from typos in command names
+- Full IntelliSense support in your IDEch text editor—it's a **type-safe React framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
 
 ### 🎯 **Type-Safe Commands & State**
 Commands and state queries are **automatically typed** based on your extensions:
@@ -41,7 +49,8 @@ function MyEditor() {
 
 **Why `as const`?** It's required for TypeScript to infer literal types from your extensions array, enabling the powerful type safety features.
 
-### 🧩 **Truly Headless & Composable**
+### 🎨 **React-First Design**
+- **Purpose-built for React** - Modern hooks and components
 - **Zero UI components** - Build your own interface
 - **Plug-and-play extensions** - Mix and match functionality
 - **Custom nodes support** - Add any content type
@@ -665,9 +674,9 @@ For quick prototyping, use inline styles as shown in the example above.
 
 ---
 
-## 🔧 Built on Lexical
+## 🔧 Built on Lexical for React
 
-LexKit is built on top of [Lexical](https://lexical.dev/), the powerful editor framework by Meta. This gives you:
+LexKit is built on top of [Lexical](https://lexical.dev/), the powerful editor framework by Meta, specifically optimized for React development. This gives you:
 
 - **Performance**: Virtual DOM-based rendering
 - **Accessibility**: Full keyboard navigation and screen reader support
@@ -703,7 +712,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 - **Theme system** for consistent styling
 
 ### ✅ **Developer Experience**
-- **Zero-config setup** for basic usage
+- **Zero-config setup** for React projects
 - **Tree-shakeable** - Only bundle what you use
 - **TypeScript first** - Full type safety
 - **Comprehensive docs** and examples
