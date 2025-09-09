@@ -31,9 +31,11 @@ export function DocsLayoutClient({ children }: DocsLayoutClientProps) {
         }
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 ">
         {/* Desktop Sidebar */}
-        <DocsSidebar className="hidden lg:flex sticky w-64 border-r top-16 bottom-0 max-h-[calc(100vh-64px)] overflow-y-auto" />
+        <div className="hidden max-h-[calc(100vh-64px)] top-[64px]  sticky  lg:flex lg:flex-col lg:w-64 lg:border-r lg:bg-background">
+          <DocsSidebar />
+        </div>
 
         {/* Mobile Sidebar */}
         <DocsSidebar

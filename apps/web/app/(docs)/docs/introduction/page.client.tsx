@@ -193,7 +193,6 @@ Ready to try it? Pick your package manager above and let's build something amazi
           </p>
         </div>
 
-        <div className="space-y-4 max-w-2xl mx-auto">
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">Install LexKit</h3>
             <InstallCommand packages={["@lexkit/editor"]} />
@@ -204,7 +203,6 @@ Ready to try it? Pick your package manager above and let's build something amazi
             <InstallCommand packages={["lexical", "@lexical/react", "@lexical/html", "@lexical/markdown", "@lexical/list", "@lexical/rich-text", "@lexical/selection", "@lexical/utils"]} />
           </div>
         </div>
-      </div>
 
       {/* Support Section */}
       <div className="bg-muted/50 rounded-lg p-6 space-y-4">
