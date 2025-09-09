@@ -7,6 +7,7 @@ import { Button } from "@repo/ui/components/button"
 import { ThemeToggle } from "./theme-toggle"
 import { useState } from "react"
 import { cn } from "@repo/ui/lib/utils"
+import { usePathname } from "next/navigation"
 
 interface TopNavigationProps {
   className?: string
@@ -16,6 +17,34 @@ interface TopNavigationProps {
   showMobileMenu?: boolean
 }
 
+// Navigation items configuration
+const navigationItems = [
+  {
+    label: "Documentation",
+    href: "/docs",
+    activePaths: ["/docs"],
+    external: false
+  },
+  {
+    label: "Demo",
+    href: "/demo",
+    activePaths: ["/demo"],
+    external: false
+  },
+  {
+    label: "Templates",
+    href: "/templates",
+    activePaths: ["/templates"],
+    external: false
+  },
+  {
+    label: "Playground",
+    href: "https://stackblitz.com/edit/vitejs-vite-bpg2kpze",
+    activePaths: [],
+    external: true
+  }
+]
+
 export function TopNavigation({
   className,
   children,
@@ -24,6 +53,21 @@ export function TopNavigation({
   showMobileMenu = true
 }: TopNavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Helper function to check if a navigation item is active
+  const isActive = (item: typeof navigationItems[0]) => {
+    if (item.external) return false
+
+    // Check if current path matches any of the active paths
+    return item.activePaths.some(activePath => {
+      if (activePath === "/docs") {
+        // Special case for docs - any path starting with /docs should be active
+        return pathname.startsWith("/docs")
+      }
+      return pathname === activePath || pathname.startsWith(activePath + "/")
+    })
+  }
 
   return (
     <header className={cn(" z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
@@ -35,9 +79,6 @@ export function TopNavigation({
           </div>
         )}
 
-
-
-
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">
@@ -48,35 +89,24 @@ export function TopNavigation({
           </Link>
         </div>
 
-
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6 text-md tracking-wide font-medium">
-          <Link
-            href="/docs"
-            className="text-foreground/60 hover:text-foreground transition-colors"
-          >
-            Documentation
-          </Link>
-          <Link
-            href="/demo"
-            className="text-foreground/60 hover:text-foreground transition-colors"
-          >
-            Demo
-          </Link>
-          <Link
-            href="/templates"
-            className="text-foreground/60 hover:text-foreground transition-colors"
-          >
-            Templates
-          </Link>
-          <Link
-            href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze"
-            target="_blank"
-            className="text-foreground/60 hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            Playground
-            <ExternalLink className="h-3 w-3" />
-          </Link>
+          {navigationItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              className={cn(
+                "flex items-center gap-1 transition-colors",
+                isActive(item)
+                  ? "text-primary underline underline-offset-4 font-semibold"
+                  : "text-foreground/60 hover:text-foreground"
+              )}
+            >
+              {item.label}
+              {item.external && <ExternalLink className="h-3 w-3" />}
+            </Link>
+          ))}
         </nav>
 
         {/* Right Side */}
@@ -104,8 +134,6 @@ export function TopNavigation({
             </Button>
           )}
           <ThemeToggle />
-
-       
         </div>
       </div>
 
@@ -113,39 +141,27 @@ export function TopNavigation({
       {isMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <nav className="px-4 py-4 space-y-3">
-            <Link
-              href="/docs"
-              className="block text-foreground/60 hover:text-foreground transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Documentation
-            </Link>
-            <Link
-              href="/demo"
-              className="block text-foreground/60 hover:text-foreground transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Demo
-            </Link>
-            <Link
-              href="/templates"
-              className="block text-foreground/60 hover:text-foreground transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Templates
-            </Link>
-            <Link
-              href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze"
-              target="_blank"
-              className="block text-foreground/60 hover:text-foreground transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Playground
-            </Link>
+            {navigationItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                className={cn(
+                  "flex items-center gap-1 transition-colors",
+                  isActive(item)
+                    ? "text-primary font-semibold"
+                    : "text-foreground/60 hover:text-foreground"
+                )}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+                {item.external && <ExternalLink className="h-3 w-3" />}
+              </Link>
+            ))}
             <Link
               href="https://github.com/novincode/lexkit"
               target="_blank"
-              className="block text-foreground/60 hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-foreground/60 hover:text-foreground transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               GitHub
