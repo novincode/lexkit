@@ -6,7 +6,7 @@ import { BasicEditorExample } from "../../examples/BasicEditorExample"
 import { AdvancedFeaturesExample } from "../../examples/AdvancedFeaturesExample"
 import { ThemedEditorExample } from "../../examples/ThemedEditorExample"
 import { TailwindBasedExample } from "../../examples/TailwindBasedExample"
-import { DefaultTemplate, DefaultTemplateRef } from "../../../templates/default/DefaultTemplate"
+import { DefaultTemplate, DefaultTemplateRef } from "@/components/templates/default/DefaultTemplate"
 import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { CheckCircle, Zap, Palette, Play, Shield, Puzzle, Rocket, Github, BookOpen } from "lucide-react"
@@ -242,7 +242,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
 
         <div className="space-y-12">
           <DynamicCodeExample
-            codes={['BasicEditorExample.tsx', 'basic-editor.css']}
+            codes={['examples/BasicEditorExample.tsx', 'examples/basic-editor.css']}
             title="1. Basic Editor"
             description="Basic text formatting: bold, italic, lists."
             preview={<BasicEditorExample />}
@@ -250,7 +250,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
           />
 
           <DynamicCodeExample
-            codes={['ThemedEditorExample.tsx', 'themed-editor.css']}
+            codes={['examples/ThemedEditorExample.tsx', 'examples/themed-editor.css']}
             title="2. Themed Editor"
             description="Custom themes and styling."
             preview={<ThemedEditorExample />}
@@ -258,7 +258,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
           />
 
           <DynamicCodeExample
-            codes={['AdvancedFeaturesExample.tsx', 'advanced-editor.css']}
+            codes={['examples/AdvancedFeaturesExample.tsx', 'examples/advanced-editor.css']}
             title="3. Advanced Features"
             description="Tables, images, exports, and more."
             preview={<AdvancedFeaturesExample />}
@@ -266,7 +266,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
           />
 
           <DynamicCodeExample
-            codes={['TailwindBasedExample.tsx']}
+            codes={['examples/TailwindBasedExample.tsx']}
             title="4. Tailwind Theming"
             description="Pure Tailwind CSS styling — no custom CSS files."
             preview={<TailwindBasedExample />}

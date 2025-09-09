@@ -165,7 +165,7 @@ export function InstallationPageClient() {
         </div>
 
         <DynamicCodeExample
-          codes={['BasicEditorExample.tsx']}
+          codes={['examples/BasicEditorExample.tsx']}
           title="Your First LexKit Editor"
           description="A simple editor with basic formatting capabilities."
           preview={<BasicEditorExample />}

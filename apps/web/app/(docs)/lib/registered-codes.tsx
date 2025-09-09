@@ -207,6 +207,34 @@ function MyEditor() {
     highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 19]
   },
   {
+    id: 'base-extension-state-queries',
+    code: `getStateQueries(editor: LexicalEditor): TestStateQueries {
+  return {
+    hasSelection: async () => {
+      return new Promise(resolve => {
+        editor.read(() => {
+          const selection = $getSelection();
+          resolve($isRangeSelection(selection) && !selection.isCollapsed());
+        });
+      });
+    },
+
+    isEmpty: async () => {
+      return new Promise(resolve => {
+        editor.read(() => {
+          const root = $getRoot();
+          resolve(!root.getTextContent().trim());
+        });
+      });
+    }
+  };
+}`,
+    language: 'typescript',
+    title: 'BaseExtension State Queries',
+    description: 'Implement getStateQueries method for BaseExtension',
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+  },
+  {
     id: 'use-extension-commands',
     code: `function MyEditor() {
   const { commands, stateQueries } = useEditor()

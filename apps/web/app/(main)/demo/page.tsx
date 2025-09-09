@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { DefaultTemplate } from '../templates/default/DefaultTemplate'
+import { DefaultTemplate } from '@/components/templates/default/DefaultTemplate'
 
 const page = () => {
   return (
