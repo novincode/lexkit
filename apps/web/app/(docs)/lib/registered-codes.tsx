@@ -122,6 +122,178 @@ function MyEditor() {
     title: 'Use Extensions',
     description: 'Configure editor with custom extensions',
     highlightLines: [3, 4, 5]
+  },
+  {
+    id: 'test-extension-definition',
+    code: `import React from 'react';
+import { createExtension } from '@lexkit/editor';
+import { ExtensionCategory } from '@lexkit/editor/extensions/types';
+import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot } from 'lexical';
+
+// Define the commands interface
+type TestCommands = {
+  insertTimestamp: () => void;
+  clearContent: () => void;
+  getWordCount: () => number;
+};
+
+// Define the state queries interface
+type TestStateQueries = {
+  hasSelection: () => Promise<boolean>;
+  isEmpty: () => Promise<boolean>;
+};
+
+// Create the extension using the new createExtension function
+const TestExtension = createExtension<'test-extension', {}, TestCommands, TestStateQueries, React.ReactNode[]>({
+  name: 'test-extension',
+  category: [ExtensionCategory.Toolbar],
+
+  // Define commands
+  commands: (editor) => ({
+    insertTimestamp: () => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const timestamp = new Date().toLocaleString();
+          selection.insertText(timestamp);
+        }
+      });
+    },
+
+    clearContent: () => {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+      });
+    },
+
+    getWordCount: () => {
+      // This would need to be implemented based on editor content
+      return 42; // Placeholder
+    }
+  }),
+
+  // Define state queries
+  stateQueries: (editor) => ({
+    hasSelection: async () => {
+      return new Promise((resolve) => {
+        editor.read(() => {
+          const selection = $getSelection();
+          resolve($isRangeSelection(selection) && !selection.isCollapsed());
+        });
+      });
+    },
+
+    isEmpty: async () => {
+      return new Promise((resolve) => {
+        editor.read(() => {
+          const root = $getRoot();
+          resolve(!root.getTextContent().trim());
+        });
+      });
+    }
+  }),
+
+  // Initialize function (optional)
+  initialize: (editor) => {
+    console.log('TestExtension initialized!');
+
+    // Return cleanup function
+    return () => {
+      console.log('TestExtension cleaned up!');
+    };
+  }
+});
+
+export { TestExtension };`,
+    language: 'tsx',
+    title: 'TestExtension Definition',
+    description: 'Complete TestExtension implementation with commands, state queries, and initialization',
+    highlightLines: [18, 24, 46, 62]
+  },
+  {
+    id: 'basic-editor-with-extension',
+    code: `'use client'
+
+import React, { useState, useEffect } from 'react';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
+import { TestExtension } from './TestExtension';
+
+// Define the extensions array
+const extensions = [TestExtension] as const;
+
+// Create the editor system
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+
+// Toolbar component
+function Toolbar() {
+  const { commands, activeStates } = useEditor();
+
+  return (
+    <div className="basic-toolbar">
+      <button
+        onClick={() => commands.insertTimestamp()}
+        disabled={!activeStates.hasSelection}
+      >
+        Insert Timestamp
+      </button>
+      <button onClick={() => commands.clearContent()}>
+        Clear Content
+      </button>
+      <button onClick={() => alert(\`Word count: \${commands.getWordCount()}\`)}>
+        Get Word Count
+      </button>
+    </div>
+  );
+}
+
+// Editor content component
+function EditorContent() {
+  const [editorState, setEditorState] = useState<string>('');
+
+  const onChange = (editorState: any) => {
+    setEditorState(JSON.stringify(editorState.toJSON()));
+  };
+
+  return (
+    <div className="basic-editor">
+      <Toolbar />
+      <RichTextPlugin
+        contentEditable={<ContentEditable className="basic-content" />}
+        placeholder={<div className="basic-placeholder">Start typing...</div>}
+        ErrorBoundary={() => <div>Error occurred</div>}
+      />
+      <OnChangePlugin onChange={onChange} />
+      <HistoryPlugin />
+    </div>
+  );
+}
+
+// Main component
+export default function BasicEditorWithCustomExtension() {
+  const initialConfig = {
+    namespace: 'basic-editor',
+    theme: {},
+    onError: (error: Error) => console.error(error),
+  };
+
+  return (
+    <LexicalComposer initialConfig={initialConfig}>
+      <Provider extensions={extensions}>
+        <EditorContent />
+      </Provider>
+    </LexicalComposer>
+  );
+}`,
+    language: 'tsx',
+    title: 'Basic Editor with Custom Extension',
+    description: 'Complete example of using a custom extension in an editor',
+    highlightLines: [13, 16, 19, 24, 29, 32]
   }
 ]
 

@@ -9,7 +9,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalEditor } from 'lexical';
 import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
 import { TestExtension } from './TestExtension';
-import '../../examples/basic-editor.css'; // Reuse the basic editor CSS
+import '../../../examples/basic-editor.css'; // Reuse the basic editor CSS
 
 // Define the extensions array
 const extensions = [TestExtension] as const;

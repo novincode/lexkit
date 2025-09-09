@@ -20,7 +20,7 @@ class CodeRegistryGenerator {
   private outputDir: string
 
   constructor() {
-    this.examplesDir = path.resolve(process.cwd(), 'app/(docs)/examples')
+    this.examplesDir = path.resolve(process.cwd(), 'app/(docs)')
     this.outputDir = path.resolve(process.cwd(), 'lib/generated')
   }
 
@@ -36,19 +36,44 @@ class CodeRegistryGenerator {
   /**
    * Scan and discover all code files
    */
-  private discoverFiles(): string[] {
-    const files = fs.readdirSync(this.examplesDir)
-    return files.filter(file => {
-      const ext = path.extname(file)
-      return ext === '.tsx' || ext === '.css'
-    })
+  private discoverFiles(): Array<{ relativePath: string; fullPath: string }> {
+    const files: Array<{ relativePath: string; fullPath: string }> = []
+    
+    const scanDirectory = (dirPath: string, relativePath: string = '') => {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name)
+        const entryRelativePath = path.join(relativePath, entry.name)
+        
+        if (entry.isDirectory()) {
+          // Only scan directories named "examples"
+          if (entry.name === 'examples') {
+            scanDirectory(fullPath, entryRelativePath)
+          } else {
+            // Recursively scan other directories to find "examples" folders
+            scanDirectory(fullPath, entryRelativePath)
+          }
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name)
+          if ((ext === '.tsx' || ext === '.css') && relativePath.includes('examples')) {
+            files.push({
+              relativePath: entryRelativePath,
+              fullPath
+            })
+          }
+        }
+      }
+    }
+    
+    scanDirectory(this.examplesDir)
+    return files
   }
 
   /**
    * Process code file with Shiki
    */
-  private async processCodeFile(filePath: string, language: string, highlightLines?: number[]): Promise<string> {
-    const fullPath = path.resolve(this.examplesDir, filePath)
+  private async processCodeFile(fullPath: string, language: string, highlightLines?: number[]): Promise<string> {
     const content = fs.readFileSync(fullPath, 'utf-8')
 
     return await codeToHtml(content, {
@@ -102,16 +127,15 @@ class CodeRegistryGenerator {
 
     // Process file-based examples
     for (const file of files) {
-      console.log(`⚙️  Processing ${file}...`)
+      console.log(`⚙️  Processing ${file.relativePath}...`)
 
-      const ext = path.extname(file)
+      const ext = path.extname(file.relativePath)
       const language = ext === '.tsx' ? 'tsx' : 'css'
 
-      const fullPath = path.resolve(this.examplesDir, file)
-      const rawContent = fs.readFileSync(fullPath, 'utf-8')
-      const highlighted = await this.processCodeFile(file, language)
+      const rawContent = fs.readFileSync(file.fullPath, 'utf-8')
+      const highlighted = await this.processCodeFile(file.fullPath, language)
       
-      registry.files[file] = {
+      registry.files[file.relativePath] = {
         raw: rawContent,
         highlighted: highlighted
       }
