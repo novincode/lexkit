@@ -185,7 +185,7 @@ export function GetStartedPageClient() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 md:gap-6 gap-4">
             <div className="space-y-4">
               <h4 className="font-semibold">Explore Examples</h4>
               <p className="text-sm text-muted-foreground">

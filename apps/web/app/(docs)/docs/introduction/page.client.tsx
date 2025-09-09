@@ -72,7 +72,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
         </div>
 
         {/* Modern Step Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 md:gap-6 gap-4">
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <Card className="relative border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-background/50 backdrop-blur-sm">
@@ -134,7 +134,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
       </div>
 
       {/* Features Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 md:gap-6 gap-4">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -215,7 +215,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
             Your support keeps this project alive — whether it's a GitHub star, bug report,
             feature suggestion, or a small donation. Every contribution helps maintain and improve LexKit for everyone.
           </p>
-          <div className="flex items-center gap-6 pt-2">
+          <div className="flex items-center md:gap-6 gap-4 pt-2">
             <a
               href="https://github.com/novincode/lexkit"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
@@ -286,7 +286,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
               Ready to build something amazing? Explore our documentation and examples.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
+          <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
             <Link
               href="/docs/getting-started"
               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"

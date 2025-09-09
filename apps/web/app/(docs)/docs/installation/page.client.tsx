@@ -180,7 +180,7 @@ export function InstallationPageClient() {
           Common issues and their solutions.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 md:gap-6 gap-4">
           <Card className="border-yellow-200 dark:border-yellow-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
@@ -222,7 +222,7 @@ export function InstallationPageClient() {
               Now that LexKit is installed, let's start building amazing editors!
             </p>
           </div>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
+          <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
             <Link
               href="/docs/getting-started"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"

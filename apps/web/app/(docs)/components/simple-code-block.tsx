@@ -61,7 +61,7 @@ export function SimpleCodeBlock({
   showCopy = true
 }: SimpleCodeBlockProps) {
   return (
-    <div className={cn("not-prose my-4 max-w-full", className)}>
+    <div className={cn("not-prose  max-w-full dark", className)}>
       {title && (
         <h4 className="mb-2 text-sm font-medium text-muted-foreground">
           {title}
