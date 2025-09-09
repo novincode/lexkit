@@ -111,7 +111,7 @@ export function DynamicCodeExample({
             <div className="">
               <CopyButton text={codeInfo.raw} />
                 <div
-                  className="w-full overflow-x-scroll"
+                  className="w-full "
                   dangerouslySetInnerHTML={{ __html: codeInfo.highlighted }}
                 />
             </div>

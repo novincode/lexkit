@@ -25,8 +25,8 @@ export const docsConfig: DocsSection[] = [
         description: "How to install and set up LexKit"
       },
       {
-        title: "Quick Start",
-        href: "/docs/quick-start",
+        title: "Get Started",
+        href: "/docs/get-started",
         description: "Get up and running in minutes"
       }
     ]
