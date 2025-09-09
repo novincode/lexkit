@@ -8,11 +8,11 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalEditor } from 'lexical';
 import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
-import { TestExtension } from './TestExtension';
+import { TestBaseExtension } from './TestBaseExtension';
 import '../../../examples/basic-editor.css'; // Reuse the basic editor CSS
 
 // Define the extensions array
-const extensions = [TestExtension] as const;
+const extensions = [TestBaseExtension] as const;
 
 // Create the editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -21,7 +21,7 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 function Toolbar() {
   const { commands, activeStates } = useEditor();
 
-  return ( 
+  return (
     <div className="basic-toolbar">
       <button onClick={() => commands.insertTimestamp()}>
         Insert Timestamp
@@ -59,9 +59,9 @@ function EditorContent() {
 }
 
 // Main component
-export default function BasicEditorWithCustomExtension() {
+export default function BasicEditorWithBaseExtension() {
   const initialConfig = {
-    namespace: 'basic-editor',
+    namespace: 'basic-editor-base',
     theme: {},
     onError: (error: Error) => console.error(error),
   };

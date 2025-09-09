@@ -55,6 +55,11 @@ export const docsConfig: DocsSection[] = [
     title: "Extensions",
     items: [
       {
+        title: "Create Extension",
+        href: "/docs/extensions/create",
+        description: "Create extensions in Lexkit Editor"
+      },
+      {
         title: "Text Formatting",
         href: "/docs/extensions/text-formatting",
         description: "Bold, italic, underline, and more"

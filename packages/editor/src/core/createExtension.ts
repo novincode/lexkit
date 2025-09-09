@@ -120,15 +120,6 @@ export function createExtension<
       // Call the initialize function if provided
       const cleanup = this._initialize?.(editor);
 
-      // Initialize commands and state queries
-      if (config.commands) {
-        this._commands = config.commands(editor);
-      }
-
-      if (config.stateQueries) {
-        this._stateQueries = config.stateQueries(editor);
-      }
-
       // Return cleanup function
       return () => {
         if (typeof cleanup === 'function') {
@@ -146,10 +137,18 @@ export function createExtension<
     }
 
     getCommands(editor: LexicalEditor): Commands {
+      // Initialize commands lazily when first called
+      if (Object.keys(this._commands).length === 0 && config.commands) {
+        this._commands = config.commands(editor);
+      }
       return this._commands;
     }
 
     getStateQueries(editor: LexicalEditor): StateQueries {
+      // Initialize state queries lazily when first called
+      if (Object.keys(this._stateQueries).length === 0 && config.stateQueries) {
+        this._stateQueries = config.stateQueries(editor);
+      }
       return this._stateQueries;
     }
   })();

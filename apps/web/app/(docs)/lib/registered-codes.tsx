@@ -46,135 +46,170 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     description: 'Import the main components'
   },
   {
-    id: 'basic-setup',
+    id: 'basic-editor',
     code: `function MyEditor() {
   return (
     <DefaultTemplate
       onReady={(editor) => {
-        console.log('Editor is ready!')
+        console.log('Editor ready!')
+        // Access editor methods here
+        editor.injectMarkdown('# Hello World')
       }}
     />
   )
 }`,
     language: 'tsx',
-    title: 'Basic Setup',
-    description: 'Create a basic editor component',
-    highlightLines: [3, 4, 5, 6]
+    title: 'Basic Editor Component',
+    description: 'Create a basic editor with ready callback',
+    highlightLines: [3, 4, 5, 6, 7]
   },
   {
-    id: 'with-content',
+    id: 'editor-with-content',
     code: `function MyEditor() {
+  const [content, setContent] = useState('')
+
   const handleReady = (editor) => {
-    editor.injectMarkdown('# Welcome to LexKit!\\n\\nStart writing...')
+    // Load initial content
+    editor.injectMarkdown('# Welcome!\\n\\nStart writing...')
+
+    // Save content on change
+    editor.onChange = (newContent) => {
+      setContent(newContent)
+    }
   }
 
-  return (
-    <DefaultTemplate onReady={handleReady} />
-  )
+  return <DefaultTemplate onReady={handleReady} />
 }`,
     language: 'tsx',
-    title: 'Initialize with Content',
-    description: 'Load initial content into the editor',
-    highlightLines: [3, 4]
+    title: 'Editor with Content Management',
+    description: 'Load and save editor content',
+    highlightLines: [5, 6, 9, 10, 11]
   }
 ]
 
 // Extension examples
 export const EXTENSION_EXAMPLES: RegisteredCodeSnippet[] = [
   {
-    id: 'custom-extension',
+    id: 'create-extension-basic',
     code: `import { createExtension } from '@lexkit/editor'
 
-const MyCustomExtension = createExtension({
+const MyExtension = createExtension({
   name: 'my-extension',
-  initialize: (editor) => {
-    // Add custom functionality
-    editor.registerCommand('my-command', () => {
-      console.log('Custom command executed!')
+  commands: (editor) => ({
+    // Define your commands here
+    myCommand: () => console.log('Hello!')
+  })
+})`,
+    language: 'typescript',
+    title: 'Create Basic Extension',
+    description: 'Minimal extension with a single command',
+    highlightLines: [4, 5, 6, 7]
+  },
+  {
+    id: 'extension-commands',
+    code: `commands: (editor) => ({
+  insertText: (text: string) => {
+    editor.update(() => {
+      // Insert text at cursor
+      const selection = $getSelection()
+      if ($isRangeSelection(selection)) {
+        selection.insertText(text)
+      }
+    })
+  },
+
+  clearEditor: () => {
+    editor.update(() => {
+      $getRoot().clear()
     })
   }
 })`,
     language: 'typescript',
-    title: 'Create Custom Extension',
-    description: 'Build your own editor extensions',
-    highlightLines: [4, 5, 6, 7, 8]
+    title: 'Extension Commands',
+    description: 'Define commands that manipulate the editor',
+    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12]
+  },
+  {
+    id: 'extension-state-queries',
+    code: `stateQueries: (editor) => ({
+  hasSelection: async () => {
+    return new Promise(resolve => {
+      editor.read(() => {
+        const selection = $getSelection()
+        resolve($isRangeSelection(selection))
+      })
+    })
+  },
+
+  isEmpty: async () => {
+    return new Promise(resolve => {
+      editor.read(() => {
+        resolve(!$getRoot().getTextContent().trim())
+      })
+    })
+  }
+})`,
+    language: 'typescript',
+    title: 'State Queries',
+    description: 'Query editor state for UI decisions',
+    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12, 13]
   },
   {
     id: 'extension-setup',
-    code: `const editorSystem = createEditorSystem({
-  extensions: [
-    MyCustomExtension,
-    // Add more extensions here
-  ]
-})
+    code: `// 1. Define your extensions
+const extensions = [MyExtension] as const
 
+// 2. Create editor system
+const { Provider, useEditor } = createEditorSystem<typeof extensions>()
+
+// 3. Use in component
 function MyEditor() {
   return (
-    <DefaultTemplate
-      system={editorSystem}
-      onReady={(editor) => {
-        console.log('Editor with extensions ready!')
-      }}
-    />
+    <Provider extensions={extensions}>
+      <EditorContent />
+    </Provider>
   )
 }`,
-    language: 'tsx',
-    title: 'Use Extensions',
-    description: 'Configure editor with custom extensions',
-    highlightLines: [3, 4, 5]
+    language: 'typescript',
+    title: 'Setup Extension System',
+    description: 'Three steps to integrate extensions',
+    highlightLines: [2, 5, 8, 9, 10, 11]
   },
   {
-    id: 'test-extension-definition',
-    code: `import React from 'react';
-import { createExtension } from '@lexkit/editor';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot } from 'lexical';
-
-// Define the commands interface
-type TestCommands = {
-  insertTimestamp: () => void;
-  clearContent: () => void;
-  getWordCount: () => number;
-};
-
-// Define the state queries interface
-type TestStateQueries = {
-  hasSelection: () => Promise<boolean>;
-  isEmpty: () => Promise<boolean>;
-};
-
-// Create the extension using the new createExtension function
-const TestExtension = createExtension<'test-extension', {}, TestCommands, TestStateQueries, React.ReactNode[]>({
-  name: 'test-extension',
-  category: [ExtensionCategory.Toolbar],
-
-  // Define commands
-  commands: (editor) => ({
+    id: 'base-extension-commands',
+    code: `getCommands(editor: LexicalEditor): TestCommands {
+  return {
     insertTimestamp: () => {
+      editor.focus();
+      const timestamp = new Date().toLocaleString();
       editor.update(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const timestamp = new Date().toLocaleString();
-          selection.insertText(timestamp);
-        }
+        const root = $getRoot();
+        const paragraph = $createParagraphNode();
+        paragraph.append($createTextNode(timestamp));
+        root.append(paragraph);
       });
     },
 
     clearContent: () => {
       editor.update(() => {
-        const root = $getRoot();
-        root.clear();
+        $getRoot().clear();
       });
     },
 
     getWordCount: () => {
-      // This would need to be implemented based on editor content
-      return 42; // Placeholder
+      alert('Hello World from BaseExtension!');
     }
-  }),
-
-  // Define state queries
-  stateQueries: (editor) => ({
+  };
+}`,
+    language: 'typescript',
+    title: 'BaseExtension Commands',
+    description: 'Implement getCommands method for BaseExtension',
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 19]
+  },
+  {
+    id: 'base-extension-state-queries',
+    code: `getStateQueries(editor: LexicalEditor): TestStateQueries {
+  return {
     hasSelection: async () => {
       return new Promise((resolve) => {
         editor.read(() => {
@@ -192,144 +227,68 @@ const TestExtension = createExtension<'test-extension', {}, TestCommands, TestSt
         });
       });
     }
-  }),
-
-  // Initialize function (optional)
-  initialize: (editor) => {
-    console.log('TestExtension initialized!');
-
-    // Return cleanup function
-    return () => {
-      console.log('TestExtension cleaned up!');
-    };
-  }
-});
-
-export { TestExtension };`,
-    language: 'tsx',
-    title: 'TestExtension Definition',
-    description: 'Complete TestExtension implementation with commands, state queries, and initialization',
-    highlightLines: [18, 24, 46, 62]
-  },
-  {
-    id: 'basic-editor-with-extension',
-    code: `'use client'
-
-import React, { useState, useEffect } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
-import { TestExtension } from './TestExtension';
-
-// Define the extensions array
-const extensions = [TestExtension] as const;
-
-// Create the editor system
-const { Provider, useEditor } = createEditorSystem<typeof extensions>();
-
-// Toolbar component
-function Toolbar() {
-  const { commands, activeStates } = useEditor();
-
-  return (
-    <div className="basic-toolbar">
-      <button
-        onClick={() => commands.insertTimestamp()}
-        disabled={!activeStates.hasSelection}
-      >
-        Insert Timestamp
-      </button>
-      <button onClick={() => commands.clearContent()}>
-        Clear Content
-      </button>
-      <button onClick={() => alert(\`Word count: \${commands.getWordCount()}\`)}>
-        Get Word Count
-      </button>
-    </div>
-  );
-}
-
-// Editor content component
-function EditorContent() {
-  const [editorState, setEditorState] = useState<string>('');
-
-  const onChange = (editorState: any) => {
-    setEditorState(JSON.stringify(editorState.toJSON()));
   };
-
-  return (
-    <div className="basic-editor">
-      <Toolbar />
-      <RichTextPlugin
-        contentEditable={<ContentEditable className="basic-content" />}
-        placeholder={<div className="basic-placeholder">Start typing...</div>}
-        ErrorBoundary={() => <div>Error occurred</div>}
-      />
-      <OnChangePlugin onChange={onChange} />
-      <HistoryPlugin />
-    </div>
-  );
-}
-
-// Main component
-export default function BasicEditorWithCustomExtension() {
-  const initialConfig = {
-    namespace: 'basic-editor',
-    theme: {},
-    onError: (error: Error) => console.error(error),
-  };
-
-  return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <Provider extensions={extensions}>
-        <EditorContent />
-      </Provider>
-    </LexicalComposer>
-  );
 }`,
-    language: 'tsx',
-    title: 'Basic Editor with Custom Extension',
-    description: 'Complete example of using a custom extension in an editor',
-    highlightLines: [13, 16, 19, 24, 29, 32]
-  }
+    language: 'typescript',
+    title: 'BaseExtension State Queries',
+    description: 'Implement getStateQueries method for BaseExtension',
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17]
+  },
 ]
 
 // Styling examples
 export const STYLING_EXAMPLES: RegisteredCodeSnippet[] = [
   {
-    id: 'tailwind-styling',
-    code: `.editor-container {
-  @apply border rounded-lg p-4;
+    id: 'custom-styling',
+    code: `.my-editor {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.editor-content {
-  @apply prose prose-sm max-w-none;
-}
-
-.editor-toolbar {
-  @apply flex gap-2 p-2 border-b bg-muted/50;
+.my-editor .editor-content {
+  padding: 16px;
+  min-height: 200px;
+  font-size: 16px;
+  line-height: 1.6;
 }`,
     language: 'css',
-    title: 'Tailwind CSS Styling',
-    description: 'Style your editor with Tailwind classes'
+    title: 'Custom CSS Styling',
+    description: 'Style your editor with custom CSS',
+    highlightLines: [1, 2, 3, 4, 7, 8, 9, 10, 11]
   },
   {
-    id: 'theme-provider',
-    code: `import { ThemeProvider } from '@lexkit/editor'
+    id: 'tailwind-styling',
+    code: `<div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+  <div className="p-4 min-h-[200px] prose prose-sm max-w-none">
+    {/* Editor content */}
+  </div>
+</div>`,
+    language: 'tsx',
+    title: 'Tailwind CSS Classes',
+    description: 'Style with Tailwind utility classes',
+    highlightLines: [1, 2, 3, 4]
+  },
+  {
+    id: 'theme-integration',
+    code: `function ThemedEditor() {
+  const [theme, setTheme] = useState('light')
 
-function App() {
   return (
-    <ThemeProvider theme="dark">
-      <MyEditor />
-    </ThemeProvider>
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <DefaultTemplate
+        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+      />
+      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle Theme
+      </button>
+    </div>
   )
 }`,
     language: 'tsx',
-    title: 'Theme Provider',
-    description: 'Apply themes to your editor'
+    title: 'Theme Integration',
+    description: 'Implement light/dark theme switching',
+    highlightLines: [3, 5, 6, 7, 10, 11, 12]
   }
 ]
 

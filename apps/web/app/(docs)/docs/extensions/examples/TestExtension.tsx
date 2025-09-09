@@ -1,13 +1,13 @@
 import React from 'react';
 import { createExtension } from '@lexkit/editor';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
 
 // Define the commands interface
 type TestCommands = {
   insertTimestamp: () => void;
   clearContent: () => void;
-  getWordCount: () => number;
+  getWordCount: () => void;
 };
 
 // Define the state queries interface
@@ -24,12 +24,13 @@ const TestExtension = createExtension<'test-extension', {}, TestCommands, TestSt
   // Define commands
   commands: (editor) => ({
     insertTimestamp: () => {
+      editor.focus();
+      const timestamp = new Date().toLocaleString();
       editor.update(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const timestamp = new Date().toLocaleString();
-          selection.insertText(timestamp);
-        }
+        const root = $getRoot();
+        const paragraph = $createParagraphNode();
+        paragraph.append($createTextNode(timestamp));
+        root.append(paragraph);
       });
     },
 
@@ -41,8 +42,7 @@ const TestExtension = createExtension<'test-extension', {}, TestCommands, TestSt
     },
 
     getWordCount: () => {
-      // This would need to be implemented based on editor content
-      return 42; // Placeholder
+      alert('Hello World');
     }
   }),
 

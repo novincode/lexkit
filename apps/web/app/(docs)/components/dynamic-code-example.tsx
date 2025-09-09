@@ -95,16 +95,16 @@ export function DynamicCodeExample({
   }
 
   // Add code tabs
-  codes.forEach(code => {
+  codes.forEach((code, index) => {
     const codeInfo = codeData[code]
     if (codeInfo) {
-      const ext = code.split('.').pop() || ''
-      const baseName = code.replace(/\.[^/.]+$/, "")
-      const label = ext === 'tsx' ? 'Component' : ext === 'css' ? 'CSS' : baseName
-      const tabId = code // use the code path as id
+      // Use custom tab label if provided, otherwise extract filename
+      const fileName = code.split('/').pop() || code
+      const customLabel = tabs && tabs[index + 1] ? tabs[index + 1] : null
+      const label = customLabel || fileName
 
       const tab = {
-        id: tabId,
+        id: code, // use the code path as id
         label,
         content: (
           <ScrollArea className="relative h-[80vh] overflow-hidden rounded-lg">
@@ -120,7 +120,13 @@ export function DynamicCodeExample({
         alwaysShow: true
       }
 
-      if (!tabs || tabs.includes(tabId) || tabs.includes(label.toLowerCase())) {
+      const customTabName = tabs && index + 1 < tabs.length ? tabs[index + 1] : null
+      const shouldShowTab = !tabs ||
+        tabs.includes(code) ||
+        tabs.includes(label.toLowerCase()) ||
+        (customTabName && tabs.includes(customTabName))
+
+      if (shouldShowTab) {
         filteredTabs.push(tab)
       }
     }
