@@ -121,7 +121,7 @@ export default function ExtensionsPageClient() {
         {/* Method 1: createExtension Function */}
         <div className="space-y-8">
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200 dark:border-blue-800 rounded-full px-6 py-3">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200 dark:border-blue-800 rounded-lg px-6 py-3">
               <Code className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-100">Method 1: createExtension Function</h3>
             </div>
@@ -150,7 +150,7 @@ export default function ExtensionsPageClient() {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:grid md:grid-cols-2 gap-6 flex flex-col">
             <Card className="border-blue-200 dark:border-blue-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
@@ -170,14 +170,14 @@ export default function ExtensionsPageClient() {
               </CardContent>
             </Card>
 
-            <Card className="border-blue-200 dark:border-blue-800">
+            <Card className="border-blue-200 dark:border-blue-800 max-w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   <Settings className="h-5 w-5 text-primary" />
                   State Queries
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className='flex flex-col'>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   Define functions that return information about the editor's current state.
                   These are async functions that can read from the editor safely.
@@ -204,16 +204,16 @@ export default function ExtensionsPageClient() {
         <DynamicCodeExample
           title="createExtension Demo"
           description="Functional approach - simple and focused"
-          codes={[ 'docs/extensions/examples/TestExtension.tsx','docs/extensions/examples/BasicEditorWithCustomExtension.tsx']}
+          codes={['docs/extensions/examples/TestExtension.tsx', 'docs/extensions/examples/BasicEditorWithCustomExtension.tsx']}
           preview={<BasicEditorWithCustomExtension />}
-          tabs={['preview', 'Extension', 'Editor' ]}
+          tabs={['preview', 'Extension', 'Editor']}
         />
       </div>
 
       {/* Class-Based Implementation */}
       <div className="space-y-6">
         <div className="text-center">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-200 dark:border-green-800 rounded-full px-6 py-3">
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-200 dark:border-green-800 rounded-lg px-6 py-3">
             <Layers className="h-6 w-6 text-green-600 dark:text-green-400" />
             <h2 className="text-3xl font-bold text-green-900 dark:text-green-100">Method 2: BaseExtension Class</h2>
           </div>
@@ -247,7 +247,7 @@ export default function ExtensionsPageClient() {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
             <Card className="border-green-200 dark:border-green-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
@@ -335,16 +335,16 @@ export default function ExtensionsPageClient() {
         <DynamicCodeExample
           title="BaseExtension Demo"
           description="Class-based approach - perfect for complex extensions"
-          codes={[ 'docs/extensions/examples/TestBaseExtension.tsx','docs/extensions/examples/BasicEditorWithBaseExtension.tsx']}
+          codes={['docs/extensions/examples/TestBaseExtension.tsx', 'docs/extensions/examples/BasicEditorWithBaseExtension.tsx']}
           preview={<BasicEditorWithBaseExtension />}
-          tabs={['preview', 'Extension', 'Editor' ]}
+          tabs={['preview', 'Extension', 'Editor']}
         />
       </div>
 
       {/* Integration Steps */}
       <div className="space-y-6">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-800 rounded-full px-6 py-3">
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-800 rounded-lg px-6 py-3">
             <Play className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             <h2 className="text-3xl font-bold text-purple-900 dark:text-purple-100">Using Your Extension</h2>
           </div>
@@ -382,9 +382,9 @@ export default function ExtensionsPageClient() {
                 Create a const assertion array containing your extensions. The process is identical
                 regardless of how you created your extensions - both approaches work the same way.
               </p>
-              <div className="bg-muted rounded-lg p-4">
+              <div className="bg-muted rounded-lg overflow-hidden">
                 <pre className="text-sm">{`const extensions = [YourExtension] as const;`}</pre>
-               
+
               </div>
             </CardContent>
           </Card>
@@ -401,8 +401,8 @@ export default function ExtensionsPageClient() {
                 Use the <code>createEditorSystem</code> function to generate a typed Provider
                 and useEditor hook based on your extensions. The process is identical for both approaches.
               </p>
-              <div className="bg-muted rounded-lg p-4 font-mono text-sm">
-                <pre>{`const { Provider, useEditor } = createEditorSystem<typeof extensions>();`}</pre>
+              <div className="bg-muted rounded-lg overflow-hidden">
+                <pre className="text-sm">{`const { Provider, useEditor } = createEditorSystem<typeof extensions>();`}</pre>
               </div>
             </CardContent>
           </Card>

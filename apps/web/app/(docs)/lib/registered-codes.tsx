@@ -207,32 +207,45 @@ function MyEditor() {
     highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 19]
   },
   {
-    id: 'base-extension-state-queries',
-    code: `getStateQueries(editor: LexicalEditor): TestStateQueries {
-  return {
-    hasSelection: async () => {
-      return new Promise((resolve) => {
-        editor.read(() => {
-          const selection = $getSelection();
-          resolve($isRangeSelection(selection) && !selection.isCollapsed());
-        });
-      });
-    },
+    id: 'use-extension-commands',
+    code: `function MyEditor() {
+  const { commands, stateQueries } = useEditor()
 
-    isEmpty: async () => {
-      return new Promise((resolve) => {
-        editor.read(() => {
-          const root = $getRoot();
-          resolve(!root.getTextContent().trim());
-        });
-      });
-    }
-  };
+  const handleInsertText = () => {
+    commands.insertText('Hello World!')
+  }
+
+  const handleClear = () => {
+    commands.clearEditor()
+  }
+
+  const checkSelection = async () => {
+    const hasSelection = await stateQueries.hasSelection()
+    console.log('Has selection:', hasSelection)
+  }
+
+  return (
+    <div>
+      <div className="mb-4 space-x-2">
+        <button onClick={handleInsertText}>
+          Insert Text
+        </button>
+        <button onClick={handleClear}>
+          Clear Editor
+        </button>
+        <button onClick={checkSelection}>
+          Check Selection
+        </button>
+      </div>
+
+      <EditorContent />
+    </div>
+  )
 }`,
-    language: 'typescript',
-    title: 'BaseExtension State Queries',
-    description: 'Implement getStateQueries method for BaseExtension',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17]
+    language: 'tsx',
+    title: 'Using Extension Commands',
+    description: 'Access and use extension commands in your components',
+    highlightLines: [2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19]
   },
 ]
 

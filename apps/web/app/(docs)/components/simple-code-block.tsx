@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@repo/ui/components/button"
+import { ScrollArea } from "@repo/ui/components/scroll-area"
 import { Copy, Check } from "lucide-react"
 import { cn } from "@repo/ui/lib/utils"
 
@@ -33,7 +34,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={handleCopy}
       size="sm"
       variant="outline"
-      className="absolute top-2 right-2 z-10 !border-foreground/20 !border-2"
+      className="absolute top-2 right-2 z-10 !border-foreground/20 !border-2 bg-background/95 backdrop-blur-sm"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -56,24 +57,24 @@ export function SimpleCodeBlock({
   raw,
   title,
   className,
-  height = "h-auto",
+  height = "h-64",
   showCopy = true
 }: SimpleCodeBlockProps) {
   return (
-    <div className={cn("not-prose my-4", className)}>
+    <div className={cn("not-prose my-4 max-w-full", className)}>
       {title && (
         <h4 className="mb-2 text-sm font-medium text-muted-foreground">
           {title}
         </h4>
       )}
 
-        <div className="relative">
-          {showCopy && <CopyButton text={raw} />}
-          <div
-            className="w-full  "
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        </div>
+      <ScrollArea className={cn("relative overflow-hidden rounded-lg ", height)}>
+        {showCopy && <CopyButton text={raw} />}
+        <div
+          className="w-full"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </ScrollArea>
     </div>
   )
 }

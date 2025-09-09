@@ -45,7 +45,7 @@ export function DocsLayoutClient({ children }: DocsLayoutClientProps) {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <main className="p-6 md:p-8 lg:p-12 max-w-full mx-auto">
+          <main className="p-4 md:p-8 lg:p-12 max-w-full mx-auto">
             {children}
           </main>
         </div>

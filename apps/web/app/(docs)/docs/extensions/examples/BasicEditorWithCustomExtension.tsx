@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalEditor } from 'lexical';
 import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
+import { RichText } from '@lexkit/editor';
 import { TestExtension } from './TestExtension';
 import '../../../examples/basic-editor.css'; // Reuse the basic editor CSS
 
@@ -47,10 +46,12 @@ function EditorContent() {
   return (
     <div className="basic-editor">
       <Toolbar />
-      <RichTextPlugin
-        contentEditable={<ContentEditable className="basic-content" />}
-        placeholder={<div className="basic-placeholder">Start typing...</div>}
-        ErrorBoundary={() => <div>Error occurred</div>}
+      <RichText
+        placeholder="Start typing..."
+        classNames={{
+          contentEditable: "basic-content",
+          placeholder: "basic-placeholder"
+        }}
       />
       <OnChangePlugin onChange={onChange} />
       <HistoryPlugin />
