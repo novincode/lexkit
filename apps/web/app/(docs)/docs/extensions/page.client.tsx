@@ -498,41 +498,6 @@ export default function ExtensionsPageClient() {
           </Card>
         </div>
       </div>
-
-      {/* Next Steps */}
-      <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-        <CardContent className="text-center py-12 space-y-6">
-          <div className="space-y-3">
-            <h3 className="text-2xl font-bold">Ready to Build Your Extension?</h3>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              You've learned the fundamentals. Now it's time to create something amazing!
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
-            <Link
-              href="/docs/extensions/examples"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              View More Examples
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/docs/api"
-              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-            >
-              <BookOpen className="h-4 w-4" />
-              API Reference
-            </Link>
-            <Link
-              href="https://github.com/novincode/lexkit"
-              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-            >
-              <Github className="h-4 w-4" />
-              Contribute
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

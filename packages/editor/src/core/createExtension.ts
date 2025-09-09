@@ -83,8 +83,6 @@ export function createExtension<
   config: CreateExtensionConfig<Name, Config, Commands, StateQueries, Plugins>
 ): BaseExtension<Name, Config, Commands, StateQueries, Plugins> {
   return new (class extends BaseExtension<Name, Config, Commands, StateQueries, Plugins> {
-    private _commands: Commands = {} as Commands;
-    private _stateQueries: StateQueries = {} as StateQueries;
     private _plugins: Plugins = [] as unknown as Plugins;
     private _nodes: any[] = [];
     private _initialize?: (editor: LexicalEditor) => (() => void) | void;
@@ -137,19 +135,21 @@ export function createExtension<
     }
 
     getCommands(editor: LexicalEditor): Commands {
-      // Initialize commands lazily when first called
-      if (Object.keys(this._commands).length === 0 && config.commands) {
-        this._commands = config.commands(editor);
+      // Always create fresh commands with the current editor instance
+      // This prevents stale editor references when components remount
+      if (config.commands) {
+        return config.commands(editor);
       }
-      return this._commands;
+      return {} as Commands;
     }
 
     getStateQueries(editor: LexicalEditor): StateQueries {
-      // Initialize state queries lazily when first called
-      if (Object.keys(this._stateQueries).length === 0 && config.stateQueries) {
-        this._stateQueries = config.stateQueries(editor);
+      // Always create fresh state queries with the current editor instance
+      // This prevents stale editor references when components remount
+      if (config.stateQueries) {
+        return config.stateQueries(editor);
       }
-      return this._stateQueries;
+      return {} as StateQueries;
     }
   })();
 }
