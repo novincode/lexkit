@@ -1,58 +1,59 @@
 /* LexKit Editor - Clean Framework-Agnostic Styles */
 
-/* CSS Variables for Theme - Auto-sync with Next.js theme */
+/* CSS Variables for Theme - Framework Agnostic */
 :root {
-  --lexkit-bg: var(--background);
-  --lexkit-fg: var(--foreground);
-  --lexkit-border: var(--border);
-  --lexkit-border-hover: var(--border);
-  --lexkit-border-active: var(--ring);
-  --lexkit-accent: var(--primary);
-  --lexkit-accent-hover: var(--primary);
-  --lexkit-shadow: rgba(0, 0, 0, 0.1);
-  --lexkit-muted: var(--muted);
-  --lexkit-muted-fg: var(--muted-foreground);
+  --lexkit-bg: #ffffff;
+  --lexkit-fg: #0f172a;
+  --lexkit-border: #e2e8f0;
+  --lexkit-border-hover: #cbd5e1;
+  --lexkit-border-active: #94a3b8;
+  --lexkit-accent: #0f172a;
+  --lexkit-accent-hover: #1e293b;
+  --lexkit-shadow: rgba(0, 0, 0, 0.08);
+  --lexkit-muted: #f8fafc;
+  --lexkit-muted-fg: #64748b;
 }
 
-/* Dark Mode - Auto-sync with Next.js dark theme */
-[data-theme="dark"] {
-  --lexkit-bg: var(--background);
-  --lexkit-fg: var(--foreground);
-  --lexkit-border: var(--border);
-  --lexkit-border-hover: var(--border);
-  --lexkit-border-active: var(--ring);
-  --lexkit-accent: var(--primary);
-  --lexkit-accent-hover: var(--primary);
-  --lexkit-shadow: rgba(0, 0, 0, 0.3);
-  --lexkit-muted: var(--muted);
-  --lexkit-muted-fg: var(--muted-foreground);
+/* Dark Mode - Framework Agnostic */
+[data-theme="dark"],
+.dark {
+  --lexkit-bg: #0a0a0a;
+  --lexkit-fg: #ededed;
+  --lexkit-border: #262626;
+  --lexkit-border-hover: #404040;
+  --lexkit-border-active: #525252;
+  --lexkit-accent: #ededed;
+  --lexkit-accent-hover: #d4d4d8;
+  --lexkit-shadow: rgba(0, 0, 0, 0.5);
+  --lexkit-muted: #171717;
+  --lexkit-muted-fg: #a3a3a3;
 }
 
 /* Editor-specific theme overrides */
 .lexkit-editor-wrapper[data-editor-theme="dark"] {
-  --lexkit-bg: #1f2937;
-  --lexkit-fg: #f9fafb;
-  --lexkit-border: #374151;
-  --lexkit-border-hover: #4b5563;
-  --lexkit-border-active: #6b7280;
-  --lexkit-accent: #60a5fa;
-  --lexkit-accent-hover: #3b82f6;
-  --lexkit-shadow: rgba(0, 0, 0, 0.3);
-  --lexkit-muted: #374151;
-  --lexkit-muted-fg: #9ca3af;
+  --lexkit-bg: #0a0a0a;
+  --lexkit-fg: #ededed;
+  --lexkit-border: #262626;
+  --lexkit-border-hover: #404040;
+  --lexkit-border-active: #525252;
+  --lexkit-accent: #ededed;
+  --lexkit-accent-hover: #d4d4d8;
+  --lexkit-shadow: rgba(0, 0, 0, 0.5);
+  --lexkit-muted: #171717;
+  --lexkit-muted-fg: #a3a3a3;
 }
 
 .lexkit-editor-wrapper[data-editor-theme="light"] {
   --lexkit-bg: #ffffff;
-  --lexkit-fg: #374151;
-  --lexkit-border: #d1d5db;
-  --lexkit-border-hover: #9ca3af;
-  --lexkit-border-active: #6b7280;
-  --lexkit-accent: #3b82f6;
-  --lexkit-accent-hover: #1d4ed8;
-  --lexkit-shadow: rgba(0, 0, 0, 0.1);
-  --lexkit-muted: #f9fafb;
-  --lexkit-muted-fg: #6b7280;
+  --lexkit-fg: #0f172a;
+  --lexkit-border: #e2e8f0;
+  --lexkit-border-hover: #cbd5e1;
+  --lexkit-border-active: #94a3b8;
+  --lexkit-accent: #0f172a;
+  --lexkit-accent-hover: #1e293b;
+  --lexkit-shadow: rgba(0, 0, 0, 0.08);
+  --lexkit-muted: #f8fafc;
+  --lexkit-muted-fg: #64748b;
 }
 
 /* Editor Wrapper */
@@ -78,27 +79,30 @@
 }
 
 .lexkit-mode-tab {
-  padding: 8px 16px;
+  padding: 10px 20px;
   background: none;
   border: none;
   cursor: pointer;
   color: var(--lexkit-muted-fg);
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: 2px solid transparent;
+  position: relative;
 }
 
 .lexkit-mode-tab:hover {
   color: var(--lexkit-fg);
-  background-color: var(--lexkit-bg);
+  background-color: var(--lexkit-muted);
 }
 
 .lexkit-mode-tab.active {
   color: var(--lexkit-accent);
   border-bottom-color: var(--lexkit-accent);
-  background-color: var(--lexkit-bg);
+  background-color: rgba(15, 23, 42, 0.05);
 }
+
+
 
 /* Toolbar */
 .lexkit-toolbar {
@@ -129,41 +133,72 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: transparent;
   color: var(--lexkit-fg);
   cursor: pointer;
-  transition: all 0.15s;
-  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.lexkit-toolbar-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .lexkit-toolbar-button:hover {
   background-color: var(--lexkit-muted);
-  border-color: var(--lexkit-border);
+  border-color: var(--lexkit-border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.lexkit-toolbar-button:hover::before {
+  opacity: 1;
 }
 
 .lexkit-toolbar-button:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .lexkit-toolbar-button.active {
   background-color: var(--lexkit-accent);
   border-color: var(--lexkit-accent);
-  color: white;
+  color: var(--lexkit-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.lexkit-toolbar-button.active::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 1;
 }
 
 .lexkit-toolbar-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .lexkit-toolbar-button:disabled:hover {
   background-color: transparent;
   border-color: transparent;
   transform: none;
+  box-shadow: none;
+}
+
+.lexkit-toolbar-button:disabled::before {
+  opacity: 0;
 }
 
 /* Select Dropdown */
@@ -175,25 +210,28 @@
 .lexkit-select-trigger {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 6px;
+  padding: 8px 12px;
   border: 1px solid var(--lexkit-border);
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: var(--lexkit-bg);
   color: var(--lexkit-fg);
   cursor: pointer;
   font-size: 14px;
   min-width: 120px;
-  height: 32px;
-  transition: all 0.15s;
+  height: 36px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .lexkit-select-trigger:hover {
   border-color: var(--lexkit-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .lexkit-select-trigger.open {
   border-color: var(--lexkit-accent);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
 }
 
 .lexkit-select-dropdown {
@@ -204,9 +242,9 @@
   z-index: 50;
   background-color: var(--lexkit-bg);
   border: 1px solid var(--lexkit-border);
-  border-radius: 4px;
-  box-shadow: 0 4px 6px -1px var(--lexkit-shadow);
-  margin-top: 2px;
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
 }
@@ -214,14 +252,14 @@
 .lexkit-select-option {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: none;
   background: none;
   color: var(--lexkit-fg);
   cursor: pointer;
   font-size: 14px;
   text-align: left;
-  transition: background-color 0.15s;
+  transition: all 0.15s ease;
 }
 
 .lexkit-select-option:hover {
@@ -230,7 +268,8 @@
 
 .lexkit-select-option.selected {
   background-color: var(--lexkit-accent);
-  color: white;
+  color: var(--lexkit-bg);
+  font-weight: 500;
 }
 
 /* Dropdown Menu for Complex Actions */
@@ -453,15 +492,18 @@
 
 .lexkit-content-editable {
   flex: 1;
-  padding: 16px;
+  padding: 20px;
   outline: none;
   color: var(--lexkit-fg);
-  line-height: 1.6;
+  line-height: 1.7;
   font-size: 16px;
+  background-color: var(--lexkit-bg);
+  transition: background-color 0.2s ease;
 }
 
 .lexkit-content-editable:focus {
   outline: none;
+  background-color: var(--lexkit-bg);
 }
 
 /* HTML Source View */
@@ -469,16 +511,18 @@
   flex: 1;
   width: 100%;
   height: 100%;
-  padding: 16px;
+  padding: 20px;
   border: none;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
   background-color: var(--lexkit-bg);
   color: var(--lexkit-fg);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  resize: none;
-  outline: none;
-  box-sizing: border-box;
+  border-radius: 0;
+  transition: background-color 0.2s ease;
 }
 
 /* Placeholder */
@@ -486,9 +530,11 @@
   color: var(--lexkit-muted-fg);
   pointer-events: none;
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 20px;
+  left: 20px;
   font-size: 16px;
+  line-height: 1.7;
+  z-index: 1;
 }
 
 /* Content Styles */
@@ -716,71 +762,86 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .lexkit-toolbar {
-    padding: 4px;
-    gap: 2px;
+    padding: 6px;
+    gap: 4px;
   }
-  
+
   .lexkit-toolbar-section {
-    margin-right: 4px;
-    padding-right: 4px;
+    margin-right: 6px;
+    padding-right: 6px;
   }
-  
+
   .lexkit-toolbar-button {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
-  
+
   .lexkit-content-editable {
-    padding: 12px;
+    padding: 16px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
-  .lexkit-placeholder {
-    top: 12px;
-    left: 12px;
-  }
-}
 
-/* HTML Embed Styles - Clean and Professional */
+  .lexkit-placeholder {
+    top: 16px;
+    left: 16px;
+  }
+}/* HTML Embed Styles - Modern and Clean */
 .html-embed-wrapper {
   position: relative;
   border: 1px solid var(--lexkit-border);
-  border-radius: 8px;
-  margin: 8px 0;
+  border-radius: 12px;
+  margin: 16px 0;
   overflow: hidden;
   background: var(--lexkit-bg);
-  min-height: 60px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.html-embed-wrapper:hover {
+  border-color: var(--lexkit-border-hover);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .html-embed-preview {
   position: relative;
-  min-height: 60px;
+  min-height: 80px;
+  padding: 16px;
+  background: var(--lexkit-bg);
+  border-bottom: 1px solid var(--lexkit-border);
 }
 
 .html-embed-content {
-  padding: 12px;
-  min-height: 40px;
+  padding: 16px;
+  min-height: 60px;
   background: var(--lexkit-bg);
+  color: var(--lexkit-fg);
+  font-size: 14px;
+  line-height: 1.6;
+  border-radius: 8px;
+  background: var(--lexkit-muted);
 }
 
 .html-embed-editor {
   position: relative;
-  min-height: 120px;
+  min-height: 140px;
+  background: var(--lexkit-bg);
 }
 
 .html-embed-textarea {
   width: 100%;
-  min-height: 120px;
-  padding: 12px;
+  min-height: 140px;
+  padding: 16px;
   border: none;
   outline: none;
   resize: vertical;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', 'Courier New', monospace;
   font-size: 13px;
-  line-height: 1.5;
-  background: var(--lexkit-muted);
+  line-height: 1.6;
+  background: var(--lexkit-bg);
   color: var(--lexkit-fg);
   box-sizing: border-box;
+  border-radius: 8px;
 }
 
 .html-embed-textarea::placeholder {
@@ -789,22 +850,25 @@
 
 .html-embed-toggle {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 12px;
+  right: 12px;
   background: var(--lexkit-accent);
-  color: white;
+  color: var(--lexkit-bg);
   border: none;
-  border-radius: 4px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .html-embed-toggle:hover {
   background: var(--lexkit-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .html-embed-toggle:focus {
@@ -816,16 +880,17 @@
 .html-embed-wrapper::before {
   content: "HTML";
   position: absolute;
-  top: -1px;
-  left: 12px;
-  background: var(--lexkit-accent);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 0 0 4px 4px;
-  font-size: 10px;
-  font-weight: 600;
+  top: 0;
+  left: 16px;
+  background: linear-gradient(135deg, var(--lexkit-accent) 0%, var(--lexkit-accent-hover) 100%);
+  color: var(--lexkit-bg);
+  padding: 4px 12px;
+  border-radius: 0 0 8px 8px;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.5px;
   z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Dialog Overlay */
