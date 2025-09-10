@@ -80,7 +80,7 @@ export function TopNavigation({
       <div className="px-4 flex h-16 items-center">
         {/* Before children (mobile) */}
         {beforeChildren && (
-          <div className="md:hidden mr-4">
+          <div className=" mr-4">
             {beforeChildren}
           </div>
         )}
@@ -175,7 +175,7 @@ export function TopNavigation({
 
             {/* After children (mobile) */}
             {afterChildren && (
-              <div className="md:hidden pt-2 border-t">
+              <div className=" pt-2 border-t">
                 {afterChildren}
               </div>
             )}

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@repo/ui/components/button"
 import { ScrollArea } from "@repo/ui/components/scroll-area"
-import { Copy, Check } from "lucide-react"
+import { Copy, Check, Maximize } from "lucide-react"
 import { cn } from "@repo/ui/lib/utils"
 
 interface SimpleCodeBlockProps {
@@ -34,7 +34,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={handleCopy}
       size="sm"
       variant="outline"
-      className="absolute top-2 right-2 z-10 !border-foreground/20 !border-2 bg-background/95 backdrop-blur-sm"
+      className=" !border-foreground/20 !border-2 bg-background/95 backdrop-blur-sm"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -52,14 +52,35 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+// ExpandButton component
+function ExpandButton({ onExpand }: { onExpand: () => void }) {
+  return (
+    <Button
+      onClick={onExpand}
+      size="sm"
+      variant="outline"
+      className=" z-10 !border-foreground/20 !border-2 bg-background/95 backdrop-blur-sm"
+      title="Expand to full size"
+    >
+      <Maximize className="h-3 w-3" />
+    </Button>
+  )
+}
+
 export function SimpleCodeBlock({
   html,
   raw,
   title,
   className,
-  height = "h-64",
+  height = "min-h-64",
   showCopy = true
 }: SimpleCodeBlockProps) {
+  const [expanded, setExpanded] = useState(false)
+
+  const handleExpand = () => {
+    setExpanded(true)
+  }
+
   return (
     <div className={cn("not-prose  max-w-full dark", className)}>
       {title && (
@@ -68,8 +89,11 @@ export function SimpleCodeBlock({
         </h4>
       )}
 
-      <ScrollArea className={cn("relative overflow-hidden rounded-lg ", height)}>
-        {showCopy && <CopyButton text={raw} />}
+      <ScrollArea className={cn("relative overflow-hidden rounded-lg ", expanded ? "h-auto max-h-screen" : height)}>
+        <div className="absolute top-2 right-2 flex gap-2">
+          {!expanded && <ExpandButton onExpand={handleExpand} />}
+          {showCopy && <CopyButton text={raw} />}
+        </div>
         <div
           className="w-full"
           dangerouslySetInnerHTML={{ __html: html }}
