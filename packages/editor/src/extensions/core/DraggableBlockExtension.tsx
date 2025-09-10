@@ -13,6 +13,8 @@ export interface DraggableConfig extends BaseExtensionConfig {
   anchorElem?: HTMLElement;
   /** Show up/down buttons */
   showMoveButtons?: boolean;
+  /** Enable dragging via text selection */
+  enableTextSelectionDrag?: boolean;
   /** Theme classes */
   theme?: {
     handle?: string;
@@ -74,6 +76,7 @@ export class DraggableBlockExtension extends BaseExtension<
       showInToolbar: false,
       position: 'after',
       showMoveButtons: true,
+      enableTextSelectionDrag: true,
       theme: {
         handle: 'lexkit-drag-handle',
         handleActive: 'lexkit-drag-handle-active',
@@ -194,6 +197,10 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
       const isOverHandle = target && target.closest && 
         (target.closest('.drag-handle-area') || target.closest('[draggable="true"]'));
 
+      // Check if there's a text selection - don't show handle if text is selected
+      const selection = window.getSelection();
+      const hasTextSelection = selection && selection.rangeCount > 0 && !selection.isCollapsed;
+
       // Find block element
       let blockElement: HTMLElement | null = null;
       let current = target;
@@ -211,7 +218,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         clearTimeout(hideTimeout);
       }
 
-      if (blockElement || isOverHandle) {
+      if ((blockElement || isOverHandle) && !hasTextSelection) {
         setHoveredBlock(blockElement || hoveredBlock);
       } else {
         // Delay hiding the handle to make it easier to catch
@@ -278,6 +285,72 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     event.dataTransfer!.setDragImage(clone, 0, 0);
     setTimeout(() => document.body.removeChild(clone), 0);
   }, [editor, applyDragClasses]);
+
+  // Handle text selection drag start
+  const handleTextSelectionDragStart = useCallback((event: DragEvent) => {
+    if (!config.enableTextSelectionDrag) return;
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+
+    // Find the block containing the selection
+    const editorElement = editor.getRootElement();
+    if (!editorElement) return;
+
+    let selectedBlock: HTMLElement | null = null;
+    const range = selection.getRangeAt(0);
+    let current = range.commonAncestorContainer as HTMLElement;
+
+    // If it's a text node, get its parent element
+    if (current.nodeType === Node.TEXT_NODE) {
+      current = current.parentElement!;
+    }
+
+    // Walk up to find the block element
+    while (current && current !== editorElement) {
+      if (current.parentElement === editorElement) {
+        selectedBlock = current;
+        break;
+      }
+      current = current.parentElement!;
+    }
+
+    if (!selectedBlock) return;
+
+    // Simple check: if there's any text selected in this block, allow dragging
+    const selectedText = selection.toString().trim();
+    if (!selectedText) return;
+
+    // Set drag state
+    setIsDragging(true);
+    draggedElementRef.current = selectedBlock;
+    applyDragClasses(selectedBlock);
+
+    // Set drag data
+    editor.update(() => {
+      const node = $getNearestNodeFromDOMNode(selectedBlock!);
+      if (node && $isElementNode(node)) {
+        const key = node.getKey();
+        draggedKeyRef.current = key;
+        event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key, type: 'text-selection' }));
+      }
+    });
+
+    event.dataTransfer!.effectAllowed = 'move';
+
+    // Create drag image
+    const clone = selectedBlock.cloneNode(true) as HTMLElement;
+    clone.style.opacity = '0.6';
+    clone.style.position = 'absolute';
+    clone.style.top = '-9999px';
+    clone.style.left = '-9999px';
+    document.body.appendChild(clone);
+    event.dataTransfer!.setDragImage(clone, 0, 0);
+    setTimeout(() => document.body.removeChild(clone), 0);
+
+    // Clear selection to prevent interference
+    selection.removeAllRanges();
+  }, [editor, applyDragClasses, config.enableTextSelectionDrag]);
 
   // Clean up drag state
   const cleanupDragState = useCallback(() => {
@@ -408,28 +481,38 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
       cleanupDragState();
     };
 
-    // Prevent default text dragging - safe check for closest
-    const preventDrag = (e: DragEvent) => {
+    // Handle drag events
+    const handleDragStart = (e: DragEvent) => {
       const target = e.target as HTMLElement;
-      if (target && target.closest && typeof target.closest === 'function') {
-        if (!target.closest('[draggable="true"]')) {
-          e.preventDefault();
-        }
+      
+      // If it's from a draggable handle, let it proceed normally
+      if (target.closest && target.closest('[draggable="true"]')) {
+        return;
       }
+
+      // Check for text selection drag
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0 && !selection.isCollapsed && config.enableTextSelectionDrag) {
+        handleTextSelectionDragStart(e);
+        return;
+      }
+
+      // Prevent other drags
+      e.preventDefault();
     };
 
-    editorElement.addEventListener('dragstart', preventDrag);
+    editorElement.addEventListener('dragstart', handleDragStart);
     editorElement.addEventListener('dragover', handleDragOver);
     editorElement.addEventListener('drop', handleDrop);
     editorElement.addEventListener('dragend', cleanupDragState);
 
     return () => {
-      editorElement.removeEventListener('dragstart', preventDrag);
+      editorElement.removeEventListener('dragstart', handleDragStart);
       editorElement.removeEventListener('dragover', handleDragOver);
       editorElement.removeEventListener('drop', handleDrop);
       editorElement.removeEventListener('dragend', cleanupDragState);
     };
-  }, [editor, cleanupDragState]);
+  }, [editor, cleanupDragState, handleTextSelectionDragStart, config.enableTextSelectionDrag]);
 
   // Don't render if no hovered block and not dragging
   const currentElement = hoveredBlock || draggedElementRef.current;
