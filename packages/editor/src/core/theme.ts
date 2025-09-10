@@ -14,6 +14,16 @@ export interface LexKitTheme extends EditorThemeClasses {
   }
   container?: string
   wrapper?: string
+  draggable?: {
+    handle?: string
+    handleHover?: string
+    handleDragging?: string
+    blockDragging?: string
+    dropIndicator?: string
+    upButton?: string
+    downButton?: string
+    blockIsDragging?: string
+  }
 }
 
 /**
@@ -66,6 +76,16 @@ export const defaultLexKitTheme: LexKitTheme = {
   },
   container: 'lexkit-editor-container',
   wrapper: 'lexkit-editor-wrapper',
+  draggable: {
+    handle: 'lexkit-draggable-handle',
+    handleHover: 'lexkit-draggable-handle-hover',
+    handleDragging: 'lexkit-draggable-handle-dragging',
+    blockDragging: 'lexkit-draggable-block-dragging opacity-50 transition-opacity duration-200',
+    dropIndicator: 'lexkit-draggable-drop-indicator',
+    upButton: 'lexkit-draggable-up-button',
+    downButton: 'lexkit-draggable-down-button',
+    blockIsDragging: 'lexkit-draggable-block-is-dragging',
+  },
   richText: {
     contentEditable: 'lexkit-content-editable',
     placeholder: 'lexkit-placeholder',
@@ -98,6 +118,10 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
     toolbar: {
       ...baseTheme.toolbar,
       ...overrideTheme.toolbar,
+    },
+    draggable: {
+      ...baseTheme.draggable,
+      ...overrideTheme.draggable,
     },
     richText: {
       ...baseTheme.richText,

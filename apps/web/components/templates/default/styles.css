@@ -1096,3 +1096,13 @@ table td[data-lexical-table-cell-selection] {
 .table-context-menu > div:not(:last-child) {
   border-bottom: 1px solid var(--lexkit-border);
 }
+
+/* Draggable Block Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

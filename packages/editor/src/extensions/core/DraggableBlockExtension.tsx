@@ -15,10 +15,37 @@ export interface DraggableConfig extends BaseExtensionConfig {
   handleRenderer?: (props: {
     rect: DOMRect;
     isDragging: boolean;
+    isHovered: boolean;
     onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
+  }) => ReactNode;
+  /** Custom drag preview renderer */
+  dragPreviewRenderer?: (props: {
+    element: HTMLElement;
+    isDragging: boolean;
   }) => ReactNode;
   /** Anchor element for portal (default: document.body) */
   anchorElem?: HTMLElement;
+  /** Show up/down buttons */
+  showMoveButtons?: boolean;
+  /** Custom up button renderer */
+  upButtonRenderer?: (props: { onClick: () => void; disabled?: boolean }) => ReactNode;
+  /** Custom down button renderer */
+  downButtonRenderer?: (props: { onClick: () => void; disabled?: boolean }) => ReactNode;
+  /** Custom drop indicator renderer */
+  dropIndicatorRenderer?: (props: { top: number; left: number; width: number }) => ReactNode;
+  /** Theme classes */
+  theme?: {
+    handle?: string;
+    handleHover?: string;
+    handleDragging?: string;
+    blockDragging?: string;
+    dropIndicator?: string;
+    upButton?: string;
+    downButton?: string;
+    blockIsDragging?: string;
+  };
 }
 
 /**
@@ -55,7 +82,18 @@ export class DraggableBlockExtension extends BaseExtension<
       showInToolbar: false,
       position: 'after',
       handleOffset: 20,
-      anchorElem: document.body,
+      anchorElem: undefined, // Will be set to document.body when component mounts
+      showMoveButtons: true, // Enable by default
+      theme: {
+        handle: 'lexkit-draggable-handle',
+        handleHover: 'lexkit-draggable-handle-hover',
+        handleDragging: 'lexkit-draggable-handle-dragging',
+        blockDragging: 'lexkit-draggable-block-dragging opacity-50 transition-opacity duration-200',
+        dropIndicator: 'lexkit-draggable-drop-indicator',
+        upButton: 'lexkit-draggable-up-button',
+        downButton: 'lexkit-draggable-down-button',
+        blockIsDragging: 'lexkit-draggable-block-is-dragging',
+      },
     } as DraggableConfig;
   }
 
@@ -130,9 +168,12 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
   const [hoveredBlock, setHoveredBlock] = useState<HTMLElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dropIndicator, setDropIndicator] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [draggedElement, setDraggedElement] = useState<HTMLElement | null>(null);
   const draggedKeyRef = useRef<string | null>(null);
-  const anchorElem = config.anchorElem || document.body;
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  if (typeof document === 'undefined') return null;
+  
+  const anchorElem = config.anchorElem || document.body;
 
   useEffect(() => {
     extension.setIsDragging(isDragging);
@@ -141,7 +182,10 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
   // Simple mouse tracking for showing handle
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) return;
+      // Don't track mouse during dragging, but keep the current hovered block
+      if (isDragging) {
+        return;
+      }
 
       const editorElement = editor.getRootElement();
       if (!editorElement) return;
@@ -172,8 +216,8 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
       // Set hovered block if we found one or are over the handle area
       if (blockElement || isOverHandle) {
         setHoveredBlock(blockElement || hoveredBlock);
-      } else {
-        // Delay hiding the handle
+      } else if (!isDragging) {
+        // Only hide if not dragging
         hideTimeoutRef.current = setTimeout(() => {
           setHoveredBlock(null);
         }, 200);
@@ -202,6 +246,17 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     console.log('🚀 handleDragStart called', element);
     event.stopPropagation();
     setIsDragging(true);
+    setDraggedElement(element);
+
+    // Add dragging classes to the element
+    if (config.theme?.blockDragging) {
+      const classes = config.theme.blockDragging.split(' ').filter(Boolean);
+      element.classList.add(...classes);
+    }
+    if (config.theme?.blockIsDragging) {
+      const classes = config.theme.blockIsDragging.split(' ').filter(Boolean);
+      element.classList.add(...classes);
+    }
 
     editor.update(() => {
       const node = $getNearestNodeFromDOMNode(element);
@@ -225,7 +280,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     document.body.appendChild(clone);
     event.dataTransfer!.setDragImage(clone, 0, 0);
     setTimeout(() => document.body.removeChild(clone), 0);
-  }, [editor]);
+  }, [editor, config.theme?.blockDragging, config.theme?.blockIsDragging]);
 
   const handleDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
@@ -317,7 +372,48 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     setIsDragging(false);
     setDropIndicator(null);
     draggedKeyRef.current = null;
-  }, []);
+
+    // Remove dragging classes from the element
+    if (draggedElement && config.theme?.blockDragging) {
+      const classes = config.theme.blockDragging.split(' ').filter(Boolean);
+      draggedElement.classList.remove(...classes);
+    }
+    if (draggedElement && config.theme?.blockIsDragging) {
+      const classes = config.theme.blockIsDragging.split(' ').filter(Boolean);
+      draggedElement.classList.remove(...classes);
+    }
+    setDraggedElement(null);
+  }, [draggedElement, config.theme?.blockDragging, config.theme?.blockIsDragging]);
+
+  const handleMoveUp = useCallback(() => {
+    if (!hoveredBlock) return;
+
+    editor.update(() => {
+      const node = $getNearestNodeFromDOMNode(hoveredBlock);
+      if (node && $isElementNode(node)) {
+        const prevSibling = node.getPreviousSibling();
+        if (prevSibling && $isElementNode(prevSibling)) {
+          node.remove();
+          prevSibling.insertBefore(node);
+        }
+      }
+    });
+  }, [editor, hoveredBlock]);
+
+  const handleMoveDown = useCallback(() => {
+    if (!hoveredBlock) return;
+
+    editor.update(() => {
+      const node = $getNearestNodeFromDOMNode(hoveredBlock);
+      if (node && $isElementNode(node)) {
+        const nextSibling = node.getNextSibling();
+        if (nextSibling && $isElementNode(nextSibling)) {
+          node.remove();
+          nextSibling.insertAfter(node);
+        }
+      }
+    });
+  }, [editor, hoveredBlock]);
 
   useEffect(() => {
     const editorElement = editor.getRootElement();
@@ -344,10 +440,11 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     }
   }, [editor, handleDragOver, handleDrop, handleDragEnd]);
 
-  // Only show handle when hovering over a block
-  if (!hoveredBlock) return null;
+  // Show handle when hovering over a block or when dragging
+  const currentElement = hoveredBlock || draggedElement;
+  if (!currentElement) return null;
 
-  const rect = hoveredBlock.getBoundingClientRect();
+  const rect = currentElement.getBoundingClientRect();
 
   return (
     <>
@@ -368,64 +465,176 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         anchorElem
       )}
 
-      {/* Actual drag handle */}
-      {createPortal(
-        <div
-          className="drag-handle"
-          style={{
-            position: 'absolute',
-            left: rect.left + window.scrollX - 35,
-            top: rect.top + window.scrollY + 4,
-            width: '24px',
-            height: '24px',
-            backgroundColor: '#64748b',
-            border: '2px solid #475569',
-            borderRadius: '6px',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#ffffff',
-            userSelect: 'none',
-            zIndex: 10000,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            pointerEvents: 'auto', // Enable mouse events for this element
-          }}
-          contentEditable={false}
-          draggable={true}
-          onDragStart={(e) => {
-            console.log('Drag started on block:', hoveredBlock);
-            handleDragStart(e, hoveredBlock);
-          }}
-          onMouseEnter={() => {
-            // Keep handle visible when hovering over it
-            setHoveredBlock(hoveredBlock);
-          }}
-        >
-          ⋮⋮
-        </div>,
-        anchorElem
+      {/* Custom handle renderer or default handle */}
+      {config.handleRenderer ? (
+        createPortal(
+          config.handleRenderer({
+            rect,
+            isDragging,
+            isHovered: true,
+            onDragStart: (e) => handleDragStart(e, currentElement),
+            onMoveUp: config.showMoveButtons ? handleMoveUp : undefined,
+            onMoveDown: config.showMoveButtons ? handleMoveDown : undefined,
+          }),
+          anchorElem
+        )
+      ) : (
+        /* Default drag handle */
+        createPortal(
+          <div
+            className={`${config.theme?.handle || 'lexkit-draggable-handle'} ${isDragging ? (config.theme?.handleDragging || 'lexkit-draggable-handle-dragging') : ''}`}
+            style={{
+              position: 'absolute',
+              left: rect.left + window.scrollX - 35,
+              top: rect.top + window.scrollY + 4,
+              width: '28px',
+              height: '28px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#64748b',
+              userSelect: 'none',
+              zIndex: 10000,
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
+              fontSize: '14px',
+              fontWeight: '600',
+              pointerEvents: 'auto',
+              transition: 'all 0.2s ease',
+            }}
+            contentEditable={false}
+            draggable={true}
+            onDragStart={(e) => {
+              console.log('Drag started on block:', currentElement);
+              handleDragStart(e, currentElement);
+            }}
+            onMouseEnter={() => {
+              setHoveredBlock(currentElement);
+            }}
+          >
+            ⋮⋮
+          </div>,
+          anchorElem
+        )
       )}
 
-      {/* Drop indicator */}
-      {dropIndicator && createPortal(
-        <div
-          style={{
-            position: 'absolute',
-            top: dropIndicator.top - 1,
-            left: dropIndicator.left,
-            width: dropIndicator.width,
-            height: '3px',
-            backgroundColor: '#3b82f6',
-            borderRadius: '2px',
-            pointerEvents: 'none',
-            zIndex: 9999,
-            boxShadow: '0 0 8px rgba(59, 130, 246, 0.5)',
-          }}
-        />,
-        anchorElem
+      {/* Move up/down buttons */}
+      {config.showMoveButtons && (
+        <>
+          {/* Up button */}
+          {config.upButtonRenderer ? (
+            createPortal(
+              config.upButtonRenderer({
+                onClick: handleMoveUp,
+                disabled: false, // TODO: Check if can move up
+              }),
+              anchorElem
+            )
+          ) : (
+            createPortal(
+              <button
+                className={config.theme?.upButton || 'lexkit-draggable-up-button'}
+                style={{
+                  position: 'absolute',
+                  left: rect.left + window.scrollX - 35,
+                  top: rect.top + window.scrollY - 24,
+                  width: '28px',
+                  height: '20px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  zIndex: 10000,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.15s ease',
+                }}
+                onClick={handleMoveUp}
+              >
+                ↑
+              </button>,
+              anchorElem
+            )
+          )}
+
+          {/* Down button */}
+          {config.downButtonRenderer ? (
+            createPortal(
+              config.downButtonRenderer({
+                onClick: handleMoveDown,
+                disabled: false, // TODO: Check if can move down
+              }),
+              anchorElem
+            )
+          ) : (
+            createPortal(
+              <button
+                className={config.theme?.downButton || 'lexkit-draggable-down-button'}
+                style={{
+                  position: 'absolute',
+                  left: rect.left + window.scrollX - 35,
+                  top: rect.top + window.scrollY + 36,
+                  width: '28px',
+                  height: '20px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  zIndex: 10000,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.15s ease',
+                }}
+                onClick={handleMoveDown}
+              >
+                ↓
+              </button>,
+              anchorElem
+            )
+          )}
+        </>
+      )}
+
+      {/* Custom drop indicator renderer or default */}
+      {dropIndicator && (
+        config.dropIndicatorRenderer ? (
+          createPortal(
+            config.dropIndicatorRenderer(dropIndicator),
+            anchorElem
+          )
+        ) : (
+          createPortal(
+            <div
+              className={config.theme?.dropIndicator || 'lexkit-draggable-drop-indicator'}
+              style={{
+                position: 'absolute',
+                top: dropIndicator.top - 1,
+                left: dropIndicator.left,
+                width: dropIndicator.width,
+                height: '3px',
+                backgroundColor: '#3b82f6',
+                borderRadius: '2px',
+                pointerEvents: 'none',
+                zIndex: 9999,
+                boxShadow: '0 0 8px rgba(59, 130, 246, 0.5)',
+              }}
+            />,
+            anchorElem
+          )
+        )
       )}
     </>
   );
