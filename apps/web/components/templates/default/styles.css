@@ -1022,7 +1022,7 @@
 .lexkit-button-primary {
   background-color: var(--lexkit-accent);
   border-color: var(--lexkit-accent);
-  color: white;
+  color:var(--lexkit-bg)
 }
 
 .lexkit-button-primary:hover {

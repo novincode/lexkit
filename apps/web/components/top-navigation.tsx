@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Github, ExternalLink, Menu, X } from "lucide-react"
 import { Button } from "@repo/ui/components/button"
 import { ThemeToggle } from "./theme-toggle"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@repo/ui/lib/utils"
 import { usePathname } from "next/navigation"
 
@@ -53,11 +53,17 @@ export function TopNavigation({
   showMobileMenu = true
 }: TopNavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const pathname = usePathname()
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Helper function to check if a navigation item is active
   const isActive = (item: typeof navigationItems[0]) => {
-    if (item.external) return false
+    if (!isClient || item.external) return false
 
     // Check if current path matches any of the active paths
     return item.activePaths.some(activePath => {
@@ -98,8 +104,8 @@ export function TopNavigation({
               target={item.external ? "_blank" : undefined}
               className={cn(
                 "flex items-center gap-1 transition-colors",
-                isActive(item)
-                  ? "text-primary underline  underline-offset-4 "
+                isClient && isActive(item)
+                  ? "text-primary underline underline-offset-4"
                   : "text-foreground/60 hover:text-foreground font-light"
               )}
             >
@@ -148,7 +154,7 @@ export function TopNavigation({
                 target={item.external ? "_blank" : undefined}
                 className={cn(
                   "flex items-center gap-1 transition-colors",
-                  isActive(item)
+                  isClient && isActive(item)
                     ? "text-primary font-semibold"
                     : "text-foreground/60 hover:text-foreground"
                 )}

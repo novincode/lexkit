@@ -137,7 +137,7 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
    */
   static importJSON(serialized: SerializedHTMLEmbedNode): HTMLEmbedNode {
     const payload: HTMLEmbedPayload = {
-      html: serialized.html || '<div style="padding: 20px; background: #f0f0f0; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
+      html: serialized.html || '<div style="padding: 20px;  border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
       preview: serialized.preview ?? true,
     };
     return new HTMLEmbedNode(payload);
@@ -338,7 +338,7 @@ export class HTMLEmbedExtension extends BaseExtension<
       insertHTMLEmbed: (html?: string) => {
         editor.update(() => {
           const payload: HTMLEmbedPayload = {
-            html: html || '<div style="padding: 20px; background: #f0f0f0; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
+            html: html || '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
             preview: false, // Start in edit mode
           };
           

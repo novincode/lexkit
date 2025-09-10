@@ -30,7 +30,6 @@ const { extension: MyCustomExtension, $createCustomNode, jsxToDOM } = createCust
         borderRadius: '8px',
         padding: '16px',
         margin: '8px 0',
-        backgroundColor: isSelected ? '#f0f8ff' : '#f8f9fa',
         position: 'relative'
       }}
     >
