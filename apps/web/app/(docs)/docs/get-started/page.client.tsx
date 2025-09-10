@@ -121,7 +121,7 @@ Ready to build something amazing? Let's get started! 🚀`);
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
             <div className="bg-background/80 rounded-lg p-4 border">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Zap className="h-4 w-4 text-blue-600" />
@@ -188,7 +188,7 @@ Ready to build something amazing? Let's get started! 🚀`);
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="flex flex-col md:grid md:grid-cols-3 gap-4">
             <div className="bg-background/80 rounded-lg p-4 border">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
@@ -231,7 +231,7 @@ Ready to build something amazing? Let's get started! 🚀`);
               <Target className="h-4 w-4" />
               Two Ways to Use LexKit
             </h4>
-            <div className="grid md:grid-cols-2 gap-4 mt-3">
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mt-3">
               <div className="text-sm">
                 <strong className="text-primary">Extension System:</strong> Use <code>createEditorSystem</code> with RichTextExtension for full type safety and modularity. Perfect for complex editors.
               </div>
@@ -330,7 +330,7 @@ Ready to build something amazing? Let's get started! 🚀`);
               <Target className="h-5 w-5 text-green-600 mt-0.5" />
               <div>
                 <h4 className="font-semibold text-green-900 dark:text-green-100 mb-1">Available Extensions</h4>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-3 text-sm">
                   <div>
                     <strong>Text Formatting:</strong> Bold, italic, underline, strikethrough, code
                   </div>
@@ -386,7 +386,7 @@ Ready to build something amazing? Let's get started! 🚀`);
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 md:gap-6 gap-4 mb-6">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
             <div className="space-y-4">
               <h4 className="font-semibold flex items-center gap-2">
                 <Play className="h-4 w-4" />
@@ -452,7 +452,7 @@ Ready to build something amazing? Let's get started! 🚀`);
                 <p className="text-sm text-muted-foreground mb-3">
                   You've learned the fundamentals of LexKit. Now you can:
                 </p>
-                <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
                     <span>Create production editors</span>

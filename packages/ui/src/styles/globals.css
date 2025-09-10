@@ -7,6 +7,27 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Code Block Line Highlighting */
+.highlighted-line {
+  position: relative;
+}
+
+.highlighted-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 122, 204, 0.1);
+  z-index: -1;
+  width: 100%;
+}
+
+.dark .highlighted-line::before {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -163,4 +184,25 @@
     linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 50px 50px;
+}
+
+/* Code Block Line Highlighting */
+.highlighted-line {
+  position: relative;
+}
+
+.highlighted-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 122, 204, 0.5);
+  z-index: -1;
+  width:100%
+}
+
+.dark .highlighted-line::before {
+  background-color: rgba(255, 255, 255, 0.5);
 }

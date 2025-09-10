@@ -63,7 +63,7 @@ export default function ExtensionsPageClient() {
           They provide commands, state queries, UI components, and custom behavior.
         </p>
 
-        <div className="grid md:grid-cols-3 md:gap-6 gap-4">
+        <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6">
           <Card className="border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export default function ExtensionsPageClient() {
             </CardContent>
           </Card>
 
-          <div className="md:grid md:grid-cols-2 md:gap-6 gap-4 flex flex-col">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
             <Card className="border-blue-200 dark:border-blue-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export default function ExtensionsPageClient() {
                   State Queries
                 </CardTitle>
               </CardHeader>
-              <CardContent className='flex flex-col'>
+              <CardContent>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   Define functions that return information about the editor's current state.
                   These are async functions that can read from the editor safely.
@@ -247,7 +247,7 @@ export default function ExtensionsPageClient() {
             </CardContent>
           </Card>
 
-          <div className="flex flex-col md:gap-6 gap-4 md:grid md:grid-cols-2">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
             <Card className="border-green-200 dark:border-green-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
@@ -298,7 +298,7 @@ export default function ExtensionsPageClient() {
               <p className="text-muted-foreground leading-relaxed mb-4">
                 Choose BaseExtension when you need:
               </p>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <h5 className="font-medium text-sm">Perfect For:</h5>
                   <ul className="text-sm text-muted-foreground space-y-1">
@@ -436,7 +436,7 @@ export default function ExtensionsPageClient() {
           Tips for building maintainable and performant extensions.
         </p>
 
-        <div className="grid md:grid-cols-2 md:gap-6 gap-4">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">

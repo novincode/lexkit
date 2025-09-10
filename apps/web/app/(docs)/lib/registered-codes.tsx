@@ -329,12 +329,6 @@ const extensions = [
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 
-function MyEditor() {
-  const initialConfig = {
-    namespace: 'my-editor',
-    theme: {},
-    onError: (error: Error) => console.error(error),
-  }
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
