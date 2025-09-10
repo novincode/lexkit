@@ -26,6 +26,9 @@ export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockTy
 // History & Undo/Redo
 export { HistoryExtension, historyExtension } from './core/HistoryExtension';
 
+// Draggable Extensions
+export { DraggableBlockExtension, draggableBlockExtension, type DraggableConfig } from './core/DraggableBlockExtension';
+
 // Export/Import Extensions
 export { HTMLExtension, htmlExtension } from './export/HTMLExtension';
 export { MarkdownExtension, markdownExtension } from './export/MarkdownExtension';

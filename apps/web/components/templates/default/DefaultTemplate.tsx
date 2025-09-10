@@ -18,7 +18,8 @@ import {
   markdownExtension,
   codeExtension,
   codeFormatExtension,
-  htmlEmbedExtension
+  htmlEmbedExtension,
+  draggableBlockExtension
 } from '@lexkit/editor/extensions';
 import { commandPaletteExtension, floatingToolbarExtension, contextMenuExtension } from '@lexkit/editor/extensions/core';
 import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/transformers';
@@ -87,7 +88,8 @@ const extensions = [
   MyCustomExtension,
   floatingToolbarExtension,
   contextMenuExtension,
-  commandPaletteExtension
+  commandPaletteExtension,
+  draggableBlockExtension
 ] as const;
 
 // Create a typed editor system for these specific extensions
