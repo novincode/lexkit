@@ -50,11 +50,12 @@ export const defaultLexKitTheme: LexKitTheme = {
   paragraph: 'lexkit-paragraph',
   link: 'lexkit-link',
   image: 'lexkit-image',
-  horizontalRule: 'lexkit-hr',
+  hr: 'lexkit-hr',
   table: 'lexkit-table',
   tableRow: 'lexkit-table-row',
   tableCell: 'lexkit-table-cell',
   tableCellHeader: 'lexkit-table-cell-header',
+  code: "lexkit-code-block",
 
   // Custom LexKit properties
   toolbar: {

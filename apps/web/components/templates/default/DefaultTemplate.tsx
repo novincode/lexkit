@@ -727,9 +727,9 @@ function EditorContent({
     // Register keyboard shortcuts
     const unregisterShortcuts = registerKeyboardShortcuts(commands, document.body);
 
-    // Add Ctrl+K shortcut for command palette
+    // Add Ctrl+K / Cmd+K shortcut for command palette
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setCommandPaletteOpen(true);
       }
@@ -927,7 +927,7 @@ export const DefaultTemplate = React.forwardRef<DefaultTemplateRef, DefaultTempl
 
     return (
       <div className={`lexkit-editor-wrapper ${className || ''}`} data-editor-theme={editorTheme}>
-        <Provider extensions={extensions} >
+        <Provider extensions={extensions}  >
           <EditorContent
             className={className}
             isDark={isDark}

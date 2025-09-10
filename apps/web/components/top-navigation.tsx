@@ -106,7 +106,7 @@ export function TopNavigation({
                 "flex items-center gap-1 transition-colors",
                 isClient && isActive(item)
                   ? "text-primary underline underline-offset-4"
-                  : "text-foreground/60 hover:text-foreground font-light"
+                  : "text-foreground/60 hover:text-foreground"
               )}
             >
               {item.label}

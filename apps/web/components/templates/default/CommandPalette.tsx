@@ -80,8 +80,14 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   if (!isOpen) return null;
 
   return (
-    <div className="lexkit-command-palette-overlay">
-      <div className="lexkit-command-palette">
+    <div 
+      className="lexkit-command-palette-overlay"
+      onClick={onClose}
+    >
+      <div 
+        className="lexkit-command-palette"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="lexkit-command-palette-header">
           <Search size={16} className="lexkit-command-palette-icon" />
           <input

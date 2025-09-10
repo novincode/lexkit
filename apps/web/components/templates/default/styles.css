@@ -599,12 +599,19 @@
   text-decoration: line-through;
 }
 
-.lexkit-text-code {
+.lexkit-text-code, .lexkit-code-block {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875em;
   background-color: var(--lexkit-muted);
+  border: 1px solid var(--lexkit-border);
   padding: 0.125em 0.25em;
   border-radius: 4px;
+}
+.lexkit-code-block {
+  display: block;
+  padding:12px;
+  border-radius: 6px;
+  margin: 0 0 1rem 0
 }
 
 .lexkit-link {

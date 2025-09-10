@@ -62,9 +62,9 @@ That's it! You're ready to build something amazing.`);
       <section className="relative overflow-hidden bg-gradient-to-b from-background via-blue-500/10 to-purple-900/20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column - Content */}
-            <div className="space-y-8">
+          <div className="flex flex-col gap-12 items-center text-center">
+            {/* Content Section */}
+            <div className="space-y-8 max-w-4xl">
               <div className="space-y-4">
                 <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -74,13 +74,13 @@ That's it! You're ready to build something amazing.`);
                   Build Amazing
                   <span className="text-primary block">Rich Text Editors</span>
                 </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed ">
+                <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                   LexKit is a modern, type-safe React framework built on Meta's Lexical.
                   Create powerful editors with ease — perfect for blogs, apps, and teams.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="text-lg px-8 py-6" asChild>
                   <Link href="/docs/introduction">
                     Get Started
@@ -95,7 +95,7 @@ That's it! You're ready to build something amazing.`);
                 </Button>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4" />
                   <span>MIT License</span>
@@ -111,8 +111,8 @@ That's it! You're ready to build something amazing.`);
               </div>
             </div>
 
-            {/* Right Column - Editor Demo */}
-            <div className="relative">
+            {/* Editor Demo Section */}
+            <div className="relative w-full max-w-4xl text-left">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-3xl blur-3xl" />
               <div className="relative">
                 <DefaultTemplate ref={editorRef} onReady={handleEditorReady} />
