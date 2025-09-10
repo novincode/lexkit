@@ -61,7 +61,7 @@ That's it! You're ready to build something amazing.`);
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-black via-slate-900 to-purple-900/20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="container mx-auto px-4 py-20 lg:py-32">
+        <div className="container mx-auto px-4 py-20 lg:py-32 relative z-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Content */}
             <div className="space-y-8">
@@ -74,7 +74,7 @@ That's it! You're ready to build something amazing.`);
                   Build Amazing
                   <span className="text-primary block">Rich Text Editors</span>
                 </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                <p className="text-xl text-muted-foreground leading-relaxed ">
                   LexKit is a modern, type-safe React framework built on Meta's Lexical.
                   Create powerful editors with ease — perfect for blogs, apps, and teams.
                 </p>
