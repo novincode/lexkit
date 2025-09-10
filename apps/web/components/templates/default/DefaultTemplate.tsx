@@ -161,13 +161,15 @@ function Toolbar({
   hasExtension,
   activeStates,
   isDark,
-  toggleTheme
+  toggleTheme,
+  onCommandPaletteOpen
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   isDark: boolean;
   toggleTheme: () => void;
+  onCommandPaletteOpen: () => void;
 }) {
   const { lexical: editor } = useEditor();
   const { handlers, fileInputRef } = useImageHandlers(commands, editor);
@@ -501,7 +503,7 @@ function Toolbar({
       {/* Command Palette */}
       <div className="lexkit-toolbar-section">
         <button
-          onClick={() => commands.showCommandPalette()}
+          onClick={onCommandPaletteOpen}
           className="lexkit-toolbar-button"
           title="Command Palette (Ctrl+K)"
         >
@@ -713,6 +715,7 @@ function EditorContent({
 
     // Register commands in the command palette
     const paletteCommands = commandsToCommandPaletteItems(commands);
+    console.log('🎯 Registering command palette commands:', paletteCommands.length);
     paletteCommands.forEach(cmd => {
       commands.registerCommand(cmd);
     });
@@ -724,6 +727,15 @@ function EditorContent({
     // Register keyboard shortcuts
     const unregisterShortcuts = registerKeyboardShortcuts(commands, document.body);
 
+    // Add Ctrl+K shortcut for command palette
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
     // Call onReady with methods immediately when editor is ready
     if (onReady) {
       console.log('🎉 Editor ready - calling onReady with methods');
@@ -732,6 +744,7 @@ function EditorContent({
 
     return () => {
       unregisterShortcuts();
+      document.removeEventListener('keydown', handleKeyDown);
       // Restore original command
       (commands as any).showCommandPalette = originalShowCommand;
     };
@@ -802,6 +815,7 @@ function EditorContent({
             activeStates={activeStates}
             isDark={isDark}
             toggleTheme={toggleTheme}
+            onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
           />
         )}
       </div>

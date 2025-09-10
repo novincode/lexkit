@@ -1,7 +1,8 @@
 /* LexKit Editor - Clean Framework-Agnostic Styles */
 
 /* CSS Variables for Theme - Framework Agnostic */
-:root {
+:root,
+.lexkit-editor-wrapper[data-editor-theme="light"] {
   --lexkit-bg: #ffffff;
   --lexkit-fg: #0f172a;
   --lexkit-border: #e2e8f0;
@@ -16,20 +17,7 @@
 
 /* Dark Mode - Framework Agnostic */
 [data-theme="dark"],
-.dark {
-  --lexkit-bg: #0a0a0a;
-  --lexkit-fg: #ededed;
-  --lexkit-border: #262626;
-  --lexkit-border-hover: #404040;
-  --lexkit-border-active: #525252;
-  --lexkit-accent: #ededed;
-  --lexkit-accent-hover: #d4d4d8;
-  --lexkit-shadow: rgba(0, 0, 0, 0.5);
-  --lexkit-muted: #171717;
-  --lexkit-muted-fg: #a3a3a3;
-}
-
-/* Editor-specific theme overrides */
+.dark,
 .lexkit-editor-wrapper[data-editor-theme="dark"] {
   --lexkit-bg: #0a0a0a;
   --lexkit-fg: #ededed;
@@ -41,19 +29,6 @@
   --lexkit-shadow: rgba(0, 0, 0, 0.5);
   --lexkit-muted: #171717;
   --lexkit-muted-fg: #a3a3a3;
-}
-
-.lexkit-editor-wrapper[data-editor-theme="light"] {
-  --lexkit-bg: #ffffff;
-  --lexkit-fg: #0f172a;
-  --lexkit-border: #e2e8f0;
-  --lexkit-border-hover: #cbd5e1;
-  --lexkit-border-active: #94a3b8;
-  --lexkit-accent: #0f172a;
-  --lexkit-accent-hover: #1e293b;
-  --lexkit-shadow: rgba(0, 0, 0, 0.08);
-  --lexkit-muted: #f8fafc;
-  --lexkit-muted-fg: #64748b;
 }
 
 /* Editor Wrapper */
@@ -332,11 +307,11 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 20vh;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .lexkit-command-palette {
-  background: var(--lexkit-bg-primary);
+  background: var(--lexkit-bg);
   border: 1px solid var(--lexkit-border);
   border-radius: 12px;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
@@ -357,7 +332,7 @@
 }
 
 .lexkit-command-palette-icon {
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   flex-shrink: 0;
 }
 
@@ -367,21 +342,21 @@
   border: none;
   outline: none;
   font-size: 16px;
-  color: var(--lexkit-text-primary);
+  color: var(--lexkit-fg);
   font-family: inherit;
 }
 
 .lexkit-command-palette-input::placeholder {
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
 }
 
 .lexkit-command-palette-kbd {
-  background: var(--lexkit-bg-secondary);
+  background: var(--lexkit-muted);
   border: 1px solid var(--lexkit-border);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 11px;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   font-family: monospace;
 }
 
@@ -399,7 +374,7 @@
   padding: 8px 20px 4px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -418,7 +393,7 @@
 
 .lexkit-command-palette-item:hover,
 .lexkit-command-palette-item.selected {
-  background: var(--lexkit-bg-secondary);
+  background: var(--lexkit-muted);
 }
 
 .lexkit-command-palette-item-content {
@@ -428,24 +403,24 @@
 
 .lexkit-command-palette-item-title {
   font-size: 14px;
-  color: var(--lexkit-text-primary);
+  color: var(--lexkit-fg);
   font-weight: 500;
   margin-bottom: 2px;
 }
 
 .lexkit-command-palette-item-description {
   font-size: 12px;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   line-height: 1.4;
 }
 
 .lexkit-command-palette-item-shortcut {
-  background: var(--lexkit-bg-tertiary);
+  background: var(--lexkit-muted);
   border: 1px solid var(--lexkit-border);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 10px;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   font-family: monospace;
   margin-left: 12px;
   flex-shrink: 0;
@@ -454,19 +429,19 @@
 .lexkit-command-palette-footer {
   padding: 12px 20px;
   border-top: 1px solid var(--lexkit-border);
-  background: var(--lexkit-bg-secondary);
+  background: var(--lexkit-muted);
 }
 
 .lexkit-command-palette-hint {
   font-size: 11px;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .lexkit-command-palette-hint kbd {
-  background: var(--lexkit-bg-primary);
+  background: var(--lexkit-bg);
   border: 1px solid var(--lexkit-border);
   border-radius: 3px;
   padding: 1px 4px;
@@ -477,7 +452,7 @@
 .lexkit-command-palette-empty {
   padding: 40px 20px;
   text-align: center;
-  color: var(--lexkit-text-secondary);
+  color: var(--lexkit-muted-fg);
   font-size: 14px;
 }
 

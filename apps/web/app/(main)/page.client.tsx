@@ -59,14 +59,14 @@ That's it! You're ready to build something amazing.`);
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-black via-slate-900 to-purple-900/20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-background via-blue-500/10 to-purple-900/20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="container mx-auto px-4 py-20 lg:py-32 relative z-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Content */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
+                <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
                   <Sparkles className="h-4 w-4 mr-2" />
                   Open Source & Free
                 </Badge>
