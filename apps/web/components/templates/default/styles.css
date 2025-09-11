@@ -1421,6 +1421,13 @@ table td[data-lexical-table-cell-selection] {
   animation: lexkit-floating-toolbar-appear 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.lexkit-floating-toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background-color: var(--lexkit-border);
+  margin: 0 4px;
+}
+
 @keyframes lexkit-floating-toolbar-appear {
   from {
     opacity: 0;
