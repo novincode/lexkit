@@ -125,7 +125,7 @@ export class DraggableBlockExtension extends BaseExtension<
                 editor.update(() => {
                     const sourceNode = $getNodeByKey(sourceKey);
                     const targetNode = $getNodeByKey(targetKey);
-                    if (sourceNode && targetNode && $isElementNode(sourceNode) && $isElementNode(targetNode)) {
+                    if (sourceNode && targetNode) {
                         sourceNode.remove();
                         if (insertAfter) {
                             targetNode.insertAfter(sourceNode);
@@ -371,7 +371,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         // Set up drag data
         editor.update(() => {
             const node = $getNearestNodeFromDOMNode(element);
-            if (node && $isElementNode(node)) {
+            if (node) {
                 const key = node.getKey();
                 draggedKeyRef.current = key;
                 event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key }));
@@ -434,7 +434,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         // Set drag data
         editor.update(() => {
             const node = $getNearestNodeFromDOMNode(selectedBlock!);
-            if (node && $isElementNode(node)) {
+            if (node) {
                 const key = node.getKey();
                 draggedKeyRef.current = key;
                 event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key, type: 'text-selection' }));
@@ -480,9 +480,9 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
         editor.update(() => {
             const node = $getNearestNodeFromDOMNode(hoveredBlock);
-            if (node && $isElementNode(node)) {
+            if (node) {
                 const prevSibling = node.getPreviousSibling();
-                if (prevSibling && $isElementNode(prevSibling)) {
+                if (prevSibling) {
                     node.remove();
                     prevSibling.insertBefore(node);
                 }
@@ -495,9 +495,9 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
         editor.update(() => {
             const node = $getNearestNodeFromDOMNode(hoveredBlock);
-            if (node && $isElementNode(node)) {
+            if (node) {
                 const nextSibling = node.getNextSibling();
-                if (nextSibling && $isElementNode(nextSibling)) {
+                if (nextSibling) {
                     node.remove();
                     nextSibling.insertAfter(node);
                 }
@@ -574,7 +574,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                     const sourceNode = $getNodeByKey(sourceKey);
                     const targetNode = $getNearestNodeFromDOMNode(targetElement);
 
-                    if (sourceNode && targetNode && $isElementNode(sourceNode) && $isElementNode(targetNode)) {
+                    if (sourceNode && targetNode) {
                         const rect = targetElement.getBoundingClientRect();
                         const insertAfter = event.clientY >= rect.top + rect.height / 2;
 
