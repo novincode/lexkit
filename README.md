@@ -1,9 +1,9 @@
-# LexKit
+# LexKit - Free Open Source Rich Text Editor
 
 <div align="center">
 
-**A headless, extensible rich text editor built on Lexical**  
-*Type-safe • Scalable • Production-ready*
+**Modern, React-Friendly Rich Text Editor Built on Lexical Framework**  
+*Free • Open Source • Type-Safe • Scalable • Production-Ready*
 
 [![npm version](https://badge.fury.io/js/lexkit)](https://github.com/novincode/lexkit)
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://github.com/novincode/lexkit)
@@ -15,7 +15,28 @@
 
 ---
 
-## ✨ What Makes LexKit Special
+## 🚀 What is LexKit?
+
+**LexKit** is a free, open-source, modern rich text editor framework built specifically for React developers. It provides a headless, extensible architecture on top of the powerful Lexical framework, giving you complete control over your editor's appearance and behavior while maintaining excellent developer experience.
+
+### 🎯 Perfect For:
+- **React Applications** - Seamless integration with React projects
+- **Content Management Systems** - Build custom CMS solutions
+- **Blog Platforms** - Create rich blogging experiences
+- **Documentation Tools** - Technical writing and documentation
+- **Email Editors** - Rich email composition
+- **Note-taking Apps** - Enhanced note-taking functionality
+- **WYSIWYG Editors** - Modern WYSIWYG experiences
+
+### ✨ Key Features:
+- 🔧 **Headless Architecture** - Complete UI control
+- 🎨 **Fully Customizable** - Style it your way
+- 📦 **Extension System** - Modular functionality
+- 🎯 **Type-Safe** - Full TypeScript support
+- 🚀 **Performance Optimized** - Built on Lexical
+- 📱 **Mobile Friendly** - Responsive design
+- 🎪 **Drag & Drop** - Intuitive content manipulation
+- 🔌 **Plugin System** - Easy extensibility
 
 LexKit is not just another rich text editor—it's a **type-safe, scalable framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
 
