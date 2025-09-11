@@ -210,6 +210,9 @@ function FloatingToolbarRenderer() {
 
   if (!isVisible || !selectionRect) return null;
 
+  // Check if an image is selected
+  const isImageSelected = activeStates.imageSelected;
+
   // Render as portal to document body for proper positioning
   return createPortal(
     <div
@@ -223,111 +226,171 @@ function FloatingToolbarRenderer() {
         pointerEvents: 'auto'
       }}
     >
-      {/* Text Formatting */}
-      <button
-        onClick={() => commands.toggleBold?.()}
-        className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
-        title="Bold"
-      >
-        <Bold size={14} />
-      </button>
-      <button
-        onClick={() => commands.toggleItalic?.()}
-        className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
-        title="Italic"
-      >
-        <Italic size={14} />
-      </button>
-      <button
-        onClick={() => commands.toggleUnderline?.()}
-        className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
-        title="Underline"
-      >
-        <Underline size={14} />
-      </button>
-      <button
-        onClick={() => commands.toggleStrikethrough?.()}
-        className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
-        title="Strikethrough"
-      >
-        <Strikethrough size={14} />
-      </button>
-
-      {/* Separator */}
-      <div className="lexkit-floating-toolbar-separator" />
-
-      {/* Block Format - Compact buttons for common formats */}
-      {hasExtension('blockFormat') && (
+      {isImageSelected ? (
+        // Image-specific toolbar
         <>
+          {/* Image Alignment */}
           <button
-            onClick={() => handleBlockFormatChange('p')}
-            className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isQuote && !activeStates.unorderedList && !activeStates.orderedList && !activeStates.isInCodeBlock ? 'active' : ''}`}
-            title="Paragraph"
+            onClick={() => commands.setImageAlignment('left')}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? 'active' : ''}`}
+            title="Align Left"
           >
-            P
+            <AlignLeft size={14} />
           </button>
           <button
-            onClick={() => handleBlockFormatChange('h1')}
-            className={`lexkit-toolbar-button ${activeStates.isH1 ? 'active' : ''}`}
-            title="Heading 1"
+            onClick={() => commands.setImageAlignment('center')}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? 'active' : ''}`}
+            title="Align Center"
           >
-            H1
+            <AlignCenter size={14} />
           </button>
           <button
-            onClick={() => handleBlockFormatChange('h2')}
-            className={`lexkit-toolbar-button ${activeStates.isH2 ? 'active' : ''}`}
-            title="Heading 2"
+            onClick={() => commands.setImageAlignment('right')}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? 'active' : ''}`}
+            title="Align Right"
           >
-            H2
+            <AlignRight size={14} />
           </button>
-          <button
-            onClick={() => handleBlockFormatChange('h3')}
-            className={`lexkit-toolbar-button ${activeStates.isH3 ? 'active' : ''}`}
-            title="Heading 3"
-          >
-            H3
-          </button>
-          <button
-            onClick={() => handleBlockFormatChange('quote')}
-            className={`lexkit-toolbar-button ${activeStates.isQuote ? 'active' : ''}`}
-            title="Quote"
-          >
-            <Quote size={14} />
-          </button>
-
-          {/* Code Block */}
-          {hasExtension('code') && (
-            <button
-              onClick={() => commands.toggleCodeBlock()}
-              className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
-              title="Code Block"
-            >
-              <Terminal size={14} />
-            </button>
-          )}
 
           {/* Separator */}
           <div className="lexkit-floating-toolbar-separator" />
-        </>
-      )}
 
-      {/* Lists */}
-      {hasExtension('list') && (
+          {/* Image Actions */}
+          <button
+            onClick={() => {
+              const caption = prompt('Enter caption:') || '';
+              commands.setImageCaption(caption);
+            }}
+            className="lexkit-toolbar-button"
+            title="Edit Caption"
+          >
+            <Type size={14} />
+          </button>
+          <button
+            onClick={() => {
+              const src = prompt('Enter new image URL:');
+              if (src) {
+                // For now, we'll need to replace the entire image
+                // This is a simplified approach - in a real app you'd want more sophisticated image replacement
+                alert('Image replacement requires selecting the image and using the main toolbar. This will be improved in future updates.');
+              }
+            }}
+            className="lexkit-toolbar-button"
+            title="Replace Image"
+          >
+            <Upload size={14} />
+          </button>
+        </>
+      ) : (
+        // Text formatting toolbar (original)
         <>
+          {/* Text Formatting */}
           <button
-            onClick={() => commands.toggleUnorderedList()}
-            className={`lexkit-toolbar-button ${activeStates.unorderedList ? 'active' : ''}`}
-            title="Bullet List"
+            onClick={() => commands.toggleBold?.()}
+            className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
+            title="Bold"
           >
-            <List size={14} />
+            <Bold size={14} />
           </button>
           <button
-            onClick={() => commands.toggleOrderedList()}
-            className={`lexkit-toolbar-button ${activeStates.orderedList ? 'active' : ''}`}
-            title="Numbered List"
+            onClick={() => commands.toggleItalic?.()}
+            className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
+            title="Italic"
           >
-            <ListOrdered size={14} />
+            <Italic size={14} />
           </button>
+          <button
+            onClick={() => commands.toggleUnderline?.()}
+            className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
+            title="Underline"
+          >
+            <Underline size={14} />
+          </button>
+          <button
+            onClick={() => commands.toggleStrikethrough?.()}
+            className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
+            title="Strikethrough"
+          >
+            <Strikethrough size={14} />
+          </button>
+
+          {/* Separator */}
+          <div className="lexkit-floating-toolbar-separator" />
+
+          {/* Block Format - Compact buttons for common formats */}
+          {hasExtension('blockFormat') && (
+            <>
+              <button
+                onClick={() => handleBlockFormatChange('p')}
+                className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isQuote && !activeStates.unorderedList && !activeStates.orderedList && !activeStates.isInCodeBlock ? 'active' : ''}`}
+                title="Paragraph"
+              >
+                P
+              </button>
+              <button
+                onClick={() => handleBlockFormatChange('h1')}
+                className={`lexkit-toolbar-button ${activeStates.isH1 ? 'active' : ''}`}
+                title="Heading 1"
+              >
+                H1
+              </button>
+              <button
+                onClick={() => handleBlockFormatChange('h2')}
+                className={`lexkit-toolbar-button ${activeStates.isH2 ? 'active' : ''}`}
+                title="Heading 2"
+              >
+                H2
+              </button>
+              <button
+                onClick={() => handleBlockFormatChange('h3')}
+                className={`lexkit-toolbar-button ${activeStates.isH3 ? 'active' : ''}`}
+                title="Heading 3"
+              >
+                H3
+              </button>
+              <button
+                onClick={() => handleBlockFormatChange('quote')}
+                className={`lexkit-toolbar-button ${activeStates.isQuote ? 'active' : ''}`}
+                title="Quote"
+              >
+                <Quote size={14} />
+              </button>
+
+              {/* Code Block */}
+              {hasExtension('code') && (
+                <button
+                  onClick={() => commands.toggleCodeBlock()}
+                  className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? 'active' : ''}`}
+                  title="Code Block"
+                >
+                  <Terminal size={14} />
+                </button>
+              )}
+
+              {/* Separator */}
+              <div className="lexkit-floating-toolbar-separator" />
+            </>
+          )}
+
+          {/* Lists */}
+          {hasExtension('list') && (
+            <>
+              <button
+                onClick={() => commands.toggleUnorderedList()}
+                className={`lexkit-toolbar-button ${activeStates.unorderedList ? 'active' : ''}`}
+                title="Bullet List"
+              >
+                <List size={14} />
+              </button>
+              <button
+                onClick={() => commands.toggleOrderedList()}
+                className={`lexkit-toolbar-button ${activeStates.orderedList ? 'active' : ''}`}
+                title="Numbered List"
+              >
+                <ListOrdered size={14} />
+              </button>
+            </>
+          )}
         </>
       )}
     </div>,

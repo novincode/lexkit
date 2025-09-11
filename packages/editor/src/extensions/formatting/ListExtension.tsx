@@ -104,17 +104,25 @@ export class ListExtension extends BaseExtension<
           if ($isRangeSelection(selection)) {
             const anchorNode = selection.anchor.getNode();
             let parent = anchorNode.getParent();
-            let hasList = false;
+            let listNode: any = null;
             while (parent) {
-              if (parent.getType() === 'list') {
-                hasList = true;
+              if ($isListNode(parent)) {
+                listNode = parent;
                 break;
               }
               parent = parent.getParent();
             }
-            if (hasList) {
-              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+
+            if (listNode) {
+              // If already an unordered list, remove it
+              if (listNode.getListType() === 'bullet') {
+                editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+              } else {
+                // If it's an ordered list, convert to unordered
+                editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+              }
             } else {
+              // No list, create unordered list
               editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
             }
           }
@@ -126,17 +134,25 @@ export class ListExtension extends BaseExtension<
           if ($isRangeSelection(selection)) {
             const anchorNode = selection.anchor.getNode();
             let parent = anchorNode.getParent();
-            let hasList = false;
+            let listNode: any = null;
             while (parent) {
-              if (parent.getType() === 'list') {
-                hasList = true;
+              if ($isListNode(parent)) {
+                listNode = parent;
                 break;
               }
               parent = parent.getParent();
             }
-            if (hasList) {
-              editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+
+            if (listNode) {
+              // If already an ordered list, remove it
+              if (listNode.getListType() === 'number') {
+                editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+              } else {
+                // If it's an unordered list, convert to ordered
+                editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+              }
             } else {
+              // No list, create ordered list
               editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
             }
           }
