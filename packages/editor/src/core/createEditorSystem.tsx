@@ -130,6 +130,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       extensions,
       commands,
       activeStates: activeStates as ExtractStateQueries<Exts>,
+      stateQueries, // Add stateQueries to context
       listeners: {
         registerUpdate: (listener: (state: any) => void) => editor?.registerUpdateListener(listener) || (() => {}),
         registerPaste: (listener: (event: ClipboardEvent) => boolean) => editor?.registerCommand(PASTE_COMMAND, listener, 4) || (() => {}),

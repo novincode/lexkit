@@ -40,11 +40,6 @@ export const docsConfig: DocsSection[] = [
         description: "Understanding the extension system"
       },
       {
-        title: "Commands & State",
-        href: "/docs/commands-state",
-        description: "Type-safe commands and state queries"
-      },
-      {
         title: "Theming",
         href: "/docs/theming",
         description: "Customize the look and feel"
@@ -52,73 +47,43 @@ export const docsConfig: DocsSection[] = [
     ]
   },
   {
-    title: "Extensions",
+    title: "Templates",
     items: [
       {
-        title: "Text Formatting",
-        href: "/docs/extensions/text-formatting",
-        description: "Bold, italic, underline, and more"
+        title: "Default Template",
+        href: "/docs/templates/default",
+        description: "Basic editor setup"
       },
       {
-        title: "Lists",
-        href: "/docs/extensions/lists",
-        description: "Ordered and unordered lists"
+        title: "Shadcn Template",
+        href: "/docs/templates/shadcn",
+        description: "Editor with Shadcn UI components"
       },
-      {
-        title: "Tables",
-        href: "/docs/extensions/tables",
-        description: "Rich table functionality",
-        isNew: true
-      },
-      {
-        title: "Images",
-        href: "/docs/extensions/images",
-        description: "Image upload and handling"
-      },
-      {
-        title: "HTML & Markdown",
-        href: "/docs/extensions/html-markdown",
-        description: "Import and export functionality"
-      }
+      
     ]
   },
   {
-    title: "Advanced",
-    items: [
-      {
-        title: "Custom Extensions",
-        href: "/docs/advanced/custom-extensions",
-        description: "Building your own extensions"
-      },
-      {
-        title: "Performance",
-        href: "/docs/advanced/performance",
-        description: "Optimization tips and best practices"
-      },
-      {
-        title: "Troubleshooting",
-        href: "/docs/advanced/troubleshooting",
-        description: "Common issues and solutions"
-      }
-    ]
-  },
-  {
-    title: "API Reference",
+    title: "Core API",
     items: [
       {
         title: "createEditorSystem",
         href: "/docs/api/create-editor-system",
-        description: "Core system creation"
+        description: "Core system creation and configuration"
       },
       {
-        title: "Extension API",
-        href: "/docs/api/extension-api",
-        description: "Extension development API"
+        title: "Extensions API",
+        href: "/docs/api/extensions",
+        description: "Building and using extensions"
       },
       {
         title: "Type Definitions",
         href: "/docs/api/types",
-        description: "TypeScript type definitions"
+        description: "Complete TypeScript definitions"
+      },
+      {
+        title: "Contributing",
+        href: "/docs/contributing",
+        description: "How to contribute and extend LexKit"
       }
     ]
   }

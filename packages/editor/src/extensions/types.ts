@@ -132,6 +132,9 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   /** Current state of all extensions */
   activeStates: ExtractStateQueries<Exts>;
 
+  /** State query functions from all extensions */
+  stateQueries: Record<string, () => Promise<any>>;
+
   /** Event listener registration functions */
   listeners: {
     registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;

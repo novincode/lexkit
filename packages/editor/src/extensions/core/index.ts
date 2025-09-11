@@ -12,10 +12,9 @@ export type {
 } from './ContextMenuExtension';
 
 export type {
-  FloatingToolbarItem,
-  FloatingToolbarConfig,
-  FloatingToolbarCommands,
-  FloatingToolbarStateQueries
+  FloatingConfig,
+  FloatingCommands,
+  FloatingStateQueries
 } from './FloatingToolbarExtension';
 
 export type {

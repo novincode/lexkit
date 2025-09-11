@@ -26,7 +26,7 @@ import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/tran
 import { MyCustomExtension } from '../MyCustomExtension';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { $getSelection, $isNodeSelection, $getRoot } from 'lexical';
+import { $getSelection, $isNodeSelection, $isRangeSelection } from 'lexical';
 import { ImageNode } from '@lexkit/editor/extensions/media';
 import './styles.css';
 import {
@@ -64,6 +64,9 @@ import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit
 import { LexicalEditor } from 'lexical';
 import { commandsToCommandPaletteItems, registerKeyboardShortcuts } from './commands';
 import { CommandPalette } from './CommandPalette';
+import { SelectionRect } from '@lexkit/editor/extensions/core/FloatingToolbarExtension';
+import { FloatingToolbarExtension } from '@lexkit/editor/extensions/core/FloatingToolbarExtension';
+import { createPortal } from 'react-dom';
 
 // Extensions array
 const extensions = [
@@ -86,7 +89,7 @@ const extensions = [
   codeFormatExtension,
   htmlEmbedExtension,
   MyCustomExtension,
-  floatingToolbarExtension,
+  floatingToolbarExtension, // Simple extension without render config
   contextMenuExtension,
   commandPaletteExtension,
   draggableBlockExtension.configure({
@@ -157,6 +160,84 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
   }), [commands]);
 
   return { handlers, fileInputRef };
+}
+
+// Floating Toolbar Renderer Component
+function FloatingToolbarRenderer() {
+  const { commands, activeStates, extensions } = useEditor();
+  const [isVisible, setIsVisible] = useState(false);
+  const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
+
+  // Get the floating toolbar extension instance
+  const floatingExtension = extensions.find(ext => ext.name === 'floatingToolbar') as FloatingToolbarExtension | undefined;
+
+  // Poll the extension state
+  useEffect(() => {
+    if (!floatingExtension) {
+      console.log('No floating extension found');
+      return;
+    }
+
+    const checkState = () => {
+      const visible = floatingExtension.getIsVisible();
+      const rect = floatingExtension.getSelectionRect();
+      
+      setIsVisible(visible);
+      setSelectionRect(rect);
+    };
+
+    const interval = setInterval(checkState, 200); // Poll every 200ms
+    return () => clearInterval(interval);
+  }, [floatingExtension]);
+
+  if (!isVisible || !selectionRect) return null;
+
+  console.log('Rendering floating toolbar at:', selectionRect);
+
+  // Render as portal to document body for proper positioning
+  return createPortal(
+    <div
+      className="flex items-center gap-1 p-1 bg-white border border-gray-300 rounded shadow-lg"
+      style={{
+        position: 'absolute',
+        top: selectionRect.y,
+        left: selectionRect.x,
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        pointerEvents: 'auto'
+      }}
+    >
+      <button
+        onClick={() => commands.toggleBold?.()}
+        className={`p-1 rounded ${activeStates.bold ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        title="Bold"
+      >
+        <Bold size={14} />
+      </button>
+      <button
+        onClick={() => commands.toggleItalic?.()}
+        className={`p-1 rounded ${activeStates.italic ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        title="Italic"
+      >
+        <Italic size={14} />
+      </button>
+      <button
+        onClick={() => commands.toggleUnderline?.()}
+        className={`p-1 rounded ${activeStates.underline ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        title="Underline"
+      >
+        <Underline size={14} />
+      </button>
+      <button
+        onClick={() => commands.toggleStrikethrough?.()}
+        className={`p-1 rounded ${activeStates.strikethrough ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        title="Strikethrough"
+      >
+        <Strikethrough size={14} />
+      </button>
+    </div>,
+    document.body
+  );
 }
 
 // Toolbar Component
@@ -684,7 +765,7 @@ function EditorContent({
   toggleTheme: () => void;
   onReady?: (methods: DefaultTemplateRef) => void;
 }) {
-  const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
+  const { commands, hasExtension, activeStates, lexical: editor, stateQueries } = useEditor();
   const [mode, setMode] = useState<EditorMode>('visual');
   const [content, setContent] = useState({ html: '', markdown: '' });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -826,11 +907,14 @@ function EditorContent({
 
       <div className="lexkit-editor">
         {mode === 'visual' ? (
-          <RichTextPlugin
-            contentEditable={<ContentEditable className="lexkit-content-editable" />}
-            placeholder={<div className="lexkit-placeholder">Start typing...</div>}
-            ErrorBoundary={ErrorBoundary}
-          />
+          <>
+            <RichTextPlugin
+              contentEditable={<ContentEditable className="lexkit-content-editable" />}
+              placeholder={<div className="lexkit-placeholder">Start typing...</div>}
+              ErrorBoundary={ErrorBoundary}
+            />
+            <FloatingToolbarRenderer />
+          </>
         ) : mode === 'html' ? (
           <HTMLSourceView
             htmlContent={content.html}
