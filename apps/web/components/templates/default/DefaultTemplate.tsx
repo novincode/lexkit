@@ -89,7 +89,9 @@ const extensions = [
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
-  draggableBlockExtension, // Use with default configuration
+  draggableBlockExtension.configure({
+    // showMoveButtons:false
+  }), // Use with default configuration
 ] as const;
 
 // Create a typed editor system for these specific extensions

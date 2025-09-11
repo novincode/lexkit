@@ -768,6 +768,303 @@
     top: 16px;
     left: 16px;
   }
+}
+
+/* ===== DRAGGABLE BLOCK EXTENSION STYLES ===== */
+
+/* Button Stack Container */
+.lexkit-drag-button-stack {
+  position: absolute;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  pointer-events: auto;
+  opacity: 0;
+  animation: fade-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Base Drag Button Styles */
+.lexkit-drag-button {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+
+.lexkit-drag-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.lexkit-drag-button:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 6px 20px rgba(14, 165, 233, 0.15),
+    0 3px 10px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border-color: rgba(14, 165, 233, 0.6);
+  color: #0ea5e9;
+}
+
+.lexkit-drag-button:hover::before {
+  opacity: 1;
+}
+
+.lexkit-drag-button:active {
+  transform: scale(0.95);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Drag Handle - Modern Grip Icon */
+.lexkit-drag-handle {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: grab !important;
+}
+
+.lexkit-drag-handle:hover {
+  transform: scale(1.08) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.lexkit-drag-handle:active,
+.lexkit-drag-handle-active {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  border-color: #1d4ed8 !important;
+  color: white !important;
+  transform: scale(1.05) rotate(5deg) !important;
+  box-shadow:
+    0 12px 40px rgba(59, 130, 246, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  cursor: grabbing !important;
+}
+
+/* Move Up/Down Buttons */
+.lexkit-move-up,
+.lexkit-move-down {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lexkit-move-up:hover,
+.lexkit-move-down:hover {
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.95) 0%, rgba(224, 242, 254, 0.9) 100%) !important;
+  border-color: rgba(14, 165, 233, 0.6) !important;
+  color: #0ea5e9 !important;
+  box-shadow:
+    0 6px 20px rgba(14, 165, 233, 0.2),
+    0 3px 10px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.lexkit-move-up:active,
+.lexkit-move-down:active {
+  transform: scale(0.95) !important;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Drop Indicator - Modern Animated Design */
+.lexkit-drop-indicator {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 50%, #3b82f6 100%) !important;
+  box-shadow:
+    0 0 24px rgba(59, 130, 246, 0.6),
+    0 0 48px rgba(59, 130, 246, 0.3),
+    0 0 96px rgba(59, 130, 246, 0.1) !important;
+  animation: drop-indicator-pulse 1.5s ease-in-out infinite !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Block Dragging State */
+.lexkit-block-dragging {
+  opacity: 0.6 !important;
+  transform: rotate(2deg) scale(0.98) !important;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Move Up/Down Buttons - Modern Design */
+.lexkit-move-up,
+.lexkit-move-down {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lexkit-move-up:hover,
+.lexkit-move-down:hover {
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.95) 0%, rgba(224, 242, 254, 0.9) 100%) !important;
+  border-color: rgba(14, 165, 233, 0.6) !important;
+  color: #0ea5e9 !important;
+  transform: translateY(-1px) scale(1.08) !important;
+  box-shadow: 
+    0 8px 32px rgba(14, 165, 233, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.lexkit-move-up:active,
+.lexkit-move-down:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Drop Indicator - Modern Animated Design */
+.lexkit-drop-indicator {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 50%, #3b82f6 100%) !important;
+  box-shadow: 
+    0 0 24px rgba(59, 130, 246, 0.6),
+    0 0 48px rgba(59, 130, 246, 0.3),
+    0 0 96px rgba(59, 130, 246, 0.1) !important;
+  animation: drop-indicator-pulse 1.5s ease-in-out infinite !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Block Dragging State */
+.lexkit-block-dragging {
+  opacity: 0.6 !important;
+  transform: rotate(2deg) scale(0.98) !important;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Drag Handle Area - Subtle Background */
+.drag-handle-area {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%) !important;
+  border-radius: 16px !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: subtle-area-glow 3s ease-in-out infinite !important;
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes fade-in-up {
+  0% { 
+    opacity: 0; 
+    transform: translateY(8px) scale(0.95); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes subtle-area-glow {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.02);
+  }
+}
+
+@keyframes drag-handle-bounce {
+  0% { 
+    transform: scale(0.8) rotate(-10deg); 
+    opacity: 0; 
+  }
+  50% { 
+    transform: scale(1.05) rotate(2deg); 
+    opacity: 0.8; 
+  }
+  100% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 1; 
+  }
+}
+
+@keyframes button-hover-lift {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-2px) scale(1.05); }
+}
+
+@keyframes button-press {
+  0% { transform: translateY(-2px) scale(1.05); }
+  100% { transform: translateY(0) scale(0.98); }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+
+[data-theme="dark"] .lexkit-drag-handle,
+.dark .lexkit-drag-handle {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .lexkit-move-up,
+[data-theme="dark"] .lexkit-move-down,
+.dark .lexkit-move-up,
+.dark .lexkit-move-down {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .lexkit-move-up:hover,
+[data-theme="dark"] .lexkit-move-down:hover,
+.dark .lexkit-move-up:hover,
+.dark .lexkit-move-down:hover {
+  background: linear-gradient(135deg, rgba(30, 58, 83, 0.95) 0%, rgba(12, 36, 58, 0.9) 100%) !important;
+  border-color: rgba(14, 165, 233, 0.6) !important;
+  color: #38bdf8 !important;
 }/* HTML Embed Styles - Modern and Clean */
 .html-embed-wrapper {
   position: relative;
