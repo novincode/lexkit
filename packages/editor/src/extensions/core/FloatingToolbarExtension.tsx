@@ -37,6 +37,12 @@ export interface FloatingToolbarRenderProps<TCommands = any, TStates = any> {
   activeStates: TStates;
   /** Callback to hide the toolbar */
   hide: () => void;
+  /** Theme classes for styling */
+  theme: {
+    container?: string;
+    button?: string;
+    buttonActive?: string;
+  };
 }
 
 /**
@@ -77,6 +83,15 @@ export interface FloatingConfig<TCommands = any, TStates = any> extends BaseExte
    * Position strategy (default: 'below')
    */
   positionStrategy?: 'above' | 'below' | 'auto';
+
+  /**
+   * Theme classes for styling
+   */
+  theme?: {
+    container?: string;
+    button?: string;
+    buttonActive?: string;
+  };
 }
 
 /**
@@ -137,7 +152,12 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
       render: () => null,
       debounceMs: 100,
       offset: { x: 0, y: 8 },
-      positionStrategy: 'below'
+      positionStrategy: 'below',
+      theme: {
+        container: 'lexkit-floating-toolbar',
+        button: 'lexkit-floating-toolbar-button',
+        buttonActive: 'lexkit-floating-toolbar-button-active',
+      }
     } as FloatingConfig<TCommands, TStates>;
   }
 
@@ -347,7 +367,8 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       editor,
       commands: config.getCommands?.() || ({} as TCommands),
       activeStates: config.getActiveStates?.() || ({} as TStates),
-      hide
+      hide,
+      theme: config.theme || {},
     }),
     anchorElem
   );

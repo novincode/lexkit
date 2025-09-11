@@ -174,7 +174,6 @@ function FloatingToolbarRenderer() {
   // Poll the extension state
   useEffect(() => {
     if (!floatingExtension) {
-      console.log('No floating extension found');
       return;
     }
 
@@ -192,12 +191,10 @@ function FloatingToolbarRenderer() {
 
   if (!isVisible || !selectionRect) return null;
 
-  console.log('Rendering floating toolbar at:', selectionRect);
-
   // Render as portal to document body for proper positioning
   return createPortal(
     <div
-      className="flex items-center gap-1 p-1 bg-white border border-gray-300 rounded shadow-lg"
+      className="lexkit-floating-toolbar"
       style={{
         position: 'absolute',
         top: selectionRect.y,
@@ -209,28 +206,28 @@ function FloatingToolbarRenderer() {
     >
       <button
         onClick={() => commands.toggleBold?.()}
-        className={`p-1 rounded ${activeStates.bold ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
         title="Bold"
       >
         <Bold size={14} />
       </button>
       <button
         onClick={() => commands.toggleItalic?.()}
-        className={`p-1 rounded ${activeStates.italic ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
         title="Italic"
       >
         <Italic size={14} />
       </button>
       <button
         onClick={() => commands.toggleUnderline?.()}
-        className={`p-1 rounded ${activeStates.underline ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
         title="Underline"
       >
         <Underline size={14} />
       </button>
       <button
         onClick={() => commands.toggleStrikethrough?.()}
-        className={`p-1 rounded ${activeStates.strikethrough ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+        className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
         title="Strikethrough"
       >
         <Strikethrough size={14} />

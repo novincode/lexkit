@@ -1403,3 +1403,31 @@ table td[data-lexical-table-cell-selection] {
     opacity: 0.6;
   }
 }
+
+/* Floating Toolbar */
+.lexkit-floating-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  background-color: var(--lexkit-bg);
+  border: 1px solid var(--lexkit-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px var(--lexkit-shadow);
+  backdrop-filter: blur(12px);
+  position: absolute;
+  z-index: 9999;
+  pointer-events: auto;
+  animation: lexkit-floating-toolbar-appear 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes lexkit-floating-toolbar-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}

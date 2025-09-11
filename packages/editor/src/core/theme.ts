@@ -24,6 +24,11 @@ export interface LexKitTheme extends EditorThemeClasses {
     downButton?: string
     blockIsDragging?: string
   }
+  floatingToolbar?: {
+    container?: string
+    button?: string
+    buttonActive?: string
+  }
 }
 
 /**
@@ -86,6 +91,11 @@ export const defaultLexKitTheme: LexKitTheme = {
     downButton: 'lexkit-draggable-down-button',
     blockIsDragging: 'lexkit-draggable-block-is-dragging',
   },
+  floatingToolbar: {
+    container: 'lexkit-floating-toolbar',
+    button: 'lexkit-floating-toolbar-button',
+    buttonActive: 'lexkit-floating-toolbar-button-active',
+  },
   richText: {
     contentEditable: 'lexkit-content-editable',
     placeholder: 'lexkit-placeholder',
@@ -122,6 +132,10 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
     draggable: {
       ...baseTheme.draggable,
       ...overrideTheme.draggable,
+    },
+    floatingToolbar: {
+      ...baseTheme.floatingToolbar,
+      ...overrideTheme.floatingToolbar,
     },
     richText: {
       ...baseTheme.richText,
