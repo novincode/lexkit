@@ -172,11 +172,9 @@ function ImageComponent({
   };
 
   const figureStyle: React.CSSProperties = {
-    margin: '1rem 0',
+    margin: 0,
     display: 'block',
     position: 'relative',
-    textAlign: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : alignment === 'center' ? 'center' : 'left',
-    ...style
   };
 
   const imgStyle: React.CSSProperties = {
@@ -185,7 +183,7 @@ function ImageComponent({
     borderRadius: '4px',
     width: typeof currentWidth === 'number' ? '100%' : currentWidth,
     height: typeof currentHeight === 'number' ? '100%' : currentHeight,
-    margin: alignment === 'center' ? '0 auto' : '0',
+    margin: 0,
   };
 
   const captionStyle: React.CSSProperties = {
@@ -197,16 +195,17 @@ function ImageComponent({
   };
 
   return (
-    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''} ${uploading ? 'uploading' : ''}`} style={figureStyle} onClick={onClick}>
-      <div style={{
-        position: 'relative',
-        display: alignment === 'center' ? 'inline-block' : 'block',
-        float: alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none',
-        marginRight: alignment === 'left' ? '1rem' : '0',
-        marginLeft: alignment === 'right' ? '1rem' : '0',
-        width: currentWidth,
-        height: currentHeight,
-      }}>
+    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''} ${uploading ? 'uploading' : ''}`} style={figureStyle}>
+      <div
+        style={{
+          position: 'relative',
+          display: 'inline-block',
+          width: currentWidth,
+          height: currentHeight,
+          cursor: 'pointer',
+        }}
+        onClick={onClick}
+      >
         <img
           ref={imageRef}
           src={src}
@@ -215,9 +214,9 @@ function ImageComponent({
         />
         {isSelected && resizable && (
           <>
-            <div 
-              className="resizer ne" 
-              onMouseDown={startResize('ne')} 
+            <div
+              className="resizer ne"
+              onMouseDown={startResize('ne')}
               onTouchStart={startResize('ne')}
               style={{
                 position: 'absolute',
@@ -230,9 +229,9 @@ function ImageComponent({
                 borderRadius: '50%'
               }}
             />
-            <div 
-              className="resizer nw" 
-              onMouseDown={startResize('nw')} 
+            <div
+              className="resizer nw"
+              onMouseDown={startResize('nw')}
               onTouchStart={startResize('nw')}
               style={{
                 position: 'absolute',
@@ -245,9 +244,9 @@ function ImageComponent({
                 borderRadius: '50%'
               }}
             />
-            <div 
-              className="resizer se" 
-              onMouseDown={startResize('se')} 
+            <div
+              className="resizer se"
+              onMouseDown={startResize('se')}
               onTouchStart={startResize('se')}
               style={{
                 position: 'absolute',
@@ -260,9 +259,9 @@ function ImageComponent({
                 borderRadius: '50%'
               }}
             />
-            <div 
-              className="resizer sw" 
-              onMouseDown={startResize('sw')} 
+            <div
+              className="resizer sw"
+              onMouseDown={startResize('sw')}
               onTouchStart={startResize('sw')}
               style={{
                 position: 'absolute',
@@ -279,6 +278,7 @@ function ImageComponent({
         )}
       </div>
       {caption && <figcaption style={captionStyle}>{caption}</figcaption>}
+      <div style={{ clear: 'both', height: 0, fontSize: 0 }} />
     </figure>
   );
 }
@@ -361,16 +361,41 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   createDOM(config: EditorConfig): HTMLElement {
     const div = document.createElement('div');
     const themeClass = config.theme?.image || '';
-    div.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
+    const alignment = this.__alignment;
+    
+    div.className = `${themeClass} lexical-image-container align-${alignment}`.trim();
+    
+    // Key changes: Float the outer container, shrink-wrap width, handle display per alignment
+    div.style.display = alignment === 'center' ? 'block' : 'inline-block';
+    div.style.float = alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none';
+    div.style.margin = alignment === 'center' ? '1rem auto' : 
+                      alignment === 'left' ? '0 1rem 1rem 0' : 
+                      alignment === 'right' ? '0 0 1rem 1rem' : 
+                      '1rem 0';
+    div.style.textAlign = alignment === 'center' ? 'center' : 'inherit';
+    div.style.position = 'relative';
+
     return div;
   }
 
   // Required for DecoratorNode: handles updates to the DOM container
   updateDOM(prevNode: ImageNode, dom: HTMLElement, config: EditorConfig): boolean {
-    if (this.__alignment !== prevNode.__alignment) {
+    const alignment = this.__alignment;
+    if (alignment !== prevNode.__alignment) {
       const themeClass = config.theme?.image || '';
-      dom.className = `${themeClass} lexical-image-container align-${this.__alignment}`.trim();
+      dom.className = `${themeClass} lexical-image-container align-${alignment}`.trim();
     }
+    
+    // Update styles on change
+    dom.style.display = alignment === 'center' ? 'block' : 'inline-block';
+    dom.style.float = alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none';
+    dom.style.margin = alignment === 'center' ? '1rem auto' : 
+                      alignment === 'left' ? '0 1rem 1rem 0' : 
+                      alignment === 'right' ? '0 0 1rem 1rem' : 
+                      '1rem 0';
+    dom.style.textAlign = alignment === 'center' ? 'center' : 'inherit';
+    dom.style.position = 'relative';
+
     return false; // No full re-render needed
   }
 
@@ -614,25 +639,13 @@ export class ImageExtension extends BaseExtension<
             );
             
             const selection = $getSelection();
-            let inserted = false;
             if ($isRangeSelection(selection)) {
               selection.insertNodes([imageNode]);
-              inserted = true;
-            }
-            
-            if (!inserted) {
+            } else {
+              // Fallback: append to root in new paragraph
               const paragraph = $createParagraphNode();
               paragraph.append(imageNode);
               $getRoot().append(paragraph);
-              // Add another paragraph after
-              const nextPara = $createParagraphNode();
-              $getRoot().append(nextPara);
-              nextPara.select();
-            } else {
-              // Add paragraph after the image
-              const nextPara = $createParagraphNode();
-              imageNode.insertAfter(nextPara);
-              nextPara.select();
             }
           } catch (error) {
             console.error('❌ Insertion error:', error);
