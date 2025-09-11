@@ -1,14 +1,5 @@
 import { codeToHtml } from 'shiki'
-
-// Define code snippets that will be registered and generated at build time
-export interface RegisteredCodeSnippet {
-  id: string
-  code: string
-  language: string
-  title?: string
-  description?: string
-  highlightLines?: number[]
-}
+import { RegisteredCodeSnippet } from './types'
 
 // Basic installation examples
 export const INSTALLATION_EXAMPLES: RegisteredCodeSnippet[] = [
@@ -477,3 +468,13 @@ export function getSnippetsByCategory(category: 'installation' | 'basic' | 'exte
       return []
   }
 }
+
+// Combine all snippets for the registry
+const ALL_SNIPPETS: RegisteredCodeSnippet[] = [
+  ...INSTALLATION_EXAMPLES,
+  ...BASIC_USAGE_EXAMPLES,
+  ...EXTENSION_EXAMPLES,
+  ...STYLING_EXAMPLES
+]
+
+export default ALL_SNIPPETS

@@ -3,24 +3,18 @@
 import fs from 'fs'
 import path from 'path'
 import { codeToHtml } from 'shiki'
-import { ALL_REGISTERED_SNIPPETS, RegisteredCodeSnippet } from '../app/(docs)/lib/registered-codes'
-
-interface GeneratedRegistry {
-  files: Record<string, { raw: string; highlighted: string; metadata?: any }>
-  lastGenerated: string
-}
+import { RegisteredCodeSnippet, GeneratedRegistry } from '../app/(docs)/lib/types'
 
 /**
- * Build-time code registry generator
- * This script scans all example files and generates a static registry
- * that can be imported directly without runtime processing
+ * Simple code registry generator
+ * Scans docs/**\/codes.tsx files and docs/**\/examples/** files and generates highlighted code registry
  */
 class CodeRegistryGenerator {
-  private examplesDir: string
+  private docsDir: string
   private outputDir: string
 
   constructor() {
-    this.examplesDir = path.resolve(process.cwd(), 'app/(docs)')
+    this.docsDir = path.resolve(process.cwd(), 'app/(docs)')
     this.outputDir = path.resolve(process.cwd(), 'lib/generated')
   }
 
@@ -34,67 +28,93 @@ class CodeRegistryGenerator {
   }
 
   /**
-   * Scan and discover all code files
+   * Find all codes.tsx files in docs/** structure
    */
-  private discoverFiles(): Array<{ relativePath: string; fullPath: string }> {
+  private findCodesFiles(): Array<{ relativePath: string; fullPath: string }> {
     const files: Array<{ relativePath: string; fullPath: string }> = []
-    
+
     const scanDirectory = (dirPath: string, relativePath: string = '') => {
       const entries = fs.readdirSync(dirPath, { withFileTypes: true })
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name)
         const entryRelativePath = path.join(relativePath, entry.name)
-        
+
         if (entry.isDirectory()) {
-          // Only scan directories named "examples"
-          if (entry.name === 'examples') {
-            scanDirectory(fullPath, entryRelativePath)
-          } else {
-            // Recursively scan other directories to find "examples" folders
-            scanDirectory(fullPath, entryRelativePath)
-          }
+          scanDirectory(fullPath, entryRelativePath)
+        } else if (entry.isFile() && entry.name === 'codes.tsx') {
+          files.push({
+            relativePath: entryRelativePath,
+            fullPath
+          })
+        }
+      }
+    }
+
+    scanDirectory(this.docsDir)
+    return files
+  }
+
+  /**
+   * Find all example files in docs subdirectories examples subdirectories
+   */
+  private findExampleFiles(): Array<{ relativePath: string; fullPath: string; language: string }> {
+    const files: Array<{ relativePath: string; fullPath: string; language: string }> = []
+
+    const scanDirectory = (dirPath: string, relativePath: string = '') => {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name)
+        const entryRelativePath = path.join(relativePath, entry.name)
+
+        if (entry.isDirectory() && entry.name === 'examples') {
+          scanDirectory(fullPath, entryRelativePath)
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name)
-          if ((ext === '.tsx' || ext === '.css') && relativePath.includes('examples')) {
+          if (ext === '.tsx' || ext === '.ts' || ext === '.css') {
+            const language = ext === '.tsx' ? 'tsx' : ext === '.ts' ? 'typescript' : 'css'
             files.push({
               relativePath: entryRelativePath,
-              fullPath
+              fullPath,
+              language
             })
           }
         }
       }
     }
-    
-    scanDirectory(this.examplesDir)
+
+    scanDirectory(this.docsDir)
     return files
   }
 
   /**
-   * Process code file with Shiki
+   * Load snippets from a codes.tsx file
    */
-  private async processCodeFile(fullPath: string, language: string, highlightLines?: number[]): Promise<string> {
-    const content = fs.readFileSync(fullPath, 'utf-8')
+  private async loadSnippetsFromFile(filePath: string): Promise<RegisteredCodeSnippet[]> {
+    try {
+      // Use dynamic import to load the codes.tsx file
+      const module = await import(filePath)
 
-    return await codeToHtml(content, {
-      lang: language,
-      theme: 'github-dark',
-      transformers: highlightLines && highlightLines.length > 0 ? [
-        {
-          line(node, line) {
-            if (highlightLines.includes(line)) {
-              node.properties.class = 'highlighted-line'
-            }
-          }
-        }
-      ] : []
-    })
+      // Get the default export
+      const snippets = module.default
+
+      if (Array.isArray(snippets)) {
+        return snippets
+      } else {
+        console.warn(`⚠️  Default export is not an array in ${filePath}`)
+        return []
+      }
+    } catch (error) {
+      console.error(`❌ Failed to load ${filePath}:`, (error as Error).message)
+      return []
+    }
   }
 
   /**
-   * Process registered code snippet with Shiki
+   * Process code snippet with Shiki
    */
-  private async processRegisteredSnippet(snippet: RegisteredCodeSnippet): Promise<string> {
+  private async processSnippet(snippet: RegisteredCodeSnippet): Promise<string> {
     return await codeToHtml(snippet.code, {
       lang: snippet.language,
       theme: 'github-dark',
@@ -111,50 +131,71 @@ class CodeRegistryGenerator {
   }
 
   /**
+   * Process example file with Shiki
+   */
+  private async processExampleFile(fullPath: string, language: string): Promise<string> {
+    const content = fs.readFileSync(fullPath, 'utf-8')
+    return await codeToHtml(content, {
+      lang: language,
+      theme: 'github-dark'
+    })
+  }
+
+  /**
    * Generate the static registry
    */
   async generateRegistry(): Promise<void> {
-    console.log('🔍 Scanning code files...')
+    console.log('🔍 Scanning codes.tsx and example files...')
 
-    const files = this.discoverFiles()
-    console.log(`📁 Found ${files.length} files:`, files)
-    console.log(`📝 Found ${ALL_REGISTERED_SNIPPETS.length} registered snippets:`, ALL_REGISTERED_SNIPPETS.map(s => s.id))
+    const codesFiles = this.findCodesFiles()
+    const exampleFiles = this.findExampleFiles()
+
+    console.log(`📁 Found ${codesFiles.length} codes.tsx files:`, codesFiles.map(f => f.relativePath))
+    console.log(`📁 Found ${exampleFiles.length} example files:`, exampleFiles.map(f => f.relativePath))
+
+    const allSnippets: RegisteredCodeSnippet[] = []
+
+    // Load all snippets from codes.tsx files
+    for (const file of codesFiles) {
+      console.log(`📥 Loading ${file.relativePath}...`)
+      const snippets = await this.loadSnippetsFromFile(file.fullPath)
+      allSnippets.push(...snippets)
+      console.log(`✅ Loaded ${snippets.length} snippets from ${file.relativePath}`)
+    }
+
+    console.log(`📝 Total snippets: ${allSnippets.length}`)
 
     const registry: GeneratedRegistry = {
       files: {},
       lastGenerated: new Date().toISOString()
     }
 
-    // Process file-based examples
-    for (const file of files) {
-      console.log(`⚙️  Processing ${file.relativePath}...`)
-
-      const ext = path.extname(file.relativePath)
-      const language = ext === '.tsx' ? 'tsx' : 'css'
-
-      const rawContent = fs.readFileSync(file.fullPath, 'utf-8')
-      const highlighted = await this.processCodeFile(file.fullPath, language)
-      
-      registry.files[file.relativePath] = {
-        raw: rawContent,
-        highlighted: highlighted
-      }
-    }
-
-    // Process registered snippets
-    for (const snippet of ALL_REGISTERED_SNIPPETS) {
-      console.log(`⚙️  Processing registered snippet: ${snippet.id}...`)
-
-      const highlighted = await this.processRegisteredSnippet(snippet)
-      
+    // Process all snippets
+    for (const snippet of allSnippets) {
+      console.log(`⚙️  Processing snippet: ${snippet.id}...`)
+      const highlighted = await this.processSnippet(snippet)
       registry.files[snippet.id] = {
         raw: snippet.code,
-        highlighted: highlighted,
+        highlighted,
         metadata: {
           title: snippet.title,
           description: snippet.description,
           language: snippet.language,
           highlightLines: snippet.highlightLines
+        }
+      }
+    }
+
+    // Process all example files
+    for (const file of exampleFiles) {
+      console.log(`⚙️  Processing example: ${file.relativePath}...`)
+      const highlighted = await this.processExampleFile(file.fullPath, file.language)
+      const content = fs.readFileSync(file.fullPath, 'utf-8')
+      registry.files[file.relativePath] = {
+        raw: content,
+        highlighted,
+        metadata: {
+          language: file.language
         }
       }
     }
