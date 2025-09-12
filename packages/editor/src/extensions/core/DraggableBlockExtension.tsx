@@ -98,6 +98,7 @@ export class DraggableBlockExtension extends BaseExtension<
     ReactNode[]
 > {
     private isDraggingState: boolean = false;
+    private stateChangeCallbacks: Set<() => void> = new Set();
 
     constructor() {
         super('draggableBlock', [ExtensionCategory.Floating]);
@@ -187,7 +188,16 @@ export class DraggableBlockExtension extends BaseExtension<
     }
 
     setIsDragging(isDragging: boolean) {
-        this.isDraggingState = isDragging;
+        if (this.isDraggingState !== isDragging) {
+            this.isDraggingState = isDragging;
+            // Notify all listeners of state change
+            this.stateChangeCallbacks.forEach(callback => callback());
+        }
+    }
+
+    onStateChange(callback: () => void): () => void {
+        this.stateChangeCallbacks.add(callback);
+        return () => this.stateChangeCallbacks.delete(callback);
     }
 }
 

@@ -88,37 +88,41 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       return obj as ExtractStateQueries<Exts>;
     });
 
+    // Reactive state management
     useEffect(() => {
       if (!editor) return;
 
-      const unregister = editor.registerUpdateListener(() => {
-        // No editorState.read() here—all queries handle their own reads if needed
+      const updateStates = async () => {
         const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
           queryFn().then((value) => [key, value] as [string, boolean])
         );
 
-        Promise.all(promises).then((results) => {
-          const newStates = Object.fromEntries(results);
-          setActiveStates((prev) => ({ ...prev, ...newStates } as ExtractStateQueries<Exts>)); // Merge to avoid overwriting
-        });
-      });
-
-      return unregister;
-    }, [editor, stateQueries]);
-
-    // Optional: Initial query on mount (to avoid undefined flash)
-    useEffect(() => {
-      if (!editor) return;
-
-      const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
-        queryFn().then((value) => [key, value] as [string, boolean])
-      );
-
-      Promise.all(promises).then((results) => {
+        const results = await Promise.all(promises);
         const newStates = Object.fromEntries(results);
         setActiveStates(newStates as ExtractStateQueries<Exts>);
+      };
+
+      // Initial update
+      updateStates();
+
+      // Listen to editor updates for standard state queries
+      const unregisterEditor = editor.registerUpdateListener(() => {
+        updateStates();
       });
-    }, [editor, stateQueries]);
+
+      // Listen to extension state changes for reactive extensions
+      const unregisterExtensions = extensions.map(ext => {
+        if ('onStateChange' in ext && typeof ext.onStateChange === 'function') {
+          return (ext as any).onStateChange(updateStates);
+        }
+        return () => {};
+      }).filter(Boolean);
+
+      return () => {
+        unregisterEditor();
+        unregisterExtensions.forEach(unreg => unreg());
+      };
+    }, [editor, stateQueries, extensions]);
 
     /**
      * Context value containing all editor functionality and state.
