@@ -92,7 +92,7 @@ export const docsConfig: DocsSection[] = [
       },
       {
         title: "Type Definitions",
-        href: "/docs/api/types",
+        href: "/docs/api/type-definitions",
         description: "Complete TypeScript definitions"
       },
       {
