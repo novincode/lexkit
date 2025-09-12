@@ -25,8 +25,6 @@ function debounce<T extends (...args: any[]) => any>(
 export interface DraggableConfig extends BaseExtensionConfig {
     /** Anchor element for portal (default: document.body) */
     anchorElem?: HTMLElement;
-    /** Container element for rendering drag handles (if not provided, uses anchorElem) */
-    containerElem?: HTMLElement;
     /** Show up/down buttons */
     showMoveButtons?: boolean;
     /** Show up button specifically */
@@ -37,23 +35,50 @@ export interface DraggableConfig extends BaseExtensionConfig {
     buttonStackPosition?: 'left' | 'right';
     /** Enable dragging via text selection (default: true) */
     enableTextSelectionDrag?: boolean;
-    /** Custom styles to override defaults */
+    /** Theme classes */
+    theme?: {
+        handle?: string;
+        handleActive?: string;
+        blockDragging?: string;
+        dropIndicator?: string;
+        upButton?: string;
+        downButton?: string;
+        buttonStack?: string;
+    };
+    /** Custom CSS styles for UI elements */
     styles?: {
-        /** Drag handle styles */
         handle?: React.CSSProperties;
-        /** Active drag handle styles */
         handleActive?: React.CSSProperties;
-        /** Block being dragged styles */
         blockDragging?: React.CSSProperties;
-        /** Drop indicator styles */
         dropIndicator?: React.CSSProperties;
-        /** Up button styles */
         upButton?: React.CSSProperties;
-        /** Down button styles */
         downButton?: React.CSSProperties;
-        /** Button stack container styles */
         buttonStack?: React.CSSProperties;
     };
+    /** Custom handle renderer for complete headless control */
+    handleRenderer?: (props: {
+        rect: DOMRect;
+        isDragging: boolean;
+        onDragStart: (e: React.DragEvent) => void;
+        className: string;
+    }) => ReactNode;
+    /** Custom up/down button renderer */
+    buttonsRenderer?: (props: {
+        rect: DOMRect;
+        onMoveUp: () => void;
+        onMoveDown: () => void;
+        showUp: boolean;
+        showDown: boolean;
+        upClassName: string;
+        downClassName: string;
+    }) => ReactNode;
+    /** Custom drop indicator renderer */
+    dropIndicatorRenderer?: (props: {
+        top: number;
+        left: number;
+        width: number;
+        className: string;
+    }) => ReactNode;
 }
 
 /**
@@ -95,78 +120,14 @@ export class DraggableBlockExtension extends BaseExtension<
             showDownButton: true,
             buttonStackPosition: 'left',
             enableTextSelectionDrag: true,
-            styles: {
-                handle: {
-                    position: 'absolute',
-                    top: '0',
-                    left: '-24px',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'grab',
-                    backgroundColor: '#f3f4f6',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    zIndex: 9999,
-                    opacity: 0.7,
-                    transition: 'opacity 0.2s ease',
-                },
-                handleActive: {
-                    opacity: 1,
-                    cursor: 'grabbing',
-                    backgroundColor: '#e5e7eb',
-                },
-                blockDragging: {
-                    opacity: 0.5,
-                },
-                dropIndicator: {
-                    position: 'absolute',
-                    height: '2px',
-                    backgroundColor: '#3b82f6',
-                    zIndex: 9998,
-                    pointerEvents: 'none',
-                },
-                upButton: {
-                    width: '20px',
-                    height: '20px',
-                    backgroundColor: '#f3f4f6',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    marginBottom: '4px',
-                    transition: 'background-color 0.2s ease',
-                },
-                downButton: {
-                    width: '20px',
-                    height: '20px',
-                    backgroundColor: '#f3f4f6',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s ease',
-                },
-                buttonStack: {
-                    position: 'absolute',
-                    top: '0',
-                    right: '-28px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 9999,
-                },
+            theme: {
+                handle: 'lexkit-drag-handle',
+                handleActive: 'lexkit-drag-handle-active',
+                blockDragging: 'lexkit-block-dragging',
+                dropIndicator: 'lexkit-drop-indicator',
+                upButton: 'lexkit-move-up',
+                downButton: 'lexkit-move-down',
+                buttonStack: 'lexkit-drag-button-stack',
             },
         } as DraggableConfig;
     }
@@ -277,90 +238,35 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const currentElementRef = useRef<HTMLElement | null>(null);
 
-    // SSR safety
-    if (typeof document === 'undefined') return null;
-    const anchorElem = config.anchorElem || document.body;
-    const containerElem = config.containerElem || anchorElem;
-    const defaultZIndex = config.zIndex ?? 9999;
-
-    // Merge default styles with user overrides
+    // Default styles for UI elements - minimal and functional
     const defaultStyles = {
         handle: {
-            position: 'absolute',
-            top: '0',
-            left: '-24px',
-            width: '20px',
-            height: '20px',
             cursor: 'grab',
-            backgroundColor: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            color: '#6b7280',
-            zIndex: 9999,
-            opacity: 0.7,
-            transition: 'opacity 0.2s ease',
+            userSelect: 'none' as const,
         },
         handleActive: {
-            opacity: 1,
             cursor: 'grabbing',
-            backgroundColor: '#e5e7eb',
         },
         blockDragging: {
             opacity: 0.5,
         },
         dropIndicator: {
-            position: 'absolute',
-            height: '2px',
             backgroundColor: '#3b82f6',
-            zIndex: 9998,
-            pointerEvents: 'none',
+            borderRadius: '2px',
         },
         upButton: {
-            width: '20px',
-            height: '20px',
-            backgroundColor: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            color: '#6b7280',
             cursor: 'pointer',
-            marginBottom: '4px',
-            transition: 'background-color 0.2s ease',
         },
         downButton: {
-            width: '20px',
-            height: '20px',
-            backgroundColor: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            color: '#6b7280',
             cursor: 'pointer',
-            transition: 'background-color 0.2s ease',
         },
-        buttonStack: {
-            position: 'absolute',
-            top: '0',
-            right: '-28px',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: 9999,
-        },
+        buttonStack: {},
     };
 
+    // Merged styles - user styles override defaults
     const mergedStyles = {
         handle: { ...defaultStyles.handle, ...config.styles?.handle },
-        handleActive: { ...defaultStyles.handle, ...config.styles?.handle, ...defaultStyles.handleActive, ...config.styles?.handleActive },
+        handleActive: { ...defaultStyles.handleActive, ...config.styles?.handleActive },
         blockDragging: { ...defaultStyles.blockDragging, ...config.styles?.blockDragging },
         dropIndicator: { ...defaultStyles.dropIndicator, ...config.styles?.dropIndicator },
         upButton: { ...defaultStyles.upButton, ...config.styles?.upButton },
@@ -368,10 +274,9 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         buttonStack: { ...defaultStyles.buttonStack, ...config.styles?.buttonStack },
     };
 
-    // Update extension state
-    useEffect(() => {
-        extension.setIsDragging(isDragging);
-    }, [isDragging, extension]);
+    // SSR safety
+    if (typeof document === 'undefined') return null;
+    const anchorElem = config.anchorElem || document.body;
 
     // Cleanup on unmount
     useEffect(() => {
@@ -434,21 +339,31 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
     // Clean up drag classes helper
     const cleanupDragClasses = useCallback((element: HTMLElement) => {
-        if (!element) return;
+        if (!element || !config.theme?.blockDragging) return;
 
-        // Remove inline styles applied during drag
-        Object.keys(mergedStyles.blockDragging).forEach(key => {
-            element.style.removeProperty(key);
-        });
-    }, [mergedStyles.blockDragging]);
+        const classes = config.theme.blockDragging.includes(' ')
+            ? config.theme.blockDragging.split(' ').filter(Boolean)
+            : [config.theme.blockDragging];
+
+        classes.forEach(cls => element.classList.remove(cls));
+
+        // Reset drag styles
+        element.style.opacity = '';
+    }, [config.theme]);
 
     // Apply drag classes helper
     const applyDragClasses = useCallback((element: HTMLElement) => {
-        if (!element) return;
+        if (!element || !config.theme?.blockDragging) return;
 
-        // Apply inline styles for dragging
+        const classes = config.theme.blockDragging.includes(' ')
+            ? config.theme.blockDragging.split(' ').filter(Boolean)
+            : [config.theme.blockDragging];
+
+        classes.forEach(cls => element.classList.add(cls));
+
+        // Apply drag styles
         Object.assign(element.style, mergedStyles.blockDragging);
-    }, [mergedStyles.blockDragging]);
+    }, [config.theme, mergedStyles.blockDragging]);
 
     // Mouse tracking for handle visibility with smooth positioning
     useEffect(() => {
@@ -856,19 +771,25 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
             {/* Button Stack */}
             {createPortal(
                 <div
-                    className={`${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
+                    className={`${config.theme?.buttonStack || 'lexkit-drag-button-stack'} ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
                     style={{
-                        ...mergedStyles.buttonStack,
+                        position: 'absolute',
                         left: config.buttonStackPosition === 'right'
                             ? rect.right + window.scrollX + 10
                             : rect.left + window.scrollX - 50,
                         top: rect.top + window.scrollY,
+                        zIndex: 9999,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '6px',
+                        alignItems: 'center',
                         pointerEvents: 'auto',
                         willChange: 'transform, opacity',
                         backfaceVisibility: 'hidden',
                         perspective: '1000px',
                         transition: isTransitioning ? 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-                    } as React.CSSProperties}
+                        ...mergedStyles.buttonStack,
+                    }}
                 >
                     {/* Move Buttons Container */}
                     <div
@@ -881,31 +802,67 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                     >
                         {/* Up Button */}
                         {(config.showMoveButtons !== false && config.showUpButton !== false) && (
-                            <button
-                                style={mergedStyles.upButton as React.CSSProperties}
-                                onClick={handleMoveUp}
-                            >
-                                ↑
-                            </button>
+                            config.buttonsRenderer ? (
+                                config.buttonsRenderer({
+                                    rect,
+                                    onMoveUp: handleMoveUp,
+                                    onMoveDown: handleMoveDown,
+                                    showUp: true,
+                                    showDown: false,
+                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
+                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                })
+                            ) : (
+                                <button
+                                    className={`lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`}
+                                    onClick={handleMoveUp}
+                                    style={mergedStyles.upButton}
+                                >
+                                    ↑
+                                </button>
+                            )
                         )}
 
                         {/* Drag Handle */}
-                        <div
-                            style={(isDragging ? mergedStyles.handleActive : mergedStyles.handle) as React.CSSProperties}
-                            draggable={true}
-                            onDragStart={(e) => handleDragStart(e, currentElement)}
-                        >
-                            ⋮⋮
-                        </div>
+                        {config.handleRenderer ? (
+                            config.handleRenderer({
+                                rect,
+                                isDragging,
+                                onDragStart: (e) => handleDragStart(e, currentElement),
+                                className: `lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim(),
+                            })
+                        ) : (
+                            <div
+                                className={`lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim()}
+                                draggable={true}
+                                onDragStart={(e) => handleDragStart(e, currentElement)}
+                                style={isDragging ? mergedStyles.handleActive : mergedStyles.handle}
+                            >
+                                ⋮⋮
+                            </div>
+                        )}
 
                         {/* Down Button */}
                         {(config.showMoveButtons !== false && config.showDownButton !== false) && (
-                            <button
-                                style={mergedStyles.downButton as React.CSSProperties}
-                                onClick={handleMoveDown}
-                            >
-                                ↓
-                            </button>
+                            config.buttonsRenderer ? (
+                                config.buttonsRenderer({
+                                    rect,
+                                    onMoveUp: handleMoveUp,
+                                    onMoveDown: handleMoveDown,
+                                    showUp: false,
+                                    showDown: true,
+                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
+                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                })
+                            ) : (
+                                <button
+                                    className={`lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`}
+                                    onClick={handleMoveDown}
+                                    style={mergedStyles.downButton}
+                                >
+                                    ↓
+                                </button>
+                            )
                         )}
                     </div>
                 </div>,
@@ -914,18 +871,31 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
             {/* Drop Indicator */}
             {dropIndicator && (
-                createPortal(
-                    <div
-                        style={{
-                            ...mergedStyles.dropIndicator,
-                            top: dropIndicator.top - 4,
-                            left: dropIndicator.left,
-                            width: dropIndicator.width,
-                            height: '8px',
-                            borderRadius: '4px',
-                        } as React.CSSProperties}
-                    />,
-                    anchorElem
+                config.dropIndicatorRenderer ? (
+                    createPortal(
+                        config.dropIndicatorRenderer({
+                            ...dropIndicator,
+                            className: config.theme?.dropIndicator || 'lexkit-drop-indicator',
+                        }),
+                        anchorElem
+                    )
+                ) : (
+                    createPortal(
+                        <div
+                            className={config.theme?.dropIndicator || 'lexkit-drop-indicator'}
+                            style={{
+                                position: 'absolute',
+                                top: dropIndicator.top - 4,
+                                left: dropIndicator.left,
+                                width: dropIndicator.width,
+                                height: '8px',
+                                pointerEvents: 'none',
+                                zIndex: 9997,
+                                ...mergedStyles.dropIndicator,
+                            }}
+                        />,
+                        anchorElem
+                    )
                 )
             )}
         </>

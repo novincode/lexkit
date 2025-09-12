@@ -99,6 +99,7 @@ const extensions = [
   contextMenuExtension,
   commandPaletteExtension,
   draggableBlockExtension.configure({
+    
     // showMoveButtons:false
   }), // Use with default configuration
 ] as const;
