@@ -1,4 +1,4 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, PASTE_COMMAND, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_CRITICAL, $createTextNode } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, PASTE_COMMAND, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_CRITICAL, $createTextNode, ParagraphNode } from 'lexical';
 import { $isLinkNode, TOGGLE_LINK_COMMAND, LinkNode, AutoLinkNode, $createLinkNode } from '@lexical/link';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { BaseExtensionConfig, ExtensionCategory } from '@lexkit/editor/extensions/types';

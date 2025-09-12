@@ -1,19 +1,31 @@
 "use client"
 
+"use client"
+
 // Auto-Linking Editor Example
 // Demonstrates automatic link creation when pasting URLs
-import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText, blockFormatExtension } from "@lexkit/editor"
+// This example shows how LinkExtension works with BlockFormatExtension for full functionality
+import { createEditorSystem, historyExtension, linkExtension, blockFormatExtension, RichText } from "@lexkit/editor"
 import "@/app/(docs)/examples/basic-editor.css"
 
 // Auto-linking configuration (autoLinkUrls: true, linkSelectedTextOnPaste: true)
+// - autoLinkUrls: true → Automatically converts pasted URLs to links
+// - linkSelectedTextOnPaste: true → When pasting URLs over selected text, makes the selected text a link
+// - autoLinkText: true → Automatically converts URLs typed in the editor to links
+// NOTE: BlockFormatExtension is required for LinkExtension to work properly with paste operations
 const extensionsWithAutoLinks = [
-  boldExtension,
-  blockFormatExtension,
-  italicExtension,
-  listExtension,
+  blockFormatExtension, // Required for LinkExtension to work with paste operations
   linkExtension.configure({
+    // autoLinkUrls: true → Automatically converts pasted URLs to links
+    // When you paste a URL anywhere in the editor, it becomes a clickable link
     autoLinkUrls: true,
+
+    // linkSelectedTextOnPaste: true → When pasting URLs over selected text, makes the selected text a link
+    // Select some text, paste a URL, and the selected text becomes a link with that URL
     linkSelectedTextOnPaste: true,
+
+    // autoLinkText: true → Automatically converts URLs typed in the editor to links
+    // As you type URLs, they automatically become clickable links
     autoLinkText: true
   }),
   historyExtension
@@ -22,7 +34,7 @@ const extensionsWithAutoLinks = [
 // Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensionsWithAutoLinks>()
 
-// Toolbar Component - Shows basic text formatting and link buttons
+// Toolbar Component - Shows only link-related buttons
 function Toolbar() {
   const { commands, activeStates } = useEditor()
 
@@ -36,39 +48,11 @@ function Toolbar() {
   return (
     <div className="basic-toolbar">
       <button
-        onClick={() => commands.toggleBold()}
-        className={activeStates.bold ? 'active' : ''}
-        title="Bold (Ctrl+B)"
-      >
-        Bold
-      </button>
-      <button
-        onClick={() => commands.toggleItalic()}
-        className={activeStates.italic ? 'active' : ''}
-        title="Italic (Ctrl+I)"
-      >
-        Italic
-      </button>
-      <button
-        onClick={() => commands.toggleUnorderedList()}
-        className={activeStates.unorderedList ? 'active' : ''}
-        title="Bullet List"
-      >
-        • List
-      </button>
-      <button
-        onClick={() => commands.toggleOrderedList()}
-        className={activeStates.orderedList ? 'active' : ''}
-        title="Numbered List"
-      >
-        1. List
-      </button>
-      <button
         onClick={insertLink}
         className={activeStates.isLink ? 'active' : ''}
         title="Insert Link"
       >
-        🔗 Link
+        🔗 Insert Link
       </button>
       <button
         onClick={() => commands.removeLink()}

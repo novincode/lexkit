@@ -62,7 +62,73 @@
   cursor: not-allowed;
 }
 
-/* LexKit Rich Text Extension Styles */
+.basic-toolbar button.active {
+  background: #f3f4f6;
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(1) {
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(2) {
+  font-style: italic;
+}
+
+/* Toolbar separator */
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: #e5e7eb;
+  margin: 0 8px;
+}
+
+/* Link Styles */
+.basic-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.basic-content a:hover {
+  color: #1d4ed8;
+  text-decoration-thickness: 2px;
+}
+
+.basic-content a:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Link nodes in editor */
+.lexkit-link {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 2px !important;
+  cursor: pointer;
+}
+
+.lexkit-link:hover {
+  color: #1d4ed8 !important;
+  text-decoration-thickness: 2px !important;
+}
+
+.lexkit-link:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Paragraph styles */
+.lexkit-paragraph {
+  margin: 0;
+  padding: 0;
+}
+
+/* Content Styles */
 .basic-content {
   padding: 16px;
   outline: none;
