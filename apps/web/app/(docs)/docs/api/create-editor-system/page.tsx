@@ -1,10 +1,9 @@
 import CreateEditorSystemPageClient from './page.client'
+import { generateDocsMetadata } from '../../../lib/docs-metadata'
+import type { Metadata } from 'next'
 
 export default function CreateEditorSystemPage() {
   return <CreateEditorSystemPageClient />
 }
 
-export const metadata = {
-  title: 'createEditorSystem - LexKit API Reference',
-  description: 'Type-safe editor system factory for creating fully typed LexKit editors with extensions.',
-}
+export const metadata: Metadata = generateDocsMetadata('/docs/api/create-editor-system')
