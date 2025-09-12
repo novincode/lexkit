@@ -1,0 +1,408 @@
+/* SHADCN Editor Styles - Modern & Simple */
+
+.shadcn-editor-wrapper {
+  --editor-border-radius: 0.5rem;
+}
+
+/* Content Editable Styling */
+.shadcn-content-editable {
+  outline: none;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.shadcn-content-editable:focus {
+  outline: none;
+}
+
+/* Placeholder Styling */
+.shadcn-placeholder {
+  font-size: 1rem;
+  line-height: 1.6;
+  user-select: none;
+  color: var(--muted-foreground);
+}
+
+/* Typography within editor */
+.shadcn-content-editable h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 2.5rem;
+  margin: 1.5rem 0 1rem 0;
+  color: var(--foreground);
+}
+
+.shadcn-content-editable h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 2.25rem;
+  margin: 1.25rem 0 0.75rem 0;
+  color: var(--foreground);
+}
+
+.shadcn-content-editable h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--foreground);
+}
+
+.shadcn-content-editable p {
+  margin: 0.75rem 0;
+  color: var(--foreground);
+}
+
+.shadcn-content-editable blockquote {
+  border-left: 4px solid var(--border);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.shadcn-content-editable code {
+  background-color: var(--muted);
+  color: var(--foreground);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.shadcn-content-editable pre {
+  background-color: var(--muted);
+  color: var(--foreground);
+  padding: 1rem;
+  border-radius: var(--editor-border-radius);
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', monospace;
+  border: 1px solid var(--border);
+}
+
+.shadcn-content-editable pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+
+/* List Styling */
+.shadcn-content-editable ul,
+.shadcn-content-editable ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.shadcn-content-editable ul {
+  list-style-type: disc;
+}
+
+.shadcn-content-editable ol {
+  list-style-type: decimal;
+}
+
+.shadcn-content-editable li {
+  margin: 0.25rem 0;
+  color: var(--foreground);
+}
+
+/* Link Styling */
+.shadcn-content-editable a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.shadcn-content-editable a:hover {
+  color: var(--primary) / 0.8;
+}
+
+/* Table Styling */
+.shadcn-content-editable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--editor-border-radius);
+  overflow: hidden;
+}
+
+.shadcn-content-editable th,
+.shadcn-content-editable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.shadcn-content-editable th {
+  background-color: var(--muted);
+  font-weight: 600;
+}
+
+.shadcn-content-editable tr:last-child td {
+  border-bottom: none;
+}
+
+/* Image Styling */
+.shadcn-content-editable img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--editor-border-radius);
+  margin: 1rem 0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Horizontal Rule */
+.shadcn-content-editable hr {
+  border: none;
+  height: 1px;
+  background-color: var(--border);
+  margin: 2rem 0;
+}
+
+/* Floating Toolbar Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+.shadcn-editor-wrapper [data-slot="toggle"]:focus-visible,
+.shadcn-editor-wrapper [data-slot="button"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ===== DRAGGABLE BLOCK EXTENSION STYLES ===== */
+
+/* Button Stack Container */
+.lexkit-drag-button-stack {
+  position: absolute;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  pointer-events: auto;
+  opacity: 0;
+  animation: fade-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Base Drag Button Styles */
+.lexkit-drag-button {
+  width: 24px;
+  height: 24px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+
+.lexkit-drag-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.lexkit-drag-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.08);
+  border-color: var(--ring);
+  color: var(--primary);
+}
+
+.lexkit-drag-button:hover::before {
+  opacity: 1;
+}
+
+.lexkit-drag-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Drag Handle - Modern Grip Icon */
+.lexkit-drag-handle {
+  background: var(--background) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: grab !important;
+}
+
+.lexkit-drag-handle:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border-color: var(--ring) !important;
+}
+
+.lexkit-drag-handle:active,
+.lexkit-drag-handle-active {
+  background: var(--accent) !important;
+  border-color: var(--ring) !important;
+  color: var(--accent-foreground) !important;
+  transform: scale(1.05) rotate(5deg) !important;
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4), 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  cursor: grabbing !important;
+}
+
+/* Move Up/Down Buttons */
+.lexkit-move-up,
+.lexkit-move-down {
+  background: var(--background) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lexkit-move-up:hover,
+.lexkit-move-down:hover {
+  background: var(--accent) !important;
+  border-color: var(--ring) !important;
+  color: var(--accent-foreground) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 3px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.lexkit-move-up:active,
+.lexkit-move-down:active {
+  transform: scale(0.95) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Drop Indicator - Modern Animated Design */
+.lexkit-drop-indicator {
+  background: linear-gradient(90deg, var(--primary) 0%, hsl(from var(--primary) calc(h + 10) s l) 50%, var(--primary) 100%) !important;
+  box-shadow:
+    0 0 24px hsl(from var(--primary) h s l / 0.6),
+    0 0 48px hsl(from var(--primary) h s l / 0.3),
+    0 0 96px hsl(from var(--primary) h s l / 0.1) !important;
+  animation: drop-indicator-pulse 1.5s ease-in-out infinite !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Block Dragging State */
+.lexkit-block-dragging {
+  opacity: 0.6 !important;
+  transform: rotate(2deg) scale(0.98) !important;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes drop-indicator-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
+}
+
+/* Dark mode adjustments */
+[data-editor-theme="dark"] .lexkit-drag-handle,
+.dark .lexkit-drag-handle {
+  background: var(--muted) !important;
+  border-color: var(--border) !important;
+  color: var(--muted-foreground) !important;
+}
+
+[data-editor-theme="dark"] .lexkit-move-up,
+[data-editor-theme="dark"] .lexkit-move-down,
+.dark .lexkit-move-up,
+.dark .lexkit-move-down {
+  background: var(--muted) !important;
+  border-color: var(--border) !important;
+  color: var(--muted-foreground) !important;
+}
+
+[data-editor-theme="dark"] .lexkit-move-up:hover,
+[data-editor-theme="dark"] .lexkit-move-down:hover,
+.dark .lexkit-move-up:hover,
+.dark .lexkit-move-down:hover {
+  background: var(--accent) !important;
+  border-color: var(--ring) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .shadcn-content-editable {
+    font-size: 1rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .shadcn-content-editable {
+    border: 2px solid var(--border);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .lexkit-drag-handle,
+  .lexkit-move-up,
+  .lexkit-move-down {
+    transition: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .lexkit-drag-handle,
+  .lexkit-move-up,
+  .lexkit-move-down,
+  .lexkit-drop-indicator {
+    display: none !important;
+  }
+
+  .shadcn-content-editable {
+    color: black;
+    background: white;
+  }
+}
