@@ -8,7 +8,6 @@ import { SimpleCodeBlock } from '../../../components/simple-code-block'
 import { getHighlightedCode, getRawCode } from '@/lib/generated/code-registry'
 import LINK_EXTENSION_CODES from './codes'
 import { BasicEditorWithAutoLinks } from './examples/BasicEditorWithAutoLinks'
-import { BasicEditorWithManualLinks } from './examples/BasicEditorWithManualLinks'
 import {
   Link,
   Settings,
@@ -16,7 +15,8 @@ import {
   Play,
   Code,
   Palette,
-  Shield
+  Shield,
+  Zap
 } from 'lucide-react'
 
 export default function LinkExtensionPageClient() {
@@ -26,39 +26,24 @@ export default function LinkExtensionPageClient() {
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">LinkExtension</h1>
-          <p className="text-xl text-muted-foreground mt-2">Powerful link management for your editor</p>
+          <p className="text-xl text-muted-foreground mt-2">Simple, powerful link management</p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Add comprehensive link functionality to your LexKit editor with auto-linking,
-          paste handling, and customizable validation.
+          Add comprehensive link functionality to your LexKit editor with automatic URL handling
+          and customizable validation. No complex configuration needed.
         </p>
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-w-3xl mx-auto">
-          <div className="flex items-start gap-3">
-            <div className="text-yellow-600 dark:text-yellow-400 mt-0.5">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Important Requirement</h3>
-              <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
-                LinkExtension requires <code className="bg-yellow-100 dark:bg-yellow-800 px-1 py-0.5 rounded text-xs">blockFormatExtension</code> to work fully with paste functionality and link insertion.
-              </p>
-            </div>
-          </div>
-        </div>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
-            <Link className="h-3 w-3 mr-1" />
-            Link Management
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1">
-            <Link className="h-3 w-3 mr-1" />
+            <Zap className="h-3 w-3 mr-1" />
             Auto-Linking
           </Badge>
           <Badge variant="secondary" className="px-3 py-1">
             <MousePointer className="h-3 w-3 mr-1" />
-            Paste Handling
+            Smart Paste
+          </Badge>
+          <Badge variant="secondary" className="px-3 py-1">
+            <Settings className="h-3 w-3 mr-1" />
+            Simple Config
           </Badge>
         </div>
       </div>
@@ -67,35 +52,22 @@ export default function LinkExtensionPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">What It Does</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          LinkExtension provides comprehensive link management with configurable auto-linking and paste behavior.
+          LinkExtension provides simple yet powerful link management using Lexical's built-in features.
         </p>
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-3xl mx-auto">
-          <div className="flex items-start gap-3">
-            <div className="text-blue-600 dark:text-blue-400 mt-0.5">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-blue-800 dark:text-blue-200">Dependency Note</h3>
-              <p className="text-blue-700 dark:text-blue-300 text-sm mt-1">
-                For full functionality including paste handling and link insertion, always include <code className="bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded text-xs">blockFormatExtension</code> in your extensions array.
-              </p>
-            </div>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Link className="h-5 w-5" />
-                Auto-Linking
+                Smart Pasting
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Automatically convert URLs to clickable links when pasted or typed.
+                Paste URLs anywhere - they'll automatically become clickable links.
+                Select text and paste a URL to link the selected text (Lexical's built-in behavior).
+                Control cursor pasting with the autoLinkUrls option.
               </p>
             </CardContent>
           </Card>
@@ -104,12 +76,13 @@ export default function LinkExtensionPageClient() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MousePointer className="h-5 w-5" />
-                Smart Paste
+                Manual Control
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Control whether pasting URLs over selected text creates links or replaces content.
+                Use toolbar buttons to manually create and edit links.
+                Click existing links to edit them.
               </p>
             </CardContent>
           </Card>
@@ -118,12 +91,13 @@ export default function LinkExtensionPageClient() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Configurable
+                Optional Auto-Type
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Fine-tune link behavior with comprehensive configuration options.
+                Optionally auto-link URLs as you type them in the editor.
+                Perfect for when you want instant link creation.
               </p>
             </CardContent>
           </Card>
@@ -152,13 +126,7 @@ export default function LinkExtensionPageClient() {
                   <TableCell className="font-mono">autoLinkUrls</TableCell>
                   <TableCell>boolean</TableCell>
                   <TableCell>true</TableCell>
-                  <TableCell>Automatically link URLs when pasted</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">linkSelectedTextOnPaste</TableCell>
-                  <TableCell>boolean</TableCell>
-                  <TableCell>true</TableCell>
-                  <TableCell>Link selected text when pasting URLs over it</TableCell>
+                  <TableCell>Automatically link URLs when pasted at cursor</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono">autoLinkText</TableCell>
@@ -182,52 +150,64 @@ export default function LinkExtensionPageClient() {
       <div className="space-y-6">
         <div className="text-center space-y-3">
           <h2 className="text-3xl font-bold">Try LinkExtension</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            See how different configurations affect link behavior when pasting URLs.
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Experience the power of automatic link handling. Paste URLs, select text and paste URLs to replace with linked URLs, or use the toolbar buttons.
           </p>
         </div>
 
         <div className="space-y-8">
           <DynamicCodeExample
-            title="Auto-Linking Editor"
-            description="Paste URLs anywhere - they'll automatically become links. Try selecting text and pasting a URL."
+            title="Link Editor Demo"
+            description="Try pasting URLs anywhere, selecting text and pasting URLs to link the selected text, or using the toolbar buttons to create links manually."
             codes={['docs/extensions/LinkExtension/examples/BasicEditorWithAutoLinks.tsx']}
             preview={<BasicEditorWithAutoLinks />}
             tabs={['preview', 'code']}
           />
-
-          <DynamicCodeExample
-            title="Manual Linking Only"
-            description="URLs are pasted as plain text. Use the link button to create links manually."
-            codes={['docs/extensions/LinkExtension/examples/BasicEditorWithManualLinks.tsx']}
-            preview={<BasicEditorWithManualLinks />}
-            tabs={['preview', 'code']}
-          />
         </div>
 
-        {/* Behavior Comparison */}
+        {/* How It Works */}
         <Card>
           <CardHeader>
-            <CardTitle>Paste Behavior Comparison</CardTitle>
+            <CardTitle>How Link Pasting Works</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold text-green-700">linkSelectedTextOnPaste: true</h4>
-                <div className="text-sm space-y-1">
-                  <p><strong>Selected text:</strong> "click here"</p>
-                  <p><strong>Paste URL:</strong> "https://example.com"</p>
-                  <p><strong>Result:</strong> <a href="#" className="text-blue-500 underline">click here</a></p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-green-700 flex items-center gap-2">
+                  <MousePointer className="h-4 w-4" />
+                  Paste URL at Cursor
+                </h4>
+                <div className="text-sm space-y-2 bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                  <p><strong>Action:</strong> Paste "https://example.com" at cursor</p>
+                  <p><strong>Result:</strong> <a href="#" className="text-blue-500 underline">https://example.com</a> (when autoLinkUrls: true)</p>
+                  <p className="text-xs text-muted-foreground">Creates a new link at the cursor position when auto-linking is enabled</p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-semibold text-red-700">linkSelectedTextOnPaste: false</h4>
-                <div className="text-sm space-y-1">
-                  <p><strong>Selected text:</strong> "click here"</p>
-                  <p><strong>Paste URL:</strong> "https://example.com"</p>
-                  <p><strong>Result:</strong> "https://example.com"</p>
+              <div className="space-y-3">
+                <h4 className="font-semibold text-blue-700 flex items-center gap-2">
+                  <Link className="h-4 w-4" />
+                  linkSelectedTextOnPaste: true
+                </h4>
+                <div className="text-sm space-y-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                  <p><strong>Selected:</strong> "click here"</p>
+                  <p><strong>Paste:</strong> "https://example.com"</p>
+                  <p><strong>Result:</strong> <a href="#" className="text-blue-500 underline">click here</a></p>
+                  <p className="text-xs text-muted-foreground">Links the selected text with the pasted URL (Lexical's built-in behavior)</p>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="font-semibold text-red-700 flex items-center gap-2">
+                <Link className="h-4 w-4" />
+                linkSelectedTextOnPaste: false
+              </h4>
+              <div className="text-sm space-y-2 bg-red-50 dark:bg-red-900/20 p-3 rounded mt-2">
+                <p><strong>Selected:</strong> "click here"</p>
+                <p><strong>Paste:</strong> "https://example.com"</p>
+                <p><strong>Result:</strong> <a href="#" className="text-blue-500 underline">https://example.com</a></p>
+                <p className="text-xs text-muted-foreground">Replaces selected text with the linked URL</p>
               </div>
             </div>
           </CardContent>
@@ -258,15 +238,15 @@ export default function LinkExtensionPageClient() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Configuration
+                <Zap className="h-5 w-5" />
+                Auto-Link Text
               </CardTitle>
             </CardHeader>
             <CardContent>
               <SimpleCodeBlock
-                title="Configuration Options"
-                html={getHighlightedCode('link-configuration') || ''}
-                raw={getRawCode('link-configuration') || ''}
+                title="Auto-Link As You Type"
+                html={getHighlightedCode('link-auto-link-text') || ''}
+                raw={getRawCode('link-auto-link-text') || ''}
               />
             </CardContent>
           </Card>
@@ -290,28 +270,27 @@ export default function LinkExtensionPageClient() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Custom Validation
+                <MousePointer className="h-5 w-5" />
+                Paste Behavior
               </CardTitle>
             </CardHeader>
             <CardContent>
               <SimpleCodeBlock
-                title="URL Validation"
-                html={getHighlightedCode('link-custom-validation') || ''}
-                raw={getRawCode('link-custom-validation') || ''}
+                title="Paste Behavior Options"
+                html={getHighlightedCode('link-paste-behavior') || ''}
+                raw={getRawCode('link-paste-behavior') || ''}
               />
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Integration */}
-            {/* Integration */}
+      {/* Quick Start */}
       <div className="space-y-6">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200 dark:border-blue-800 rounded-lg px-6 py-3">
             <Play className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-3xl font-bold text-blue-900 dark:text-blue-100">Using LinkExtension</h2>
+            <h2 className="text-3xl font-bold text-blue-900 dark:text-blue-100">Quick Start</h2>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Add link functionality to your editor in just a few lines of code.
@@ -320,7 +299,7 @@ export default function LinkExtensionPageClient() {
 
         <Card className="border-blue-200 dark:border-blue-800">
           <CardHeader>
-            <CardTitle>Quick Start</CardTitle>
+            <CardTitle>Import & Setup</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <SimpleCodeBlock
@@ -344,12 +323,24 @@ export default function LinkExtensionPageClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Choose the Right Configuration</CardTitle>
+              <CardTitle>Start Simple</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Consider your users' needs. Auto-linking everything might be convenient,
-                but selective linking gives users more control.
+                Use the default configuration first. It handles most use cases automatically
+                with smart paste behavior and manual link creation.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Auto-Link When Appropriate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Enable autoLinkText for user-friendly experiences where instant link creation
+                is desired, like in chat applications or note-taking apps.
               </p>
             </CardContent>
           </Card>
@@ -361,7 +352,7 @@ export default function LinkExtensionPageClient() {
             <CardContent>
               <p className="text-muted-foreground">
                 Use custom URL validation to restrict links to trusted domains
-                or enforce HTTPS-only policies.
+                or enforce security policies in enterprise applications.
               </p>
             </CardContent>
           </Card>
@@ -373,35 +364,12 @@ export default function LinkExtensionPageClient() {
             <CardContent>
               <p className="text-muted-foreground">
                 Provide clear visual feedback for links and make link editing
-                intuitive with toolbar buttons.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                For large documents, consider disabling auto-link-as-you-type
-                if it impacts performance.
+                intuitive with toolbar buttons and keyboard shortcuts.
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
-  );
-}
-
-// Demo Component
-function LinkDemo() {
-  return (
-    <div className="p-6 border rounded-lg bg-muted/50">
-      <p className="text-center text-muted-foreground">
-        Demo component would show the editor with link functionality
-      </p>
     </div>
   );
 }

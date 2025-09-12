@@ -1,4 +1,4 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, PASTE_COMMAND, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_CRITICAL, $createTextNode, ParagraphNode } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection, PASTE_COMMAND, $createTextNode } from 'lexical';
 import { $isLinkNode, TOGGLE_LINK_COMMAND, LinkNode, AutoLinkNode, $createLinkNode } from '@lexical/link';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { BaseExtensionConfig, ExtensionCategory } from '@lexkit/editor/extensions/types';
@@ -10,17 +10,6 @@ import React from 'react';
  * Configuration for the link extension.
  */
 export interface LinkConfig extends BaseExtensionConfig {
-  /** 
-   * Whether to automatically link URLs when pasted anywhere in the editor. 
-   * When false, pasted URLs remain as plain text. Default: true 
-   */
-  autoLinkUrls?: boolean;
-  /** 
-   * Whether to link selected text when pasting URLs over it.
-   * When false, pasting URLs over selected text replaces it with plain URL text.
-   * Only applies when autoLinkUrls is true. Default: true 
-   */
-  linkSelectedTextOnPaste?: boolean;
   /** 
    * Whether to automatically link URLs as you type them in the editor.
    * Uses real-time pattern matching. Default: false 
@@ -47,26 +36,31 @@ export type LinkStateQueries = {
 
 /**
  * Link extension for creating and managing hyperlinks.
- * Provides functionality to insert, edit, and remove links in the editor.
- * Includes configurable auto-linking of URLs on paste and in text.
+ * 
+ * Features:
+ * - Manual link creation via commands
+ * - Built-in paste URL handling (always creates links when pasting URLs)
+ * - Optional auto-linking as you type
+ * - Click to follow links, click again to edit
+ * 
+ * Uses Lexical's built-in LinkPlugin which handles:
+ * - Pasting URLs over selected text (converts selection to link)
+ * - Pasting URLs at cursor (creates new link)
+ * - Link editing and validation
  *
  * @example
  * ```tsx
- * const extensions = [linkExtension.configure({
- *   autoLinkUrls: true,
- *   linkSelectedTextOnPaste: false,
- *   autoLinkText: true
- * })] as const;
- * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
- *
+ * const extensions = [
+ *   linkExtension.configure({
+ *     autoLinkText: true // Optional: auto-link as you type
+ *   })
+ * ] as const;
+ * 
  * function MyEditor() {
  *   const { commands, activeStates } = useEditor();
  *   return (
  *     <button
- *       onClick={() => {
- *         const url = prompt('Enter URL:');
- *         if (url) commands.insertLink(url);
- *       }}
+ *       onClick={() => commands.insertLink()}
  *       className={activeStates.isLink ? 'active' : ''}
  *     >
  *       Link
@@ -88,8 +82,6 @@ export class LinkExtension extends BaseExtension<
   constructor() {
     super('link', [ExtensionCategory.Toolbar]);
     this.config = {
-      autoLinkUrls: true,
-      linkSelectedTextOnPaste: true, // This should be true by default
       autoLinkText: false,
       validateUrl: (url: string) => {
         try {
@@ -104,13 +96,10 @@ export class LinkExtension extends BaseExtension<
 
   /**
    * Registers the extension with the editor.
-   * Sets up link-related functionality and paste handling.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Cleanup function
+   * Sets up paste handling for URLs.
    */
   register(editor: LexicalEditor): () => void {
-    // Register paste command handler with HIGHEST priority to override LinkPlugin completely
+    // Handle URL pasting with custom logic
     const unregisterPaste = editor.registerCommand(
       PASTE_COMMAND,
       (event: ClipboardEvent) => {
@@ -120,49 +109,36 @@ export class LinkExtension extends BaseExtension<
         const pastedText = clipboardData.getData('text/plain');
         if (!pastedText) return false;
 
-        // Check if pasted text is a URL
+        // Check if pasted text is a valid URL
         if (this.config.validateUrl!(pastedText)) {
-          // Always prevent default to override LinkPlugin, then decide what to do
-          event.preventDefault();
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return false;
 
-          editor.update(() => {
-            const selection = $getSelection();
-            if (!$isRangeSelection(selection)) return;
-
-            if (selection.isCollapsed()) {
-              // No text selected, just insert the URL
-              if (this.config.autoLinkUrls) {
-                // Insert as link
+          if (selection.isCollapsed()) {
+            // No text selected - handle based on autoLinkUrls setting
+            if (this.config.autoLinkUrls) {
+              event.preventDefault();
+              editor.update(() => {
+                // Create new link
                 const linkNode = $createLinkNode(pastedText);
                 linkNode.append($createTextNode(pastedText));
                 selection.insertNodes([linkNode]);
-              } else {
-                // Insert as plain text
-                selection.insertText(pastedText);
-              }
+              });
+              return true;
             } else {
-              // Text is selected
-              if (this.config.autoLinkUrls && this.config.linkSelectedTextOnPaste) {
-                // Keep selected text and make it a link with pasted URL
-                const selectedText = selection.getTextContent();
-                const linkNode = $createLinkNode(pastedText);
-                linkNode.append($createTextNode(selectedText));
-                selection.insertNodes([linkNode]);
-              } else {
-                // Replace selected text with pasted URL as plain text
-                // First delete the selected text, then insert the new text
-                selection.removeText();
-                selection.insertText(pastedText);
-              }
+              // Let default behavior handle it (paste as plain text)
+              return false;
             }
-          });
-
-          return true; // Always return true to prevent LinkPlugin from handling
+          } else {
+            // Text is selected - let Lexical handle it naturally
+            // Don't interfere with Lexical's built-in selected text + paste behavior
+            return false;
+          }
         }
 
-        return false; // Not a URL, let other handlers deal with it
+        return false;
       },
-      COMMAND_PRIORITY_CRITICAL // Maximum priority to ensure we override LinkPlugin
+      3 // Higher priority than LinkPlugin's default
     );
 
     return () => {
@@ -172,8 +148,6 @@ export class LinkExtension extends BaseExtension<
 
   /**
    * Returns the Lexical nodes provided by this extension.
-   *
-   * @returns Array containing the LinkNode and optionally AutoLinkNode
    */
   getNodes(): any[] {
     const nodes = [LinkNode];
@@ -185,16 +159,19 @@ export class LinkExtension extends BaseExtension<
 
   /**
    * Returns React plugins provided by this extension.
-   *
-   * @returns Array containing the LinkPlugin and optionally AutoLinkPlugin
    */
   getPlugins(): React.ReactElement[] {
     const plugins: React.ReactElement[] = [];
     
-    // Always include LinkPlugin for basic link functionality (clicking, editing existing links)
-    // Our paste handler with CRITICAL priority will override its paste behavior
-    plugins.push(<LinkPlugin key="link-plugin" validateUrl={this.config.validateUrl} />);
+    // LinkPlugin handles all URL pasting behavior automatically
+    plugins.push(
+      <LinkPlugin 
+        key="link-plugin" 
+        validateUrl={this.config.validateUrl} 
+      />
+    );
     
+    // Optional: Auto-link as you type
     if (this.config.autoLinkText) {
       const urlMatcher = (text: string) => {
         const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
@@ -209,16 +186,20 @@ export class LinkExtension extends BaseExtension<
         }
         return null;
       };
-      plugins.push(<AutoLinkPlugin key="auto-link" matchers={[urlMatcher]} />);
+      
+      plugins.push(
+        <AutoLinkPlugin 
+          key="auto-link" 
+          matchers={[urlMatcher]} 
+        />
+      );
     }
+    
     return plugins;
   }
 
   /**
    * Returns commands provided by this extension.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Object with link command functions
    */
   getCommands(editor: LexicalEditor): LinkCommands {
     return {
@@ -233,7 +214,6 @@ export class LinkExtension extends BaseExtension<
               }
             });
           }
-
           // Apply link to current selection
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, url);
         } else {
@@ -253,9 +233,6 @@ export class LinkExtension extends BaseExtension<
 
   /**
    * Returns state query functions provided by this extension.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Object with link state query functions
    */
   getStateQueries(editor: LexicalEditor): LinkStateQueries {
     return {

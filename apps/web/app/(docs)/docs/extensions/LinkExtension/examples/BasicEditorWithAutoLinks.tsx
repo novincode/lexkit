@@ -1,32 +1,18 @@
 "use client"
 
-"use client"
-
 // Auto-Linking Editor Example
 // Demonstrates automatic link creation when pasting URLs
-// This example shows how LinkExtension works with BlockFormatExtension for full functionality
-import { createEditorSystem, historyExtension, linkExtension, blockFormatExtension, RichText } from "@lexkit/editor"
+import { createEditorSystem, historyExtension, linkExtension, RichText } from "@lexkit/editor"
 import "@/app/(docs)/examples/basic-editor.css"
 
-// Auto-linking configuration (autoLinkUrls: true, linkSelectedTextOnPaste: true)
-// - autoLinkUrls: true → Automatically converts pasted URLs to links
-// - linkSelectedTextOnPaste: true → When pasting URLs over selected text, makes the selected text a link
+// Auto-linking configuration
+// - URL pasting at cursor: Always creates links (autoLinkUrls: true)
+// - URL pasting over selected text: Links selected text (Lexical's built-in behavior)
 // - autoLinkText: true → Automatically converts URLs typed in the editor to links
-// NOTE: BlockFormatExtension is required for LinkExtension to work properly with paste operations
 const extensionsWithAutoLinks = [
-  blockFormatExtension, // Required for LinkExtension to work with paste operations
   linkExtension.configure({
-    // autoLinkUrls: true → Automatically converts pasted URLs to links
-    // When you paste a URL anywhere in the editor, it becomes a clickable link
-    autoLinkUrls: true,
-
-    // linkSelectedTextOnPaste: true → When pasting URLs over selected text, makes the selected text a link
-    // Select some text, paste a URL, and the selected text becomes a link with that URL
-    linkSelectedTextOnPaste: true,
-
-    // autoLinkText: true → Automatically converts URLs typed in the editor to links
-    // As you type URLs, they automatically become clickable links
-    autoLinkText: true
+    autoLinkUrls: false,               // Auto-convert pasted URLs to links (at cursor)
+    autoLinkText: true               // Auto-convert typed URLs to links
   }),
   historyExtension
 ] as const
@@ -39,7 +25,7 @@ function Toolbar() {
   const { commands, activeStates } = useEditor()
 
   const insertLink = () => {
-    const url = prompt('Enter URL:')
+    const url = prompt('Enter URL: ')
     if (url) {
       commands.insertLink(url)
     }
@@ -87,7 +73,7 @@ export function BasicEditorWithAutoLinks() {
   return (
     <Provider extensions={extensionsWithAutoLinks}>
       <div className="basic-editor">
-        <h3 className="example-title">Auto-Linking Editor (linkSelectedTextOnPaste: true)</h3>
+        <h3 className="example-title">Link Editor Demo</h3>
         <Toolbar />
         <RichText
           classNames={{
@@ -95,7 +81,7 @@ export function BasicEditorWithAutoLinks() {
             contentEditable: "basic-content",
             placeholder: "basic-placeholder"
           }}
-          placeholder="Try pasting URLs or selecting text and pasting URLs..."
+          placeholder="Try pasting URLs anywhere, selecting text and pasting URLs to link the selected text, or using the toolbar buttons to create links manually..."
         />
       </div>
     </Provider>
