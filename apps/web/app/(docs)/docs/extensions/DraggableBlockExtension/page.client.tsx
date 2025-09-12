@@ -33,7 +33,7 @@ export default function DraggableBlockExtensionPageClient() {
           </Badge>
           <Badge variant="secondary" className="px-3 py-1">
             <Zap className="h-3 w-3 mr-1" />
-            Smooth Animations
+            Reactive State
           </Badge>
         </div>
       </div>
@@ -79,14 +79,14 @@ export default function DraggableBlockExtensionPageClient() {
           <Card className="border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <Palette className="h-6 w-6 text-primary" />
-                Fully Customizable
+                <Zap className="h-6 w-6 text-primary" />
+                Reactive State System
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Customize handles, animations, themes, and behavior with renderers
-                for complete headless control.
+                Real-time drag state updates without polling. Access `activeStates.isDragging`
+                for immediate feedback on drag operations.
               </p>
             </CardContent>
           </Card>
@@ -145,6 +145,31 @@ export default function DraggableBlockExtensionPageClient() {
           preview={<BasicEditorWithDraggableBlockExtension />}
           tabs={['preview', 'Editor']}
         />
+      </div>
+
+      {/* Reactive State System */}
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Reactive State System</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          Access drag state reactively without performance-killing polling.
+        </p>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Real-time Drag State</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SimpleCodeBlock
+              title="Access reactive drag state"
+              html={getHighlightedCode('draggable-block-reactive-state') || ''}
+              raw={getRawCode('draggable-block-reactive-state') || ''}
+            />
+            <p className="text-muted-foreground mt-4 leading-relaxed">
+              The <code className="bg-muted px-1 py-0.5 rounded text-sm">activeStates.isDragging</code> updates
+              immediately when drag operations start and stop, providing real-time feedback without any polling.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Configuration Options */}
@@ -295,6 +320,18 @@ export default function DraggableBlockExtensionPageClient() {
                     Programmatically move a block to a new position.
                   </p>
                 </div>
+                <div>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">moveCurrentBlockUp()</code>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Move the currently selected block up one position.
+                  </p>
+                </div>
+                <div>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">moveCurrentBlockDown()</code>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Move the currently selected block down one position.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -303,21 +340,34 @@ export default function DraggableBlockExtensionPageClient() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                State Queries
+                Active States
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">isDragging()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">isDragging</code>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Check if a drag operation is currently in progress.
+                    Real-time boolean indicating if a drag operation is in progress.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Programmatic Control</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SimpleCodeBlock
+              title="Using commands programmatically"
+              html={getHighlightedCode('draggable-block-commands') || ''}
+              raw={getRawCode('draggable-block-commands') || ''}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Best Practices */}
@@ -346,8 +396,8 @@ export default function DraggableBlockExtensionPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Use efficient animations and consider debouncing for smooth performance
-                on lower-end devices.
+                The reactive state system ensures optimal performance without polling.
+                Animations are hardware-accelerated for smooth 60fps experience.
               </p>
             </CardContent>
           </Card>

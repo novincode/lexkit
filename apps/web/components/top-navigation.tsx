@@ -117,6 +117,7 @@ export function TopNavigation({
 
         {/* Right Side */}
         <div className="ml-auto flex items-center space-x-2">
+
           <Button variant="ghost" size="lg" asChild className="hidden md:flex">
             <Link
               href="https://github.com/novincode/lexkit"

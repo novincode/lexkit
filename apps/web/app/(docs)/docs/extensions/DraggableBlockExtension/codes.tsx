@@ -124,6 +124,68 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     title: 'Custom Handle Renderer',
     description: 'Create custom drag handles with full control',
     highlightLines: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+  },
+  {
+    id: 'draggable-block-reactive-state',
+    code: `function MyToolbar() {
+  const { commands, activeStates } = useEditor()
+
+  // Reactive state - updates immediately when dragging starts/stops
+  const isDragging = activeStates?.isDragging || false
+
+  return (
+    <div className="toolbar">
+      <button onClick={() => commands.moveCurrentBlockUp()}>
+        Move Up
+      </button>
+      <button onClick={() => commands.moveCurrentBlockDown()}>
+        Move Down
+      </button>
+
+      {/* Real-time drag state indicator */}
+      <div className="drag-status">
+        Dragging: {isDragging ? 'Yes' : 'No'}
+      </div>
+    </div>
+  )
+}`,
+    language: 'tsx',
+    title: 'Reactive State Usage',
+    description: 'Access drag state reactively without polling',
+    highlightLines: [5, 6, 17]
+  },
+  {
+    id: 'draggable-block-commands',
+    code: `function MyEditor() {
+  const { commands, activeStates } = useEditor()
+
+  const handleMoveBlock = () => {
+    // Move a specific block programmatically
+    commands.moveBlock('block-1', 'block-2', true)
+  }
+
+  const handleMoveCurrent = () => {
+    // Move the currently selected block
+    commands.moveCurrentBlockUp()
+    // or
+    commands.moveCurrentBlockDown()
+  }
+
+  return (
+    <div>
+      <button onClick={handleMoveBlock}>
+        Move Block 1 After Block 2
+      </button>
+      <button onClick={handleMoveCurrent}>
+        Move Current Block Up
+      </button>
+    </div>
+  )
+}`,
+    language: 'tsx',
+    title: 'Using Commands',
+    description: 'Programmatically control block movement',
+    highlightLines: [6, 11, 12, 13, 14, 15, 16]
   }
 ]
 
