@@ -115,7 +115,7 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               © 2025 LexKit. Built with{" "}
               <Heart className="inline h-3 w-3 text-red-500" />{" "}
-              by a solo dev stuck in Iran :D
+              by a solo dev (but open to collab :D)
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <Link href="/docs" className="hover:text-foreground transition-colors">

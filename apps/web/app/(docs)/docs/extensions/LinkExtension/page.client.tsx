@@ -214,7 +214,7 @@ export default function LinkExtensionPageClient() {
           Customize LinkExtension behavior to match your needs.
         </p>
 
-        <Card>
+        <Card className='p-0'>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
