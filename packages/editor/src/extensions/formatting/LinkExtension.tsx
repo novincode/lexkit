@@ -20,6 +20,12 @@ export interface LinkConfig extends BaseExtensionConfig {
    * When false, pasted URLs remain as plain text. Default: true
    */
   autoLinkUrls?: boolean;
+  /** 
+   * Whether to link selected text when pasting URLs over it.
+   * When true: selected text becomes a link with the pasted URL.
+   * When false: selected text is replaced with the pasted URL and then linked. Default: true
+   */
+  linkSelectedTextOnPaste?: boolean;
   /** URL validation function. Default: basic URL regex */
   validateUrl?: (url: string) => boolean;
 }
@@ -57,7 +63,9 @@ export type LinkStateQueries = {
  * ```tsx
  * const extensions = [
  *   linkExtension.configure({
- *     autoLinkText: true // Optional: auto-link as you type
+ *     autoLinkText: true, // Optional: auto-link as you type
+ *     autoLinkUrls: true, // Optional: auto-link pasted URLs
+ *     linkSelectedTextOnPaste: false // Optional: replace selected text instead of linking it
  *   })
  * ] as const;
  * 

@@ -63,6 +63,21 @@ export const docsConfig: DocsSection[] = [
     ]
   },
   {
+    title: "Extensions",
+    items: [
+      {
+        title: "LinkExtension",
+        href: "/docs/extensions/LinkExtension",
+        description: "Create and manage hyperlinks with smart paste behavior"
+      },
+      {
+        title: "DraggableBlockExtension",
+        href: "/docs/extensions/DraggableBlockExtension",
+        description: "Add drag-and-drop functionality to content blocks"
+      }
+    ]
+  },
+  {
     title: "Core API",
     items: [
       {
