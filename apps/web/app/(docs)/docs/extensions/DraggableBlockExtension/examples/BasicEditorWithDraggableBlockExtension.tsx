@@ -68,8 +68,8 @@ function Toolbar() {
             >
                 ↷ Redo
             </button>
-            <div className="text-sm text-muted-foreground ml-4">
-                Dragging: {isDragging ? 'Yes' : 'No'}
+            <div className="text-sm text-muted-foreground ml-4 ">
+                Dragging: {isDragging ? 'YEAH' : 'Nope'}
             </div>
         </div>
     )
