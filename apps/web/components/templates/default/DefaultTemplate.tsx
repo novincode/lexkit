@@ -75,7 +75,12 @@ const extensions = [
   italicExtension,
   underlineExtension,
   strikethroughExtension,
-  linkExtension,
+  linkExtension.configure({
+    linkSelectedTextOnPaste: false,
+   
+    autoLinkText:true,
+    autoLinkUrls: true
+  }),
   horizontalRuleExtension,
   tableExtension,
   listExtension,
