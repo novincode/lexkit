@@ -76,7 +76,7 @@ const extensions = [
   underlineExtension,
   strikethroughExtension,
   linkExtension.configure({
-    linkSelectedTextOnPaste: false,
+    linkSelectedTextOnPaste: true,
    
     autoLinkText:true,
     autoLinkUrls: true

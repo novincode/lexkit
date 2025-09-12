@@ -10,7 +10,7 @@ const extensions = [
   boldExtension,
   italicExtension,
   listExtension,
-  linkExtension.configure({ pasteListener: { insert: true, replace: true } }),
+  linkExtension,
   historyExtension
 ] as const
 
