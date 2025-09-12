@@ -10,7 +10,8 @@ import { DarkModeExample } from './examples/DarkModeExample'
 import { Badge } from "@repo/ui/components/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/table"
-import { Palette, Code, Zap, Settings, Layers, Sparkles } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert"
+import { Palette, Code, Zap, Settings, Layers, Sparkles, Info } from "lucide-react"
 
 export default function ThemingPageClient() {
   return (
@@ -180,10 +181,26 @@ export default function ThemingPageClient() {
             tabs={['preview', 'Editor']}
           />
 
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Multiple Ways to Implement Dark Mode</AlertTitle>
+            <AlertDescription>
+              There are several approaches to dark mode theming:
+              <br />
+              <strong>1. Theme Object Replacement:</strong> Replace the entire theme object (like the example above) for complete control.
+              <br />
+              <strong>2. Parent Container Classes:</strong> Add dark mode classes to parent containers and let CSS handle the styling cascade.
+              <br />
+              <strong>3. CSS Variables:</strong> Use CSS custom properties that change based on a dark mode class.
+              <br />
+              <strong>4. Hybrid Approach:</strong> Combine theme objects with CSS variables for maximum flexibility.
+            </AlertDescription>
+          </Alert>
+
           <DynamicCodeExample
             title="Custom CSS Classes Theme"
             description="Using custom CSS classes for complete styling control"
-            codes={['docs/theming/examples/ThemedEditorExample.tsx']}
+            codes={['examples/ThemedEditorExample.tsx']}
             preview={<ThemedEditorExample />}
             tabs={['preview', 'Editor']}
           />
@@ -191,7 +208,7 @@ export default function ThemingPageClient() {
           <DynamicCodeExample
             title="Tailwind CSS Theme"
             description="Pure Tailwind utilities for modern, responsive styling"
-            codes={['docs/theming/examples/TailwindBasedExample.tsx']}
+            codes={['examples/TailwindBasedExample.tsx']}
             preview={<TailwindBasedExample />}
             tabs={['preview', 'Editor']}
           />
