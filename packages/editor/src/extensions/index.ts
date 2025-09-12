@@ -21,7 +21,7 @@ export { TableExtension, tableExtension, type TableConfig } from './formatting/T
 export { ListExtension, listExtension } from './formatting/ListExtension';
 export { CodeExtension, codeExtension } from './formatting/CodeExtension';
 export { CodeFormatExtension, codeFormatExtension } from './formatting/CodeFormatExtension';
-export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockTypeExtension';
+export { BlockFormatExtension, blockFormatExtension } from './formatting/BlockFormatExtension';
 
 // History & Undo/Redo
 export { HistoryExtension, historyExtension } from './core/HistoryExtension';

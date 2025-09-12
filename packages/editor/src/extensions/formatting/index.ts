@@ -3,7 +3,7 @@ export { ItalicExtension, italicExtension } from './ItalicExtension';
 export { UnderlineExtension, underlineExtension } from './UnderlineExtension';
 export { StrikethroughExtension, strikethroughExtension } from './StrikethroughExtension';
 export { ListExtension, listExtension } from './ListExtension';
-export { BlockFormatExtension, blockFormatExtension } from './BlockTypeExtension';
+export { BlockFormatExtension, blockFormatExtension } from './BlockFormatExtension';
 export { CodeExtension, codeExtension } from './CodeExtension';
 export { CodeFormatExtension, codeFormatExtension } from './CodeFormatExtension';
 export { LinkExtension, linkExtension } from './LinkExtension';
