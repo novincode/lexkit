@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lexkit.codeideal.com/sitemap.xml
+Sitemap: https://lexkit.dev/sitemap.xml

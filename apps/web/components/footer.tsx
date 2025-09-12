@@ -127,6 +127,9 @@ export function Footer() {
               <Link href="https://discord.gg/hAvRFC9Y" target="_blank" className="hover:text-foreground transition-colors">
                 Discord
               </Link>
+              <Link href="https://codeideal.com" target="_blank" className="hover:text-foreground transition-colors font-medium">
+                By CodeIdeal
+              </Link>
             </div>
           </div>
         </div>

@@ -104,7 +104,7 @@ export function DocsSidebar({
             <ExternalLink className="h-3 w-3 ml-auto" />
           </Link>
           <Link
-            href="https://lexkit.codeideal.com/demo"
+            href="https://lexkit.dev/demo"
             target="_blank"
             className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
             onClick={isMobile ? onClose : undefined}

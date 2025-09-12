@@ -2,23 +2,23 @@
   "name": "LexKit - Modern Rich Text Editor",
   "short_name": "LexKit",
   "description": "A powerful, extensible rich text editor built with Lexical and React",
-  "start_url": "https://lexkit.codeideal.com",
+  "start_url": "https://lexkit.dev",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
-  "scope": "https://lexkit.codeideal.com",
+  "scope": "https://lexkit.dev",
   "lang": "en-US",
   "categories": ["productivity", "developer-tools", "text-editor"],
   "icons": [
     {
-      "src": "https://lexkit.codeideal.com/images/web-app-manifest-192x192.png",
+      "src": "https://lexkit.dev/images/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "https://lexkit.codeideal.com/images/web-app-manifest-512x512.png",
+      "src": "https://lexkit.dev/images/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
