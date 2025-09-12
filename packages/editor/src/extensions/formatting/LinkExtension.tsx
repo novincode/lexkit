@@ -15,6 +15,11 @@ export interface LinkConfig extends BaseExtensionConfig {
    * Uses real-time pattern matching. Default: false 
    */
   autoLinkText?: boolean;
+  /** 
+   * Whether to automatically link URLs when pasted into the editor.
+   * When false, pasted URLs remain as plain text. Default: true
+   */
+  autoLinkUrls?: boolean;
   /** URL validation function. Default: basic URL regex */
   validateUrl?: (url: string) => boolean;
 }
@@ -83,6 +88,7 @@ export class LinkExtension extends BaseExtension<
     super('link', [ExtensionCategory.Toolbar]);
     this.config = {
       autoLinkText: false,
+      linkSelectedTextOnPaste: true, // Link selected text when pasting URLs
       validateUrl: (url: string) => {
         try {
           new URL(url);
@@ -111,29 +117,44 @@ export class LinkExtension extends BaseExtension<
 
         // Check if pasted text is a valid URL
         if (this.config.validateUrl!(pastedText)) {
-          const selection = $getSelection();
-          if (!$isRangeSelection(selection)) return false;
-
-          if (selection.isCollapsed()) {
-            // No text selected - handle based on autoLinkUrls setting
-            if (this.config.autoLinkUrls) {
-              event.preventDefault();
-              editor.update(() => {
-                // Create new link
-                const linkNode = $createLinkNode(pastedText);
-                linkNode.append($createTextNode(pastedText));
-                selection.insertNodes([linkNode]);
-              });
-              return true;
-            } else {
-              // Let default behavior handle it (paste as plain text)
-              return false;
-            }
-          } else {
-            // Text is selected - let Lexical handle it naturally
-            // Don't interfere with Lexical's built-in selected text + paste behavior
+          // If autoLinkUrls is false, don't handle the paste
+          if (!this.config.autoLinkUrls) {
             return false;
           }
+
+          event.preventDefault();
+
+          editor.update(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) return;
+
+            if (selection.isCollapsed()) {
+              // No text selected - create new link
+              const linkNode = $createLinkNode(pastedText);
+              linkNode.append($createTextNode(pastedText));
+              selection.insertNodes([linkNode]);
+            } else {
+              // Text is selected - handle based on linkSelectedTextOnPaste option
+              if (this.config.linkSelectedTextOnPaste) {
+                // Link the selected text with the pasted URL
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, pastedText);
+              } else {
+                // Replace selected text with the pasted URL and link it
+                selection.insertText(pastedText);
+                // Apply link to the newly inserted text
+                const newSelection = $getSelection();
+                if (newSelection && $isRangeSelection(newSelection)) {
+                  const nodes = newSelection.getNodes();
+                  const firstNode = nodes[0];
+                  if (firstNode) {
+                    editor.dispatchCommand(TOGGLE_LINK_COMMAND, pastedText);
+                  }
+                }
+              }
+            }
+          });
+
+          return true;
         }
 
         return false;
@@ -163,7 +184,8 @@ export class LinkExtension extends BaseExtension<
   getPlugins(): React.ReactElement[] {
     const plugins: React.ReactElement[] = [];
     
-    // LinkPlugin handles all URL pasting behavior automatically
+    // Always include LinkPlugin for basic link functionality
+    // Our paste handler will override its behavior when needed
     plugins.push(
       <LinkPlugin 
         key="link-plugin" 

@@ -1,66 +1,74 @@
 import { RegisteredCodeSnippet } from '../../../lib/types'
 
-const LINK_EXTENSION_CODES: RegisteredCodeSnippet[] = [
+export const LINK_EXTENSION_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'link-import',
-    code: `import { linkExtension } from '@lexkit/editor/extensions'
-import { DefaultTemplate } from '@lexkit/editor/templates'`,
-    language: 'typescript',
-    title: 'Import LinkExtension',
-    description: 'Import the extension and template'
-  },
-  {
-    id: 'link-basic-usage',
-    code: `import { createEditorSystem, linkExtension, historyExtension, RichText } from '@lexkit/editor'
+    id: 'link-extension-basic-usage',
+    code: `import { createEditorSystem, linkExtension } from '@lexkit/editor'
 
-const extensions = [
-  linkExtension,        // Basic link functionality
-  historyExtension      // Undo/redo support
-] as const
-
+const extensions = [linkExtension] as const
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 
 function MyEditor() {
+  const { commands, activeStates } = useEditor()
+
   return (
     <Provider extensions={extensions}>
-      <RichText placeholder="Start typing..." />
+      <button
+        onClick={() => commands.insertLink()}
+        className={activeStates.isLink ? 'active' : ''}
+      >
+        Insert Link
+      </button>
+      <button
+        onClick={() => commands.removeLink()}
+        disabled={!activeStates.isLink}
+      >
+        Remove Link
+      </button>
     </Provider>
   )
 }`,
     language: 'tsx',
-    title: 'Basic Usage with RichText',
-    description: 'LinkExtension with RichText component',
-    highlightLines: [3, 4, 5, 6, 11, 12, 13, 14, 15]
+    title: 'Basic Link Extension Usage',
+    description: 'Simple setup with manual link creation',
+    highlightLines: [3, 4, 5, 10, 11, 12, 15, 16, 17]
   },
   {
-    id: 'link-auto-link-urls',
-    code: `import { createEditorSystem, linkExtension, historyExtension, RichText } from '@lexkit/editor'
+    id: 'link-extension-auto-link-text',
+    code: `import { linkExtension } from '@lexkit/editor'
 
 const extensions = [
   linkExtension.configure({
-    autoLinkUrls: false,    // Don't auto-link pasted URLs
-    autoLinkText: true      // But auto-link URLs as you type
-  }),
-  historyExtension
-] as const
-
-const { Provider, useEditor } = createEditorSystem<typeof extensions>()
-
-function MyEditor() {
-  return (
-    <Provider extensions={extensions}>
-      <RichText placeholder="Paste URLs - they'll remain as plain text. Type URLs to auto-link them..." />
-    </Provider>
-  )
-}`,
-    language: 'tsx',
-    title: 'Manual URL Pasting',
-    description: 'Disable auto-linking of pasted URLs while keeping auto-linking as you type',
-    highlightLines: [3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17]
+    autoLinkText: true  // Auto-convert URLs as you type
+  })
+] as const`,
+    language: 'typescript',
+    title: 'Auto-Link Text Configuration',
+    description: 'Enable automatic link creation when typing URLs',
+    highlightLines: [4, 5]
   },
   {
-    id: 'link-commands',
-    code: `function MyEditor() {
+    id: 'link-extension-custom-validation',
+    code: `import { linkExtension } from '@lexkit/editor'
+
+const extensions = [
+  linkExtension.configure({
+    autoLinkText: true,
+    validateUrl: (url: string) => {
+      // Custom URL validation
+      return url.startsWith('https://') &&
+             url.includes('example.com')
+    }
+  })
+] as const`,
+    language: 'typescript',
+    title: 'Custom URL Validation',
+    description: 'Use custom validation for URLs',
+    highlightLines: [5, 6, 7, 8]
+  },
+  {
+    id: 'link-extension-commands',
+    code: `function LinkToolbar() {
   const { commands, activeStates } = useEditor()
 
   const insertLink = () => {
@@ -71,19 +79,16 @@ function MyEditor() {
   }
 
   const insertLinkWithText = () => {
-    const text = prompt('Enter link text:')
     const url = prompt('Enter URL:')
-    if (text && url) {
+    const text = prompt('Enter link text:')
+    if (url && text) {
       commands.insertLink(url, text)
     }
   }
 
   return (
     <div>
-      <button
-        onClick={insertLink}
-        className={activeStates.isLink ? 'active' : ''}
-      >
+      <button onClick={insertLink}>
         Insert Link
       </button>
       <button onClick={insertLinkWithText}>
@@ -99,35 +104,33 @@ function MyEditor() {
   )
 }`,
     language: 'tsx',
-    title: 'Using Link Commands',
-    description: 'Programmatically create and manage links',
-    highlightLines: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+    title: 'Link Commands Usage',
+    description: 'Using link extension commands in components',
+    highlightLines: [4, 5, 6, 7, 11, 12, 13, 14, 17, 18, 19, 20]
   },
   {
-    id: 'link-paste-behavior',
-    code: `import { createEditorSystem, linkExtension, historyExtension, RichText } from '@lexkit/editor'
-
-// Replace selected text when pasting URLs
-const replaceOnPaste = linkExtension.configure({
-  linkSelectedTextOnPaste: false  // Replace selected text with pasted URL
-})
-
-// Link selected text when pasting URLs (default)
-const linkOnPaste = linkExtension.configure({
-  linkSelectedTextOnPaste: true   // Link selected text with pasted URL
-})
-
-const extensions = [
-  linkOnPaste,  // or replaceOnPaste
-  historyExtension
-] as const
-
-const { Provider } = createEditorSystem<typeof extensions>()`,
-    language: 'tsx',
-    title: 'Paste Behavior Options',
-    description: 'Control how URLs are handled when pasted over selected text',
-    highlightLines: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
-  },
+    id: 'link-extension-paste-behavior',
+    code: `// LinkExtension Paste Behavior:
+//
+// 1. Pasting URL at cursor (no selection):
+//    - Always creates a link automatically
+//    - Example: Paste "https://example.com" → creates clickable link
+//
+// 2. Pasting URL over selected text:
+//    - Uses Lexical's built-in behavior
+//    - Converts selected text to link with pasted URL
+//    - Example: Select "click here" + paste "https://example.com"
+//              → "click here" becomes link to example.com
+//
+// 3. Pasting non-URL text:
+//    - Normal paste behavior (no link creation)
+//
+// Note: autoLinkText setting only affects typing, not pasting`,
+    language: 'typescript',
+    title: 'Paste Behavior Explanation',
+    description: 'How LinkExtension handles different paste scenarios',
+    highlightLines: [3, 7, 11, 15, 19]
+  }
 ]
 
 export default LINK_EXTENSION_CODES
