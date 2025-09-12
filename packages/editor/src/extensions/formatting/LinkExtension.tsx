@@ -130,15 +130,18 @@ export class LinkExtension extends BaseExtension<
             if (!$isRangeSelection(selection)) return;
 
             if (selection.isCollapsed()) {
+              // No text selected, just insert the URL
               if (this.config.autoLinkUrls) {
                 // Insert as link
                 const linkNode = $createLinkNode(pastedText);
                 linkNode.append($createTextNode(pastedText));
                 selection.insertNodes([linkNode]);
               } else {
+                // Insert as plain text
                 selection.insertText(pastedText);
               }
             } else {
+              // Text is selected
               if (this.config.autoLinkUrls && this.config.linkSelectedTextOnPaste) {
                 // Keep selected text and make it a link with pasted URL
                 const selectedText = selection.getTextContent();
@@ -146,7 +149,9 @@ export class LinkExtension extends BaseExtension<
                 linkNode.append($createTextNode(selectedText));
                 selection.insertNodes([linkNode]);
               } else {
-                // Just replace with plain text
+                // Replace selected text with pasted URL as plain text
+                // First delete the selected text, then insert the new text
+                selection.removeText();
                 selection.insertText(pastedText);
               }
             }

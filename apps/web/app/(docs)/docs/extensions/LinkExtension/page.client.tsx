@@ -7,7 +7,8 @@ import { DynamicCodeExample } from '../../../components/dynamic-code-example'
 import { SimpleCodeBlock } from '../../../components/simple-code-block'
 import { getHighlightedCode, getRawCode } from '@/lib/generated/code-registry'
 import LINK_EXTENSION_CODES from './codes'
-import { BasicEditorWithAutoLinks, BasicEditorWithManualLinks } from './examples/BasicEditorWithLinks'
+import { BasicEditorWithAutoLinks } from './examples/BasicEditorWithAutoLinks'
+import { BasicEditorWithManualLinks } from './examples/BasicEditorWithManualLinks'
 import {
   Link,
   Settings,
@@ -160,7 +161,7 @@ export default function LinkExtensionPageClient() {
           <DynamicCodeExample
             title="Auto-Linking Editor"
             description="Paste URLs anywhere - they'll automatically become links. Try selecting text and pasting a URL."
-            codes={['docs/extensions/link/examples/BasicEditorWithLinks.tsx', 'docs/extensions/link/examples/basic-editor-with-links.css']}
+            codes={['docs/extensions/LinkExtension/examples/BasicEditorWithAutoLinks.tsx']}
             preview={<BasicEditorWithAutoLinks />}
             tabs={['preview', 'code']}
           />
@@ -168,7 +169,7 @@ export default function LinkExtensionPageClient() {
           <DynamicCodeExample
             title="Manual Linking Only"
             description="URLs are pasted as plain text. Use the link button to create links manually."
-            codes={['docs/extensions/link/examples/BasicEditorWithLinks.tsx', 'docs/extensions/link/examples/basic-editor-with-links.css']}
+            codes={['docs/extensions/LinkExtension/examples/BasicEditorWithManualLinks.tsx']}
             preview={<BasicEditorWithManualLinks />}
             tabs={['preview', 'code']}
           />

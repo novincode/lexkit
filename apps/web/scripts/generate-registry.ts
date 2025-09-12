@@ -56,7 +56,7 @@ class CodeRegistryGenerator {
   }
 
   /**
-   * Find all example files in docs subdirectories examples subdirectories
+   * Find all example files in docs/** structure (recursively)
    */
   private findExampleFiles(): Array<{ relativePath: string; fullPath: string; language: string }> {
     const files: Array<{ relativePath: string; fullPath: string; language: string }> = []
@@ -68,12 +68,14 @@ class CodeRegistryGenerator {
         const fullPath = path.join(dirPath, entry.name)
         const entryRelativePath = path.join(relativePath, entry.name)
 
-        if (entry.isDirectory() && entry.name === 'examples') {
+        if (entry.isDirectory()) {
+          // Recursively scan all directories
           scanDirectory(fullPath, entryRelativePath)
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name)
-          if (ext === '.tsx' || ext === '.ts' || ext === '.css') {
-            const language = ext === '.tsx' ? 'tsx' : ext === '.ts' ? 'typescript' : 'css'
+          // Include files with relevant extensions
+          if (ext === '.tsx' || ext === '.ts' || ext === '.css' || ext === '.js' || ext === '.jsx') {
+            const language = ext === '.tsx' ? 'tsx' : ext === '.ts' ? 'typescript' : ext === '.css' ? 'css' : ext === '.js' ? 'javascript' : 'jsx'
             files.push({
               relativePath: entryRelativePath,
               fullPath,

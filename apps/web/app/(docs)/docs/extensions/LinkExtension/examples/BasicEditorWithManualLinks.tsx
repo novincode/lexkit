@@ -1,25 +1,12 @@
 "use client"
 
-// Basic Editor with Links Example
-// Demonstrates link functionality with different configurations
+// Manual Linking Editor Example
+// Demonstrates manual link creation - URLs are pasted as plain text
 import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText } from "@lexkit/editor"
-import "./basic-editor-with-links.css"
+import "@/app/(docs)/examples/basic-editor.css"
 
-// Example 1: Default link configuration (autoLinkUrls: true, linkSelectedTextOnPaste: true)
-const extensionsWithLinks = [
-  boldExtension,
-  italicExtension,
-  listExtension,
-  linkExtension.configure({
-    autoLinkUrls: true,
-    linkSelectedTextOnPaste: true,
-    autoLinkText: true
-  }),
-  historyExtension
-] as const
-
-// Example 2: Manual linking only (autoLinkUrls: false)
-const extensionsManualLinks = [
+// Manual linking configuration (autoLinkUrls: false, linkSelectedTextOnPaste: false)
+const extensionsWithManualLinks = [
   boldExtension,
   italicExtension,
   listExtension,
@@ -31,13 +18,12 @@ const extensionsManualLinks = [
   historyExtension
 ] as const
 
-// Create typed editor systems
-const { Provider: ProviderWithLinks, useEditor: useEditorWithLinks } = createEditorSystem<typeof extensionsWithLinks>()
-const { Provider: ProviderManual, useEditor: useEditorManual } = createEditorSystem<typeof extensionsManualLinks>()
+// Create typed editor system
+const { Provider, useEditor } = createEditorSystem<typeof extensionsWithManualLinks>()
 
 // Toolbar Component - Shows basic text formatting and link buttons
-function Toolbar({ useEditorHook }: { useEditorHook: any }) {
-  const { commands, activeStates } = useEditorHook()
+function Toolbar() {
+  const { commands, activeStates } = useEditor()
 
   const insertLink = () => {
     const url = prompt('Enter URL:')
@@ -111,45 +97,14 @@ function Toolbar({ useEditorHook }: { useEditorHook: any }) {
   )
 }
 
-// Editor Component - Renders the actual editor with toolbar
-function Editor({ Provider, useEditorHook, title }: { Provider: any, useEditorHook: any, title: string }) {
-  return (
-    <div className="basic-editor">
-      <h3 className="example-title">{title}</h3>
-      <Toolbar useEditorHook={useEditorHook} />
-      <RichText
-        classNames={{
-          container: "basic-editor-container",
-          contentEditable: "basic-content",
-          placeholder: "basic-placeholder"
-        }}
-        placeholder="Try pasting URLs or selecting text and inserting links..."
-      />
-    </div>
-  )
-}
-
-// Main Components
-export function BasicEditorWithAutoLinks() {
-  return (
-    <ProviderWithLinks extensions={extensionsWithLinks}>
-      <Editor
-        Provider={ProviderWithLinks}
-        useEditorHook={useEditorWithLinks}
-        title="Auto-Linking Editor (linkSelectedTextOnPaste: true)"
-      />
-    </ProviderWithLinks>
-  )
-}
-
+// Main Manual Linking Editor Component
 export function BasicEditorWithManualLinks() {
   return (
-    <ProviderManual extensions={extensionsManualLinks}>
-      <Editor
-        Provider={ProviderManual}
-        useEditorHook={useEditorManual}
-        title="Manual Linking Only (autoLinkUrls: false)"
-      />
-    </ProviderManual>
+    <Provider extensions={extensionsWithManualLinks}>
+      <div className="basic-editor">
+        <h3 className="example-title">Manual Linking Only (autoLinkUrls: false)</h3>
+        <Toolbar />
+      </div>
+    </Provider>
   )
 }
