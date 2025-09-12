@@ -7,14 +7,16 @@ import { RegisteredCodeSnippet, GeneratedRegistry } from '../app/(docs)/lib/type
 
 /**
  * Simple code registry generator
- * Scans docs/**\/codes.tsx files and docs/**\/examples/** files and generates highlighted code registry
+ * Scans docs/**\/codes.tsx files, docs/**\/examples/** files, and components/templates/** files and generates highlighted code registry
  */
 class CodeRegistryGenerator {
   private docsDir: string
+  private templatesDir: string
   private outputDir: string
 
   constructor() {
     this.docsDir = path.resolve(process.cwd(), 'app/(docs)')
+    this.templatesDir = path.resolve(process.cwd(), 'components/templates')
     this.outputDir = path.resolve(process.cwd(), 'lib/generated')
   }
 
@@ -28,7 +30,7 @@ class CodeRegistryGenerator {
   }
 
   /**
-   * Find all codes.tsx files in docs/** structure
+   * Find all codes.tsx files in docs/** and components/templates/** structures
    */
   private findCodesFiles(): Array<{ relativePath: string; fullPath: string }> {
     const files: Array<{ relativePath: string; fullPath: string }> = []
@@ -52,11 +54,12 @@ class CodeRegistryGenerator {
     }
 
     scanDirectory(this.docsDir)
+    scanDirectory(this.templatesDir)
     return files
   }
 
   /**
-   * Find all example files in docs/** structure (recursively)
+   * Find all example files in docs/** and components/templates/** structures (recursively)
    */
   private findExampleFiles(): Array<{ relativePath: string; fullPath: string; language: string }> {
     const files: Array<{ relativePath: string; fullPath: string; language: string }> = []
@@ -87,6 +90,7 @@ class CodeRegistryGenerator {
     }
 
     scanDirectory(this.docsDir)
+    scanDirectory(this.templatesDir)
     return files
   }
 
