@@ -8,6 +8,7 @@ import { ScrollArea } from "@repo/ui/components/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@repo/ui/components/sheet"
 import { docsConfig } from "../lib/docs-config"
 import { cn } from "@repo/ui/lib/utils"
+import { useEffect } from "react"
 
 interface DocsSidebarProps {
   className?: string
@@ -23,6 +24,21 @@ export function DocsSidebar({
   onClose
 }: DocsSidebarProps) {
   const pathname = usePathname()
+
+  useEffect(() => {
+    // Small delay to ensure DOM is updated
+    const timer = setTimeout(() => {
+      const activeLink = document.querySelector('[data-active="true"]') as HTMLElement
+      if (activeLink) {
+        activeLink.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [pathname])
 
   const SidebarContent = () => (
     <div className="flex flex-col max-h-full  flex-auto">
@@ -55,6 +71,7 @@ export function DocsSidebar({
                               : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                           onClick={isMobile ? onClose : undefined}
+                          data-active={isActive ? "true" : "false"}
                         >
                           <span>{item.title}</span>
                           {item.isNew && (

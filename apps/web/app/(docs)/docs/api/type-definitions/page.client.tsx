@@ -454,34 +454,8 @@ export default function TypeDefinitionsPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="Typed Extension Usage"
-              html={`<pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> extensions = [</span></span>
-<span class="line"><span style="color:#E1E4E8">  boldExtension,</span></span>
-<span class="line"><span style="color:#E1E4E8">  italicExtension,</span></span>
-<span class="line"><span style="color:#E1E4E8">  linkExtension</span></span>
-<span class="line"><span style="color:#E1E4E8">] </span><span style="color:#F97583">as const</span><span style="color:#E1E4E8">;</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#F97583">type</span><span style="color:#E1E4E8"> MyEditorContext = EditorContextType&lt;</span><span style="color:#F97583">typeof</span><span style="color:#E1E4E8"> extensions&gt;;</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D">// Now you have full type safety!</span></span>
-<span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> MyEditor: React.FC = () =&gt; {</span></span>
-<span class="line"><span style="color:#E1E4E8">  </span><span style="color:#F97583">const</span><span style="color:#E1E4E8"> { commands, activeStates } = useEditor();</span></span>
-<span class="line"><span style="color:#E1E4E8">  </span><span style="color:#6A737D">// commands has all available commands with proper types</span></span>
-<span class="line"><span style="color:#E1E4E8">  </span><span style="color:#6A737D">// activeStates has all state queries with boolean types</span></span>
-<span class="line"><span style="color:#E1E4E8">};</span></span></code></pre>`}
-              raw={`const extensions = [
-  boldExtension,
-  italicExtension,
-  linkExtension
-] as const;
-
-type MyEditorContext = EditorContextType<typeof extensions>;
-
-// Now you have full type safety!
-const MyEditor: React.FC = () => {
-  const { commands, activeStates } = useEditor();
-  // commands has all available commands with proper types
-  // activeStates has all state queries with boolean types
-};`}
+              html={getHighlightedCode('type-definitions-typed-extension-usage') || ''}
+              raw={getRawCode('type-definitions-typed-extension-usage') || ''}
             />
           </CardContent>
         </Card>

@@ -248,6 +248,26 @@ export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQ
     language: 'typescript',
     title: 'EditorContextType (Extensions)',
     description: 'Context type for the editor system, generic over the extensions array'
+  },
+  {
+    id: 'type-definitions-typed-extension-usage',
+    code: `const extensions = [
+  boldExtension,
+  italicExtension,
+  linkExtension
+] as const;
+
+type MyEditorContext = EditorContextType<typeof extensions>;
+
+// Now you have full type safety!
+const MyEditor: React.FC = () => {
+  const { commands, activeStates } = useEditor();
+  // commands has all available commands with proper types
+  // activeStates has all state queries with boolean types
+};`,
+    language: 'typescript',
+    title: 'Typed Extension Usage',
+    description: 'Creating type-safe extension arrays and editor contexts'
   }
 ]
 

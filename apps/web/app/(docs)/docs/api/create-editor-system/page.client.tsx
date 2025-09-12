@@ -110,12 +110,8 @@ export default function CreateEditorSystemPageClient() {
               </p>
               <SimpleCodeBlock
                 title="Define extensions array"
-                html={`<pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> { boldExtension, italicExtension, linkExtension } </span><span style="color:#F97583">from</span><span style="color:#E1E4E8"> </span><span style="color:#9ECBFF">'@lexkit/editor'</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> extensions = [boldExtension, italicExtension, linkExtension] </span><span style="color:#F97583">as const</span></span></code></pre>`}
-                raw={`import { boldExtension, italicExtension, linkExtension } from '@lexkit/editor'
-
-const extensions = [boldExtension, italicExtension, linkExtension] as const`}
+                html={getHighlightedCode('create-editor-system-define-extensions') || ''}
+                raw={getRawCode('create-editor-system-define-extensions') || ''}
               />
             </CardContent>
           </Card>
@@ -130,12 +126,8 @@ const extensions = [boldExtension, italicExtension, linkExtension] as const`}
               </p>
               <SimpleCodeBlock
                 title="Create typed editor system"
-                html={`<pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> { createEditorSystem } </span><span style="color:#F97583">from</span><span style="color:#E1E4E8"> </span><span style="color:#9ECBFF">'@lexkit/editor'</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> { Provider, useEditor } = createEditorSystem&lt;</span><span style="color:#F97583">typeof</span><span style="color:#E1E4E8"> extensions&gt;()</span></span></code></pre>`}
-                raw={`import { createEditorSystem } from '@lexkit/editor'
-
-const { Provider, useEditor } = createEditorSystem<typeof extensions>()`}
+                html={getHighlightedCode('create-editor-system-create-system') || ''}
+                raw={getRawCode('create-editor-system-create-system') || ''}
               />
             </CardContent>
           </Card>

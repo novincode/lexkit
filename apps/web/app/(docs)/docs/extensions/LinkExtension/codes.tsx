@@ -130,6 +130,28 @@ const extensions = [
     title: 'Paste Behavior Explanation',
     description: 'How LinkExtension handles different paste scenarios',
     highlightLines: [3, 7, 11, 15, 19]
+  },
+  {
+    id: 'link-extension-disable-auto-link-urls',
+    code: `const extensions = [
+  linkExtension.configure({
+    autoLinkUrls: false  // Pasted URLs remain as plain text
+  })
+] as const`,
+    language: 'typescript',
+    title: 'Disable Auto-Link URLs',
+    description: 'Disable automatic linking for pasted URLs'
+  },
+  {
+    id: 'link-extension-link-selected-text-on-paste',
+    code: `const extensions = [
+  linkExtension.configure({
+    linkSelectedTextOnPaste: false  // Replace selected text with URL instead of linking it
+  })
+] as const`,
+    language: 'typescript',
+    title: 'Control Selected Text Paste Behavior',
+    description: 'Control behavior when pasting URLs over selected text'
   }
 ]
 

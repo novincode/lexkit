@@ -284,29 +284,13 @@ export default function LinkExtensionPageClient() {
               />
               <SimpleCodeBlock
                 title="Disable automatic linking for pasted URLs"
-                html={`<pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> extensions = [</span></span>
-<span class="line"><span style="color:#E1E4E8">  linkExtension.configure({</span></span>
-<span class="line"><span style="color:#E1E4E8">    autoLinkUrls: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">  </span><span style="color:#6A737D">// Pasted URLs remain as plain text</span></span>
-<span class="line"><span style="color:#E1E4E8">  })</span></span>
-<span class="line"><span style="color:#E1E4E8">] </span><span style="color:#F97583">as const</span></span></code></pre>`}
-                raw={`const extensions = [
-  linkExtension.configure({
-    autoLinkUrls: false  // Pasted URLs remain as plain text
-  })
-] as const`}
+                html={getHighlightedCode('link-extension-disable-auto-link-urls') || ''}
+                raw={getRawCode('link-extension-disable-auto-link-urls') || ''}
               />
               <SimpleCodeBlock
                 title="Control selected text behavior when pasting URLs"
-                html={`<pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> extensions = [</span></span>
-<span class="line"><span style="color:#E1E4E8">  linkExtension.configure({</span></span>
-<span class="line"><span style="color:#E1E4E8">    linkSelectedTextOnPaste: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">  </span><span style="color:#6A737D">// Replace selected text with URL instead of linking it</span></span>
-<span class="line"><span style="color:#E1E4E8">  })</span></span>
-<span class="line"><span style="color:#E1E4E8">] </span><span style="color:#F97583">as const</span></span></code></pre>`}
-                raw={`const extensions = [
-  linkExtension.configure({
-    linkSelectedTextOnPaste: false  // Replace selected text with URL instead of linking it
-  })
-] as const`}
+                html={getHighlightedCode('link-extension-link-selected-text-on-paste') || ''}
+                raw={getRawCode('link-extension-link-selected-text-on-paste') || ''}
               />
               <SimpleCodeBlock
                 title="Custom URL validation"

@@ -183,6 +183,24 @@ function ContentEditor() {
     description: 'Access advanced features like state queries and export/import',
     highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
   },
+  {
+    id: 'create-editor-system-define-extensions',
+    code: `import { boldExtension, italicExtension, linkExtension } from '@lexkit/editor'
+
+const extensions = [boldExtension, italicExtension, linkExtension] as const`,
+    language: 'typescript',
+    title: 'Define extensions array',
+    description: 'Create a const array of extensions for type safety'
+  },
+  {
+    id: 'create-editor-system-create-system',
+    code: `import { createEditorSystem } from '@lexkit/editor'
+
+const { Provider, useEditor } = createEditorSystem<typeof extensions>()`,
+    language: 'typescript',
+    title: 'Create typed editor system',
+    description: 'Use createEditorSystem with your extensions to generate typed components'
+  },
 ]
 
 export default CREATE_EDITOR_SYSTEM_CODES
