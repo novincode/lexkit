@@ -1,33 +1,26 @@
-'use client'
+"use client"
 
-import { Badge } from '@repo/ui/components/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/table'
+import { DynamicCodeExample } from '../../../components/dynamic-code-example'
 import { SimpleCodeBlock } from '../../../components/simple-code-block'
 import { getHighlightedCode, getRawCode } from '@/lib/generated/code-registry'
-import DRAGGABLE_BLOCK_EXTENSION_CODES from './codes'
-import {
-  Move,
-  Settings,
-  MousePointer,
-  Zap,
-  Play,
-  Code,
-  Palette
-} from 'lucide-react'
+import { BasicEditorWithDraggableBlockExtension } from './examples/BasicEditorWithDraggableBlockExtension'
+import { Badge } from "@repo/ui/components/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card"
+import { MousePointer, Zap, Settings, Code, Move, Palette } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/table"
 
 export default function DraggableBlockExtensionPageClient() {
   return (
-    <div className="space-y-12">
+    <div className="max-w-4xl mx-auto space-y-12">
       {/* Hero Section */}
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">DraggableBlockExtension</h1>
-          <p className="text-xl text-muted-foreground mt-2">Drag and drop blocks with beautiful UI</p>
+          <p className="text-xl text-muted-foreground mt-2">Intuitive drag-and-drop for content blocks</p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Add intuitive drag-and-drop functionality to your LexKit editor. Move paragraphs, images,
-          embeds, and any content block with smooth animations and visual feedback.
+          Transform your editor with smooth, professional drag-and-drop functionality.
+          Rearrange paragraphs, images, and any content blocks with visual feedback and animations.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -45,150 +38,76 @@ export default function DraggableBlockExtensionPageClient() {
         </div>
       </div>
 
-      {/* What It Does */}
+      {/* Key Features */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">What It Does</h2>
+        <h2 className="text-3xl font-bold text-center">Key Features</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          The DraggableBlockExtension adds professional drag-and-drop capabilities to your editor,
-          making content rearrangement intuitive and visually appealing.
+          Everything you need for seamless block rearrangement in your editor.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6">
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MousePointer className="h-5 w-5" />
-                Intuitive Dragging
+              <CardTitle className="flex items-center gap-3">
+                <MousePointer className="h-6 w-6 text-primary" />
+                Visual Drag Handles
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Hover over blocks to see drag handles, then drag to rearrange content seamlessly.
+              <p className="text-muted-foreground leading-relaxed">
+                Hover over blocks to reveal drag handles. Click and drag to move content
+                with smooth visual feedback.
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Smooth Animations
+              <CardTitle className="flex items-center gap-3">
+                <Move className="h-6 w-6 text-primary" />
+                Multiple Movement Options
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Beautiful animations and visual feedback make dragging feel natural and responsive.
+              <p className="text-muted-foreground leading-relaxed">
+                Drag blocks directly, use up/down buttons, or even drag via text selection
+                for flexible content rearrangement.
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Highly Configurable
+              <CardTitle className="flex items-center gap-3">
+                <Palette className="h-6 w-6 text-primary" />
+                Fully Customizable
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Customize drag handles, animations, and behavior to match your design system.
+              <p className="text-muted-foreground leading-relaxed">
+                Customize handles, animations, themes, and behavior with renderers
+                for complete headless control.
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Configuration Table */}
+      {/* Quick Start */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Configuration Options</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>DraggableConfig Interface</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Default</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-mono">dragHandle</TableCell>
-                  <TableCell>boolean</TableCell>
-                  <TableCell>true</TableCell>
-                  <TableCell>Show drag handles on blocks</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">animationDuration</TableCell>
-                  <TableCell>number</TableCell>
-                  <TableCell>200</TableCell>
-                  <TableCell>Animation duration in milliseconds</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">easing</TableCell>
-                  <TableCell>string</TableCell>
-                  <TableCell>'ease-out'</TableCell>
-                  <TableCell>CSS easing function for animations</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">onDragStart</TableCell>
-                  <TableCell>(node) =&gt; void</TableCell>
-                  <TableCell>undefined</TableCell>
-                  <TableCell>Callback when drag starts</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">onDragEnd</TableCell>
-                  <TableCell>(node) =&gt; void</TableCell>
-                  <TableCell>undefined</TableCell>
-                  <TableCell>Callback when drag ends</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-mono">onDrop</TableCell>
-                  <TableCell>(dragged, target) =&gt; void</TableCell>
-                  <TableCell>undefined</TableCell>
-                  <TableCell>Callback when blocks are reordered</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+        <h2 className="text-3xl font-bold text-center">Quick Start</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          Get drag-and-drop working in your editor in just a few lines.
+        </p>
 
-      {/* Live Example */}
-      <div className="space-y-6">
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl font-bold">Try DraggableBlockExtension</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Hover over blocks to see the drag handles, then drag to rearrange content!
-          </p>
-        </div>
-
-        <Card className="p-6">
-          <p className="text-center text-muted-foreground">
-            Demo component would show the editor with draggable blocks
-          </p>
-        </Card>
-      </div>
-
-      {/* Code Examples */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Code Examples</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Code className="h-5 w-5" />
-                Basic Setup
-              </CardTitle>
+              <CardTitle>Basic Setup</CardTitle>
             </CardHeader>
             <CardContent>
               <SimpleCodeBlock
-                title="Basic Usage"
+                title="Import and add DraggableBlockExtension"
                 html={getHighlightedCode('draggable-block-basic-usage') || ''}
                 raw={getRawCode('draggable-block-basic-usage') || ''}
               />
@@ -197,82 +116,205 @@ export default function DraggableBlockExtensionPageClient() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Configuration
-              </CardTitle>
+              <CardTitle>With Configuration</CardTitle>
             </CardHeader>
             <CardContent>
               <SimpleCodeBlock
-                title="Configuration Options"
+                title="Customize drag behavior"
                 html={getHighlightedCode('draggable-block-configuration') || ''}
                 raw={getRawCode('draggable-block-configuration') || ''}
               />
             </CardContent>
           </Card>
+        </div>
+      </div>
 
+      {/* Live Demo */}
+      <div className="space-y-6">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-bold">Try DraggableBlockExtension</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Interactive demo showcasing drag-and-drop features. Hover over blocks, grab handles, and rearrange content!
+          </p>
+        </div>
+
+        <DynamicCodeExample
+          title="DraggableBlockExtension Demo"
+          description="Try dragging blocks, using move buttons, and text selection drag"
+          codes={['docs/extensions/DraggableBlockExtension/examples/BasicEditorWithDraggableBlockExtension.tsx']}
+          preview={<BasicEditorWithDraggableBlockExtension />}
+          tabs={['preview', 'Editor']}
+        />
+      </div>
+
+      {/* Configuration Options */}
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Configuration Options</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          Customize every aspect of the drag-and-drop experience.
+        </p>
+
+        <Card className='p-0'>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-1/4">Option</TableHead>
+                  <TableHead className="w-1/4">Type</TableHead>
+                  <TableHead className="w-1/2">Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">showMoveButtons</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">boolean</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Show up/down arrow buttons for manual block movement.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">showUpButton</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">boolean</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Enable the move up button specifically.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">showDownButton</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">boolean</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Enable the move down button specifically.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">buttonStackPosition</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">'left' | 'right'</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Position of the move buttons relative to blocks.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">enableTextSelectionDrag</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">boolean</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Allow dragging blocks by selecting text within them.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">theme</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">object</Badge>
+                  </TableCell>
+                  <TableCell>
+                    CSS class names for customizing handles, indicators, and animations.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">handleRenderer</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">function</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Custom renderer for drag handles with full control.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">buttonsRenderer</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">function</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Custom renderer for move up/down buttons.
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">dropIndicatorRenderer</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">function</Badge>
+                  </TableCell>
+                  <TableCell>
+                    Custom renderer for the drop indicator line.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MousePointer className="h-5 w-5" />
-                Event Handling
-              </CardTitle>
+              <CardTitle>Usage Examples</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <SimpleCodeBlock
-                title="Event Handling"
-                html={getHighlightedCode('draggable-block-events') || ''}
-                raw={getRawCode('draggable-block-events') || ''}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Custom Styling
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SimpleCodeBlock
-                title="Custom Styling"
+                title="Custom styling with theme classes"
                 html={getHighlightedCode('draggable-block-styling') || ''}
                 raw={getRawCode('draggable-block-styling') || ''}
+              />
+              <SimpleCodeBlock
+                title="Custom handle renderer for full control"
+                html={getHighlightedCode('draggable-block-events') || ''}
+                raw={getRawCode('draggable-block-events') || ''}
               />
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Integration */}
+      {/* API Reference */}
       <div className="space-y-6">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-800 rounded-lg px-6 py-3">
-            <Play className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            <h2 className="text-3xl font-bold text-purple-900 dark:text-purple-100">Using DraggableBlockExtension</h2>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Add drag-and-drop to your editor in just a few lines of code.
-          </p>
-        </div>
+        <h2 className="text-3xl font-bold text-center">API Reference</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          Commands and state queries for programmatic control.
+        </p>
 
-        <div className="space-y-6">
-          <Card className="border-purple-200 dark:border-purple-800">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Quick Start</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Commands
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <SimpleCodeBlock
-                title="Import and Setup"
-                html={getHighlightedCode('draggable-block-import') || ''}
-                raw={getRawCode('draggable-block-import') || ''}
-              />
-              <SimpleCodeBlock
-                title="Add to Extensions Array"
-                html={getHighlightedCode('draggable-block-basic-usage') || ''}
-                raw={getRawCode('draggable-block-basic-usage') || ''}
-              />
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">moveBlock(sourceKey, targetKey, insertAfter)</code>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Programmatically move a block to a new position.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                State Queries
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">isDragging()</code>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Check if a drag operation is currently in progress.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -281,16 +323,19 @@ export default function DraggableBlockExtensionPageClient() {
       {/* Best Practices */}
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Best Practices</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          Tips for the best drag-and-drop experience.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Visual Feedback</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Always provide clear visual cues like drag handles and drop indicators
-                to help users understand the drag-and-drop functionality.
+              <p className="text-muted-foreground leading-relaxed">
+                Always provide clear visual cues like handles and drop indicators
+                to guide users through the drag process.
               </p>
             </CardContent>
           </Card>
@@ -300,9 +345,9 @@ export default function DraggableBlockExtensionPageClient() {
               <CardTitle>Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Use appropriate animation durations and consider disabling animations
-                on low-performance devices.
+              <p className="text-muted-foreground leading-relaxed">
+                Use efficient animations and consider debouncing for smooth performance
+                on lower-end devices.
               </p>
             </CardContent>
           </Card>
@@ -312,9 +357,9 @@ export default function DraggableBlockExtensionPageClient() {
               <CardTitle>Accessibility</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground leading-relaxed">
                 Ensure drag handles are keyboard accessible and provide alternative
-                methods for reordering content.
+                navigation methods for users who can't use a mouse.
               </p>
             </CardContent>
           </Card>
@@ -324,14 +369,14 @@ export default function DraggableBlockExtensionPageClient() {
               <CardTitle>User Experience</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Test with real users to ensure the drag-and-drop interaction feels
-                natural and intuitive.
+              <p className="text-muted-foreground leading-relaxed">
+                Test with real users to ensure the drag interaction feels natural
+                and intuitive in your specific use case.
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  );
+  )
 }

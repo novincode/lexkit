@@ -1,4 +1,4 @@
-import { LexicalEditor, $getNearestNodeFromDOMNode, $getNodeByKey, $isElementNode } from 'lexical';
+import { LexicalEditor, $getNearestNodeFromDOMNode, $getNodeByKey, $isElementNode, $getSelection, $isRangeSelection } from 'lexical';
 import React, { ReactNode, useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -43,24 +43,31 @@ export interface DraggableConfig extends BaseExtensionConfig {
         dropIndicator?: string;
         upButton?: string;
         downButton?: string;
+        buttonStack?: string;
     };
     /** Custom handle renderer for complete headless control */
     handleRenderer?: (props: {
         rect: DOMRect;
         isDragging: boolean;
         onDragStart: (e: React.DragEvent) => void;
+        className: string;
     }) => ReactNode;
     /** Custom up/down button renderer */
     buttonsRenderer?: (props: {
         rect: DOMRect;
         onMoveUp: () => void;
         onMoveDown: () => void;
+        showUp: boolean;
+        showDown: boolean;
+        upClassName: string;
+        downClassName: string;
     }) => ReactNode;
     /** Custom drop indicator renderer */
     dropIndicatorRenderer?: (props: {
         top: number;
         left: number;
         width: number;
+        className: string;
     }) => ReactNode;
 }
 
@@ -69,6 +76,8 @@ export interface DraggableConfig extends BaseExtensionConfig {
  */
 export type DraggableCommands = {
     moveBlock: (sourceKey: string, targetKey: string, insertAfter: boolean) => void;
+    moveCurrentBlockUp: () => void;
+    moveCurrentBlockDown: () => void;
 };
 
 /**
@@ -107,6 +116,7 @@ export class DraggableBlockExtension extends BaseExtension<
                 dropIndicator: 'lexkit-drop-indicator',
                 upButton: 'lexkit-move-up',
                 downButton: 'lexkit-move-down',
+                buttonStack: 'lexkit-drag-button-stack',
             },
         } as DraggableConfig;
     }
@@ -131,6 +141,38 @@ export class DraggableBlockExtension extends BaseExtension<
                             targetNode.insertAfter(sourceNode);
                         } else {
                             targetNode.insertBefore(sourceNode);
+                        }
+                    }
+                });
+            },
+            moveCurrentBlockUp: () => {
+                editor.update(() => {
+                    const selection = $getSelection();
+                    if ($isRangeSelection(selection)) {
+                        const anchorNode = selection.anchor.getNode();
+                        const elementNode = $isElementNode(anchorNode) ? anchorNode : anchorNode.getParent();
+                        if (elementNode && $isElementNode(elementNode)) {
+                            const prevSibling = elementNode.getPreviousSibling();
+                            if (prevSibling) {
+                                elementNode.remove();
+                                prevSibling.insertBefore(elementNode);
+                            }
+                        }
+                    }
+                });
+            },
+            moveCurrentBlockDown: () => {
+                editor.update(() => {
+                    const selection = $getSelection();
+                    if ($isRangeSelection(selection)) {
+                        const anchorNode = selection.anchor.getNode();
+                        const elementNode = $isElementNode(anchorNode) ? anchorNode : anchorNode.getParent();
+                        if (elementNode && $isElementNode(elementNode)) {
+                            const nextSibling = elementNode.getNextSibling();
+                            if (nextSibling) {
+                                elementNode.remove();
+                                nextSibling.insertAfter(elementNode);
+                            }
                         }
                     }
                 });
@@ -669,130 +711,10 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
     return (
         <>
-            {/* Modern 2025 CSS animations */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-          @keyframes float-in {
-            0% { 
-              opacity: 0; 
-              transform: translateY(20px) translateX(-10px) scale(0.8) rotate(-5deg); 
-              filter: blur(4px);
-            }
-            50% { 
-              opacity: 0.7; 
-              transform: translateY(-5px) translateX(5px) scale(1.05) rotate(2deg); 
-              filter: blur(1px);
-            }
-            100% { 
-              opacity: 1; 
-              transform: translateY(0) translateX(0) scale(1) rotate(0deg); 
-              filter: blur(0px);
-            }
-          }
-          
-          @keyframes smooth-reposition {
-            0% { 
-              opacity: 0.8;
-              transform: scale(0.95) translateY(-10px);
-            }
-            50% { 
-              opacity: 0.6;
-              transform: scale(1.1) translateY(5px);
-            }
-            100% { 
-              opacity: 1; 
-              transform: scale(1) translateY(0);
-            }
-          }
-          
-          @keyframes float-out {
-            0% { 
-              opacity: 1; 
-              transform: translateY(0) translateX(0) scale(1) rotate(0deg); 
-              filter: blur(0px);
-            }
-            100% { 
-              opacity: 0; 
-              transform: translateY(-10px) translateX(10px) scale(0.9) rotate(3deg); 
-              filter: blur(2px);
-            }
-          }
-          
-          @keyframes pulse-glow {
-            0%, 100% { 
-              box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-            }
-            50% { 
-              box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
-            }
-          }
-          
-          @keyframes bounce-in-modern {
-            0% { 
-              opacity: 0; 
-              transform: scale(0.3) translateY(30px); 
-            }
-            50% { 
-              opacity: 0.8; 
-              transform: scale(1.1) translateY(-5px); 
-            }
-            70% { 
-              transform: scale(0.95) translateY(2px); 
-            }
-            100% { 
-              opacity: 1; 
-              transform: scale(1) translateY(0); 
-            }
-          }
-          
-          @keyframes slide-up {
-            0% { 
-              opacity: 0; 
-              transform: translateY(15px); 
-            }
-            100% { 
-              opacity: 1; 
-              transform: translateY(0); 
-            }
-          }
-          
-          @keyframes slide-down {
-            0% { 
-              opacity: 0; 
-              transform: translateY(-15px); 
-            }
-            100% { 
-              opacity: 1; 
-              transform: translateY(0); 
-            }
-          }
-          
-          .lexkit-drag-button-stack {
-            animation: float-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          }
-          
-          .lexkit-drag-button-stack.fade-out {
-            animation: float-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-          }
-          
-          .lexkit-drag-button-stack.repositioning {
-            animation: smooth-reposition 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-          }
-          
-          .lexkit-drag-handle.dragging {
-            animation: pulse-glow 1.5s ease-in-out infinite;
-          }
-          
-          .lexkit-drag-button:hover {
-            animation: bounce-in-modern 0.3s ease-out;
-          }
-        `
-            }} />
-
-            {/* Modern Glassmorphism Button Stack */}
+            {/* Button Stack */}
             {createPortal(
                 <div
-                    className={`lexkit-drag-button-stack ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
+                    className={`${config.theme?.buttonStack || 'lexkit-drag-button-stack'} ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
                     style={{
                         position: 'absolute',
                         left: config.buttonStackPosition === 'right'
@@ -811,9 +733,8 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         transition: isTransitioning ? 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
                     }}
                 >
-                    {/* Move Buttons Container - Vertical Stack */}
+                    {/* Move Buttons Container */}
                     <div
-                        className="lexkit-move-buttons-container"
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -821,215 +742,96 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                             alignItems: 'center',
                         }}
                     >
-                        {/* Up Button - Modern Design */}
+                        {/* Up Button */}
                         {(config.showMoveButtons !== false && config.showUpButton !== false) && (
-                            <button
-                                className={`lexkit-drag-button lexkit-move-up ${config.theme?.upButton || ''}`.trim()}
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 50%, rgba(241, 245, 249, 0.85) 100%)',
-                                    border: '1px solid rgba(226, 232, 240, 0.6)',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#475569',
-                                    fontSize: '12px',
-                                    fontWeight: '600',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-                                    backdropFilter: 'blur(8px)',
-                                    WebkitBackdropFilter: 'blur(8px)',
-                                    transform: 'translateZ(0)',
-                                    animation: 'slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both',
-                                }}
-                                onClick={handleMoveUp}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(-1px) scale(1.1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(14, 165, 233, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(240, 249, 255, 0.98) 0%, rgba(224, 242, 254, 0.95) 50%, rgba(219, 234, 254, 0.9) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(14, 165, 233, 0.5)';
-                                    e.currentTarget.style.color = '#0ea5e9';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(0) scale(1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 50%, rgba(241, 245, 249, 0.85) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
-                                    e.currentTarget.style.color = '#475569';
-                                }}
-                                onMouseDown={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(0) scale(0.95) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4)';
-                                }}
-                                onMouseUp={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(-1px) scale(1.1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(14, 165, 233, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-                                }}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M18 15l-6-6-6 6" />
-                                </svg>
-                            </button>
+                            config.buttonsRenderer ? (
+                                config.buttonsRenderer({
+                                    rect,
+                                    onMoveUp: handleMoveUp,
+                                    onMoveDown: handleMoveDown,
+                                    showUp: true,
+                                    showDown: false,
+                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
+                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                })
+                            ) : (
+                                <button
+                                    className={`lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`}
+                                    onClick={handleMoveUp}
+                                >
+                                    ↑
+                                </button>
+                            )
                         )}
-                        {/* Drag Handle - Ultra Modern */}
+
+                        {/* Drag Handle */}
                         {config.handleRenderer ? (
                             config.handleRenderer({
                                 rect,
                                 isDragging,
                                 onDragStart: (e) => handleDragStart(e, currentElement),
+                                className: `lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim(),
                             })
                         ) : (
                             <div
-                                className={`lexkit-drag-button lexkit-drag-handle drag-handle-modern ${config.theme?.handle} ${isDragging ? 'dragging' : ''}`.trim()}
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    background: isDragging
-                                        ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%)'
-                                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 50%, rgba(241, 245, 249, 0.88) 100%)',
-                                    border: isDragging
-                                        ? '1px solid rgba(59, 130, 246, 0.8)'
-                                        : '1px solid rgba(226, 232, 240, 0.5)',
-                                    borderRadius: '14px',
-                                    cursor: isDragging ? 'grabbing' : 'grab',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: isDragging ? '#ffffff' : '#475569',
-                                    userSelect: 'none',
-                                    fontSize: '18px',
-                                    fontWeight: '700',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    transform: isDragging
-                                        ? 'scale(1.1) rotate(5deg) translateZ(0)'
-                                        : 'scale(1) rotate(0deg) translateZ(0)',
-                                    boxShadow: isDragging
-                                        ? '0 12px 40px rgba(59, 130, 246, 0.4), 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                                        : '0 6px 24px rgba(0, 0, 0, 0.08), 0 3px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7)',
-                                    backdropFilter: 'blur(16px)',
-                                    WebkitBackdropFilter: 'blur(16px)',
-                                    willChange: 'transform, box-shadow',
-                                    backfaceVisibility: 'hidden',
-                                    animation: 'bounce-in-modern 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-                                }}
-                                contentEditable={false}
+                                className={`lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim()}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, currentElement)}
-                                onMouseEnter={(e) => {
-                                    if (!isDragging) {
-                                        e.currentTarget.style.transform = 'scale(1.08) rotate(2deg) translateZ(0)';
-                                        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-                                        e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(240, 249, 255, 0.98) 0%, rgba(224, 242, 254, 0.95) 50%, rgba(219, 234, 254, 0.9) 100%)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isDragging) {
-                                        e.currentTarget.style.transform = 'scale(1) rotate(0deg) translateZ(0)';
-                                        e.currentTarget.style.boxShadow = '0 6px 24px rgba(0, 0, 0, 0.08), 0 3px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7)';
-                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
-                                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 50%, rgba(241, 245, 249, 0.88) 100%)';
-                                    }
-                                }}
                             >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="3" y1="6" x2="21" y2="6" />
-                                    <line x1="3" y1="12" x2="21" y2="12" />
-                                    <line x1="3" y1="18" x2="21" y2="18" />
-                                </svg>
+                                ⋮⋮
                             </div>
                         )}
 
-                        {/* Down Button - Modern Design */}
+                        {/* Down Button */}
                         {(config.showMoveButtons !== false && config.showDownButton !== false) && (
-                            <button
-                                className={`lexkit-drag-button lexkit-move-down ${config.theme?.downButton || ''}`.trim()}
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 50%, rgba(241, 245, 249, 0.85) 100%)',
-                                    border: '1px solid rgba(226, 232, 240, 0.6)',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#475569',
-                                    fontSize: '12px',
-                                    fontWeight: '600',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-                                    backdropFilter: 'blur(8px)',
-                                    WebkitBackdropFilter: 'blur(8px)',
-                                    transform: 'translateZ(0)',
-                                    animation: 'slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both',
-                                }}
-                                onClick={handleMoveDown}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(1px) scale(1.1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(14, 165, 233, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(240, 249, 255, 0.98) 0%, rgba(224, 242, 254, 0.95) 50%, rgba(219, 234, 254, 0.9) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(14, 165, 233, 0.5)';
-                                    e.currentTarget.style.color = '#0ea5e9';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(0) scale(1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 50%, rgba(241, 245, 249, 0.85) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
-                                    e.currentTarget.style.color = '#475569';
-                                }}
-                                onMouseDown={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(0) scale(0.95) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4)';
-                                }}
-                                onMouseUp={(e) => {
-                                    e.currentTarget.style.transform = 'translateX(1px) scale(1.1) translateZ(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(14, 165, 233, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-                                }}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M6 9l6 6 6-6" />
-                                </svg>
-                            </button>
+                            config.buttonsRenderer ? (
+                                config.buttonsRenderer({
+                                    rect,
+                                    onMoveUp: handleMoveUp,
+                                    onMoveDown: handleMoveDown,
+                                    showUp: false,
+                                    showDown: true,
+                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
+                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                })
+                            ) : (
+                                <button
+                                    className={`lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`}
+                                    onClick={handleMoveDown}
+                                >
+                                    ↓
+                                </button>
+                            )
                         )}
                     </div>
-
-
                 </div>,
                 anchorElem
             )}
 
-            {/* Enhanced Drop Indicator */}
+            {/* Drop Indicator */}
             {dropIndicator && (
                 config.dropIndicatorRenderer ? (
                     createPortal(
-                        config.dropIndicatorRenderer(dropIndicator),
+                        config.dropIndicatorRenderer({
+                            ...dropIndicator,
+                            className: config.theme?.dropIndicator || 'lexkit-drop-indicator',
+                        }),
                         anchorElem
                     )
                 ) : (
                     createPortal(
                         <div
-                            className={config.theme?.dropIndicator}
+                            className={config.theme?.dropIndicator || 'lexkit-drop-indicator'}
                             style={{
                                 position: 'absolute',
                                 top: dropIndicator.top - 4,
                                 left: dropIndicator.left,
                                 width: dropIndicator.width,
                                 height: '8px',
-                                background: 'linear-gradient(90deg, #3b82f6 0%, #1d4ed8 30%, #1e40af 70%, #3b82f6 100%)',
+                                background: '#3b82f6',
                                 borderRadius: '4px',
                                 pointerEvents: 'none',
                                 zIndex: 9997,
-                                boxShadow: '0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.4), 0 0 90px rgba(59, 130, 246, 0.2)',
-                                animation: 'pulse-glow 1.5s ease-in-out infinite',
-                                backdropFilter: 'blur(4px)',
-                                WebkitBackdropFilter: 'blur(4px)',
-                                willChange: 'box-shadow',
-                                backfaceVisibility: 'hidden',
                             }}
                         />,
                         anchorElem

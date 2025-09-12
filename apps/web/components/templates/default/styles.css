@@ -787,8 +787,8 @@
 
 /* Base Drag Button Styles */
 .lexkit-drag-button {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 8px;
@@ -922,61 +922,6 @@
   opacity: 0.6 !important;
   transform: rotate(2deg) scale(0.98) !important;
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.15),
-    0 10px 20px rgba(0, 0, 0, 0.1) !important;
-  border-radius: 8px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Move Up/Down Buttons - Modern Design */
-.lexkit-move-up,
-.lexkit-move-down {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.lexkit-move-up:hover,
-.lexkit-move-down:hover {
-  background: linear-gradient(135deg, rgba(240, 249, 255, 0.95) 0%, rgba(224, 242, 254, 0.9) 100%) !important;
-  border-color: rgba(14, 165, 233, 0.6) !important;
-  color: #0ea5e9 !important;
-  transform: translateY(-1px) scale(1.08) !important;
-  box-shadow: 
-    0 8px 32px rgba(14, 165, 233, 0.2),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
-}
-
-.lexkit-move-up:active,
-.lexkit-move-down:active {
-  transform: translateY(0) scale(0.98) !important;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Drop Indicator - Modern Animated Design */
-.lexkit-drop-indicator {
-  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 50%, #3b82f6 100%) !important;
-  box-shadow: 
-    0 0 24px rgba(59, 130, 246, 0.6),
-    0 0 48px rgba(59, 130, 246, 0.3),
-    0 0 96px rgba(59, 130, 246, 0.1) !important;
-  animation: drop-indicator-pulse 1.5s ease-in-out infinite !important;
-  backdrop-filter: blur(4px) !important;
-}
-
-/* Block Dragging State */
-.lexkit-block-dragging {
-  opacity: 0.6 !important;
-  transform: rotate(2deg) scale(0.98) !important;
-  box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.15),
     0 10px 20px rgba(0, 0, 0, 0.1) !important;
   border-radius: 8px !important;

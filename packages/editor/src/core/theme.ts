@@ -23,6 +23,7 @@ export interface LexKitTheme extends EditorThemeClasses {
     upButton?: string
     downButton?: string
     blockIsDragging?: string
+    buttonStack?: string
   }
   floatingToolbar?: {
     container?: string
@@ -90,6 +91,7 @@ export const defaultLexKitTheme: LexKitTheme = {
     upButton: 'lexkit-draggable-up-button',
     downButton: 'lexkit-draggable-down-button',
     blockIsDragging: 'lexkit-draggable-block-is-dragging',
+    buttonStack: 'lexkit-draggable-button-stack',
   },
   floatingToolbar: {
     container: 'lexkit-floating-toolbar',

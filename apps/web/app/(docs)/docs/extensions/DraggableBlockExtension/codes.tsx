@@ -3,7 +3,7 @@ import { RegisteredCodeSnippet } from '../../../lib/types'
 const DRAGGABLE_BLOCK_EXTENSION_CODES: RegisteredCodeSnippet[] = [
   {
     id: 'draggable-block-import',
-    code: `import { DraggableBlockExtension } from '@lexkit/editor/extensions'
+    code: `import { draggableBlockExtension } from '@lexkit/editor/extensions'
 import { DefaultTemplate } from '@lexkit/editor/templates'`,
     language: 'typescript',
     title: 'Import DraggableBlockExtension',
@@ -14,7 +14,7 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     code: `function MyEditor() {
   return (
     <DefaultTemplate
-      extensions={[DraggableBlockExtension]}
+      extensions={[draggableBlockExtension]}
       onReady={(editor) => {
         console.log('Editor with drag-and-drop ready!')
       }}
@@ -28,73 +28,57 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
   },
   {
     id: 'draggable-block-configuration',
-    code: `const draggableConfig = {
-  dragHandle: true,           // Show drag handles
-  dragHandleClass: 'custom-handle', // Custom CSS class
-  animationDuration: 200,     // Animation duration in ms
-  easing: 'ease-out',         // CSS easing function
-  dropIndicator: true,        // Show drop indicator
-  dropIndicatorClass: 'drop-zone', // Custom drop indicator class
-  onDragStart: (node) => console.log('Drag started', node),
-  onDragEnd: (node) => console.log('Drag ended', node),
-  onDrop: (draggedNode, targetNode) => console.log('Dropped', draggedNode, targetNode)
-}
-
-function MyEditor() {
-  return (
-    <DefaultTemplate
-      extensions={[new DraggableBlockExtension(draggableConfig)]}
-    />
-  )
-}`,
+    code: `const extensionsWithDraggable = [
+  draggableBlockExtension.configure({
+    showMoveButtons: true,        // Show up/down buttons
+    showUpButton: true,           // Enable move up button
+    showDownButton: true,         // Enable move down button
+    buttonStackPosition: 'left',  // Position buttons on left
+    enableTextSelectionDrag: true, // Allow dragging via text selection
+    theme: {
+      handle: 'my-drag-handle',
+      handleActive: 'my-drag-handle-active',
+      blockDragging: 'my-block-dragging',
+      dropIndicator: 'my-drop-indicator'
+    }
+  }),
+  historyExtension
+] as const`,
     language: 'tsx',
     title: 'Configuration Options',
     description: 'Customize drag-and-drop behavior',
-    highlightLines: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   },
   {
     id: 'draggable-block-styling',
-    code: `.draggable-block {
-  position: relative;
-  transition: transform 0.2s ease-out;
+    code: `.my-drag-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: grab;
 }
 
-.draggable-block:hover .drag-handle {
+.my-drag-handle:hover {
   opacity: 1;
 }
 
-.drag-handle {
-  position: absolute;
-  left: -20px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  cursor: grab;
-  padding: 4px;
-  border-radius: 4px;
-  background: var(--muted);
-  transition: opacity 0.2s ease;
-}
-
-.drag-handle:hover {
-  background: var(--accent);
-}
-
-.drag-handle:active {
+.my-drag-handle-active {
+  opacity: 1;
   cursor: grabbing;
 }
 
-.drop-indicator {
-  position: absolute;
-  left: 0;
-  right: 0;
+.my-block-dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.my-drop-indicator {
   height: 2px;
-  background: var(--primary);
+  background: #007acc;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.drop-indicator.active {
+.my-drop-indicator.active {
   opacity: 1;
 }`,
     language: 'css',
@@ -104,31 +88,42 @@ function MyEditor() {
   {
     id: 'draggable-block-events',
     code: `function MyEditor() {
-  const handleDragStart = (node) => {
-    console.log('Started dragging:', node.getType())
+  const handleDragStart = () => {
+    console.log('Drag started')
   }
 
-  const handleDrop = (draggedNode, targetNode) => {
-    // Custom logic when blocks are reordered
-    console.log('Reordered blocks')
-
-    // You can access the editor instance for more complex operations
-    // editor.update(() => { ... })
+  const handleDrop = (sourceKey: string, targetKey: string) => {
+    console.log('Block moved from', sourceKey, 'to', targetKey)
   }
 
-  return (
-    <DefaultTemplate
-      extensions={[new DraggableBlockExtension({
-        onDragStart: handleDragStart,
-        onDrop: handleDrop
-      })]}
-    />
-  )
+  const extensions = [
+    draggableBlockExtension.configure({
+      // Custom renderers for full control
+      handleRenderer: ({ rect, isDragging, onDragStart }) => (
+        <div
+          style={{
+            position: 'absolute',
+            left: rect.left - 20,
+            top: rect.top + rect.height / 2 - 10,
+            width: 16,
+            height: 16,
+            background: isDragging ? '#007acc' : '#ccc',
+            cursor: 'grab'
+          }}
+          onMouseDown={onDragStart}
+        >
+          ⋮⋮
+        </div>
+      )
+    })
+  ] as const
+
+  return <DefaultTemplate extensions={extensions} />
 }`,
     language: 'tsx',
-    title: 'Event Handling',
-    description: 'Handle drag-and-drop events',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    title: 'Custom Handle Renderer',
+    description: 'Create custom drag handles with full control',
+    highlightLines: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
   }
 ]
 
