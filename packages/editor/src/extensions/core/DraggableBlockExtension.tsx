@@ -324,12 +324,18 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         setIsDragging(false);
         setDropIndicator(null);
 
+        // Restore editor focus
+        const editorElement = editor.getRootElement();
+        if (editorElement) {
+            editorElement.focus();
+        }
+
         // Don't clear refs immediately - let the UI update
         setTimeout(() => {
             draggedElementRef.current = null;
             draggedKeyRef.current = null;
         }, 100);
-    }, [cleanupDragClasses]);
+    }, [cleanupDragClasses, editor]);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -458,6 +464,12 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         document.body.appendChild(clone);
         event.dataTransfer!.setDragImage(clone, 0, 0);
         setTimeout(() => document.body.removeChild(clone), 0);
+
+        // Ensure editor retains focus
+        const editorElement = editor.getRootElement();
+        if (editorElement) {
+            editorElement.focus();
+        }
     }, [editor, applyDragClasses]);
 
     // Handle touch events for mobile drag support (handle and long press on text)
@@ -799,6 +811,11 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         } catch (error) {
                             console.warn('Error finding moved element:', error);
                         }
+                    }
+                    // Restore editor focus after drop
+                    const editorElement = editor.getRootElement();
+                    if (editorElement) {
+                        editorElement.focus();
                     }
                 }, 50);
             }
