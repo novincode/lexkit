@@ -169,73 +169,56 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
   return { handlers, fileInputRef };
 }
 
-// Floating Toolbar Renderer Component
+// Modern Floating Toolbar with proper positioning
 function FloatingToolbarRenderer() {
   const { commands, activeStates, extensions, hasExtension } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
-  const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
+  const [selectionRect, setSelectionRect] = useState<any>(null);
 
   // Get the floating toolbar extension instance
-  const floatingExtension = extensions.find(ext => ext.name === 'floatingToolbar') as FloatingToolbarExtension | undefined;
+  const floatingExtension = extensions.find(ext => ext.name === 'floatingToolbar') as any;
 
   // Poll the extension state
   useEffect(() => {
-    if (!floatingExtension) {
-      return;
-    }
+    if (!floatingExtension) return;
 
     const checkState = () => {
       const visible = floatingExtension.getIsVisible();
       const rect = floatingExtension.getSelectionRect();
-      
+
       setIsVisible(visible);
       setSelectionRect(rect);
     };
 
-    const interval = setInterval(checkState, 200); // Poll every 200ms
+    const interval = setInterval(checkState, 200);
     return () => clearInterval(interval);
   }, [floatingExtension]);
 
-  // Block format handlers
-  const handleBlockFormatChange = (format: string) => {
-    if (format === 'p') commands.toggleParagraph();
-    else if (format === 'h1') commands.toggleHeading('h1');
-    else if (format === 'h2') commands.toggleHeading('h2');
-    else if (format === 'h3') commands.toggleHeading('h3');
-    else if (format === 'quote') commands.toggleQuote();
-  };
-
-  // Get current block format for display
-  const getCurrentBlockFormat = () => {
-    if (activeStates.isH1) return 'H1';
-    if (activeStates.isH2) return 'H2';
-    if (activeStates.isH3) return 'H3';
-    if (activeStates.isQuote) return 'Quote';
-    return 'P';
-  };
-
   if (!isVisible || !selectionRect) return null;
 
-  // Check if an image is selected
   const isImageSelected = activeStates.imageSelected;
 
-  // Render as portal to document body for proper positioning
   return createPortal(
     <div
       className="lexkit-floating-toolbar"
       style={{
         position: 'absolute',
         top: selectionRect.y,
-        left: selectionRect.x,
-        transform: 'translateX(-50%)',
-        zIndex: 9999,
+        ...(selectionRect.positionFromRight
+          ? // Stick to right edge with margin
+            { right: 10, left: 'auto' }
+          : // Use calculated position (either centered or left-aligned)
+            { left: selectionRect.x, right: 'auto' }
+        ),
+        zIndex: 50,
+        maxWidth:400,
+        flexWrap:'wrap',
         pointerEvents: 'auto'
       }}
     >
       {isImageSelected ? (
         // Image-specific toolbar
         <>
-          {/* Image Alignment */}
           <button
             onClick={() => commands.setImageAlignment('left')}
             className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? 'active' : ''}`}
@@ -258,10 +241,8 @@ function FloatingToolbarRenderer() {
             <AlignRight size={14} />
           </button>
 
-          {/* Separator */}
-          <div className="lexkit-floating-toolbar-separator" />
+          <div className="w-px h-6 bg-border mx-1" />
 
-          {/* Image Actions */}
           <button
             onClick={() => {
               const caption = prompt('Enter caption:') || '';
@@ -272,97 +253,97 @@ function FloatingToolbarRenderer() {
           >
             <Type size={14} />
           </button>
-          <button
-            onClick={() => {
-              const src = prompt('Enter new image URL:');
-              if (src) {
-                // For now, we'll need to replace the entire image
-                // This is a simplified approach - in a real app you'd want more sophisticated image replacement
-                alert('Image replacement requires selecting the image and using the main toolbar. This will be improved in future updates.');
-              }
-            }}
-            className="lexkit-toolbar-button"
-            title="Replace Image"
-          >
-            <Upload size={14} />
-          </button>
         </>
       ) : (
-        // Text formatting toolbar (original)
+        // Text formatting toolbar
         <>
-          {/* Text Formatting */}
           <button
-            onClick={() => commands.toggleBold?.()}
+            onClick={() => commands.toggleBold()}
             className={`lexkit-toolbar-button ${activeStates.bold ? 'active' : ''}`}
             title="Bold"
           >
             <Bold size={14} />
           </button>
           <button
-            onClick={() => commands.toggleItalic?.()}
+            onClick={() => commands.toggleItalic()}
             className={`lexkit-toolbar-button ${activeStates.italic ? 'active' : ''}`}
             title="Italic"
           >
             <Italic size={14} />
           </button>
           <button
-            onClick={() => commands.toggleUnderline?.()}
+            onClick={() => commands.toggleUnderline()}
             className={`lexkit-toolbar-button ${activeStates.underline ? 'active' : ''}`}
             title="Underline"
           >
             <Underline size={14} />
           </button>
           <button
-            onClick={() => commands.toggleStrikethrough?.()}
+            onClick={() => commands.toggleStrikethrough()}
             className={`lexkit-toolbar-button ${activeStates.strikethrough ? 'active' : ''}`}
             title="Strikethrough"
           >
             <Strikethrough size={14} />
           </button>
 
-          {/* Separator */}
-          <div className="lexkit-floating-toolbar-separator" />
+          <div className="w-px h-6 bg-border mx-1" />
 
-          {/* Block Format - Compact buttons for common formats */}
+          <button
+            onClick={() => commands.formatText('code')}
+            className={`lexkit-toolbar-button ${activeStates.code ? 'active' : ''}`}
+            title="Inline Code"
+          >
+            <Code size={14} />
+          </button>
+
+          <button
+            onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()}
+            className={`lexkit-toolbar-button ${activeStates.isLink ? 'active' : ''}`}
+            title={activeStates.isLink ? "Remove Link" : "Insert Link"}
+          >
+            {activeStates.isLink ? <Unlink size={14} /> : <Link size={14} />}
+          </button>
+
+          <div className="w-px h-6 bg-border mx-1" />
+
           {hasExtension('blockFormat') && (
             <>
               <button
-                onClick={() => handleBlockFormatChange('p')}
-                className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isQuote && !activeStates.unorderedList && !activeStates.orderedList && !activeStates.isInCodeBlock ? 'active' : ''}`}
+                onClick={() => commands.toggleParagraph()}
+                className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isQuote ? 'active' : ''}`}
                 title="Paragraph"
               >
                 P
               </button>
               <button
-                onClick={() => handleBlockFormatChange('h1')}
+                onClick={() => commands.toggleHeading('h1')}
                 className={`lexkit-toolbar-button ${activeStates.isH1 ? 'active' : ''}`}
                 title="Heading 1"
               >
                 H1
               </button>
               <button
-                onClick={() => handleBlockFormatChange('h2')}
+                onClick={() => commands.toggleHeading('h2')}
                 className={`lexkit-toolbar-button ${activeStates.isH2 ? 'active' : ''}`}
                 title="Heading 2"
               >
                 H2
               </button>
               <button
-                onClick={() => handleBlockFormatChange('h3')}
+                onClick={() => commands.toggleHeading('h3')}
                 className={`lexkit-toolbar-button ${activeStates.isH3 ? 'active' : ''}`}
                 title="Heading 3"
               >
                 H3
               </button>
               <button
-                onClick={() => handleBlockFormatChange('quote')}
+                onClick={() => commands.toggleQuote()}
                 className={`lexkit-toolbar-button ${activeStates.isQuote ? 'active' : ''}`}
                 title="Quote"
               >
                 <Quote size={14} />
               </button>
 
-              {/* Code Block */}
               {hasExtension('code') && (
                 <button
                   onClick={() => commands.toggleCodeBlock()}
@@ -373,12 +354,10 @@ function FloatingToolbarRenderer() {
                 </button>
               )}
 
-              {/* Separator */}
-              <div className="lexkit-floating-toolbar-separator" />
+              <div className="w-px h-6 bg-border mx-1" />
             </>
           )}
 
-          {/* Lists */}
           {hasExtension('list') && (
             <>
               <button

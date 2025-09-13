@@ -766,7 +766,10 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                   className={activeStates.isLink ? theme.buttonActive : theme.button}
                   pressed={activeStates.isLink}
                   onPressedChange={() => {
-                    if (activeStates.isTextSelected) {
+                    if (activeStates.isLink) {
+                      // Text is already linked - remove the link
+                      commands.removeLink();
+                    } else if (activeStates.isTextSelected) {
                       // Text is selected - only ask for URL
                       openLinkDialog('', '', false, false);
                     } else {
@@ -955,7 +958,10 @@ function ModernToolbar({
                 variant={activeStates.isLink ? "pressed" : "default"}
                 pressed={activeStates.isLink}
                 onPressedChange={() => {
-                  if (activeStates.isTextSelected) {
+                  if (activeStates.isLink) {
+                    // Text is already linked - remove the link
+                    commands.removeLink();
+                  } else if (activeStates.isTextSelected) {
                     // Text is selected - only ask for URL
                     onLinkDialogOpen('', '', false, false);
                   } else {
