@@ -112,20 +112,6 @@ const extensions = [
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension.configure({
-    theme: {
-      container: 'border border-border rounded-lg p-4 bg-card',
-      preview: 'space-y-3',
-      editor: 'space-y-3',
-      textarea: 'w-full min-h-[120px] p-3 font-mono text-sm border border-input rounded-md bg-background resize-y focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-      toggle: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3',
-      content: 'prose prose-sm max-w-none'
-    },
-    styles: {
-      toggle: {
-        marginTop: '12px'
-      }
-    },
-
     toggleRenderer: ({ isPreview, onClick, className, style }) => (
       <Button
         variant="outline"
@@ -154,38 +140,7 @@ const extensions = [
   contextMenuExtension,
   commandPaletteExtension,
   draggableBlockExtension.configure({
-    styles: {
-      handle: {
-        backgroundColor: 'var(--background)',
-        border: '1px solid var(--border)',
-        borderRadius: '6px',
-        color: 'var(--foreground)',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-      },
-      handleActive: {
-        backgroundColor: 'var(--accent)',
-        borderColor: 'var(--ring)',
-        color: 'var(--accent-foreground)'
-      },
-      upButton: {
-        backgroundColor: 'var(--background)',
-        border: '1px solid var(--border)',
-        borderRadius: '4px',
-        color: 'var(--foreground)'
-      },
-      downButton: {
-        backgroundColor: 'var(--background)',
-        border: '1px solid var(--border)',
-        borderRadius: '4px',
-        color: 'var(--foreground)'
-      },
-      buttonStack: {
-        backgroundColor: 'var(--background)',
-        border: '1px solid var(--border)',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }
-    }
+    buttonStackPosition: 'right'
   }),
 ] as const;
 

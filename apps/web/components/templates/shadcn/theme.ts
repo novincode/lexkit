@@ -1,6 +1,11 @@
-export const shadcnTheme = {
+import React from 'react';
+import { LexKitTheme } from "@lexkit/editor";
+
+export const shadcnTheme: LexKitTheme = {
   // Toolbar styles - using SHADCN classes
-  toolbar: 'flex items-center gap-1 p-2 border-b bg-background',
+  toolbar: {
+    group: 'flex items-center gap-1 p-2 border-b bg-background'
+  },
 
   // Editor content styles
   editor: 'min-h-[400px] p-4 focus:outline-none',
@@ -19,7 +24,7 @@ export const shadcnTheme = {
   list: {
     ul: 'list-disc list-inside mb-4 space-y-1',
     ol: 'list-decimal list-inside mb-4 space-y-1',
-    li: 'leading-relaxed',
+    listitem: 'leading-relaxed',
   },
   quote: 'border-l-4 border-border pl-4 italic text-muted-foreground mb-4',
   code: 'bg-muted px-1.5 py-0.5 rounded text-sm font-mono',
@@ -72,18 +77,25 @@ export const shadcnTheme = {
 
   // HTML Embed Extension - accessed via this.theme.htmlEmbed in extensions
   htmlEmbed: {
-    theme: {
-      container: 'border border-border rounded-lg overflow-hidden bg-card shadow-sm',
-      preview: 'p-4',
-      editor: 'p-4 border-t border-border bg-muted/50',
-      textarea: 'w-full h-32 p-3 bg-background border border-input rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring',
-      toggle: 'mt-3 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors',
-      content: 'prose prose-sm max-w-none dark:prose-invert'
-    },
+    container: 'border border-border rounded-lg overflow-hidden bg-card shadow-sm',
+    preview: 'p-4',
+    editor: 'p-4 border-t border-border bg-muted/50',
+    textarea: 'w-full h-32 p-3 bg-background border border-input rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring',
+    toggle: 'mt-3 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors',
+    content: 'prose prose-sm max-w-none dark:prose-invert',
     styles: {
       toggle: {
         marginTop: '12px'
-      }
+      },
     }
+  },
+
+  // Draggable Block Extension - accessed via this.theme.draggable in extensions
+  draggable: {
+    handle: 'bg-background border border-border rounded-md text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors',
+    handleActive: 'bg-accent border-ring text-accent-foreground shadow-md',
+    upButton: 'bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-colors',
+    downButton: 'bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-colors',
+    buttonStack: ' !border-0 rounded-lg shadow-md flex gap-1 p-1 -ml-10'
   }
 };

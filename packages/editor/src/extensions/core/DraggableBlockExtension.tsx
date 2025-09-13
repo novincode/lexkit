@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BaseExtension } from '../base/BaseExtension';
 import { ExtensionCategory, BaseExtensionConfig } from '../types';
+import { useBaseEditor as useEditor } from '../../core/createEditorSystem';
 
 /**
  * Debounce utility for performance optimization
@@ -110,7 +111,7 @@ export class DraggableBlockExtension extends BaseExtension<
     private isDraggingState: boolean = false;
     private stateChangeCallbacks: Set<() => void> = new Set();
 
-    constructor() {
+    constructor(config?: Partial<DraggableConfig>) {
         super('draggableBlock', [ExtensionCategory.Floating]);
         this.config = {
             showInToolbar: false,
@@ -120,15 +121,7 @@ export class DraggableBlockExtension extends BaseExtension<
             showDownButton: true,
             buttonStackPosition: 'left',
             enableTextSelectionDrag: true,
-            theme: {
-                handle: 'lexkit-drag-handle',
-                handleActive: 'lexkit-drag-handle-active',
-                blockDragging: 'lexkit-block-dragging',
-                dropIndicator: 'lexkit-drop-indicator',
-                upButton: 'lexkit-move-up',
-                downButton: 'lexkit-move-down',
-                buttonStack: 'lexkit-drag-button-stack',
-            },
+            ...config,
         } as DraggableConfig;
     }
 
@@ -226,6 +219,10 @@ interface DraggableBlockPluginProps {
 
 function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) {
     const [editor] = useLexicalComposerContext();
+    const { config: globalConfig, extensions } = useEditor();
+    const draggableExt = extensions.find((ext: { name: string }) => ext.name === 'draggableBlock') as DraggableBlockExtension | undefined;
+    const draggableConfig = draggableExt?.config as DraggableConfig | undefined;
+    const globalDraggableTheme = globalConfig?.theme?.draggable || {};
     const [hoveredBlock, setHoveredBlock] = useState<HTMLElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dropIndicator, setDropIndicator] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -263,20 +260,31 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         buttonStack: {},
     };
 
-    // Merged styles - user styles override defaults
+    // Merged styles: extension config -> global theme styles -> defaults
     const mergedStyles = {
-        handle: { ...defaultStyles.handle, ...config.styles?.handle },
-        handleActive: { ...defaultStyles.handleActive, ...config.styles?.handleActive },
-        blockDragging: { ...defaultStyles.blockDragging, ...config.styles?.blockDragging },
-        dropIndicator: { ...defaultStyles.dropIndicator, ...config.styles?.dropIndicator },
-        upButton: { ...defaultStyles.upButton, ...config.styles?.upButton },
-        downButton: { ...defaultStyles.downButton, ...config.styles?.downButton },
-        buttonStack: { ...defaultStyles.buttonStack, ...config.styles?.buttonStack },
+        handle: { ...defaultStyles.handle, ...globalDraggableTheme.styles?.handle, ...draggableConfig?.styles?.handle },
+        handleActive: { ...defaultStyles.handleActive, ...globalDraggableTheme.styles?.handleActive, ...draggableConfig?.styles?.handleActive },
+        blockDragging: { ...defaultStyles.blockDragging, ...globalDraggableTheme.styles?.blockDragging, ...draggableConfig?.styles?.blockDragging },
+        dropIndicator: { ...defaultStyles.dropIndicator, ...globalDraggableTheme.styles?.dropIndicator, ...draggableConfig?.styles?.dropIndicator },
+        upButton: { ...defaultStyles.upButton, ...globalDraggableTheme.styles?.upButton, ...draggableConfig?.styles?.upButton },
+        downButton: { ...defaultStyles.downButton, ...globalDraggableTheme.styles?.downButton, ...draggableConfig?.styles?.downButton },
+        buttonStack: { ...defaultStyles.buttonStack, ...globalDraggableTheme.styles?.buttonStack, ...draggableConfig?.styles?.buttonStack },
+    };
+
+    // Merged theme classes: extension config -> global theme -> defaults
+    const mergedThemeClasses = {
+        handle: draggableConfig?.theme?.handle || globalDraggableTheme.handle || 'lexkit-draggable-handle',
+        handleActive: draggableConfig?.theme?.handleActive || globalDraggableTheme.handleActive || 'lexkit-draggable-handle-active',
+        blockDragging: draggableConfig?.theme?.blockDragging || globalDraggableTheme.blockDragging || 'lexkit-draggable-block-dragging',
+        dropIndicator: draggableConfig?.theme?.dropIndicator || globalDraggableTheme.dropIndicator || 'lexkit-draggable-drop-indicator',
+        upButton: draggableConfig?.theme?.upButton || globalDraggableTheme.upButton || 'lexkit-draggable-up-button',
+        downButton: draggableConfig?.theme?.downButton || globalDraggableTheme.downButton || 'lexkit-draggable-down-button',
+        buttonStack: draggableConfig?.theme?.buttonStack || globalDraggableTheme.buttonStack || 'lexkit-draggable-button-stack',
     };
 
     // SSR safety
     if (typeof document === 'undefined') return null;
-    const anchorElem = config.anchorElem || document.body;
+    const anchorElem = draggableConfig?.anchorElem || config.anchorElem || document.body;
 
     // Cleanup on unmount
     useEffect(() => {
@@ -339,31 +347,31 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
     // Clean up drag classes helper
     const cleanupDragClasses = useCallback((element: HTMLElement) => {
-        if (!element || !config.theme?.blockDragging) return;
+        if (!element || !mergedThemeClasses.blockDragging) return;
 
-        const classes = config.theme.blockDragging.includes(' ')
-            ? config.theme.blockDragging.split(' ').filter(Boolean)
-            : [config.theme.blockDragging];
+        const classes = mergedThemeClasses.blockDragging.includes(' ')
+            ? mergedThemeClasses.blockDragging.split(' ').filter(Boolean)
+            : [mergedThemeClasses.blockDragging];
 
-        classes.forEach(cls => element.classList.remove(cls));
+        classes.forEach((cls: string) => element.classList.remove(cls));
 
         // Reset drag styles
         element.style.opacity = '';
-    }, [config.theme]);
+    }, [mergedThemeClasses]);
 
     // Apply drag classes helper
     const applyDragClasses = useCallback((element: HTMLElement) => {
-        if (!element || !config.theme?.blockDragging) return;
+        if (!element || !mergedThemeClasses.blockDragging) return;
 
-        const classes = config.theme.blockDragging.includes(' ')
-            ? config.theme.blockDragging.split(' ').filter(Boolean)
-            : [config.theme.blockDragging];
+        const classes = mergedThemeClasses.blockDragging.includes(' ')
+            ? mergedThemeClasses.blockDragging.split(' ').filter(Boolean)
+            : [mergedThemeClasses.blockDragging];
 
-        classes.forEach(cls => element.classList.add(cls));
+        classes.forEach((cls: string) => element.classList.add(cls));
 
         // Apply drag styles
         Object.assign(element.style, mergedStyles.blockDragging);
-    }, [config.theme, mergedStyles.blockDragging]);
+    }, [mergedThemeClasses, mergedStyles.blockDragging]);
 
     // Mouse tracking for handle visibility with smooth positioning
     useEffect(() => {
@@ -492,7 +500,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
     // Handle text selection drag start
     const handleTextSelectionDragStart = useCallback((event: DragEvent) => {
-        if (!config.enableTextSelectionDrag) return;
+        if (!(draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) return;
 
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
@@ -554,7 +562,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
         // Clear selection to prevent interference
         selection.removeAllRanges();
-    }, [editor, applyDragClasses, config.enableTextSelectionDrag]);
+    }, [editor, applyDragClasses, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag]);
 
     // Clean up drag state
     const cleanupDragState = useCallback(() => {
@@ -717,7 +725,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
             // Check for text selection drag
             const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0 && !selection.isCollapsed && config.enableTextSelectionDrag) {
+            if (selection && selection.rangeCount > 0 && !selection.isCollapsed && (draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) {
                 handleTextSelectionDragStart(e);
                 return;
             }
@@ -749,7 +757,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                 clearTimeout(resizeTimeoutRef.current);
             }
         };
-    }, [editor, cleanupDragState, handleTextSelectionDragStart, config.enableTextSelectionDrag, handleResize]);
+    }, [editor, cleanupDragState, handleTextSelectionDragStart, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag, handleResize]);
 
     // Don't render if no hovered block and not dragging
     const currentElement = hoveredBlock || draggedElementRef.current || currentElementRef.current;
@@ -771,10 +779,10 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
             {/* Button Stack */}
             {createPortal(
                 <div
-                    className={`${config.theme?.buttonStack || 'lexkit-drag-button-stack'} ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
+                    className={`${mergedThemeClasses.buttonStack} ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
                     style={{
                         position: 'absolute',
-                        left: config.buttonStackPosition === 'right'
+                        left: (draggableConfig?.buttonStackPosition || config.buttonStackPosition) === 'right'
                             ? rect.right + window.scrollX + 10
                             : rect.left + window.scrollX - 50,
                         top: rect.top + window.scrollY,
@@ -801,20 +809,20 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         }}
                     >
                         {/* Up Button */}
-                        {(config.showMoveButtons !== false && config.showUpButton !== false) && (
-                            config.buttonsRenderer ? (
-                                config.buttonsRenderer({
+                        {((draggableConfig?.showMoveButtons ?? config.showMoveButtons) !== false && (draggableConfig?.showUpButton ?? config.showUpButton) !== false) && (
+                            (draggableConfig?.buttonsRenderer || config.buttonsRenderer) ? (
+                                (draggableConfig?.buttonsRenderer || config.buttonsRenderer)!({
                                     rect,
                                     onMoveUp: handleMoveUp,
                                     onMoveDown: handleMoveDown,
                                     showUp: true,
                                     showDown: false,
-                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
-                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                    upClassName: `lexkit-drag-button ${mergedThemeClasses.upButton}`,
+                                    downClassName: `lexkit-drag-button ${mergedThemeClasses.downButton}`,
                                 })
                             ) : (
                                 <button
-                                    className={`lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`}
+                                    className={`lexkit-drag-button ${mergedThemeClasses.upButton}`}
                                     onClick={handleMoveUp}
                                     style={mergedStyles.upButton}
                                 >
@@ -824,16 +832,16 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         )}
 
                         {/* Drag Handle */}
-                        {config.handleRenderer ? (
-                            config.handleRenderer({
+                        {(draggableConfig?.handleRenderer || config.handleRenderer) ? (
+                            (draggableConfig?.handleRenderer || config.handleRenderer)!({
                                 rect,
                                 isDragging,
                                 onDragStart: (e) => handleDragStart(e, currentElement),
-                                className: `lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim(),
+                                className: `lexkit-drag-button ${mergedThemeClasses.handle} ${isDragging ? mergedThemeClasses.handleActive : ''}`.trim(),
                             })
                         ) : (
                             <div
-                                className={`lexkit-drag-button ${config.theme?.handle || 'lexkit-drag-handle'} ${isDragging ? (config.theme?.handleActive || 'lexkit-drag-handle-active') : ''}`.trim()}
+                                className={`lexkit-drag-button ${mergedThemeClasses.handle} ${isDragging ? mergedThemeClasses.handleActive : ''}`.trim()}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, currentElement)}
                                 style={isDragging ? mergedStyles.handleActive : mergedStyles.handle}
@@ -843,20 +851,20 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         )}
 
                         {/* Down Button */}
-                        {(config.showMoveButtons !== false && config.showDownButton !== false) && (
-                            config.buttonsRenderer ? (
-                                config.buttonsRenderer({
+                        {((draggableConfig?.showMoveButtons ?? config.showMoveButtons) !== false && (draggableConfig?.showDownButton ?? config.showDownButton) !== false) && (
+                            (draggableConfig?.buttonsRenderer || config.buttonsRenderer) ? (
+                                (draggableConfig?.buttonsRenderer || config.buttonsRenderer)!({
                                     rect,
                                     onMoveUp: handleMoveUp,
                                     onMoveDown: handleMoveDown,
                                     showUp: false,
                                     showDown: true,
-                                    upClassName: `lexkit-drag-button ${config.theme?.upButton || 'lexkit-move-up'}`,
-                                    downClassName: `lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`,
+                                    upClassName: `lexkit-drag-button ${mergedThemeClasses.upButton}`,
+                                    downClassName: `lexkit-drag-button ${mergedThemeClasses.downButton}`,
                                 })
                             ) : (
                                 <button
-                                    className={`lexkit-drag-button ${config.theme?.downButton || 'lexkit-move-down'}`}
+                                    className={`lexkit-drag-button ${mergedThemeClasses.downButton}`}
                                     onClick={handleMoveDown}
                                     style={mergedStyles.downButton}
                                 >
@@ -871,18 +879,18 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
 
             {/* Drop Indicator */}
             {dropIndicator && (
-                config.dropIndicatorRenderer ? (
+                (draggableConfig?.dropIndicatorRenderer || config.dropIndicatorRenderer) ? (
                     createPortal(
-                        config.dropIndicatorRenderer({
+                        (draggableConfig?.dropIndicatorRenderer || config.dropIndicatorRenderer)!({
                             ...dropIndicator,
-                            className: config.theme?.dropIndicator || 'lexkit-drop-indicator',
+                            className: mergedThemeClasses.dropIndicator,
                         }),
                         anchorElem
                     )
                 ) : (
                     createPortal(
                         <div
-                            className={config.theme?.dropIndicator || 'lexkit-drop-indicator'}
+                            className={mergedThemeClasses.dropIndicator}
                             style={{
                                 position: 'absolute',
                                 top: dropIndicator.top - 4,

@@ -20,40 +20,7 @@ import { ExtensionCategory, BaseExtensionConfig } from '../types';
 import { LexKitTheme } from '../../core/theme';
 import { useBaseEditor as useEditor } from '../../core/createEditorSystem'; // Use base for untyped access
 
-// Shared defaults to avoid duplication between extension and component
-export const defaultEmbedTheme = {
-  container: 'lexkit-html-embed-container',
-  preview: 'lexkit-html-embed-preview',
-  editor: 'lexkit-html-embed-editor',
-  textarea: 'lexkit-html-embed-textarea',
-  toggle: 'lexkit-html-embed-toggle',
-  content: 'lexkit-html-embed-content',
-};
-
-export const defaultEmbedStyles = {
-  container: {},
-  preview: {},
-  editor: {},
-  textarea: {
-    width: '100%',
-    minHeight: '120px',
-    padding: '8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontFamily: 'monospace',
-    fontSize: '14px',
-    resize: 'vertical' as const,
-  },
-  toggle: {
-    marginTop: '8px',
-    padding: '4px 8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    backgroundColor: '#f9f9f9',
-    cursor: 'pointer',
-  },
-  content: {},
-};
+// No shared defaults - use core theme
 
 /**
  * Payload interface for HTML embed content
@@ -378,24 +345,24 @@ const HTMLEmbedComponent: React.FC<{
     updatePayload({ preview: true });
   };
 
-  // Merged styles: extension config -> global theme -> defaults
+  // Merged styles: extension config -> global theme (no defaults since core theme doesn't have them)
   const mergedStyles = {
-    container: { ...defaultEmbedStyles.container, ...embedConfig?.styles?.container, ...globalHtmlEmbedTheme.styles?.container },
-    preview: { ...defaultEmbedStyles.preview, ...embedConfig?.styles?.preview, ...globalHtmlEmbedTheme.styles?.preview },
-    editor: { ...defaultEmbedStyles.editor, ...embedConfig?.styles?.editor, ...globalHtmlEmbedTheme.styles?.editor },
-    textarea: { ...defaultEmbedStyles.textarea, ...embedConfig?.styles?.textarea, ...globalHtmlEmbedTheme.styles?.textarea },
-    toggle: { ...defaultEmbedStyles.toggle, ...embedConfig?.styles?.toggle, ...globalHtmlEmbedTheme.styles?.toggle },
-    content: { ...defaultEmbedStyles.content, ...embedConfig?.styles?.content, ...globalHtmlEmbedTheme.styles?.content },
+    container: { ...embedConfig?.styles?.container, ...globalHtmlEmbedTheme.styles?.container },
+    preview: { ...embedConfig?.styles?.preview, ...globalHtmlEmbedTheme.styles?.preview },
+    editor: { ...embedConfig?.styles?.editor, ...globalHtmlEmbedTheme.styles?.editor },
+    textarea: { ...embedConfig?.styles?.textarea, ...globalHtmlEmbedTheme.styles?.textarea },
+    toggle: { ...embedConfig?.styles?.toggle, ...globalHtmlEmbedTheme.styles?.toggle },
+    content: { ...embedConfig?.styles?.content, ...globalHtmlEmbedTheme.styles?.content },
   };
 
-  // Merged theme classes: extension config -> global theme -> defaults
+  // Merged theme classes: extension config -> global theme (core theme provides defaults)
   const mergedThemeClasses = {
-    container: embedConfig?.theme?.container || globalHtmlEmbedTheme.container || defaultEmbedTheme.container,
-    preview: embedConfig?.theme?.preview || globalHtmlEmbedTheme.preview || defaultEmbedTheme.preview,
-    editor: embedConfig?.theme?.editor || globalHtmlEmbedTheme.editor || defaultEmbedTheme.editor,
-    textarea: embedConfig?.theme?.textarea || globalHtmlEmbedTheme.textarea || defaultEmbedTheme.textarea,
-    toggle: embedConfig?.theme?.toggle || globalHtmlEmbedTheme.toggle || defaultEmbedTheme.toggle,
-    content: embedConfig?.theme?.content || globalHtmlEmbedTheme.content || defaultEmbedTheme.content,
+    container: embedConfig?.theme?.container || globalHtmlEmbedTheme.container || '',
+    preview: embedConfig?.theme?.preview || globalHtmlEmbedTheme.preview || '',
+    editor: embedConfig?.theme?.editor || globalHtmlEmbedTheme.editor || '',
+    textarea: embedConfig?.theme?.textarea || globalHtmlEmbedTheme.textarea || '',
+    toggle: embedConfig?.theme?.toggle || globalHtmlEmbedTheme.toggle || '',
+    content: embedConfig?.theme?.content || globalHtmlEmbedTheme.content || '',
   };
 
   // Default renderers
@@ -552,8 +519,6 @@ export class HTMLEmbedExtension extends BaseExtension<
     this.config = {
       defaultHtml: '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
       defaultPreview: false,
-      theme: defaultEmbedTheme,
-      styles: defaultEmbedStyles,
       ...config,
     } as HTMLEmbedConfig;
   }

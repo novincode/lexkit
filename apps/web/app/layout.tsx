@@ -140,7 +140,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans ${fontFira.className} antialiased`}
+        className={`${fontSans.variable} ${fontMono.variable} font-sans ${fontFira.className} antialiased overflow-x-hidden`}
       >
         <Script
           id="structured-data"

@@ -1,4 +1,5 @@
 import { EditorThemeClasses } from 'lexical'
+import React from 'react'
 
 /**
  * Enhanced theme type that extends Lexical's EditorThemeClasses
@@ -16,6 +17,7 @@ export interface LexKitTheme extends EditorThemeClasses {
   wrapper?: string
   draggable?: {
     handle?: string
+    handleActive?: string
     handleHover?: string
     handleDragging?: string
     blockDragging?: string
@@ -24,11 +26,28 @@ export interface LexKitTheme extends EditorThemeClasses {
     downButton?: string
     blockIsDragging?: string
     buttonStack?: string
+    styles?: {
+      handle?: React.CSSProperties
+      handleActive?: React.CSSProperties
+      handleHover?: React.CSSProperties
+      handleDragging?: React.CSSProperties
+      blockDragging?: React.CSSProperties
+      dropIndicator?: React.CSSProperties
+      upButton?: React.CSSProperties
+      downButton?: React.CSSProperties
+      blockIsDragging?: React.CSSProperties
+      buttonStack?: React.CSSProperties
+    }
   }
   floatingToolbar?: {
     container?: string
     button?: string
     buttonActive?: string
+    styles?: {
+      container?: React.CSSProperties
+      button?: React.CSSProperties
+      buttonActive?: React.CSSProperties
+    }
   }
   htmlEmbed?: {
     container?: string
@@ -37,6 +56,49 @@ export interface LexKitTheme extends EditorThemeClasses {
     textarea?: string
     toggle?: string
     content?: string
+    styles?: {
+      container?: React.CSSProperties
+      preview?: React.CSSProperties
+      editor?: React.CSSProperties
+      textarea?: React.CSSProperties
+      toggle?: React.CSSProperties
+      content?: React.CSSProperties
+    }
+  }
+  // Styles for inline CSS properties
+  styles?: {
+    toolbar?: {
+      button?: React.CSSProperties
+      buttonActive?: React.CSSProperties
+      buttonDisabled?: React.CSSProperties
+      group?: React.CSSProperties
+    }
+    container?: React.CSSProperties
+    wrapper?: React.CSSProperties
+    draggable?: {
+      handle?: React.CSSProperties
+      handleHover?: React.CSSProperties
+      handleDragging?: React.CSSProperties
+      blockDragging?: React.CSSProperties
+      dropIndicator?: React.CSSProperties
+      upButton?: React.CSSProperties
+      downButton?: React.CSSProperties
+      blockIsDragging?: React.CSSProperties
+      buttonStack?: React.CSSProperties
+    }
+    floatingToolbar?: {
+      container?: React.CSSProperties
+      button?: React.CSSProperties
+      buttonActive?: React.CSSProperties
+    }
+    htmlEmbed?: {
+      container?: React.CSSProperties
+      preview?: React.CSSProperties
+      editor?: React.CSSProperties
+      textarea?: React.CSSProperties
+      toggle?: React.CSSProperties
+      content?: React.CSSProperties
+    }
   }
 }
 
@@ -92,6 +154,7 @@ export const defaultLexKitTheme: LexKitTheme = {
   wrapper: 'lexkit-editor-wrapper',
   draggable: {
     handle: 'lexkit-draggable-handle',
+    handleActive: 'lexkit-draggable-handle-active',
     handleHover: 'lexkit-draggable-handle-hover',
     handleDragging: 'lexkit-draggable-handle-dragging',
     blockDragging: 'lexkit-draggable-block-dragging opacity-50 transition-opacity duration-200',
@@ -150,18 +213,49 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
     draggable: {
       ...baseTheme.draggable,
       ...overrideTheme.draggable,
+      styles: {
+        ...baseTheme.draggable?.styles,
+        ...overrideTheme.draggable?.styles,
+      },
     },
     floatingToolbar: {
       ...baseTheme.floatingToolbar,
       ...overrideTheme.floatingToolbar,
+      styles: {
+        ...baseTheme.floatingToolbar?.styles,
+        ...overrideTheme.floatingToolbar?.styles,
+      },
     },
     htmlEmbed: {
       ...baseTheme.htmlEmbed,
       ...overrideTheme.htmlEmbed,
+      styles: {
+        ...baseTheme.htmlEmbed?.styles,
+        ...overrideTheme.htmlEmbed?.styles,
+      },
     },
     richText: {
       ...baseTheme.richText,
       ...overrideTheme.richText,
+    },
+    styles: {
+      toolbar: {
+        ...baseTheme.styles?.toolbar,
+        ...overrideTheme.styles?.toolbar,
+      },
+      draggable: {
+        ...baseTheme.styles?.draggable,
+        ...overrideTheme.styles?.draggable,
+      },
+      floatingToolbar: {
+        ...baseTheme.styles?.floatingToolbar,
+        ...overrideTheme.styles?.floatingToolbar,
+      },
+      htmlEmbed: {
+        ...baseTheme.styles?.htmlEmbed,
+        ...overrideTheme.styles?.htmlEmbed,
+      },
+      ...overrideTheme.styles,
     },
   }
 }
