@@ -5,6 +5,9 @@ import { LexicalEditor, FORMAT_TEXT_COMMAND, PASTE_COMMAND, TextFormatType, $get
 import { EditorConfig, EditorContextType, Extension, ExtractCommands, ExtractPlugins, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
 import { defaultLexKitTheme } from './theme';
 
+// Shared context to avoid mismatches between typed/untyped usage
+export const EditorContext = createContext<EditorContextType<any> | null>(null);
+
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
   config?: EditorConfig;
@@ -26,18 +29,16 @@ interface ProviderProps<Exts extends readonly Extension[]> {
  * ```
  */
 export function createEditorSystem<Exts extends readonly Extension[]>() {
-  const EditorContext = createContext<EditorContextType<Exts> | null>(null);
-
   /**
    * Hook to access the editor context. Must be used within a Provider.
    *
    * @returns Editor context with commands, state, and utilities
    * @throws Error if used outside of Provider
    */
-  function useEditor() {
+  function useEditor(): EditorContextType<Exts> {
     const ctx = useContext(EditorContext);
     if (!ctx) throw new Error('useEditor must be used within Provider');
-    return ctx;
+    return ctx as EditorContextType<Exts>;
   }
 
   /**
@@ -198,4 +199,8 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
 // Base system for untyped use
 export const baseEditorSystem = createEditorSystem<readonly Extension[]>();
 export const BaseProvider = baseEditorSystem.Provider;
-export const useBaseEditor = baseEditorSystem.useEditor;
+export const useBaseEditor = () => {
+  const ctx = useContext(EditorContext);
+  if (!ctx) throw new Error('useBaseEditor must be used within Provider');
+  return ctx;
+};

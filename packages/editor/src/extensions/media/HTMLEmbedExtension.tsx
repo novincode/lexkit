@@ -18,6 +18,42 @@ import {
 import { BaseExtension } from '../base/BaseExtension';
 import { ExtensionCategory, BaseExtensionConfig } from '../types';
 import { LexKitTheme } from '../../core/theme';
+import { useBaseEditor as useEditor } from '../../core/createEditorSystem'; // Use base for untyped access
+
+// Shared defaults to avoid duplication between extension and component
+export const defaultEmbedTheme = {
+  container: 'lexkit-html-embed-container',
+  preview: 'lexkit-html-embed-preview',
+  editor: 'lexkit-html-embed-editor',
+  textarea: 'lexkit-html-embed-textarea',
+  toggle: 'lexkit-html-embed-toggle',
+  content: 'lexkit-html-embed-content',
+};
+
+export const defaultEmbedStyles = {
+  container: {},
+  preview: {},
+  editor: {},
+  textarea: {
+    width: '100%',
+    minHeight: '120px',
+    padding: '8px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    resize: 'vertical' as const,
+  },
+  toggle: {
+    marginTop: '8px',
+    padding: '4px 8px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    backgroundColor: '#f9f9f9',
+    cursor: 'pointer',
+  },
+  content: {},
+};
 
 /**
  * Payload interface for HTML embed content
@@ -276,14 +312,11 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
 
   // React component rendering
   decorate(editor: LexicalEditor): ReactNode {
-    // Get config from global storage (set by HTMLEmbedPlugin)
-    const config = (globalThis as any).__htmlEmbedConfig || {};
     return (
       <HTMLEmbedComponent
         nodeKey={this.__key}
         payload={this.__payload}
         editor={editor}
-        config={config}
       />
     );
   }
@@ -303,8 +336,15 @@ const HTMLEmbedComponent: React.FC<{
   nodeKey: NodeKey;
   payload: HTMLEmbedPayload;
   editor: LexicalEditor;
-  config: HTMLEmbedConfig;
-}> = ({ nodeKey, payload, editor, config }) => {
+}> = ({ nodeKey, payload, editor }) => {
+  const { config, extensions } = useEditor();
+  // Fetch extension-specific config (for renderers, per-extension overrides)
+  const embedExtension = extensions.find((ext: any) => ext.name === 'htmlEmbed') as HTMLEmbedExtension | undefined;
+  const embedConfig = embedExtension?.config as HTMLEmbedConfig | undefined;
+
+  // Global theme section
+  const globalHtmlEmbedTheme = config?.theme?.htmlEmbed || {};
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Update payload in Lexical state
@@ -338,50 +378,24 @@ const HTMLEmbedComponent: React.FC<{
     updatePayload({ preview: true });
   };
 
-  // Default styles - minimal and functional
-  const defaultStyles = {
-    container: {},
-    preview: {},
-    editor: {},
-    textarea: {
-      width: '100%',
-      minHeight: '120px',
-      padding: '8px',
-      border: '1px solid #ccc',
-      borderRadius: '4px',
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      resize: 'vertical' as const,
-    },
-    toggle: {
-      marginTop: '8px',
-      padding: '4px 8px',
-      border: '1px solid #ccc',
-      borderRadius: '4px',
-      backgroundColor: '#f9f9f9',
-      cursor: 'pointer',
-    },
-    content: {},
-  };
-
-  // Merged styles - user styles override defaults
+  // Merged styles: extension config -> global theme -> defaults
   const mergedStyles = {
-    container: { ...defaultStyles.container, ...config.styles?.container },
-    preview: { ...defaultStyles.preview, ...config.styles?.preview },
-    editor: { ...defaultStyles.editor, ...config.styles?.editor },
-    textarea: { ...defaultStyles.textarea, ...config.styles?.textarea },
-    toggle: { ...defaultStyles.toggle, ...config.styles?.toggle },
-    content: { ...defaultStyles.content, ...config.styles?.content },
+    container: { ...defaultEmbedStyles.container, ...embedConfig?.styles?.container, ...globalHtmlEmbedTheme.styles?.container },
+    preview: { ...defaultEmbedStyles.preview, ...embedConfig?.styles?.preview, ...globalHtmlEmbedTheme.styles?.preview },
+    editor: { ...defaultEmbedStyles.editor, ...embedConfig?.styles?.editor, ...globalHtmlEmbedTheme.styles?.editor },
+    textarea: { ...defaultEmbedStyles.textarea, ...embedConfig?.styles?.textarea, ...globalHtmlEmbedTheme.styles?.textarea },
+    toggle: { ...defaultEmbedStyles.toggle, ...embedConfig?.styles?.toggle, ...globalHtmlEmbedTheme.styles?.toggle },
+    content: { ...defaultEmbedStyles.content, ...embedConfig?.styles?.content, ...globalHtmlEmbedTheme.styles?.content },
   };
 
-  // Theme classes with defaults
-  const themeClasses = {
-    container: config.theme?.container || 'lexkit-html-embed-container',
-    preview: config.theme?.preview || 'lexkit-html-embed-preview',
-    editor: config.theme?.editor || 'lexkit-html-embed-editor',
-    textarea: config.theme?.textarea || 'lexkit-html-embed-textarea',
-    toggle: config.theme?.toggle || 'lexkit-html-embed-toggle',
-    content: config.theme?.content || 'lexkit-html-embed-content',
+  // Merged theme classes: extension config -> global theme -> defaults
+  const mergedThemeClasses = {
+    container: embedConfig?.theme?.container || globalHtmlEmbedTheme.container || defaultEmbedTheme.container,
+    preview: embedConfig?.theme?.preview || globalHtmlEmbedTheme.preview || defaultEmbedTheme.preview,
+    editor: embedConfig?.theme?.editor || globalHtmlEmbedTheme.editor || defaultEmbedTheme.editor,
+    textarea: embedConfig?.theme?.textarea || globalHtmlEmbedTheme.textarea || defaultEmbedTheme.textarea,
+    toggle: embedConfig?.theme?.toggle || globalHtmlEmbedTheme.toggle || defaultEmbedTheme.toggle,
+    content: embedConfig?.theme?.content || globalHtmlEmbedTheme.content || defaultEmbedTheme.content,
   };
 
   // Default renderers
@@ -412,12 +426,12 @@ const HTMLEmbedComponent: React.FC<{
   }) => (
     <div className={className} style={style}>
       <div
-        className={themeClasses.content}
+        className={mergedThemeClasses.content}
         style={mergedStyles.content}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      {config.toggleRenderer ? (
-        config.toggleRenderer({
+      {embedConfig?.toggleRenderer ? (
+        embedConfig.toggleRenderer({
           isPreview: true,
           onClick: onToggleEdit,
           className: toggleClassName,
@@ -466,8 +480,8 @@ const HTMLEmbedComponent: React.FC<{
         defaultValue={html}
         placeholder="Enter HTML here..."
       />
-      {config.toggleRenderer ? (
-        config.toggleRenderer({
+      {embedConfig?.toggleRenderer ? (
+        embedConfig.toggleRenderer({
           isPreview: false,
           onClick: onSave,
           className: toggleClassName,
@@ -487,23 +501,23 @@ const HTMLEmbedComponent: React.FC<{
     </div>
   );
 
-  // Use custom renderers if provided, otherwise use defaults
-  const ContainerRenderer = config.containerRenderer || defaultContainerRenderer;
-  const PreviewRenderer = config.previewRenderer || defaultPreviewRenderer;
-  const EditorRenderer = config.editorRenderer || defaultEditorRenderer;
+  // Use custom renderers from extension config if provided, otherwise defaults
+  const ContainerRenderer = embedConfig?.containerRenderer || defaultContainerRenderer;
+  const PreviewRenderer = embedConfig?.previewRenderer || defaultPreviewRenderer;
+  const EditorRenderer = embedConfig?.editorRenderer || defaultEditorRenderer;
 
   return (
     <ContainerRenderer
-      className={themeClasses.container}
+      className={mergedThemeClasses.container}
       style={mergedStyles.container}
     >
       {payload.preview ? (
         <PreviewRenderer
           html={payload.html}
           onToggleEdit={togglePreview}
-          className={themeClasses.preview}
+          className={mergedThemeClasses.preview}
           style={mergedStyles.preview}
-          toggleClassName={themeClasses.toggle}
+          toggleClassName={mergedThemeClasses.toggle}
           toggleStyle={mergedStyles.toggle}
         />
       ) : (
@@ -511,11 +525,11 @@ const HTMLEmbedComponent: React.FC<{
           html={payload.html}
           onTogglePreview={togglePreview}
           onSave={handleSave}
-          className={themeClasses.editor}
+          className={mergedThemeClasses.editor}
           style={mergedStyles.editor}
-          textareaClassName={themeClasses.textarea}
+          textareaClassName={mergedThemeClasses.textarea}
           textareaStyle={mergedStyles.textarea}
-          toggleClassName={themeClasses.toggle}
+          toggleClassName={mergedThemeClasses.toggle}
           toggleStyle={mergedStyles.toggle}
         />
       )}
@@ -538,14 +552,8 @@ export class HTMLEmbedExtension extends BaseExtension<
     this.config = {
       defaultHtml: '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
       defaultPreview: false,
-      theme: {
-        container: 'lexkit-html-embed-container',
-        preview: 'lexkit-html-embed-preview',
-        editor: 'lexkit-html-embed-editor',
-        textarea: 'lexkit-html-embed-textarea',
-        toggle: 'lexkit-html-embed-toggle',
-        content: 'lexkit-html-embed-content',
-      },
+      theme: defaultEmbedTheme,
+      styles: defaultEmbedStyles,
       ...config,
     } as HTMLEmbedConfig;
   }
@@ -560,8 +568,8 @@ export class HTMLEmbedExtension extends BaseExtension<
   }
 
   getPlugins(): ReactNode[] {
-    // Pass config to HTMLEmbedNode via a plugin that sets up the node rendering
-    return [<HTMLEmbedPlugin key="html-embed" config={this.config} />];
+    // No plugins needed - theme is accessed via useEditor hook
+    return [];
   }
 
   getCommands(editor: LexicalEditor): HTMLEmbedCommands {
@@ -628,13 +636,6 @@ export class HTMLEmbedExtension extends BaseExtension<
       }),
     };
   }
-}
-
-// Plugin to handle HTMLEmbedNode rendering with config
-function HTMLEmbedPlugin({ config }: { config: HTMLEmbedConfig }) {
-  // Store config globally for HTMLEmbedNode to access
-  (globalThis as any).__htmlEmbedConfig = config;
-  return null;
 }
 
 // Markdown Transformer - Properly implemented for Lexical 0.35

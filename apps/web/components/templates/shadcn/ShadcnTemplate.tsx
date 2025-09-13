@@ -1599,7 +1599,7 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
       <div
         className={`shadcn-editor-wrapper ${className || ''}`}
       >
-        <Provider extensions={extensions}>
+        <Provider extensions={extensions} config={{ theme: shadcnTheme }}>
           <EditorContent
             className={className}
             onReady={handleEditorReady}

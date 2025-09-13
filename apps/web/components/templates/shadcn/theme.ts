@@ -69,4 +69,21 @@ export const shadcnTheme = {
   tableRow: '',
   tableCell: 'border border-border p-3 text-left',
   tableCellHeader: 'border border-border p-3 text-left font-semibold bg-muted',
+
+  // HTML Embed Extension - accessed via this.theme.htmlEmbed in extensions
+  htmlEmbed: {
+    theme: {
+      container: 'border border-border rounded-lg overflow-hidden bg-card shadow-sm',
+      preview: 'p-4',
+      editor: 'p-4 border-t border-border bg-muted/50',
+      textarea: 'w-full h-32 p-3 bg-background border border-input rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring',
+      toggle: 'mt-3 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors',
+      content: 'prose prose-sm max-w-none dark:prose-invert'
+    },
+    styles: {
+      toggle: {
+        marginTop: '12px'
+      }
+    }
+  }
 };
