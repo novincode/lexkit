@@ -600,7 +600,7 @@ function ModernFloatingToolbar() {
             : // Use calculated position (either centered or left-aligned)
               { left: selectionRect.x, right: 'auto' }
           ),
-          zIndex: 9999,
+          zIndex: 50,
           pointerEvents: 'auto',
           ...theme.styles?.container
         }}
@@ -1429,7 +1429,7 @@ function EditorContent({
 
       {/* Sticky Toolbar Header - only show in visual mode */}
       {mode === 'visual' && (
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className=" z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
           <div className="px-4 py-3">
             <ModernToolbar
               commands={commands}

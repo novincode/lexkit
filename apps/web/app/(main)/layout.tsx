@@ -11,7 +11,7 @@ export default function DocsLayoutClient({ children }: Props) {
     return (
         <div className="flex flex-col min-h-screen">
             <TopNavigation
-                className="top-0 sticky"
+                className="top-0 sticky z-[99999]"
             />
 
 

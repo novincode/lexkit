@@ -95,6 +95,11 @@ export interface FloatingConfig<TCommands = any, TStates = any> extends BaseExte
     button?: string;
     buttonActive?: string;
   };
+
+  /**
+   * Toolbar dimensions for positioning calculations (default: { width: 300, height: 40 })
+   */
+  toolbarDimensions?: { width: number; height: number };
 }
 
 /**
@@ -228,9 +233,9 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       y = spaceBelow > 60 ? domRect.bottom + scrollY + offset.y : domRect.top + scrollY - offset.y;
     }
 
-    // Toolbar dimensions (conservative estimate)
-    const toolbarWidth = 300;
-    const toolbarHeight = 40;
+    // Toolbar dimensions (configurable with defaults)
+    const toolbarWidth = config.toolbarDimensions?.width || 300;
+    const toolbarHeight = config.toolbarDimensions?.height || 40;
     const margin = 10; // Minimum margin from viewport edges
 
     // Calculate selection center in viewport coordinates

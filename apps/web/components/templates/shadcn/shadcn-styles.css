@@ -7,7 +7,7 @@
 /* Content Editable Styling */
 .shadcn-content-editable {
   outline: none;
-  font-size: 1rem;
+  font-size: 1.25rem;
   line-height: 1.6;
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -19,7 +19,7 @@
 
 /* Placeholder Styling */
 .shadcn-placeholder {
-  font-size: 1rem;
+  font-size: 1.25rem;
   line-height: 1.6;
   user-select: none;
   color: var(--muted-foreground);
@@ -396,12 +396,7 @@
   color: var(--accent-foreground) !important;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .shadcn-content-editable {
-    font-size: 1rem;
-  }
-}
+
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
