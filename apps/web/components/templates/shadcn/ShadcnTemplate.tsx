@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useTheme } from 'next-themes';
 import {
   boldExtension,
   italicExtension,
@@ -805,8 +804,6 @@ function ModernToolbar({
   commands,
   hasExtension,
   activeStates,
-  isDark,
-  toggleTheme,
   onCommandPaletteOpen,
   onLinkDialogOpen,
   onImageDialogOpen
@@ -814,8 +811,6 @@ function ModernToolbar({
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
-  isDark: boolean;
-  toggleTheme: () => void;
   onCommandPaletteOpen: () => void;
   onLinkDialogOpen: () => void;
   onImageDialogOpen: () => void;
@@ -1188,19 +1183,6 @@ function ModernToolbar({
             </TooltipTrigger>
             <TooltipContent>Command Palette (Ctrl+K)</TooltipContent>
           </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={toggleTheme}
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{isDark ? 'Light Mode' : 'Dark Mode'}</TooltipContent>
-          </Tooltip>
         </div>
       </div>
     </TooltipProvider>
@@ -1292,13 +1274,9 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
 // Main Editor Content Component
 function EditorContent({
   className,
-  isDark,
-  toggleTheme,
   onReady
 }: {
   className?: string;
-  isDark: boolean;
-  toggleTheme: () => void;
   onReady?: (methods: ShadcnTemplateRef) => void;
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
@@ -1372,9 +1350,6 @@ function EditorContent({
   // Register command palette commands and keyboard shortcuts
   useEffect(() => {
     if (editor && methods) {
-      // Set the editor theme attribute for CSS
-      editor.getRootElement()?.setAttribute('data-editor-theme', isDark ? 'dark' : 'light');
-
       // Register keyboard shortcuts
       const unregister = registerKeyboardShortcuts(commands);
 
@@ -1392,7 +1367,7 @@ function EditorContent({
         (commands as any).showCommandPalette = originalShowCommand;
       };
     }
-  }, [editor, methods, onReady, commands, isDark]);
+  }, [editor, methods, onReady, commands]);
 
   // Handle mode changes
   const handleModeChange = (newMode: EditorMode) => {
@@ -1457,8 +1432,6 @@ function EditorContent({
             commands={commands}
             hasExtension={hasExtension}
             activeStates={activeStates}
-            isDark={isDark}
-            toggleTheme={toggleTheme}
             onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
             onLinkDialogOpen={() => openLinkDialog('', '', false)}
             onImageDialogOpen={openImageDialog}
@@ -1550,18 +1523,7 @@ interface ShadcnTemplateProps {
 
 export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplateProps>(
   ({ className, onReady }, ref) => {
-    const { theme: globalTheme } = useTheme();
-    const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
     const [editorMethods, setEditorMethods] = useState<ShadcnTemplateRef | null>(null);
-
-    // Initialize editor theme from global theme on mount
-    useEffect(() => {
-      if (globalTheme === 'dark' || globalTheme === 'light') {
-        setEditorTheme(globalTheme);
-      }
-    }, [globalTheme]);
-
-    const isDark = editorTheme === 'dark';
 
     // Configure image extension
     useEffect(() => {
@@ -1576,10 +1538,6 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
         debug: false,
       });
     }, []);
-
-    const toggleTheme = () => {
-      setEditorTheme(isDark ? 'light' : 'dark');
-    };
 
     // Handle when editor is ready
     const handleEditorReady = React.useCallback((methods: ShadcnTemplateRef) => {
@@ -1613,26 +1571,10 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
     return (
       <div
         className={`shadcn-editor-wrapper ${className || ''}`}
-        data-theme={editorTheme}
-        data-editor-theme={editorTheme}
-        style={{
-          '--background': isDark ? 'hsl(222.2 84% 4.9%)' : 'hsl(0 0% 100%)',
-          '--foreground': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
-          '--muted': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(210 40% 96%)',
-          '--muted-foreground': isDark ? 'hsl(215 20.2% 65.1%)' : 'hsl(215.4 16.3% 46.9%)',
-          '--border': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(214.3 31.8% 91%)',
-          '--ring': isDark ? 'hsl(212.7 26.8% 83.9%)' : 'hsl(222.2 84% 4.9%)',
-          '--primary': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
-          '--primary-foreground': isDark ? 'hsl(222.2 84% 4.9%)' : 'hsl(210 40% 98%)',
-          '--accent': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(210 40% 96%)',
-          '--accent-foreground': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
-        } as React.CSSProperties}
       >
         <Provider extensions={extensions}>
           <EditorContent
             className={className}
-            isDark={isDark}
-            toggleTheme={toggleTheme}
             onReady={handleEditorReady}
           />
         </Provider>

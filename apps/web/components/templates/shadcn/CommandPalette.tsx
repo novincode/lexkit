@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { CommandPaletteItem } from '@lexkit/editor/extensions/core';
 import { Search, Command } from 'lucide-react';
 import { Input } from '@repo/ui/components/input';
-import { Dialog, DialogContent } from '@repo/ui/components/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/dialog';
 import { ScrollArea } from '@repo/ui/components/scroll-area';
 import { Badge } from '@repo/ui/components/badge';
 
@@ -83,6 +83,9 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] p-0">
+        <DialogHeader>
+          <DialogTitle>Command Palette</DialogTitle>
+        </DialogHeader>
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
