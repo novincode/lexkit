@@ -63,7 +63,7 @@ export const shadcnTheme: LexKitTheme = {
     url: 'text-blue-600',
     variable: 'text-yellow-600',
   },
-  link: 'text-primary underline underline-offset-2 hover:text-primary/80 transition-colors',
+  link: 'text-blue-600 underline underline-offset-2 hover:text-blue-700 transition-colors',
   text: {
     bold: 'font-bold',
     italic: 'italic',
@@ -111,7 +111,7 @@ export const shadcnTheme: LexKitTheme = {
   // Floating Toolbar Extension - accessed via this.theme.floatingToolbar in extensions
   floatingToolbar: {
     container: 'flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg animate-in fade-in-0 slide-in-from-top-2 duration-200',
-    button: 'w-8 h-8 bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    button: 'w-8 h-8 bg-background  border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     buttonActive: 'bg-accent border-ring text-accent-foreground scale-105',
     styles: {
       container: {

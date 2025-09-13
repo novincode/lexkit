@@ -36,6 +36,10 @@ export interface DraggableConfig extends BaseExtensionConfig {
     buttonStackPosition?: 'left' | 'right';
     /** Enable dragging via text selection (default: true) */
     enableTextSelectionDrag?: boolean;
+    /** Configurable offset for left position */
+    offsetLeft?: number;
+    /** Configurable offset for right position */
+    offsetRight?: number;
     /** Theme classes */
     theme?: {
         handle?: string;
@@ -121,6 +125,8 @@ export class DraggableBlockExtension extends BaseExtension<
             showDownButton: true,
             buttonStackPosition: 'left',
             enableTextSelectionDrag: true,
+            offsetLeft: -40,
+            offsetRight: 10,
             ...config,
         } as DraggableConfig;
     }
@@ -416,7 +422,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                 // Delay hiding when mouse leaves the entire document
                 hideTimeout = setTimeout(() => {
                     setHoveredBlock(null);
-                }, 1000);
+                }, 300);
             }
         };
 
@@ -959,8 +965,8 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                     style={{
                         position: 'absolute',
                         left: (draggableConfig?.buttonStackPosition || config.buttonStackPosition) === 'right'
-                            ? rect.right + window.scrollX + 10
-                            : rect.left + window.scrollX - 50,
+                            ? rect.right + window.scrollX + (draggableConfig?.offsetRight || config.offsetRight || 10)
+                            : rect.left + window.scrollX + (draggableConfig?.offsetLeft || config.offsetLeft || -40),
                         top: rect.top + window.scrollY,
                         zIndex: 9999,
                         display: 'flex',
