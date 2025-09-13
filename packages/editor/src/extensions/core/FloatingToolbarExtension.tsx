@@ -4,6 +4,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BaseExtension } from '@lexkit/editor/extensions/base/BaseExtension';
 import { ExtensionCategory, BaseExtensionConfig } from '@lexkit/editor/extensions/types';
+import { useBaseEditor as useEditor } from '../../core/createEditorSystem';
 
 /**
  * Selection rect with position information
@@ -17,6 +18,8 @@ export interface SelectionRect {
   left: number;
   bottom: number;
   right: number;
+  // Positioning hints for the component
+  positionFromRight?: boolean;
 }
 
 /**
@@ -108,33 +111,6 @@ export type FloatingStateQueries = {
 
 /**
  * FloatingToolbarExtension - Clean, headless floating toolbar that appears on text selection
- *
- * Features:
- * - 🎯 Truly headless: Complete UI control via render prop
- * - 🔧 Framework agnostic: Works with any UI library (shadcn, Material-UI, etc.)
- * - 📱 Smart positioning: Auto-calculates position with customizable strategies
- * - ⚡ Performance optimized: Debounced updates, efficient rendering
- * - 🎨 Fully customizable: Position, styling, behavior all under your control
- * - 🛡️ Type-safe: Strongly typed props and configuration
- *
- * Usage:
- * ```tsx
- * floatingToolbarExtension.configure({
- *   render: ({ isVisible, selectionRect, selection, editor, commands, activeStates, hide }) => {
- *     if (!isVisible || !selectionRect) return null;
- *
- *     return (
- *       <MyToolbar
- *         position={{ x: selectionRect.x, y: selectionRect.bottom + 8 }}
- *         onBold={() => commands.formatText('bold')}
- *         onClose={hide}
- *       />
- *     );
- *   },
- *   positionStrategy: 'below',
- *   offset: { x: 0, y: 8 }
- * })
- * ```
  */
 export class FloatingToolbarExtension<TCommands = any, TStates = any> extends BaseExtension<
   'floatingToolbar',
@@ -162,7 +138,6 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
   }
 
   register(editor: LexicalEditor): () => void {
-    // No global registrations needed; handled in plugin
     return () => {};
   }
 
@@ -180,9 +155,6 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
     };
   }
 
-  /**
-   * Update the configuration with commands and activeStates
-   */
   updateContext(commands: TCommands, activeStates: TStates) {
     if (this.config) {
       this.config.commands = commands;
@@ -190,16 +162,10 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
     }
   }
 
-  /**
-   * Get the current selection rectangle
-   */
   getSelectionRect(): SelectionRect | null {
     return this.selectionRect;
   }
 
-  /**
-   * Check if the floating toolbar is currently visible
-   */
   getIsVisible(): boolean {
     return this.isVisible;
   }
@@ -228,6 +194,7 @@ interface FloatingToolbarPluginProps<TCommands = any, TStates = any> {
 
 function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, config }: FloatingToolbarPluginProps<TCommands, TStates>) {
   const [editor] = useLexicalComposerContext();
+  const { config: globalConfig } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
   const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
   const [selection, setSelection] = useState<RangeSelection | null>(null);
@@ -237,39 +204,92 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
     let timeout: NodeJS.Timeout;
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
+      timeout = setTimeout(() => func(() => args), wait);
     };
   };
 
-  // Convert DOMRect to SelectionRect with positioning
+  // Convert DOMRect to SelectionRect with intelligent positioning
   const createSelectionRect = (domRect: DOMRect): SelectionRect => {
     const offset = config.offset || { x: 0, y: 8 };
     const strategy = config.positionStrategy || 'below';
-    
-    // Add scroll offset to get absolute position
-    const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-    
+
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate Y position based on strategy
     let y = domRect.bottom + scrollY + offset.y;
     if (strategy === 'above') {
       y = domRect.top + scrollY - offset.y;
     } else if (strategy === 'auto') {
-      // Auto position based on viewport
-      const viewportHeight = window.innerHeight;
       const spaceBelow = viewportHeight - domRect.bottom;
       const spaceAbove = domRect.top;
       y = spaceBelow > 60 ? domRect.bottom + scrollY + offset.y : domRect.top + scrollY - offset.y;
     }
 
+    // Toolbar dimensions (conservative estimate)
+    const toolbarWidth = 300;
+    const toolbarHeight = 40;
+    const margin = 10; // Minimum margin from viewport edges
+
+    // Calculate selection center in viewport coordinates
+    const selectionCenterX = domRect.left + domRect.width / 2;
+    const selectionCenterAbsolute = selectionCenterX + scrollX;
+
+    // Determine optimal positioning strategy
+    let x: number;
+    let positionFromRight = false;
+
+    // Check available space on both sides of selection center
+    const spaceLeft = selectionCenterX - margin; // Space to the left of center
+    const spaceRight = viewportWidth - selectionCenterX - margin; // Space to the right of center
+    const halfToolbarWidth = toolbarWidth / 2;
+
+    // Calculate where the toolbar would be positioned if centered
+    const centeredToolbarLeft = selectionCenterX - halfToolbarWidth;
+    const centeredToolbarRight = selectionCenterX + halfToolbarWidth;
+
+    // Check if centering would cause overflow
+    const wouldOverflowLeft = centeredToolbarLeft < margin;
+    const wouldOverflowRight = centeredToolbarRight > (viewportWidth - margin);
+
+    if (!wouldOverflowLeft && !wouldOverflowRight) {
+      // Perfect centering case - no overflow on either side
+      // Position the toolbar so its center aligns with selection center
+      x = selectionCenterAbsolute - halfToolbarWidth;
+      positionFromRight = false;
+    } else if (wouldOverflowLeft || spaceLeft < halfToolbarWidth) {
+      // Too close to left edge or would overflow left - stick toolbar to left with margin
+      x = scrollX + margin;
+      positionFromRight = false;
+    } else if (wouldOverflowRight || spaceRight < halfToolbarWidth) {
+      // Too close to right edge or would overflow right - stick toolbar to right with margin
+      x = scrollX + viewportWidth - toolbarWidth - margin;
+      positionFromRight = true;
+    } else {
+      // Fallback to centering
+      x = selectionCenterAbsolute - halfToolbarWidth;
+      positionFromRight = false;
+    }
+
+    // Vertical bounds check
+    if (y - toolbarHeight < scrollY) {
+      y = domRect.bottom + scrollY + offset.y;
+    } else if (y + toolbarHeight > scrollY + viewportHeight) {
+      y = domRect.top + scrollY - offset.y - toolbarHeight;
+    }
+
     return {
-      x: domRect.left + scrollX + domRect.width / 2 + offset.x,
+      x,
       y,
       width: domRect.width,
       height: domRect.height,
       top: domRect.top + scrollY,
       left: domRect.left + scrollX,
       bottom: domRect.bottom + scrollY,
-      right: domRect.right + scrollX
+      right: domRect.right + scrollX,
+      positionFromRight
     };
   };
 
@@ -328,7 +348,6 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       debouncedUpdate();
     });
 
-    // Listen for selection changes outside of editor updates
     const handleSelectionChange = () => {
       debouncedUpdate();
     };
@@ -368,7 +387,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       commands: config.getCommands?.() || ({} as TCommands),
       activeStates: config.getActiveStates?.() || ({} as TStates),
       hide,
-      theme: config.theme || {},
+      theme: globalConfig?.theme?.floatingToolbar || config.theme || {},
     }),
     anchorElem
   );

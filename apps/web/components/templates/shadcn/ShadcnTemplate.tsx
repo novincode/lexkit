@@ -557,7 +557,7 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
 
 // Modern Floating Toolbar with SHADCN components
 function ModernFloatingToolbar() {
-  const { commands, activeStates, extensions, hasExtension } = useEditor();
+  const { commands, activeStates, extensions, hasExtension, config } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
   const [selectionRect, setSelectionRect] = useState<any>(null);
 
@@ -584,17 +584,25 @@ function ModernFloatingToolbar() {
 
   const isImageSelected = activeStates.imageSelected;
 
+  // Get theme classes from global theme
+  const theme = config?.theme?.floatingToolbar || {};
+
   return createPortal(
     <TooltipProvider>
       <div
-        className="flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg"
+        className={theme.container || "flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg"}
         style={{
           position: 'absolute',
           top: selectionRect.y,
-          left: selectionRect.x,
-          transform: 'translateX(-50%)',
+          ...(selectionRect.positionFromRight
+            ? // Stick to right edge with margin
+              { right: 10, left: 'auto' }
+            : // Use calculated position (either centered or left-aligned)
+              { left: selectionRect.x, right: 'auto' }
+          ),
           zIndex: 9999,
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          ...theme.styles?.container
         }}
       >
         {isImageSelected ? (
@@ -605,6 +613,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.isImageAlignedLeft ? "pressed" : "default"}
+                  className={activeStates.isImageAlignedLeft ? theme.buttonActive : theme.button}
                   pressed={activeStates.isImageAlignedLeft}
                   onPressedChange={() => commands.setImageAlignment('left')}
                 >
@@ -619,6 +628,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.isImageAlignedCenter ? "pressed" : "default"}
+                  className={activeStates.isImageAlignedCenter ? theme.buttonActive : theme.button}
                   pressed={activeStates.isImageAlignedCenter}
                   onPressedChange={() => commands.setImageAlignment('center')}
                 >
@@ -633,6 +643,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.isImageAlignedRight ? "pressed" : "default"}
+                  className={activeStates.isImageAlignedRight ? theme.buttonActive : theme.button}
                   pressed={activeStates.isImageAlignedRight}
                   onPressedChange={() => commands.setImageAlignment('right')}
                 >
@@ -649,6 +660,7 @@ function ModernFloatingToolbar() {
                 <Button
                   size="sm"
                   variant="ghost"
+                  className={theme.button}
                   onClick={() => {
                     const caption = prompt('Enter caption:') || '';
                     commands.setImageCaption(caption);
@@ -668,6 +680,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.bold ? "pressed" : "default"}
+                  className={activeStates.bold ? theme.buttonActive : theme.button}
                   pressed={activeStates.bold}
                   onPressedChange={() => commands.toggleBold()}
                 >
@@ -682,6 +695,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.italic ? "pressed" : "default"}
+                  className={activeStates.italic ? theme.buttonActive : theme.button}
                   pressed={activeStates.italic}
                   onPressedChange={() => commands.toggleItalic()}
                 >
@@ -696,6 +710,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.underline ? "pressed" : "default"}
+                  className={activeStates.underline ? theme.buttonActive : theme.button}
                   pressed={activeStates.underline}
                   onPressedChange={() => commands.toggleUnderline()}
                 >
@@ -710,6 +725,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.strikethrough ? "pressed" : "default"}
+                  className={activeStates.strikethrough ? theme.buttonActive : theme.button}
                   pressed={activeStates.strikethrough}
                   onPressedChange={() => commands.toggleStrikethrough()}
                 >
@@ -726,6 +742,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.code ? "pressed" : "default"}
+                  className={activeStates.code ? theme.buttonActive : theme.button}
                   pressed={activeStates.code}
                   onPressedChange={() => commands.formatText('code')}
                 >
@@ -740,6 +757,7 @@ function ModernFloatingToolbar() {
                 <Toggle
                   size="sm"
                   variant={activeStates.isLink ? "pressed" : "default"}
+                  className={activeStates.isLink ? theme.buttonActive : theme.button}
                   pressed={activeStates.isLink}
                   onPressedChange={() => commands.insertLink()}
                 >
@@ -759,6 +777,7 @@ function ModernFloatingToolbar() {
                     <Toggle
                       size="sm"
                       variant={activeStates.unorderedList ? "pressed" : "default"}
+                      className={activeStates.unorderedList ? theme.buttonActive : theme.button}
                       pressed={activeStates.unorderedList}
                       onPressedChange={() => commands.toggleUnorderedList()}
                     >
@@ -773,6 +792,7 @@ function ModernFloatingToolbar() {
                     <Toggle
                       size="sm"
                       variant={activeStates.orderedList ? "pressed" : "default"}
+                      className={activeStates.orderedList ? theme.buttonActive : theme.button}
                       pressed={activeStates.orderedList}
                       onPressedChange={() => commands.toggleOrderedList()}
                     >

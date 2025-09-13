@@ -96,6 +96,18 @@ export const shadcnTheme: LexKitTheme = {
     handleActive: 'bg-accent border-ring text-accent-foreground shadow-md',
     upButton: 'bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-colors',
     downButton: 'bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-colors',
-    buttonStack: ' !border-0 rounded-lg shadow-md flex gap-1 p-1 -ml-10'
-  }
+    buttonStack: '!border-0 rounded-lg shadow-md flex gap-1 p-1 -ml-10'
+  },
+
+  // Floating Toolbar Extension - accessed via this.theme.floatingToolbar in extensions
+  // floatingToolbar: {
+  //   container: 'flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg',
+  //   button: 'bg-background border border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-colors',
+  //   buttonActive: 'bg-accent border-ring text-accent-foreground',
+  //   styles: {
+  //     container: {
+  //       zIndex: 99
+  //     },
+  //   }
+  // }
 };
