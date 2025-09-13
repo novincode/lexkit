@@ -31,12 +31,7 @@ const navigationItems = [
     activePaths: ["/demo"],
     external: false
   },
-  {
-    label: "Templates",
-    href: "/templates",
-    activePaths: ["/templates"],
-    external: false
-  },
+
   {
     label: "Playground",
     href: "https://stackblitz.com/edit/vitejs-vite-bpg2kpze",
