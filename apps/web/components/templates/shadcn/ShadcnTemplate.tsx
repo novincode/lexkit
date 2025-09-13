@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import {
   boldExtension,
@@ -39,13 +39,13 @@ import { Toggle } from '@repo/ui/components/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@repo/ui/components/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@repo/ui/components/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/components/dialog';
 import { Separator } from '@repo/ui/components/separator';
 import { Label } from '@repo/ui/components/label';
 import { Input } from '@repo/ui/components/input';
 import { Textarea } from '@repo/ui/components/textarea';
 import { Switch } from '@repo/ui/components/switch';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@repo/ui/components/drawer';
 
 // Icons
 import {
@@ -76,7 +76,10 @@ import {
   Quote,
   Command,
   FileText,
-  Hash
+  Hash,
+  X,
+  CloudUpload,
+  Globe
 } from 'lucide-react';
 
 import { createEditorSystem } from '@lexkit/editor';
@@ -168,46 +171,393 @@ export interface ShadcnTemplateRef {
   getHTML: () => string;
 }
 
+// Global dialog state management for singleton dialogs
+interface DialogState {
+  linkDialog: {
+    isOpen: boolean;
+    url: string;
+    text: string;
+    isEdit: boolean;
+  };
+  imageDialog: {
+    isOpen: boolean;
+    activeTab: 'upload' | 'url';
+    url: string;
+    alt: string;
+    caption: string;
+    file: File | null;
+    dragOver: boolean;
+  };
+}
+
+// Custom hook for dialog state management
+function useDialogState() {
+  const [dialogs, setDialogs] = useState<DialogState>({
+    linkDialog: {
+      isOpen: false,
+      url: '',
+      text: '',
+      isEdit: false
+    },
+    imageDialog: {
+      isOpen: false,
+      activeTab: 'upload',
+      url: '',
+      alt: '',
+      caption: '',
+      file: null,
+      dragOver: false
+    }
+  });
+
+  const openLinkDialog = useCallback((url = '', text = '', isEdit = false) => {
+    setDialogs(prev => ({
+      ...prev,
+      linkDialog: { isOpen: true, url, text, isEdit }
+    }));
+  }, []);
+
+  const closeLinkDialog = useCallback(() => {
+    setDialogs(prev => ({
+      ...prev,
+      linkDialog: { ...prev.linkDialog, isOpen: false }
+    }));
+  }, []);
+
+  const updateLinkDialog = useCallback((updates: Partial<DialogState['linkDialog']>) => {
+    setDialogs(prev => ({
+      ...prev,
+      linkDialog: { ...prev.linkDialog, ...updates }
+    }));
+  }, []);
+
+  const openImageDialog = useCallback(() => {
+    setDialogs(prev => ({
+      ...prev,
+      imageDialog: { ...prev.imageDialog, isOpen: true }
+    }));
+  }, []);
+
+  const closeImageDialog = useCallback(() => {
+    setDialogs(prev => ({
+      ...prev,
+      imageDialog: {
+        isOpen: false,
+        activeTab: 'upload',
+        url: '',
+        alt: '',
+        caption: '',
+        file: null,
+        dragOver: false
+      }
+    }));
+  }, []);
+
+  const updateImageDialog = useCallback((updates: Partial<DialogState['imageDialog']>) => {
+    setDialogs(prev => ({
+      ...prev,
+      imageDialog: { ...prev.imageDialog, ...updates }
+    }));
+  }, []);
+
+  return {
+    dialogs,
+    openLinkDialog,
+    closeLinkDialog,
+    updateLinkDialog,
+    openImageDialog,
+    closeImageDialog,
+    updateImageDialog
+  };
+}
+
+// Link Dialog Component - Singleton
+function LinkDialog({
+  isOpen,
+  onClose,
+  url,
+  text,
+  isEdit,
+  onUrlChange,
+  onTextChange,
+  onSubmit
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  url: string;
+  text: string;
+  isEdit: boolean;
+  onUrlChange: (url: string) => void;
+  onTextChange: (text: string) => void;
+  onSubmit: () => void;
+}) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
+  return (
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5" />
+            {isEdit ? 'Edit Link' : 'Insert Link'}
+          </DrawerTitle>
+        </DrawerHeader>
+
+        <div className="p-4 space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="link-url">URL</Label>
+              <Input
+                id="link-url"
+                type="url"
+                placeholder="https://example.com"
+                value={url}
+                onChange={(e) => onUrlChange(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="link-text">Link Text</Label>
+              <Input
+                id="link-text"
+                placeholder="Link text"
+                value={text}
+                onChange={(e) => onTextChange(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!url.trim()}>
+                {isEdit ? 'Update Link' : 'Insert Link'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// Image Dialog Component - Singleton with tabs
+function ImageDialog({
+  isOpen,
+  onClose,
+  activeTab,
+  url,
+  alt,
+  caption,
+  file,
+  dragOver,
+  onTabChange,
+  onUrlChange,
+  onAltChange,
+  onCaptionChange,
+  onFileChange,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onSubmit
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  activeTab: 'upload' | 'url';
+  url: string;
+  alt: string;
+  caption: string;
+  file: File | null;
+  dragOver: boolean;
+  onTabChange: (tab: 'upload' | 'url') => void;
+  onUrlChange: (url: string) => void;
+  onAltChange: (alt: string) => void;
+  onCaptionChange: (caption: string) => void;
+  onFileChange: (file: File | null) => void;
+  onDragOver: (dragOver: boolean) => void;
+  onDragLeave: () => void;
+  onDrop: (files: FileList) => void;
+  onSubmit: () => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    onDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    onDragLeave();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    onDragLeave();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      onDrop(files);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0 && files[0]) {
+      onFileChange(files[0]);
+    }
+  };
+
+  return (
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            Insert Image
+          </DrawerTitle>
+        </DrawerHeader>
+
+        <div className="p-4">
+          <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as 'upload' | 'url')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload
+              </TabsTrigger>
+              <TabsTrigger value="url" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                URL
+              </TabsTrigger>
+            </TabsList>
+
+            <form onSubmit={handleSubmit}>
+              <TabsContent value="upload" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Upload Image</Label>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      dragOver
+                        ? 'border-primary bg-primary/5'
+                        : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {file ? file.name : 'Drop an image here, or click to select'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Supports: JPG, PNG, GIF, WebP (max 10MB)
+                    </p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="url" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="image-url">Image URL</Label>
+                  <Input
+                    id="image-url"
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={url}
+                    onChange={(e) => onUrlChange(e.target.value)}
+                  />
+                </div>
+              </TabsContent>
+
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="image-alt">Alt Text (optional)</Label>
+                  <Input
+                    id="image-alt"
+                    placeholder="Describe the image"
+                    value={alt}
+                    onChange={(e) => onAltChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="image-caption">Caption (optional)</Label>
+                  <Input
+                    id="image-caption"
+                    placeholder="Image caption"
+                    value={caption}
+                    onChange={(e) => onCaptionChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={activeTab === 'upload' ? !file : !url.trim()}
+                  >
+                    Insert Image
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Tabs>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // Custom hook for image handling
 function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlers = useMemo(() => ({
-    insertImageFromUrl: () => {
-      const src = prompt('Enter image URL:');
-      if (!src) return;
-      const alt = prompt('Enter alt text:') || '';
-      const caption = prompt('Enter caption (optional):') || undefined;
-      commands.insertImage({ src, alt, caption });
+    insertImageFromUrl: (url: string, alt = '', caption?: string) => {
+      commands.insertImage({ src: url, alt, caption });
     },
 
-    insertImageFromFile: () => {
-      fileInputRef.current?.click();
-    },
-
-    handleFileUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file && imageExtension.config.uploadHandler) {
+    insertImageFromFile: async (file: File, alt = '', caption?: string) => {
+      if (imageExtension.config.uploadHandler) {
         try {
           const src = await imageExtension.config.uploadHandler(file);
-          commands.insertImage({ src, alt: file.name, file });
+          commands.insertImage({ src, alt: alt || file.name, caption, file });
         } catch (error) {
-          alert('Failed to upload image');
+          console.error('Failed to upload image:', error);
+          // Fallback to object URL
+          const src = URL.createObjectURL(file);
+          commands.insertImage({ src, alt: alt || file.name, caption, file });
         }
-      } else if (file) {
+      } else {
         const src = URL.createObjectURL(file);
-        commands.insertImage({ src, alt: file.name, file });
+        commands.insertImage({ src, alt: alt || file.name, caption, file });
       }
-      e.target.value = '';
     },
 
     setImageAlignment: (alignment: 'left' | 'center' | 'right' | 'none') => {
       commands.setImageAlignment(alignment);
     },
 
-    setImageCaption: () => {
-      const newCaption = prompt('Enter caption:') || '';
-      commands.setImageCaption(newCaption);
+    setImageCaption: (caption: string) => {
+      commands.setImageCaption(caption);
     },
   }), [commands]);
 
@@ -249,7 +599,7 @@ function ModernFloatingToolbar() {
         className="flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg"
         style={{
           position: 'absolute',
-          top: selectionRect.y - 60,
+          top: selectionRect.y,
           left: selectionRect.x,
           transform: 'translateX(-50%)',
           zIndex: 9999,
@@ -263,6 +613,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedLeft ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedLeft}
                   onPressedChange={() => commands.setImageAlignment('left')}
                 >
@@ -276,6 +627,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedCenter ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedCenter}
                   onPressedChange={() => commands.setImageAlignment('center')}
                 >
@@ -289,6 +641,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedRight ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedRight}
                   onPressedChange={() => commands.setImageAlignment('right')}
                 >
@@ -323,6 +676,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.bold ? "pressed" : "default"}
                   pressed={activeStates.bold}
                   onPressedChange={() => commands.toggleBold()}
                 >
@@ -336,6 +690,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.italic ? "pressed" : "default"}
                   pressed={activeStates.italic}
                   onPressedChange={() => commands.toggleItalic()}
                 >
@@ -349,6 +704,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.underline ? "pressed" : "default"}
                   pressed={activeStates.underline}
                   onPressedChange={() => commands.toggleUnderline()}
                 >
@@ -362,6 +718,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.strikethrough ? "pressed" : "default"}
                   pressed={activeStates.strikethrough}
                   onPressedChange={() => commands.toggleStrikethrough()}
                 >
@@ -377,6 +734,7 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.code ? "pressed" : "default"}
                   pressed={activeStates.code}
                   onPressedChange={() => commands.formatText('code')}
                 >
@@ -390,8 +748,9 @@ function ModernFloatingToolbar() {
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isLink ? "pressed" : "default"}
                   pressed={activeStates.isLink}
-                  onPressedChange={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()}
+                  onPressedChange={() => commands.insertLink()}
                 >
                   {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
                 </Toggle>
@@ -408,6 +767,7 @@ function ModernFloatingToolbar() {
                   <TooltipTrigger asChild>
                     <Toggle
                       size="sm"
+                      variant={activeStates.unorderedList ? "pressed" : "default"}
                       pressed={activeStates.unorderedList}
                       onPressedChange={() => commands.toggleUnorderedList()}
                     >
@@ -421,6 +781,7 @@ function ModernFloatingToolbar() {
                   <TooltipTrigger asChild>
                     <Toggle
                       size="sm"
+                      variant={activeStates.orderedList ? "pressed" : "default"}
                       pressed={activeStates.orderedList}
                       onPressedChange={() => commands.toggleOrderedList()}
                     >
@@ -446,7 +807,9 @@ function ModernToolbar({
   activeStates,
   isDark,
   toggleTheme,
-  onCommandPaletteOpen
+  onCommandPaletteOpen,
+  onLinkDialogOpen,
+  onImageDialogOpen
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
@@ -454,9 +817,10 @@ function ModernToolbar({
   isDark: boolean;
   toggleTheme: () => void;
   onCommandPaletteOpen: () => void;
+  onLinkDialogOpen: () => void;
+  onImageDialogOpen: () => void;
 }) {
   const { lexical: editor } = useEditor();
-  const { handlers, fileInputRef } = useImageHandlers(commands, editor);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [tableConfig, setTableConfig] = useState<TableConfig>({
     rows: 3,
@@ -497,6 +861,7 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.bold ? "pressed" : "default"}
                 pressed={activeStates.bold}
                 onPressedChange={() => commands.toggleBold()}
               >
@@ -510,6 +875,7 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.italic ? "pressed" : "default"}
                 pressed={activeStates.italic}
                 onPressedChange={() => commands.toggleItalic()}
               >
@@ -523,6 +889,7 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.underline ? "pressed" : "default"}
                 pressed={activeStates.underline}
                 onPressedChange={() => commands.toggleUnderline()}
               >
@@ -536,6 +903,7 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.strikethrough ? "pressed" : "default"}
                 pressed={activeStates.strikethrough}
                 onPressedChange={() => commands.toggleStrikethrough()}
               >
@@ -549,6 +917,7 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.code ? "pressed" : "default"}
                 pressed={activeStates.code}
                 onPressedChange={() => commands.formatText('code')}
               >
@@ -562,8 +931,9 @@ function ModernToolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.isLink ? "pressed" : "default"}
                 pressed={activeStates.isLink}
-                onPressedChange={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()}
+                onPressedChange={onLinkDialogOpen}
               >
                 {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
               </Toggle>
@@ -603,6 +973,7 @@ function ModernToolbar({
                 <TooltipTrigger asChild>
                   <Toggle
                     size="sm"
+                    variant={activeStates.isInCodeBlock ? "pressed" : "default"}
                     pressed={activeStates.isInCodeBlock}
                     onPressedChange={() => commands.toggleCodeBlock()}
                   >
@@ -624,6 +995,7 @@ function ModernToolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.unorderedList ? "pressed" : "default"}
                   pressed={activeStates.unorderedList}
                   onPressedChange={() => commands.toggleUnorderedList()}
                 >
@@ -637,6 +1009,7 @@ function ModernToolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.orderedList ? "pressed" : "default"}
                   pressed={activeStates.orderedList}
                   onPressedChange={() => commands.toggleOrderedList()}
                 >
@@ -654,40 +1027,14 @@ function ModernToolbar({
         <div className="flex items-center gap-1">
           {/* Image Insert */}
           {hasExtension('image') && (
-            <Popover>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <PopoverTrigger asChild>
-                    <Button size="sm" variant="ghost">
-                      <Image className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                </TooltipTrigger>
-                <TooltipContent>Insert Image</TooltipContent>
-              </Tooltip>
-              <PopoverContent className="w-56">
-                <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={handlers.insertImageFromUrl}
-                  >
-                    <LinkIcon className="h-4 w-4 mr-2" />
-                    From URL
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={handlers.insertImageFromFile}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload File
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={onImageDialogOpen}>
+                  <Image className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Insert Image</TooltipContent>
+            </Tooltip>
           )}
 
           {/* Table Insert */}
@@ -778,6 +1125,7 @@ function ModernToolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isHTMLEmbedSelected ? "pressed" : "default"}
                   pressed={activeStates.isHTMLEmbedSelected}
                   onPressedChange={() => commands.insertHTMLEmbed()}
                 >
@@ -855,15 +1203,6 @@ function ModernToolbar({
           </Tooltip>
         </div>
       </div>
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handlers.handleFileUpload}
-        className="hidden"
-      />
     </TooltipProvider>
   );
 }
@@ -967,6 +1306,17 @@ function EditorContent({
   const [content, setContent] = useState({ html: '', markdown: '' });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
+  // Dialog state management
+  const {
+    dialogs,
+    openLinkDialog,
+    closeLinkDialog,
+    updateLinkDialog,
+    openImageDialog,
+    closeImageDialog,
+    updateImageDialog
+  } = useDialogState();
+
   // Use ref to store latest commands to avoid dependency issues
   const commandsRef = React.useRef(commands);
 
@@ -993,6 +1343,31 @@ function EditorContent({
       return commandsRef.current.exportToHTML();
     }
   }), []);
+
+  // Image handlers
+  const { handlers: imageHandlers } = useImageHandlers(commands, editor);
+
+  // Handle link dialog submission
+  const handleLinkSubmit = useCallback(() => {
+    const { url, text, isEdit } = dialogs.linkDialog;
+    if (url.trim()) {
+      commands.insertLink(url.trim(), text.trim());
+      closeLinkDialog();
+    }
+  }, [dialogs.linkDialog, commands, closeLinkDialog]);
+
+  // Handle image dialog submission
+  const handleImageSubmit = useCallback(() => {
+    const { activeTab, url, alt, caption, file } = dialogs.imageDialog;
+
+    if (activeTab === 'upload' && file) {
+      imageHandlers.insertImageFromFile(file, alt, caption);
+    } else if (activeTab === 'url' && url.trim()) {
+      imageHandlers.insertImageFromUrl(url.trim(), alt, caption);
+    }
+
+    closeImageDialog();
+  }, [dialogs.imageDialog, imageHandlers, closeImageDialog]);
 
   // Register command palette commands and keyboard shortcuts
   useEffect(() => {
@@ -1085,6 +1460,8 @@ function EditorContent({
             isDark={isDark}
             toggleTheme={toggleTheme}
             onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+            onLinkDialogOpen={() => openLinkDialog('', '', false)}
+            onImageDialogOpen={openImageDialog}
           />
         )}
       </div>
@@ -1119,6 +1496,42 @@ function EditorContent({
         )}
       </div>
 
+      {/* Dialogs */}
+      <LinkDialog
+        isOpen={dialogs.linkDialog.isOpen}
+        onClose={closeLinkDialog}
+        url={dialogs.linkDialog.url}
+        text={dialogs.linkDialog.text}
+        isEdit={dialogs.linkDialog.isEdit}
+        onUrlChange={(url) => updateLinkDialog({ url })}
+        onTextChange={(text) => updateLinkDialog({ text })}
+        onSubmit={handleLinkSubmit}
+      />
+
+      <ImageDialog
+        isOpen={dialogs.imageDialog.isOpen}
+        onClose={closeImageDialog}
+        activeTab={dialogs.imageDialog.activeTab}
+        url={dialogs.imageDialog.url}
+        alt={dialogs.imageDialog.alt}
+        caption={dialogs.imageDialog.caption}
+        file={dialogs.imageDialog.file}
+        dragOver={dialogs.imageDialog.dragOver}
+        onTabChange={(activeTab) => updateImageDialog({ activeTab })}
+        onUrlChange={(url) => updateImageDialog({ url })}
+        onAltChange={(alt) => updateImageDialog({ alt })}
+        onCaptionChange={(caption) => updateImageDialog({ caption })}
+        onFileChange={(file) => updateImageDialog({ file })}
+        onDragOver={(dragOver) => updateImageDialog({ dragOver })}
+        onDragLeave={() => updateImageDialog({ dragOver: false })}
+        onDrop={(files) => {
+          if (files.length > 0) {
+            updateImageDialog({ file: files[0], dragOver: false });
+          }
+        }}
+        onSubmit={handleImageSubmit}
+      />
+
       {/* Command Palette */}
       <ShadcnCommandPalette
         isOpen={commandPaletteOpen}
@@ -1141,7 +1554,7 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
     const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
     const [editorMethods, setEditorMethods] = useState<ShadcnTemplateRef | null>(null);
 
-    // Initialize editor theme from global theme
+    // Initialize editor theme from global theme on mount
     useEffect(() => {
       if (globalTheme === 'dark' || globalTheme === 'light') {
         setEditorTheme(globalTheme);
@@ -1198,7 +1611,23 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
     }), [editorMethods]);
 
     return (
-      <div className={`shadcn-editor-wrapper ${className || ''}`} data-theme={editorTheme} data-editor-theme={editorTheme}>
+      <div
+        className={`shadcn-editor-wrapper ${className || ''}`}
+        data-theme={editorTheme}
+        data-editor-theme={editorTheme}
+        style={{
+          '--background': isDark ? 'hsl(222.2 84% 4.9%)' : 'hsl(0 0% 100%)',
+          '--foreground': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
+          '--muted': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(210 40% 96%)',
+          '--muted-foreground': isDark ? 'hsl(215 20.2% 65.1%)' : 'hsl(215.4 16.3% 46.9%)',
+          '--border': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(214.3 31.8% 91%)',
+          '--ring': isDark ? 'hsl(212.7 26.8% 83.9%)' : 'hsl(222.2 84% 4.9%)',
+          '--primary': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
+          '--primary-foreground': isDark ? 'hsl(222.2 84% 4.9%)' : 'hsl(210 40% 98%)',
+          '--accent': isDark ? 'hsl(217.2 32.6% 17.5%)' : 'hsl(210 40% 96%)',
+          '--accent-foreground': isDark ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)',
+        } as React.CSSProperties}
+      >
         <Provider extensions={extensions}>
           <EditorContent
             className={className}
