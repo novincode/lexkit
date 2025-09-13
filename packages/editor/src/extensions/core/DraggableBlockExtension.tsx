@@ -227,13 +227,18 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
     const [isDragging, setIsDragging] = useState(false);
     const [dropIndicator, setDropIndicator] = useState<{ top: number; left: number; width: number } | null>(null);
     const [isVisible, setIsVisible] = useState(false);
-    const [isTransitioning, setIsTransitioning] = useState(false);
 
     const draggedElementRef = useRef<HTMLElement | null>(null);
     const draggedKeyRef = useRef<string | null>(null);
-    const animationFrameRef = useRef<number | null>(null);
-    const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const currentElementRef = useRef<HTMLElement | null>(null);
+
+    // Sync local isDragging to extension
+    useEffect(() => {
+        extension.setIsDragging(isDragging);
+    }, [isDragging, extension]);
+
+    // SSR safety
+    if (typeof document === 'undefined') return null;
+    const anchorElem = draggableConfig?.anchorElem || config.anchorElem || document.body;
 
     // Default styles for UI elements - minimal and functional
     const defaultStyles = {
@@ -282,69 +287,6 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         buttonStack: draggableConfig?.theme?.buttonStack || globalDraggableTheme.buttonStack || 'lexkit-draggable-button-stack',
     };
 
-    // SSR safety
-    if (typeof document === 'undefined') return null;
-    const anchorElem = draggableConfig?.anchorElem || config.anchorElem || document.body;
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    // Manage visibility for smooth animations
-    useEffect(() => {
-        if (hoveredBlock || draggedElementRef.current || currentElementRef.current) {
-            setIsVisible(true);
-        } else {
-            // Delay hiding for smooth fade-out animation, but not during transitions
-            if (!isTransitioning) {
-                const timeout = setTimeout(() => setIsVisible(false), 300);
-                return () => clearTimeout(timeout);
-            }
-        }
-    }, [hoveredBlock, draggedElementRef.current, currentElementRef.current, isTransitioning]);
-
-    // Auto-hide handle after successful drop
-    useEffect(() => {
-        if (currentElementRef.current && !isDragging && !hoveredBlock) {
-            const timeout = setTimeout(() => {
-                setHoveredBlock(null);
-                currentElementRef.current = null;
-                setIsVisible(false);
-            }, 10000); // Increased from 1.5s to 3s for smoother connected flow
-
-            return () => clearTimeout(timeout);
-        }
-    }, [isDragging, hoveredBlock]);
-
-    // Re-arrange elements after drop or resize with smooth transition
-    const rearrangeElements = useCallback(() => {
-        if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-        }
-
-        setIsTransitioning(true);
-
-        animationFrameRef.current = requestAnimationFrame(() => {
-            // Simple smooth transition
-            setTimeout(() => {
-                setIsTransitioning(false);
-            }, 400);
-        });
-    }, []);
-
-    // Debounced resize handler
-    const handleResize = useCallback(debounce(() => {
-        rearrangeElements();
-    }, 150), [rearrangeElements]);
-
     // Clean up drag classes helper
     const cleanupDragClasses = useCallback((element: HTMLElement) => {
         if (!element || !mergedThemeClasses.blockDragging) return;
@@ -373,23 +315,46 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         Object.assign(element.style, mergedStyles.blockDragging);
     }, [mergedThemeClasses, mergedStyles.blockDragging]);
 
+    // Clean up drag state
+    const cleanupDragState = useCallback(() => {
+        if (draggedElementRef.current) {
+            cleanupDragClasses(draggedElementRef.current);
+        }
+
+        setIsDragging(false);
+        setDropIndicator(null);
+
+        // Don't clear refs immediately - let the UI update
+        setTimeout(() => {
+            draggedElementRef.current = null;
+            draggedKeyRef.current = null;
+        }, 100);
+    }, [cleanupDragClasses]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            // Cleanup drag classes
+            if (draggedElementRef.current) {
+                cleanupDragClasses(draggedElementRef.current);
+            }
+        };
+    }, [cleanupDragClasses]);
+
+    // Manage visibility for smooth animations
+    useEffect(() => {
+        if (hoveredBlock || draggedElementRef.current) {
+            setIsVisible(true);
+        } else {
+            // Delay hiding the handle to make it easier to catch
+            const timeout = setTimeout(() => setIsVisible(false), 300);
+            return () => clearTimeout(timeout);
+        }
+    }, [hoveredBlock, draggedElementRef.current]);
+
     // Mouse tracking for handle visibility with smooth positioning
     useEffect(() => {
         let hideTimeout: NodeJS.Timeout;
-        let positionUpdateFrame: number;
-
-        const updateHandlePosition = () => {
-            if (hoveredBlock || currentElementRef.current) {
-                const element = hoveredBlock || currentElementRef.current;
-                if (element && element instanceof HTMLElement && typeof element.getBoundingClientRect === 'function') {
-                    // Update position smoothly using animation frame
-                    positionUpdateFrame = requestAnimationFrame(() => {
-                        // Simple re-render trigger
-                        setHoveredBlock(prev => prev === element ? element : prev);
-                    });
-                }
-            }
-        };
 
         const handleMouseMove = (e: MouseEvent) => {
             if (isDragging) return;
@@ -424,16 +389,15 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                 clearTimeout(hideTimeout);
             }
 
-            if ((blockElement || isOverHandle) && !hasTextSelection) {
-                if (blockElement && blockElement !== hoveredBlock && !currentElementRef.current) {
+            if ((blockElement || isOverHandle) && !hasTextSelection && !isDragging) {
+                if (blockElement && blockElement !== hoveredBlock) {
                     setHoveredBlock(blockElement);
-                    updateHandlePosition();
                 }
-            } else if (!currentElementRef.current) {
+            } else {
                 // Delay hiding the handle to make it easier to catch
                 hideTimeout = setTimeout(() => {
                     setHoveredBlock(null);
-                }, 500); // Increased from 100ms to 500ms for smoother flow
+                }, 500);
             }
         };
 
@@ -446,7 +410,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                 // Delay hiding when mouse leaves the entire document
                 hideTimeout = setTimeout(() => {
                     setHoveredBlock(null);
-                }, 1000); // Increased from 300ms to 1000ms for connected flow
+                }, 1000);
             }
         };
 
@@ -459,13 +423,10 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
             if (hideTimeout) {
                 clearTimeout(hideTimeout);
             }
-            if (positionUpdateFrame) {
-                cancelAnimationFrame(positionUpdateFrame);
-            }
         };
     }, [editor, isDragging, hoveredBlock]);
 
-    // Drag start handler
+    // Drag start handler for handle
     const handleDragStart = useCallback((event: React.DragEvent, element: HTMLElement) => {
         event.stopPropagation();
 
@@ -476,14 +437,15 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         applyDragClasses(element);
 
         // Set up drag data
-        editor.update(() => {
+        const key = editor.read(() => {
             const node = $getNearestNodeFromDOMNode(element);
-            if (node) {
-                const key = node.getKey();
-                draggedKeyRef.current = key;
-                event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key }));
-            }
+            return node ? node.getKey() : null;
         });
+
+        if (key) {
+            draggedKeyRef.current = key;
+            event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key }));
+        }
 
         event.dataTransfer!.effectAllowed = 'move';
 
@@ -498,88 +460,125 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         setTimeout(() => document.body.removeChild(clone), 0);
     }, [editor, applyDragClasses]);
 
-    // Handle text selection drag start
-    const handleTextSelectionDragStart = useCallback((event: DragEvent) => {
-        if (!(draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) return;
+    // Handle touch events for mobile drag support (handle and long press on text)
+    const handleTouchStart = useCallback((e: React.TouchEvent, element: HTMLElement) => {
+        // Prevent default to avoid scrolling
+        e.preventDefault();
 
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+        setIsDragging(true);
+        draggedElementRef.current = element;
+        applyDragClasses(element);
 
-        // Find the block containing the selection
+        // Set up drag data
+        const key = editor.read(() => {
+            const node = $getNearestNodeFromDOMNode(element);
+            return node ? node.getKey() : null;
+        });
+
+        if (key) {
+            draggedKeyRef.current = key;
+        }
+    }, [editor, applyDragClasses]);
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (!isDragging || !draggedElementRef.current) return;
+
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        if (!touch) return;
+
         const editorElement = editor.getRootElement();
         if (!editorElement) return;
 
-        let selectedBlock: HTMLElement | null = null;
-        const range = selection.getRangeAt(0);
-        let current = range.commonAncestorContainer as HTMLElement;
-
-        // If it's a text node, get its parent element
-        if (current.nodeType === Node.TEXT_NODE) {
-            current = current.parentElement!;
-        }
-
-        // Walk up to find the block element
-        while (current && current !== editorElement) {
-            if (current.parentElement === editorElement) {
-                selectedBlock = current;
-                break;
+        let blockElement: HTMLElement | null = null;
+        const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+        if (target) {
+            let current = target;
+            while (current && current !== editorElement) {
+                if (current.parentElement === editorElement) {
+                    blockElement = current;
+                    break;
+                }
+                current = current.parentElement!;
             }
-            current = current.parentElement!;
         }
 
-        if (!selectedBlock) return;
+        if (blockElement && blockElement !== draggedElementRef.current) {
+            const rect = blockElement.getBoundingClientRect();
+            const isAbove = touch.clientY < rect.top + rect.height / 2;
+            setDropIndicator({
+                top: isAbove ? rect.top + window.scrollY : rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX,
+                width: rect.width,
+            });
+        } else {
+            setDropIndicator(null);
+        }
+    }, [editor, isDragging]);
 
-        // Simple check: if there's any text selected in this block, allow dragging
-        const selectedText = selection.toString().trim();
-        if (!selectedText) return;
+    const handleTouchEnd = useCallback((e: TouchEvent) => {
+        if (!isDragging || !draggedKeyRef.current) {
+            cleanupDragState();
+            return;
+        }
 
-        // Set drag state
-        setIsDragging(true);
-        draggedElementRef.current = selectedBlock;
-        applyDragClasses(selectedBlock);
+        e.preventDefault();
 
-        // Set drag data
-        editor.update(() => {
-            const node = $getNearestNodeFromDOMNode(selectedBlock!);
-            if (node) {
-                const key = node.getKey();
-                draggedKeyRef.current = key;
-                event.dataTransfer?.setData('application/x-lexical-drag', JSON.stringify({ key, type: 'text-selection' }));
+        const touch = e.changedTouches[0];
+        if (!touch) return;
+
+        const editorElement = editor.getRootElement();
+        if (!editorElement) return;
+
+        let targetElement: HTMLElement | null = null;
+        const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+        if (target) {
+            let current = target;
+            while (current && current !== editorElement) {
+                if (current.parentElement === editorElement) {
+                    targetElement = current;
+                    break;
+                }
+                current = current.parentElement!;
             }
-        });
-
-        event.dataTransfer!.effectAllowed = 'move';
-
-        // Create drag image
-        const clone = selectedBlock.cloneNode(true) as HTMLElement;
-        clone.style.opacity = '0.6';
-        clone.style.position = 'absolute';
-        clone.style.top = '-9999px';
-        clone.style.left = '-9999px';
-        document.body.appendChild(clone);
-        event.dataTransfer!.setDragImage(clone, 0, 0);
-        setTimeout(() => document.body.removeChild(clone), 0);
-
-        // Clear selection to prevent interference
-        selection.removeAllRanges();
-    }, [editor, applyDragClasses, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag]);
-
-    // Clean up drag state
-    const cleanupDragState = useCallback(() => {
-        if (draggedElementRef.current) {
-            cleanupDragClasses(draggedElementRef.current);
         }
 
-        setIsDragging(false);
-        setDropIndicator(null);
+        if (targetElement && targetElement !== draggedElementRef.current) {
+            editor.update(() => {
+                const sourceNode = $getNodeByKey(draggedKeyRef.current!);
+                const targetNode = $getNearestNodeFromDOMNode(targetElement);
 
-        // Don't clear refs immediately - let rearrange function use them
-        setTimeout(() => {
-            draggedElementRef.current = null;
-            draggedKeyRef.current = null;
-            currentElementRef.current = null;
-        }, 100);
-    }, [cleanupDragClasses]);
+                if (sourceNode && targetNode) {
+                    const rect = targetElement.getBoundingClientRect();
+                    const insertAfter = touch.clientY >= rect.top + rect.height / 2;
+
+                    sourceNode.remove();
+                    if (insertAfter) {
+                        targetNode.insertAfter(sourceNode);
+                    } else {
+                        targetNode.insertBefore(sourceNode);
+                    }
+                }
+            });
+
+            // Smooth transition to new position
+            setTimeout(() => {
+                if (draggedKeyRef.current) {
+                    try {
+                        const newElement = editor.getElementByKey(draggedKeyRef.current);
+                        if (newElement && newElement instanceof HTMLElement && typeof newElement.getBoundingClientRect === 'function') {
+                            setHoveredBlock(newElement);
+                        }
+                    } catch (error) {
+                        console.warn('Error finding moved element:', error);
+                    }
+                }
+            }, 50);
+        }
+
+        cleanupDragState();
+    }, [editor, isDragging, cleanupDragState]);
 
     // Move handlers
     const handleMoveUp = useCallback(() => {
@@ -612,16 +611,103 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         });
     }, [editor, hoveredBlock]);
 
-    // Drag event handlers
+    // Drag event handlers (desktop)
     useEffect(() => {
         const editorElement = editor.getRootElement();
         if (!editorElement) return;
 
+        const handleDragStartEvent = (e: DragEvent) => {
+            let targetNode = e.target as Node;
+            if (targetNode.nodeType !== Node.ELEMENT_NODE) {
+                targetNode = targetNode.parentNode as Node;
+            }
+            if (!targetNode || !(targetNode instanceof HTMLElement)) {
+                e.preventDefault();
+                return;
+            }
+            const target = targetNode as HTMLElement;
+
+            if (target.closest('[draggable="true"]')) {
+                // From handle - let its onDragStart handle it
+                return;
+            }
+
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed || !(draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) {
+                e.preventDefault();
+                return;
+            }
+
+            // Find block from anchor node
+            let current: Node | null = selection.anchorNode;
+            if (current?.nodeType === Node.TEXT_NODE) {
+                current = current.parentNode;
+            }
+            let blockElement: HTMLElement | null = null;
+            while (current && current !== editorElement) {
+                if (current.parentNode === editorElement) {
+                    blockElement = current as HTMLElement;
+                    break;
+                }
+                current = current.parentNode;
+            }
+
+            if (!blockElement) {
+                e.preventDefault();
+                return;
+            }
+
+            // Collapse selection to a caret to minimize default drag image
+            selection.collapse(selection.anchorNode, selection.anchorOffset);
+
+            // Get node key synchronously
+            const key = editor.read(() => $getNearestNodeFromDOMNode(blockElement!)?.getKey() ?? null);
+            if (!key) {
+                e.preventDefault();
+                return;
+            }
+
+            // Clear all existing dataTransfer data (removes text/plain etc.)
+            e.dataTransfer!.clearData();
+
+            // Set custom data
+            e.dataTransfer!.setData('application/x-lexical-drag', JSON.stringify({ key }));
+
+            // Set effect
+            e.dataTransfer!.effectAllowed = 'move';
+
+            // Create custom drag image from block clone
+            const clone = blockElement.cloneNode(true) as HTMLElement;
+            clone.style.opacity = '0.6';
+            clone.style.position = 'absolute';
+            clone.style.top = '-9999px';
+            clone.style.left = '-9999px';
+            document.body.appendChild(clone);
+            e.dataTransfer!.setDragImage(clone, 0, 0);
+            setTimeout(() => document.body.removeChild(clone), 0);
+
+            // Set dragging state
+            setIsDragging(true);
+            draggedElementRef.current = blockElement;
+            applyDragClasses(blockElement);
+            draggedKeyRef.current = key;
+
+            // Do NOT preventDefault - allow native drag to proceed with our customizations
+        };
+
         const handleDragOver = (event: DragEvent) => {
+            let targetNode = event.target as Node;
+            if (targetNode.nodeType !== Node.ELEMENT_NODE) {
+                targetNode = targetNode.parentNode as Node;
+            }
+            if (!targetNode || !(targetNode instanceof HTMLElement)) {
+                return;
+            }
+            const target = targetNode as HTMLElement;
+
             event.preventDefault();
             event.dataTransfer!.dropEffect = 'move';
 
-            const target = event.target as HTMLElement;
             let blockElement: HTMLElement | null = null;
             let current = target;
 
@@ -647,6 +733,15 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
         };
 
         const handleDrop = (event: DragEvent) => {
+            let targetNode = event.target as Node;
+            if (targetNode.nodeType !== Node.ELEMENT_NODE) {
+                targetNode = targetNode.parentNode as Node;
+            }
+            if (!targetNode || !(targetNode instanceof HTMLElement)) {
+                return;
+            }
+            const target = targetNode as HTMLElement;
+
             event.preventDefault();
 
             // Clean up UI immediately
@@ -664,7 +759,6 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                 return;
             }
 
-            const target = event.target as HTMLElement;
             let targetElement: HTMLElement | null = null;
             let current = target;
 
@@ -701,8 +795,6 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                             const newElement = editor.getElementByKey(draggedKeyRef.current);
                             if (newElement && newElement instanceof HTMLElement && typeof newElement.getBoundingClientRect === 'function') {
                                 setHoveredBlock(newElement);
-                                currentElementRef.current = newElement;
-                                rearrangeElements();
                             }
                         } catch (error) {
                             console.warn('Error finding moved element:', error);
@@ -714,53 +806,120 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
             cleanupDragState();
         };
 
-        // Handle drag events
-        const handleDragStart = (e: DragEvent) => {
-            const target = e.target as HTMLElement;
-
-            // If it's from a draggable handle, let it proceed normally
-            if (target.closest && target.closest('[draggable="true"]')) {
-                return;
-            }
-
-            // Check for text selection drag
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0 && !selection.isCollapsed && (draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) {
-                handleTextSelectionDragStart(e);
-                return;
-            }
-
-            // Prevent other drags
-            e.preventDefault();
-        };
-
-        editorElement.addEventListener('dragstart', handleDragStart);
+        editorElement.addEventListener('dragstart', handleDragStartEvent);
         editorElement.addEventListener('dragover', handleDragOver);
         editorElement.addEventListener('drop', handleDrop);
         editorElement.addEventListener('dragend', cleanupDragState);
 
-        // Add resize listener with debounce
-        window.addEventListener('resize', handleResize);
-
         return () => {
-            editorElement.removeEventListener('dragstart', handleDragStart);
+            editorElement.removeEventListener('dragstart', handleDragStartEvent);
             editorElement.removeEventListener('dragover', handleDragOver);
             editorElement.removeEventListener('drop', handleDrop);
             editorElement.removeEventListener('dragend', cleanupDragState);
-            window.removeEventListener('resize', handleResize);
+        };
+    }, [editor, cleanupDragState, applyDragClasses, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag]);
 
-            // Cleanup animation frame and timeout
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
+    // Touch event handlers for long press on text (mobile)
+    useEffect(() => {
+        const editorElement = editor.getRootElement();
+        if (!editorElement) return;
+
+        let pressTimeout: NodeJS.Timeout | null = null;
+        let startX = 0;
+        let startY = 0;
+
+        const handleTouchStartEvent = (e: TouchEvent) => {
+            if (e.touches.length !== 1 || !(draggableConfig?.enableTextSelectionDrag ?? config.enableTextSelectionDrag)) return;
+
+            const touch = e.touches[0];
+            if (!touch) return;
+
+            let targetNode = e.target as Node;
+            if (targetNode.nodeType !== Node.ELEMENT_NODE) {
+                targetNode = targetNode.parentNode as Node;
             }
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
+            if (!targetNode || !(targetNode instanceof HTMLElement)) {
+                return;
+            }
+            const target = targetNode as HTMLElement;
+
+            if (target.closest('[draggable="true"]')) return; // Handle has its own touchstart
+
+            startX = touch.clientX;
+            startY = touch.clientY;
+
+            pressTimeout = setTimeout(() => {
+                pressTimeout = null;
+
+                // Find block from target
+                let blockElement: HTMLElement | null = null;
+                let current = target;
+                while (current && current !== editorElement) {
+                    if (current.parentElement === editorElement) {
+                        blockElement = current;
+                        break;
+                    }
+                    current = current.parentElement!;
+                }
+
+                if (!blockElement) return;
+
+                // Collapse any existing selection
+                const selection = window.getSelection();
+                if (selection && !selection.isCollapsed) {
+                    selection.collapseToStart();
+                }
+
+                // Set dragging state
+                setIsDragging(true);
+                draggedElementRef.current = blockElement;
+                applyDragClasses(blockElement);
+
+                // Get key
+                const key = editor.read(() => $getNearestNodeFromDOMNode(blockElement!)?.getKey() ?? null);
+                if (key) draggedKeyRef.current = key;
+            }, 500); // Long press duration
+        };
+
+        const handleTouchMoveEvent = (e: TouchEvent) => {
+            if (pressTimeout && e.touches.length === 1) {
+                const touch = e.touches[0];
+                if (!touch) return;
+                const dx = touch.clientX - startX;
+                const dy = touch.clientY - startY;
+                if (Math.sqrt(dx * dx + dy * dy) > 10) {
+                    clearTimeout(pressTimeout);
+                    pressTimeout = null;
+                }
             }
         };
-    }, [editor, cleanupDragState, handleTextSelectionDragStart, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag, handleResize]);
+
+        const handleTouchEndEvent = (e: TouchEvent) => {
+            if (pressTimeout) {
+                clearTimeout(pressTimeout);
+                pressTimeout = null;
+            }
+        };
+
+        editorElement.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
+        editorElement.addEventListener('touchmove', handleTouchMoveEvent, { passive: false });
+        editorElement.addEventListener('touchend', handleTouchEndEvent, { passive: false });
+
+        // Global touchmove/touchend for drag simulation
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        return () => {
+            editorElement.removeEventListener('touchstart', handleTouchStartEvent);
+            editorElement.removeEventListener('touchmove', handleTouchMoveEvent);
+            editorElement.removeEventListener('touchend', handleTouchEndEvent);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [editor, applyDragClasses, cleanupDragState, isDragging, handleTouchMove, handleTouchEnd, draggableConfig?.enableTextSelectionDrag, config.enableTextSelectionDrag]);
 
     // Don't render if no hovered block and not dragging
-    const currentElement = hoveredBlock || draggedElementRef.current || currentElementRef.current;
+    const currentElement = hoveredBlock || draggedElementRef.current;
 
     // Ensure we have a valid DOM element with getBoundingClientRect method
     if (!currentElement || typeof currentElement.getBoundingClientRect !== 'function') {
@@ -779,7 +938,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
             {/* Button Stack */}
             {createPortal(
                 <div
-                    className={`${mergedThemeClasses.buttonStack} ${!isVisible ? 'fade-out' : ''} ${isTransitioning ? 'repositioning' : ''}`}
+                    className={`${mergedThemeClasses.buttonStack} ${!isVisible ? 'fade-out' : ''}`}
                     style={{
                         position: 'absolute',
                         left: (draggableConfig?.buttonStackPosition || config.buttonStackPosition) === 'right'
@@ -795,7 +954,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                         willChange: 'transform, opacity',
                         backfaceVisibility: 'hidden',
                         perspective: '1000px',
-                        transition: isTransitioning ? 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+                        transition: 'none',
                         ...mergedStyles.buttonStack,
                     }}
                 >
@@ -844,6 +1003,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                                 className={`lexkit-drag-button ${mergedThemeClasses.handle} ${isDragging ? mergedThemeClasses.handleActive : ''}`.trim()}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, currentElement)}
+                                onTouchStart={(e) => handleTouchStart(e, currentElement)}
                                 style={isDragging ? mergedStyles.handleActive : mergedStyles.handle}
                             >
                                 ⋮⋮
