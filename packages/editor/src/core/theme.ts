@@ -30,6 +30,14 @@ export interface LexKitTheme extends EditorThemeClasses {
     button?: string
     buttonActive?: string
   }
+  htmlEmbed?: {
+    container?: string
+    preview?: string
+    editor?: string
+    textarea?: string
+    toggle?: string
+    content?: string
+  }
 }
 
 /**
@@ -98,6 +106,14 @@ export const defaultLexKitTheme: LexKitTheme = {
     button: 'lexkit-floating-toolbar-button',
     buttonActive: 'lexkit-floating-toolbar-button-active',
   },
+  htmlEmbed: {
+    container: 'lexkit-html-embed-container',
+    preview: 'lexkit-html-embed-preview',
+    editor: 'lexkit-html-embed-editor',
+    textarea: 'lexkit-html-embed-textarea',
+    toggle: 'lexkit-html-embed-toggle',
+    content: 'lexkit-html-embed-content',
+  },
   richText: {
     contentEditable: 'lexkit-content-editable',
     placeholder: 'lexkit-placeholder',
@@ -138,6 +154,10 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
     floatingToolbar: {
       ...baseTheme.floatingToolbar,
       ...overrideTheme.floatingToolbar,
+    },
+    htmlEmbed: {
+      ...baseTheme.htmlEmbed,
+      ...overrideTheme.htmlEmbed,
     },
     richText: {
       ...baseTheme.richText,

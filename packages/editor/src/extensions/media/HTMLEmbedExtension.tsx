@@ -1,7 +1,7 @@
 // HTMLEmbedExtension.tsx
 // Clean, scalable, headless HTML embed extension that works across all tabs
 
-import React, { useState } from 'react';
+import React, { useState, ReactNode, useRef } from 'react';
 import {
   LexicalEditor,
   DecoratorNode,
@@ -15,9 +15,9 @@ import {
   SerializedLexicalNode,
   Spread
 } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
+import { BaseExtension } from '../base/BaseExtension';
+import { ExtensionCategory, BaseExtensionConfig } from '../types';
+import { LexKitTheme } from '../../core/theme';
 
 /**
  * Payload interface for HTML embed content
@@ -28,6 +28,68 @@ export type HTMLEmbedPayload = {
   /** Whether to show preview mode or edit mode */
   preview: boolean;
 };
+
+/**
+ * Configuration for the HTMLEmbedExtension
+ */
+export interface HTMLEmbedConfig extends BaseExtensionConfig {
+  /** Default HTML content for new embeds */
+  defaultHtml?: string;
+  /** Start in preview mode by default */
+  defaultPreview?: boolean;
+  /** Theme classes */
+  theme?: {
+    container?: string;
+    preview?: string;
+    editor?: string;
+    textarea?: string;
+    toggle?: string;
+    content?: string;
+  };
+  /** Custom CSS styles for UI elements */
+  styles?: {
+    container?: React.CSSProperties;
+    preview?: React.CSSProperties;
+    editor?: React.CSSProperties;
+    textarea?: React.CSSProperties;
+    toggle?: React.CSSProperties;
+    content?: React.CSSProperties;
+  };
+  /** Custom container renderer for complete headless control */
+  containerRenderer?: (props: {
+    children: ReactNode;
+    className: string;
+    style?: React.CSSProperties;
+  }) => ReactNode;
+  /** Custom preview renderer */
+  previewRenderer?: (props: {
+    html: string;
+    onToggleEdit: () => void;
+    className: string;
+    style?: React.CSSProperties;
+    toggleClassName: string;
+    toggleStyle?: React.CSSProperties;
+  }) => ReactNode;
+  /** Custom editor renderer */
+  editorRenderer?: (props: {
+    html: string;
+    onTogglePreview: () => void;
+    onSave: () => void;
+    className: string;
+    style?: React.CSSProperties;
+    textareaClassName: string;
+    textareaStyle?: React.CSSProperties;
+    toggleClassName: string;
+    toggleStyle?: React.CSSProperties;
+  }) => ReactNode;
+  /** Custom toggle button renderer */
+  toggleRenderer?: (props: {
+    isPreview: boolean;
+    onClick: () => void;
+    className: string;
+    style?: React.CSSProperties;
+  }) => ReactNode;
+}
 
 /**
  * Commands provided by the HTMLEmbedExtension
@@ -214,11 +276,14 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
 
   // React component rendering
   decorate(editor: LexicalEditor): ReactNode {
+    // Get config from global storage (set by HTMLEmbedPlugin)
+    const config = (globalThis as any).__htmlEmbedConfig || {};
     return (
-      <HTMLEmbedComponent 
-        nodeKey={this.__key} 
-        payload={this.__payload} 
-        editor={editor} 
+      <HTMLEmbedComponent
+        nodeKey={this.__key}
+        payload={this.__payload}
+        editor={editor}
+        config={config}
       />
     );
   }
@@ -234,13 +299,13 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
 }
 
 // React Component - Clean and headless design
-const HTMLEmbedComponent: React.FC<{ 
-  nodeKey: NodeKey; 
-  payload: HTMLEmbedPayload; 
-  editor: LexicalEditor 
-}> = ({ nodeKey, payload, editor }) => {
-  const [localHtml, setLocalHtml] = useState(payload.html);
-  const [isSelected, setIsSelected] = useState(false);
+const HTMLEmbedComponent: React.FC<{
+  nodeKey: NodeKey;
+  payload: HTMLEmbedPayload;
+  editor: LexicalEditor;
+  config: HTMLEmbedConfig;
+}> = ({ nodeKey, payload, editor, config }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Update payload in Lexical state
   const updatePayload = (newPayload: Partial<HTMLEmbedPayload>) => {
@@ -252,76 +317,237 @@ const HTMLEmbedComponent: React.FC<{
     });
   };
 
-  // Handle HTML content changes
-  const handleHtmlChange = (html: string) => {
-    setLocalHtml(html);
-  };
-
-  const handleHtmlBlur = () => {
-    if (localHtml !== payload.html) {
-      updatePayload({ html: localHtml });
-    }
-  };
-
   const togglePreview = () => {
+    // Save current content before switching to preview
+    if (!payload.preview && textareaRef.current) {
+      const html = textareaRef.current.value;
+      if (html !== payload.html) {
+        updatePayload({ html });
+      }
+    }
     updatePayload({ preview: !payload.preview });
   };
 
-  // Clean, accessible UI
-  return (
-    <div className="html-embed-wrapper">
-      {payload.preview ? (
-        <div className="html-embed-preview">
-          <div 
-            className="html-embed-content"
-            dangerouslySetInnerHTML={{ __html: payload.html }}
-          />
-          <button 
-            className="html-embed-toggle"
-            onClick={togglePreview}
-            title="Edit HTML"
-            type="button"
-          >
-            ✏️ Edit
-          </button>
-        </div>
+  const handleSave = () => {
+    if (textareaRef.current) {
+      const html = textareaRef.current.value;
+      if (html !== payload.html) {
+        updatePayload({ html });
+      }
+    }
+    updatePayload({ preview: true });
+  };
+
+  // Default styles - minimal and functional
+  const defaultStyles = {
+    container: {},
+    preview: {},
+    editor: {},
+    textarea: {
+      width: '100%',
+      minHeight: '120px',
+      padding: '8px',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      resize: 'vertical' as const,
+    },
+    toggle: {
+      marginTop: '8px',
+      padding: '4px 8px',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      backgroundColor: '#f9f9f9',
+      cursor: 'pointer',
+    },
+    content: {},
+  };
+
+  // Merged styles - user styles override defaults
+  const mergedStyles = {
+    container: { ...defaultStyles.container, ...config.styles?.container },
+    preview: { ...defaultStyles.preview, ...config.styles?.preview },
+    editor: { ...defaultStyles.editor, ...config.styles?.editor },
+    textarea: { ...defaultStyles.textarea, ...config.styles?.textarea },
+    toggle: { ...defaultStyles.toggle, ...config.styles?.toggle },
+    content: { ...defaultStyles.content, ...config.styles?.content },
+  };
+
+  // Theme classes with defaults
+  const themeClasses = {
+    container: config.theme?.container || 'lexkit-html-embed-container',
+    preview: config.theme?.preview || 'lexkit-html-embed-preview',
+    editor: config.theme?.editor || 'lexkit-html-embed-editor',
+    textarea: config.theme?.textarea || 'lexkit-html-embed-textarea',
+    toggle: config.theme?.toggle || 'lexkit-html-embed-toggle',
+    content: config.theme?.content || 'lexkit-html-embed-content',
+  };
+
+  // Default renderers
+  const defaultContainerRenderer = ({ children, className, style }: {
+    children: ReactNode;
+    className: string;
+    style?: React.CSSProperties;
+  }) => (
+    <div className={className} style={style}>
+      {children}
+    </div>
+  );
+
+  const defaultPreviewRenderer = ({
+    html,
+    onToggleEdit,
+    className,
+    style,
+    toggleClassName,
+    toggleStyle
+  }: {
+    html: string;
+    onToggleEdit: () => void;
+    className: string;
+    style?: React.CSSProperties;
+    toggleClassName: string;
+    toggleStyle?: React.CSSProperties;
+  }) => (
+    <div className={className} style={style}>
+      <div
+        className={themeClasses.content}
+        style={mergedStyles.content}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+      {config.toggleRenderer ? (
+        config.toggleRenderer({
+          isPreview: true,
+          onClick: onToggleEdit,
+          className: toggleClassName,
+          style: toggleStyle,
+        })
       ) : (
-        <div className="html-embed-editor">
-          <textarea
-            className="html-embed-textarea"
-            value={localHtml}
-            onChange={(e) => handleHtmlChange(e.target.value)}
-            onBlur={handleHtmlBlur}
-            placeholder="Enter HTML here..."
-            autoFocus
-          />
-          <button 
-            className="html-embed-toggle"
-            onClick={() => {
-              handleHtmlBlur(); // Save changes first
-              togglePreview();
-            }}
-            title="Preview HTML"
-            type="button"
-          >
-            👁️ Preview
-          </button>
-        </div>
+        <button
+          className={toggleClassName}
+          style={toggleStyle}
+          onClick={onToggleEdit}
+          title="Edit HTML"
+          type="button"
+        >
+          ✏️ Edit
+        </button>
       )}
     </div>
+  );
+
+  const defaultEditorRenderer = ({
+    html,
+    onTogglePreview,
+    onSave,
+    className,
+    style,
+    textareaClassName,
+    textareaStyle,
+    toggleClassName,
+    toggleStyle
+  }: {
+    html: string;
+    onTogglePreview: () => void;
+    onSave: () => void;
+    className: string;
+    style?: React.CSSProperties;
+    textareaClassName: string;
+    textareaStyle?: React.CSSProperties;
+    toggleClassName: string;
+    toggleStyle?: React.CSSProperties;
+  }) => (
+    <div className={className} style={style}>
+      <textarea
+        ref={textareaRef}
+        className={textareaClassName}
+        style={textareaStyle}
+        defaultValue={html}
+        placeholder="Enter HTML here..."
+      />
+      {config.toggleRenderer ? (
+        config.toggleRenderer({
+          isPreview: false,
+          onClick: onSave,
+          className: toggleClassName,
+          style: toggleStyle,
+        })
+      ) : (
+        <button
+          className={toggleClassName}
+          style={toggleStyle}
+          onClick={onSave}
+          title="Preview HTML"
+          type="button"
+        >
+          👁️ Preview
+        </button>
+      )}
+    </div>
+  );
+
+  // Use custom renderers if provided, otherwise use defaults
+  const ContainerRenderer = config.containerRenderer || defaultContainerRenderer;
+  const PreviewRenderer = config.previewRenderer || defaultPreviewRenderer;
+  const EditorRenderer = config.editorRenderer || defaultEditorRenderer;
+
+  return (
+    <ContainerRenderer
+      className={themeClasses.container}
+      style={mergedStyles.container}
+    >
+      {payload.preview ? (
+        <PreviewRenderer
+          html={payload.html}
+          onToggleEdit={togglePreview}
+          className={themeClasses.preview}
+          style={mergedStyles.preview}
+          toggleClassName={themeClasses.toggle}
+          toggleStyle={mergedStyles.toggle}
+        />
+      ) : (
+        <EditorRenderer
+          html={payload.html}
+          onTogglePreview={togglePreview}
+          onSave={handleSave}
+          className={themeClasses.editor}
+          style={mergedStyles.editor}
+          textareaClassName={themeClasses.textarea}
+          textareaStyle={mergedStyles.textarea}
+          toggleClassName={themeClasses.toggle}
+          toggleStyle={mergedStyles.toggle}
+        />
+      )}
+    </ContainerRenderer>
   );
 };
 
 // Extension class
 export class HTMLEmbedExtension extends BaseExtension<
   'htmlEmbed',
-  {},
+  HTMLEmbedConfig,
   HTMLEmbedCommands,
   HTMLEmbedQueries,
   ReactNode[]
 > {
-  constructor() {
+  constructor(config?: Partial<HTMLEmbedConfig>) {
     super('htmlEmbed', [ExtensionCategory.Toolbar]);
+
+    // Default configuration
+    this.config = {
+      defaultHtml: '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
+      defaultPreview: false,
+      theme: {
+        container: 'lexkit-html-embed-container',
+        preview: 'lexkit-html-embed-preview',
+        editor: 'lexkit-html-embed-editor',
+        textarea: 'lexkit-html-embed-textarea',
+        toggle: 'lexkit-html-embed-toggle',
+        content: 'lexkit-html-embed-content',
+      },
+      ...config,
+    } as HTMLEmbedConfig;
   }
 
   register(editor: LexicalEditor): () => void {
@@ -333,18 +559,23 @@ export class HTMLEmbedExtension extends BaseExtension<
     return [HTMLEmbedNode];
   }
 
+  getPlugins(): ReactNode[] {
+    // Pass config to HTMLEmbedNode via a plugin that sets up the node rendering
+    return [<HTMLEmbedPlugin key="html-embed" config={this.config} />];
+  }
+
   getCommands(editor: LexicalEditor): HTMLEmbedCommands {
     return {
       insertHTMLEmbed: (html?: string) => {
         editor.update(() => {
           const payload: HTMLEmbedPayload = {
-            html: html || '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
-            preview: false, // Start in edit mode
+            html: html || this.config.defaultHtml!,
+            preview: this.config.defaultPreview!,
           };
-          
+
           const node = new HTMLEmbedNode(payload);
           const selection = $getSelection();
-          
+
           if ($isRangeSelection(selection)) {
             selection.insertNodes([node]);
           } else {
@@ -397,6 +628,13 @@ export class HTMLEmbedExtension extends BaseExtension<
       }),
     };
   }
+}
+
+// Plugin to handle HTMLEmbedNode rendering with config
+function HTMLEmbedPlugin({ config }: { config: HTMLEmbedConfig }) {
+  // Store config globally for HTMLEmbedNode to access
+  (globalThis as any).__htmlEmbedConfig = config;
+  return null;
 }
 
 // Markdown Transformer - Properly implemented for Lexical 0.35
