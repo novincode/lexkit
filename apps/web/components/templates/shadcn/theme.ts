@@ -30,7 +30,7 @@ export const shadcnTheme: LexKitTheme = {
     listitem: 'leading-relaxed text-foreground',
   },
   quote: 'border-l-4 border-border pl-4 italic text-muted-foreground mb-4',
-  code: 'bg-muted px-1.5 py-0.5 rounded text-sm font-mono',
+  code: 'bg-muted px-1.5 py-0.5 rounded text-sm font-mono block w-full',
   codeHighlight: {
     atrule: 'text-purple-600',
     attr: 'text-blue-600',
@@ -72,14 +72,14 @@ export const shadcnTheme: LexKitTheme = {
     code: 'bg-muted px-1.5 py-0.5 rounded text-sm font-mono',
   },
   image: 'max-w-full h-auto rounded-lg shadow-sm',
-  horizontalRule: 'border-t border-border my-8',
+  hr: 'border-t border-border my-8',
   table: 'w-full border-collapse border border-border rounded-lg overflow-hidden mb-4',
   tableRow: '',
   tableCell: 'border border-border p-3 text-left text-foreground',
   tableCellHeader: 'border border-border p-3 text-left font-semibold bg-muted text-foreground',
 
   // Pre/code block styling
-  pre: 'bg-muted text-foreground p-4 rounded-lg overflow-x-auto my-4 border font-mono text-sm',
+  pre: 'bg-muted text-foreground p-4 rounded-lg overflow-x-auto my-4 border font-mono text-sm w-full block',
   preCode: 'bg-transparent p-0 rounded-none text-sm',
 
   // HTML Embed Extension - accessed via this.theme.htmlEmbed in extensions
