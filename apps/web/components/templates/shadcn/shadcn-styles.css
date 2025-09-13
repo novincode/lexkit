@@ -319,6 +319,33 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* ===== HTML/MARKDOWN TEXTAREA STYLES ===== */
+
+.lexkit-html-view {
+  width: 100%;
+  min-height: 600px;
+  padding: 1rem;
+  font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  border-radius: var(--editor-border-radius);
+  background-color: var(--background);
+  color: var(--foreground);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lexkit-html-view:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.lexkit-html-view::placeholder {
+  color: var(--muted-foreground);
+}
+
 /* ===== ANIMATIONS ===== */
 
 @keyframes fade-in-up {
@@ -405,4 +432,19 @@
     color: black;
     background: white;
   }
+}
+
+/* Plain textarea for source views */
+.lexkit-html-view {
+  width: 100%;
+  min-height: 600px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  padding: 0;
 }

@@ -83,6 +83,7 @@ import {
 
 import { createEditorSystem } from '@lexkit/editor';
 import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
+import { RichText } from '@lexkit/editor/extensions/core/RichTextExtension';
 import { LexicalEditor } from 'lexical';
 import { createPortal } from 'react-dom';
 import './shadcn-styles.css';
@@ -124,7 +125,7 @@ const extensions = [
         marginTop: '12px'
       }
     },
-    
+
     toggleRenderer: ({ isPreview, onClick, className, style }) => (
       <Button
         variant="outline"
@@ -146,13 +147,13 @@ const extensions = [
         )}
       </Button>
     ),
-    
+
   }),
   MyCustomExtension,
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
-    draggableBlockExtension.configure({
+  draggableBlockExtension.configure({
     styles: {
       handle: {
         backgroundColor: 'var(--background)',
@@ -480,11 +481,10 @@ function ImageDialog({
                 <div className="space-y-2">
                   <Label>Upload Image</Label>
                   <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                      dragOver
-                        ? 'border-primary bg-primary/5'
-                        : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-                    }`}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragOver
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                      }`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
@@ -872,9 +872,9 @@ function ModernToolbar({
   // Get current block format
   const currentBlockFormat = activeStates.isH1 ? 'h1'
     : activeStates.isH2 ? 'h2'
-    : activeStates.isH3 ? 'h3'
-    : activeStates.isQuote ? 'quote'
-    : 'p';
+      : activeStates.isH3 ? 'h3'
+        : activeStates.isQuote ? 'quote'
+          : 'p';
 
   const handleBlockFormatChange = (value: string) => {
     if (value === 'p') commands.toggleParagraph();
@@ -886,7 +886,7 @@ function ModernToolbar({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-background border border-border rounded-lg shadow-sm">
+      <div className="flex flex-wrap items-center gap-2 p-2 bg-transparent">
         {/* Text Formatting Section */}
         <div className="flex items-center gap-1">
           <Tooltip>
@@ -1226,7 +1226,7 @@ function ModernToolbar({
   );
 }
 
-// Modern Mode Tabs with SHADCN Tabs
+// Modern Mode Tabs with SHADCN Tabs - Clean
 function ModernModeTabs({
   mode,
   onModeChange
@@ -1236,16 +1236,16 @@ function ModernModeTabs({
 }) {
   return (
     <Tabs value={mode} onValueChange={(value) => onModeChange(value as EditorMode)}>
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="visual" className="flex items-center gap-2">
+      <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/50">
+        <TabsTrigger value="visual" className="flex items-center gap-2 text-sm">
           <Eye className="h-4 w-4" />
           Visual
         </TabsTrigger>
-        <TabsTrigger value="html" className="flex items-center gap-2">
+        <TabsTrigger value="html" className="flex items-center gap-2 text-sm">
           <FileCode className="h-4 w-4" />
           HTML
         </TabsTrigger>
-        <TabsTrigger value="markdown" className="flex items-center gap-2">
+        <TabsTrigger value="markdown" className="flex items-center gap-2 text-sm">
           <FileText className="h-4 w-4" />
           Markdown
         </TabsTrigger>
@@ -1254,7 +1254,7 @@ function ModernModeTabs({
   );
 }
 
-// Modern Source Views
+// Modern Source Views - Clean and full width
 function ModernHTMLSourceView({
   htmlContent,
   onHtmlChange
@@ -1263,19 +1263,13 @@ function ModernHTMLSourceView({
   onHtmlChange: (html: string) => void;
 }) {
   return (
-    <div className="flex-1">
-      <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-        <FileCode className="h-4 w-4" />
-        HTML Source
-      </div>
-      <Textarea
-        className="min-h-[400px] font-mono text-sm"
-        value={htmlContent}
-        onChange={(e) => onHtmlChange(e.target.value)}
-        placeholder="Enter HTML content..."
-        spellCheck={false}
-      />
-    </div>
+    <textarea
+      className="lexkit-html-view"
+      value={htmlContent}
+      onChange={(e) => onHtmlChange(e.target.value)}
+      placeholder="Enter HTML content..."
+      spellCheck={false}
+    />
   );
 }
 
@@ -1287,19 +1281,13 @@ function ModernMarkdownSourceView({
   onMarkdownChange: (markdown: string) => void;
 }) {
   return (
-    <div className="flex-1">
-      <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-        <FileText className="h-4 w-4" />
-        Markdown Source
-      </div>
-      <Textarea
-        className="min-h-[400px] font-mono text-sm"
-        value={markdownContent}
-        onChange={(e) => onMarkdownChange(e.target.value)}
-        placeholder="Enter Markdown content..."
-        spellCheck={false}
-      />
-    </div>
+    <textarea
+      className="lexkit-html-view"
+      value={markdownContent}
+      onChange={(e) => onMarkdownChange(e.target.value)}
+      placeholder="Enter Markdown content..."
+      spellCheck={false}
+    />
   );
 }
 
@@ -1458,38 +1446,40 @@ function EditorContent({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header with Mode Tabs */}
-      <div className="space-y-4">
+    <div className="flex flex-col min-h-[500px]">
+      {/* Mode Tabs at top */}
+      <div className="px-4 py-3 border-b border-border">
         <ModernModeTabs mode={mode} onModeChange={handleModeChange} />
-
-        {/* Toolbar - only show in visual mode */}
-        {mode === 'visual' && (
-          <ModernToolbar
-            commands={commands}
-            hasExtension={hasExtension}
-            activeStates={activeStates}
-            onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
-            onLinkDialogOpen={() => openLinkDialog('', '', false)}
-            onImageDialogOpen={openImageDialog}
-          />
-        )}
       </div>
 
-      {/* Editor Content */}
-      <div className="min-h-[500px] border border-border rounded-lg bg-background p-6">
+      {/* Sticky Toolbar Header - only show in visual mode */}
+      {mode === 'visual' && (
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+          <div className="px-4 py-3">
+            <ModernToolbar
+              commands={commands}
+              hasExtension={hasExtension}
+              activeStates={activeStates}
+              onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+              onLinkDialogOpen={() => openLinkDialog('', '', false)}
+              onImageDialogOpen={openImageDialog}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className='relative p-4'>
+
+        {/* Editor Content - Full width, no card wrapper */}
         {mode === 'visual' ? (
-          <div className="min-h-[500px]">
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable className="shadcn-content-editable min-h-[500px] focus:outline-none" />
-              }
-              placeholder={
-                <div className="shadcn-placeholder absolute top-6 left-6 text-muted-foreground pointer-events-none">
-                  Start writing...
-                </div>
-              }
-              ErrorBoundary={ErrorBoundary}
+          <div className="min-h-[600px] prose prose-lg max-w-none">
+            <RichText
+              className={shadcnTheme.contentEditable}
+              placeholder="Start writing..."
+              classNames={{
+                contentEditable: `${shadcnTheme.contentEditable} min-h-[600px] focus:outline-none`,
+                placeholder: "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none"
+              }}
             />
             <ModernFloatingToolbar />
           </div>

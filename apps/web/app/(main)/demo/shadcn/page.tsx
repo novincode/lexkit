@@ -5,7 +5,7 @@ import { ShadcnTemplate } from '../../../../components/templates/shadcn';
 
 export default function ShadcnTemplatePage() {
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="flex-1 flex flex-col">
       <ShadcnTemplate />
     </div>
   );
