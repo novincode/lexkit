@@ -170,6 +170,7 @@ interface DialogState {
     url: string;
     text: string;
     isEdit: boolean;
+    showTextField: boolean;
   };
   imageDialog: {
     isOpen: boolean;
@@ -189,7 +190,8 @@ function useDialogState() {
       isOpen: false,
       url: '',
       text: '',
-      isEdit: false
+      isEdit: false,
+      showTextField: true
     },
     imageDialog: {
       isOpen: false,
@@ -202,10 +204,10 @@ function useDialogState() {
     }
   });
 
-  const openLinkDialog = useCallback((url = '', text = '', isEdit = false) => {
+  const openLinkDialog = useCallback((url = '', text = '', isEdit = false, showTextField = true) => {
     setDialogs(prev => ({
       ...prev,
-      linkDialog: { isOpen: true, url, text, isEdit }
+      linkDialog: { isOpen: true, url, text, isEdit, showTextField }
     }));
   }, []);
 
@@ -270,6 +272,7 @@ function LinkDialog({
   url,
   text,
   isEdit,
+  showTextField,
   onUrlChange,
   onTextChange,
   onSubmit
@@ -279,6 +282,7 @@ function LinkDialog({
   url: string;
   text: string;
   isEdit: boolean;
+  showTextField: boolean;
   onUrlChange: (url: string) => void;
   onTextChange: (text: string) => void;
   onSubmit: () => void;
@@ -312,15 +316,17 @@ function LinkDialog({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="link-text">Link Text</Label>
-              <Input
-                id="link-text"
-                placeholder="Link text"
-                value={text}
-                onChange={(e) => onTextChange(e.target.value)}
-              />
-            </div>
+            {showTextField && (
+              <div className="space-y-2">
+                <Label htmlFor="link-text">Link Text</Label>
+                <Input
+                  id="link-text"
+                  placeholder="Link text"
+                  value={text}
+                  onChange={(e) => onTextChange(e.target.value)}
+                />
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
@@ -556,7 +562,7 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
 }
 
 // Modern Floating Toolbar with SHADCN components
-function ModernFloatingToolbar() {
+function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: string, text?: string, isEdit?: boolean, showTextField?: boolean) => void }) {
   const { commands, activeStates, extensions, hasExtension, config } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
   const [selectionRect, setSelectionRect] = useState<any>(null);
@@ -759,7 +765,15 @@ function ModernFloatingToolbar() {
                   variant={activeStates.isLink ? "pressed" : "default"}
                   className={activeStates.isLink ? theme.buttonActive : theme.button}
                   pressed={activeStates.isLink}
-                  onPressedChange={() => commands.insertLink()}
+                  onPressedChange={() => {
+                    if (activeStates.isTextSelected) {
+                      // Text is selected - only ask for URL
+                      openLinkDialog('', '', false, false);
+                    } else {
+                      // No text selected - use the full dialog
+                      openLinkDialog('', '', false, true);
+                    }
+                  }}
                 >
                   {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
                 </Toggle>
@@ -824,7 +838,7 @@ function ModernToolbar({
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   onCommandPaletteOpen: () => void;
-  onLinkDialogOpen: () => void;
+  onLinkDialogOpen: (url?: string, text?: string, isEdit?: boolean, showTextField?: boolean) => void;
   onImageDialogOpen: () => void;
 }) {
   const { lexical: editor } = useEditor();
@@ -940,7 +954,15 @@ function ModernToolbar({
                 size="sm"
                 variant={activeStates.isLink ? "pressed" : "default"}
                 pressed={activeStates.isLink}
-                onPressedChange={onLinkDialogOpen}
+                onPressedChange={() => {
+                  if (activeStates.isTextSelected) {
+                    // Text is selected - only ask for URL
+                    onLinkDialogOpen('', '', false, false);
+                  } else {
+                    // No text selected - use the full dialog
+                    onLinkDialogOpen('', '', false, true);
+                  }
+                }}
               >
                 {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
               </Toggle>
@@ -1436,7 +1458,7 @@ function EditorContent({
               hasExtension={hasExtension}
               activeStates={activeStates}
               onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
-              onLinkDialogOpen={() => openLinkDialog('', '', false)}
+              onLinkDialogOpen={openLinkDialog}
               onImageDialogOpen={openImageDialog}
             />
           </div>
@@ -1456,7 +1478,7 @@ function EditorContent({
                 placeholder: "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none"
               }}
             />
-            <ModernFloatingToolbar />
+            <ModernFloatingToolbar openLinkDialog={openLinkDialog} />
           </div>
         ) : mode === 'html' ? (
           <ModernHTMLSourceView
@@ -1478,6 +1500,7 @@ function EditorContent({
         url={dialogs.linkDialog.url}
         text={dialogs.linkDialog.text}
         isEdit={dialogs.linkDialog.isEdit}
+        showTextField={dialogs.linkDialog.showTextField}
         onUrlChange={(url) => updateLinkDialog({ url })}
         onTextChange={(text) => updateLinkDialog({ text })}
         onSubmit={handleLinkSubmit}

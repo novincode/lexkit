@@ -43,6 +43,7 @@ export type LinkCommands = {
  */
 export type LinkStateQueries = {
   isLink: () => Promise<boolean>;
+  isTextSelected: () => Promise<boolean>;
 };
 
 /**
@@ -279,6 +280,19 @@ export class LinkExtension extends BaseExtension<
               } else {
                 resolve(false);
               }
+            } else {
+              resolve(false);
+            }
+          });
+        }),
+
+      isTextSelected: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (selection && $isRangeSelection(selection)) {
+              // Check if there's actual text selected (not just a collapsed cursor)
+              resolve(!selection.isCollapsed());
             } else {
               resolve(false);
             }
