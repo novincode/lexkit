@@ -1,6 +1,6 @@
 {
   "name": "@lexkit/editor",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "LexKit Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
@@ -9,8 +9,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
+    
   },
   "scripts": {
     "build": "tsup",
