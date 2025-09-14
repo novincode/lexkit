@@ -33,7 +33,6 @@ import {
 export default function ShadcnTemplatePageClient() {
   const editorRef = useRef<ShadcnTemplateRef>(null)
   const [isDark, setIsDark] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
 
   // Handle when editor is ready - inject sample content
   const handleEditorReady = React.useCallback((methods: ShadcnTemplateRef) => {
@@ -147,15 +146,7 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               {isDark ? 'Light' : 'Dark'}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center gap-2"
-            >
-              {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              Preview
-            </Button>
+     
           </div>
         </div>
 
@@ -169,7 +160,7 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               Try the floating toolbar, context menu (right-click), command palette (Ctrl+K), and drag handles on the left edge of content blocks.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='p-0'>
             <div className="space-y-4">
               <ShadcnTemplate
                 ref={editorRef}

@@ -35,7 +35,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/docs/quick-start" className="hover:text-foreground transition-colors">
+                <Link href="/docs/get-started" className="hover:text-foreground transition-colors">
                   Quick Start
                 </Link>
               </li>
@@ -56,11 +56,7 @@ export function Footer() {
                   Demo
                 </Link>
               </li>
-              <li>
-                <Link href="/templates" className="hover:text-foreground transition-colors">
-                  Templates
-                </Link>
-              </li>
+              
               <li>
                 <Link 
                   href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze" 
