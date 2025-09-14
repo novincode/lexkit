@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, X } from "lucide-react";
 
 // Custom Select Component
 export function Select({
   value,
   onValueChange,
   options,
-  placeholder = "Select..."
+  placeholder = "Select...",
 }: {
   value: string;
   onValueChange: (value: string) => void;
@@ -19,20 +19,23 @@ export function Select({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedOption = options.find(opt => opt.value === value);
+  const selectedOption = options.find((opt) => opt.value === value);
 
   return (
     <div className="lexkit-select" ref={selectRef}>
       <button
-        className={`lexkit-select-trigger ${isOpen ? 'open' : ''}`}
+        className={`lexkit-select-trigger ${isOpen ? "open" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
@@ -44,7 +47,7 @@ export function Select({
           {options.map((option) => (
             <button
               key={option.value}
-              className={`lexkit-select-option ${value === option.value ? 'selected' : ''}`}
+              className={`lexkit-select-option ${value === option.value ? "selected" : ""}`}
               onClick={() => {
                 onValueChange(option.value);
                 setIsOpen(false);
@@ -65,7 +68,7 @@ export function Dropdown({
   trigger,
   children,
   isOpen,
-  onOpenChange
+  onOpenChange,
 }: {
   trigger: React.ReactNode;
   children: React.ReactNode;
@@ -76,24 +79,21 @@ export function Dropdown({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         onOpenChange(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onOpenChange]);
 
   return (
     <div className="lexkit-dropdown" ref={dropdownRef}>
-      <div onClick={() => onOpenChange(!isOpen)}>
-        {trigger}
-      </div>
-      {isOpen && (
-        <div className="lexkit-dropdown-content">
-          {children}
-        </div>
-      )}
+      <div onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
+      {isOpen && <div className="lexkit-dropdown-content">{children}</div>}
     </div>
   );
 }
@@ -103,7 +103,7 @@ export function Dialog({
   isOpen,
   onClose,
   title,
-  children
+  children,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -114,27 +114,30 @@ export function Dialog({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dialogRef.current && !dialogRef.current.contains(event.target as Node)) {
+      if (
+        dialogRef.current &&
+        !dialogRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
@@ -153,9 +156,7 @@ export function Dialog({
             <X size={16} />
           </button>
         </div>
-        <div className="lexkit-dialog-content">
-          {children}
-        </div>
+        <div className="lexkit-dialog-content">{children}</div>
       </div>
     </div>
   );

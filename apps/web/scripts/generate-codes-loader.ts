@@ -1,61 +1,69 @@
 #!/usr/bin/env tsx
 
-import fs from 'fs'
-import path from 'path'
+import fs from "fs";
+import path from "path";
 
 /**
  * Generate a dynamic codes loader that imports all codes.tsx files
  */
 class CodesLoaderGenerator {
-  private docsDir: string
-  private outputFile: string
+  private docsDir: string;
+  private outputFile: string;
 
   constructor() {
-    this.docsDir = path.resolve(process.cwd(), 'app/(docs)/docs')
-    this.outputFile = path.resolve(process.cwd(), 'app/(docs)/lib/codes-loader.ts')
+    this.docsDir = path.resolve(process.cwd(), "app/(docs)/docs");
+    this.outputFile = path.resolve(
+      process.cwd(),
+      "app/(docs)/lib/codes-loader.ts",
+    );
   }
 
   /**
    * Find all codes.tsx files in docs/** structure
    */
-  private findCodesFiles(): Array<{ relativePath: string; importPath: string }> {
-    const files: Array<{ relativePath: string; importPath: string }> = []
+  private findCodesFiles(): Array<{
+    relativePath: string;
+    importPath: string;
+  }> {
+    const files: Array<{ relativePath: string; importPath: string }> = [];
 
-    const scanDirectory = (dirPath: string, relativePath: string = '') => {
-      const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+    const scanDirectory = (dirPath: string, relativePath: string = "") => {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
       for (const entry of entries) {
-        const fullPath = path.join(dirPath, entry.name)
-        const entryRelativePath = path.join(relativePath, entry.name)
+        const fullPath = path.join(dirPath, entry.name);
+        const entryRelativePath = path.join(relativePath, entry.name);
 
         if (entry.isDirectory()) {
-          scanDirectory(fullPath, entryRelativePath)
-        } else if (entry.isFile() && entry.name === 'codes.tsx') {
+          scanDirectory(fullPath, entryRelativePath);
+        } else if (entry.isFile() && entry.name === "codes.tsx") {
           // Convert file path to import path
-          const importPath = `../docs/${entryRelativePath.replace('\\', '/').replace('.tsx', '')}`
+          const importPath = `../docs/${entryRelativePath.replace("\\", "/").replace(".tsx", "")}`;
           files.push({
             relativePath: entryRelativePath,
-            importPath
-          })
+            importPath,
+          });
         }
       }
-    }
+    };
 
-    scanDirectory(this.docsDir)
-    return files
+    scanDirectory(this.docsDir);
+    return files;
   }
 
   /**
    * Generate the codes loader file
    */
-  private generateLoader(files: Array<{ relativePath: string; importPath: string }>): string {
-    const imports = files.map((file, index) =>
-      `import * as codes${index} from '${file.importPath}'`
-    ).join('\n')
+  private generateLoader(
+    files: Array<{ relativePath: string; importPath: string }>,
+  ): string {
+    const imports = files
+      .map(
+        (file, index) => `import * as codes${index} from '${file.importPath}'`,
+      )
+      .join("\n");
 
-    const exports = files.map((file, index) =>
-      `  codes${index}`
-    ).join(',\n')
+    const exports = files.map((file, index) => `  codes${index}`).join(",\n");
 
     return `// Auto-generated codes loader - DO NOT EDIT MANUALLY
 // Generated on: ${new Date().toISOString()}
@@ -66,27 +74,30 @@ ${imports}
 export const allCodesModules = [
 ${exports}
 ]
-`
+`;
   }
 
   /**
    * Generate the loader file
    */
   public generate(): void {
-    const files = this.findCodesFiles()
-    const content = this.generateLoader(files)
+    const files = this.findCodesFiles();
+    const content = this.generateLoader(files);
 
     // Ensure output directory exists
-    const outputDir = path.dirname(this.outputFile)
+    const outputDir = path.dirname(this.outputFile);
     if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true })
+      fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    fs.writeFileSync(this.outputFile, content, 'utf-8')
-    console.log(`Generated codes loader with ${files.length} files:`, files.map(f => f.relativePath))
+    fs.writeFileSync(this.outputFile, content, "utf-8");
+    console.log(
+      `Generated codes loader with ${files.length} files:`,
+      files.map((f) => f.relativePath),
+    );
   }
 }
 
 // Run the generator
-const generator = new CodesLoaderGenerator()
-generator.generate()
+const generator = new CodesLoaderGenerator();
+generator.generate();

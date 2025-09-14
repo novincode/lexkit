@@ -1,14 +1,19 @@
-import { TextFormatExtension } from '@lexkit/editor/extensions/base';
-import { FORMAT_TEXT_COMMAND, LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
+import { TextFormatExtension } from "@lexkit/editor/extensions/base";
+import {
+  FORMAT_TEXT_COMMAND,
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+} from "lexical";
 
 /**
  * Custom Underline Transformer for Markdown
  * Uses ++underline++ syntax (common convention for underline in extended markdown)
  */
 export const UNDERLINE_TRANSFORMER = {
-  format: ['underline'],
-  tag: '++',
-  type: 'text-format' as const,
+  format: ["underline"],
+  tag: "++",
+  type: "text-format" as const,
 };
 
 /**
@@ -28,9 +33,9 @@ export const UNDERLINE_TRANSFORMER = {
  * const editor = createEditorSystem(extensions);
  * ```
  */
-export class UnderlineExtension extends TextFormatExtension<'underline'> {
+export class UnderlineExtension extends TextFormatExtension<"underline"> {
   constructor() {
-    super('underline');
+    super("underline");
   }
 
   /**

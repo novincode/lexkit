@@ -1,7 +1,7 @@
-import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import React from 'react';
+import { LexicalEditor } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import React from "react";
 
 /**
  * Command palette item
@@ -39,7 +39,7 @@ export type CommandPaletteStateQueries = {
  * Provides a searchable command palette similar to VS Code.
  */
 export class CommandPaletteExtension extends BaseExtension<
-  'commandPalette',
+  "commandPalette",
   any,
   CommandPaletteCommands,
   CommandPaletteStateQueries,
@@ -47,33 +47,40 @@ export class CommandPaletteExtension extends BaseExtension<
 > {
   private isOpen = false;
   private commands: Map<string, CommandPaletteItem> = new Map();
-  private listeners: ((isOpen: boolean, commands: CommandPaletteItem[]) => void)[] = [];
+  private listeners: ((
+    isOpen: boolean,
+    commands: CommandPaletteItem[],
+  ) => void)[] = [];
 
   constructor() {
-    super('commandPalette', [ExtensionCategory.Toolbar]);
+    super("commandPalette", [ExtensionCategory.Toolbar]);
   }
 
   register(editor: LexicalEditor): () => void {
     // Register keyboard shortcut (Cmd/Ctrl + Shift + P)
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'P') {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        event.key === "P"
+      ) {
         event.preventDefault();
         this.toggleCommandPalette();
       }
-      
+
       // ESC to close
-      if (event.key === 'Escape' && this.isOpen) {
+      if (event.key === "Escape" && this.isOpen) {
         this.hideCommandPalette();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     // Register default table commands if table extension is available
     this.registerTableCommands(editor);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }
 
@@ -82,13 +89,13 @@ export class CommandPaletteExtension extends BaseExtension<
       showCommandPalette: () => this.showCommandPalette(),
       hideCommandPalette: () => this.hideCommandPalette(),
       registerCommand: (item: CommandPaletteItem) => this.registerCommand(item),
-      unregisterCommand: (id: string) => this.unregisterCommand(id)
+      unregisterCommand: (id: string) => this.unregisterCommand(id),
     };
   }
 
   getStateQueries(editor: LexicalEditor): CommandPaletteStateQueries {
     return {
-      isCommandPaletteOpen: () => Promise.resolve(this.isOpen)
+      isCommandPaletteOpen: () => Promise.resolve(this.isOpen),
     };
   }
 
@@ -121,77 +128,79 @@ export class CommandPaletteExtension extends BaseExtension<
     // These would be registered automatically when table extension is loaded
     const tableCommands: CommandPaletteItem[] = [
       {
-        id: 'table.insertRowAbove',
-        label: 'Insert Row Above',
-        category: 'Table',
+        id: "table.insertRowAbove",
+        label: "Insert Row Above",
+        category: "Table",
         action: () => {
           // This would call the table extension's command
-          console.log('Insert row above');
+          console.log("Insert row above");
         },
-        keywords: ['table', 'row', 'insert', 'above']
+        keywords: ["table", "row", "insert", "above"],
       },
       {
-        id: 'table.insertRowBelow',
-        label: 'Insert Row Below',
-        category: 'Table',
+        id: "table.insertRowBelow",
+        label: "Insert Row Below",
+        category: "Table",
         action: () => {
-          console.log('Insert row below');
+          console.log("Insert row below");
         },
-        keywords: ['table', 'row', 'insert', 'below']
+        keywords: ["table", "row", "insert", "below"],
       },
       {
-        id: 'table.insertColumnLeft',
-        label: 'Insert Column Left',
-        category: 'Table',
+        id: "table.insertColumnLeft",
+        label: "Insert Column Left",
+        category: "Table",
         action: () => {
-          console.log('Insert column left');
+          console.log("Insert column left");
         },
-        keywords: ['table', 'column', 'insert', 'left']
+        keywords: ["table", "column", "insert", "left"],
       },
       {
-        id: 'table.insertColumnRight',
-        label: 'Insert Column Right',
-        category: 'Table',
+        id: "table.insertColumnRight",
+        label: "Insert Column Right",
+        category: "Table",
         action: () => {
-          console.log('Insert column right');
+          console.log("Insert column right");
         },
-        keywords: ['table', 'column', 'insert', 'right']
+        keywords: ["table", "column", "insert", "right"],
       },
       {
-        id: 'table.deleteRow',
-        label: 'Delete Row',
-        category: 'Table',
+        id: "table.deleteRow",
+        label: "Delete Row",
+        category: "Table",
         action: () => {
-          console.log('Delete row');
+          console.log("Delete row");
         },
-        keywords: ['table', 'row', 'delete', 'remove']
+        keywords: ["table", "row", "delete", "remove"],
       },
       {
-        id: 'table.deleteColumn',
-        label: 'Delete Column',
-        category: 'Table',
+        id: "table.deleteColumn",
+        label: "Delete Column",
+        category: "Table",
         action: () => {
-          console.log('Delete column');
+          console.log("Delete column");
         },
-        keywords: ['table', 'column', 'delete', 'remove']
-      }
+        keywords: ["table", "column", "delete", "remove"],
+      },
     ];
 
-    tableCommands.forEach(cmd => this.registerCommand(cmd));
+    tableCommands.forEach((cmd) => this.registerCommand(cmd));
   }
 
   private notifyListeners() {
     const commandsArray = Array.from(this.commands.values());
-    this.listeners.forEach(listener => listener(this.isOpen, commandsArray));
+    this.listeners.forEach((listener) => listener(this.isOpen, commandsArray));
   }
 
   /**
    * Subscribe to command palette changes
    */
-  subscribe(listener: (isOpen: boolean, commands: CommandPaletteItem[]) => void): () => void {
+  subscribe(
+    listener: (isOpen: boolean, commands: CommandPaletteItem[]) => void,
+  ): () => void {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 

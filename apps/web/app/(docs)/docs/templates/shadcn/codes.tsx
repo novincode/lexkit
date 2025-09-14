@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 const SHADCN_TEMPLATE_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'shadcn-template-basic-usage',
+    id: "shadcn-template-basic-usage",
     code: `import { ShadcnTemplate } from '@lexkit/editor/templates'
 
 function MyEditor() {
@@ -16,12 +16,12 @@ function MyEditor() {
     />
   )
 }`,
-    language: 'tsx',
-    title: 'Basic ShadcnTemplate Usage',
-    description: 'Create a basic editor with the ShadcnTemplate'
+    language: "tsx",
+    title: "Basic ShadcnTemplate Usage",
+    description: "Create a basic editor with the ShadcnTemplate",
   },
   {
-    id: 'shadcn-template-with-ref',
+    id: "shadcn-template-with-ref",
     code: `import { useRef } from 'react'
 import { ShadcnTemplate, ShadcnTemplateRef } from '@lexkit/editor/templates'
 
@@ -41,12 +41,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'ShadcnTemplate with Ref',
-    description: 'Access editor methods using a ref'
+    language: "tsx",
+    title: "ShadcnTemplate with Ref",
+    description: "Access editor methods using a ref",
   },
   {
-    id: 'shadcn-template-extensions',
+    id: "shadcn-template-extensions",
     code: `import {
   boldExtension,
   italicExtension,
@@ -72,12 +72,12 @@ const extensions = [
   codeExtension,
   // ... add more extensions as needed
 ] as const`,
-    language: 'typescript',
-    title: 'ShadcnTemplate Extensions',
-    description: 'Configure extensions for the ShadcnTemplate'
+    language: "typescript",
+    title: "ShadcnTemplate Extensions",
+    description: "Configure extensions for the ShadcnTemplate",
   },
   {
-    id: 'shadcn-template-create-system',
+    id: "shadcn-template-create-system",
     code: `import { createEditorSystem } from '@lexkit/editor'
 
 // Define your extensions
@@ -89,12 +89,12 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 // Extract types for type safety
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>
 type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
-    language: 'typescript',
-    title: 'Create Editor System',
-    description: 'Set up a typed editor system with extensions'
+    language: "typescript",
+    title: "Create Editor System",
+    description: "Set up a typed editor system with extensions",
   },
   {
-    id: 'shadcn-template-toolbar',
+    id: "shadcn-template-toolbar",
     code: `function Toolbar({ commands, activeStates }: {
   commands: EditorCommands
   activeStates: EditorStateQueries
@@ -116,12 +116,12 @@ type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Custom Toolbar',
-    description: 'Create a custom toolbar with command buttons'
+    language: "tsx",
+    title: "Custom Toolbar",
+    description: "Create a custom toolbar with command buttons",
   },
   {
-    id: 'shadcn-template-theme',
+    id: "shadcn-template-theme",
     code: `import { shadcnTheme } from '@lexkit/editor/templates'
 
 // Use the built-in shadcn theme
@@ -138,12 +138,12 @@ const customTheme = {
 }
 
 <ShadcnTemplate theme={customTheme} />`,
-    language: 'typescript',
-    title: 'ShadcnTemplate Theme',
-    description: 'Apply custom CSS classes with a theme object'
+    language: "typescript",
+    title: "ShadcnTemplate Theme",
+    description: "Apply custom CSS classes with a theme object",
   },
   {
-    id: 'shadcn-template-css-variables',
+    id: "shadcn-template-css-variables",
     code: `:root {
   --editor-bg: #ffffff;
   --editor-text: #000000;
@@ -157,12 +157,12 @@ const customTheme = {
   --toolbar-bg: #2a2a2a;
   --button-hover: #3a3a3a;
 }`,
-    language: 'css',
-    title: 'CSS Variables for Theming',
-    description: 'Use CSS variables for dynamic theming'
+    language: "css",
+    title: "CSS Variables for Theming",
+    description: "Use CSS variables for dynamic theming",
   },
   {
-    id: 'shadcn-template-command-palette',
+    id: "shadcn-template-command-palette",
     code: `import { commandPaletteExtension } from '@lexkit/editor'
 
 // Add to extensions array
@@ -189,12 +189,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Command Palette',
-    description: 'Add a command palette for keyboard-driven editing'
+    language: "tsx",
+    title: "Command Palette",
+    description: "Add a command palette for keyboard-driven editing",
   },
   {
-    id: 'shadcn-template-image-handling',
+    id: "shadcn-template-image-handling",
     code: `function ImageHandler({ commands }: { commands: EditorCommands }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -229,12 +229,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Image Handling',
-    description: 'Handle image uploads and insertion'
+    language: "tsx",
+    title: "Image Handling",
+    description: "Handle image uploads and insertion",
   },
   {
-    id: 'shadcn-template-markdown-import',
+    id: "shadcn-template-markdown-import",
     code: `import { markdownExtension } from '@lexkit/editor'
 
 // Add to extensions
@@ -263,12 +263,12 @@ This is **bold** and *italic* text.
 
   return <ShadcnTemplate ref={editorRef} onReady={loadMarkdown} />
 }`,
-    language: 'tsx',
-    title: 'Markdown Support',
-    description: 'Import and export markdown content'
+    language: "tsx",
+    title: "Markdown Support",
+    description: "Import and export markdown content",
   },
   {
-    id: 'shadcn-template-floating-toolbar',
+    id: "shadcn-template-floating-toolbar",
     code: `// The ShadcnTemplate includes a floating toolbar by default
 // It appears when you select text and provides formatting options
 
@@ -279,12 +279,12 @@ This is **bold** and *italic* text.
 // - Code formatting
 // - Link creation/removal
 // - List toggles (unordered/ordered)`,
-    language: 'tsx',
-    title: 'Floating Toolbar',
-    description: 'Contextual formatting toolbar that appears on text selection'
+    language: "tsx",
+    title: "Floating Toolbar",
+    description: "Contextual formatting toolbar that appears on text selection",
   },
   {
-    id: 'shadcn-template-draggable-blocks',
+    id: "shadcn-template-draggable-blocks",
     code: `// The ShadcnTemplate includes draggable blocks by default
 // Hover over the left edge of content blocks to see drag handles
 
@@ -295,12 +295,12 @@ This is **bold** and *italic* text.
 // - Visual feedback during dragging
 // - Smooth animations
 // - Works with all content types (paragraphs, headings, lists, etc.)`,
-    language: 'tsx',
-    title: 'Draggable Blocks',
-    description: 'Drag and drop content blocks to reorder your document'
+    language: "tsx",
+    title: "Draggable Blocks",
+    description: "Drag and drop content blocks to reorder your document",
   },
   {
-    id: 'shadcn-template-context-menu',
+    id: "shadcn-template-context-menu",
     code: `// The ShadcnTemplate includes a context menu by default
 // Right-click on content to see formatting options
 
@@ -310,10 +310,10 @@ This is **bold** and *italic* text.
 // - Text formatting options
 // - Block-level commands
 // - Quick access to common actions`,
-    language: 'tsx',
-    title: 'Context Menu',
-    description: 'Right-click context menu for quick formatting actions'
-  }
-]
+    language: "tsx",
+    title: "Context Menu",
+    description: "Right-click context menu for quick formatting actions",
+  },
+];
 
-export default SHADCN_TEMPLATE_CODES
+export default SHADCN_TEMPLATE_CODES;

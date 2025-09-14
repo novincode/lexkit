@@ -1,10 +1,19 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, $isNodeSelection, RangeSelection } from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import React, { ReactNode, useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { BaseExtension } from '@lexkit/editor/extensions/base/BaseExtension';
-import { ExtensionCategory, BaseExtensionConfig } from '@lexkit/editor/extensions/types';
-import { useBaseEditor as useEditor } from '../../core/createEditorSystem';
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  $isNodeSelection,
+  RangeSelection,
+} from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import React, { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { BaseExtension } from "@lexkit/editor/extensions/base/BaseExtension";
+import {
+  ExtensionCategory,
+  BaseExtensionConfig,
+} from "@lexkit/editor/extensions/types";
+import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
 
 /**
  * Selection rect with position information
@@ -51,11 +60,14 @@ export interface FloatingToolbarRenderProps<TCommands = any, TStates = any> {
 /**
  * Configuration for the FloatingToolbarExtension
  */
-export interface FloatingConfig<TCommands = any, TStates = any> extends BaseExtensionConfig {
+export interface FloatingConfig<TCommands = any, TStates = any>
+  extends BaseExtensionConfig {
   /**
    * Headless render function - you have complete control over UI
    */
-  render: (props: FloatingToolbarRenderProps<TCommands, TStates>) => ReactNode | null;
+  render: (
+    props: FloatingToolbarRenderProps<TCommands, TStates>,
+  ) => ReactNode | null;
 
   /**
    * Function to get type-safe commands from the editor system
@@ -85,7 +97,7 @@ export interface FloatingConfig<TCommands = any, TStates = any> extends BaseExte
   /**
    * Position strategy (default: 'below')
    */
-  positionStrategy?: 'above' | 'below' | 'auto';
+  positionStrategy?: "above" | "below" | "auto";
 
   /**
    * Theme classes for styling
@@ -117,8 +129,11 @@ export type FloatingStateQueries = {
 /**
  * FloatingToolbarExtension - Clean, headless floating toolbar that appears on text selection
  */
-export class FloatingToolbarExtension<TCommands = any, TStates = any> extends BaseExtension<
-  'floatingToolbar',
+export class FloatingToolbarExtension<
+  TCommands = any,
+  TStates = any,
+> extends BaseExtension<
+  "floatingToolbar",
   FloatingConfig<TCommands, TStates>,
   FloatingCommands,
   FloatingStateQueries,
@@ -128,17 +143,17 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
   private selectionRect: SelectionRect | null = null;
 
   constructor() {
-    super('floatingToolbar', [ExtensionCategory.Floating]);
+    super("floatingToolbar", [ExtensionCategory.Floating]);
     this.config = {
       render: () => null,
       debounceMs: 100,
       offset: { x: 0, y: 8 },
-      positionStrategy: 'below',
+      positionStrategy: "below",
       theme: {
-        container: 'lexkit-floating-toolbar',
-        button: 'lexkit-floating-toolbar-button',
-        buttonActive: 'lexkit-floating-toolbar-button-active',
-      }
+        container: "lexkit-floating-toolbar",
+        button: "lexkit-floating-toolbar-button",
+        buttonActive: "lexkit-floating-toolbar-button-active",
+      },
     } as FloatingConfig<TCommands, TStates>;
   }
 
@@ -147,7 +162,13 @@ export class FloatingToolbarExtension<TCommands = any, TStates = any> extends Ba
   }
 
   getPlugins(): ReactNode[] {
-    return [<FloatingToolbarPlugin key="floating-toolbar" extension={this} config={this.config} />];
+    return [
+      <FloatingToolbarPlugin
+        key="floating-toolbar"
+        extension={this}
+        config={this.config}
+      />,
+    ];
   }
 
   getCommands(editor: LexicalEditor): FloatingCommands {
@@ -197,15 +218,23 @@ interface FloatingToolbarPluginProps<TCommands = any, TStates = any> {
   config: FloatingConfig<TCommands, TStates>;
 }
 
-function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, config }: FloatingToolbarPluginProps<TCommands, TStates>) {
+function FloatingToolbarPlugin<TCommands = any, TStates = any>({
+  extension,
+  config,
+}: FloatingToolbarPluginProps<TCommands, TStates>) {
   const [editor] = useLexicalComposerContext();
   const { config: globalConfig } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
-  const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
+  const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(
+    null,
+  );
   const [selection, setSelection] = useState<RangeSelection | null>(null);
 
   // Debounce utility
-  const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
+  const debounce = <T extends (...args: any[]) => any>(
+    func: T,
+    wait: number,
+  ) => {
     let timeout: NodeJS.Timeout;
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
@@ -216,21 +245,26 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
   // Convert DOMRect to SelectionRect with intelligent positioning
   const createSelectionRect = (domRect: DOMRect): SelectionRect => {
     const offset = config.offset || { x: 0, y: 8 };
-    const strategy = config.positionStrategy || 'below';
+    const strategy = config.positionStrategy || "below";
 
-    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const scrollX =
+      window.pageXOffset || document.documentElement.scrollLeft || 0;
+    const scrollY =
+      window.pageYOffset || document.documentElement.scrollTop || 0;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     // Calculate Y position based on strategy
     let y = domRect.bottom + scrollY + offset.y;
-    if (strategy === 'above') {
+    if (strategy === "above") {
       y = domRect.top + scrollY - offset.y;
-    } else if (strategy === 'auto') {
+    } else if (strategy === "auto") {
       const spaceBelow = viewportHeight - domRect.bottom;
       const spaceAbove = domRect.top;
-      y = spaceBelow > 60 ? domRect.bottom + scrollY + offset.y : domRect.top + scrollY - offset.y;
+      y =
+        spaceBelow > 60
+          ? domRect.bottom + scrollY + offset.y
+          : domRect.top + scrollY - offset.y;
     }
 
     // Toolbar dimensions (configurable with defaults)
@@ -257,7 +291,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
 
     // Check if centering would cause overflow
     const wouldOverflowLeft = centeredToolbarLeft < margin;
-    const wouldOverflowRight = centeredToolbarRight > (viewportWidth - margin);
+    const wouldOverflowRight = centeredToolbarRight > viewportWidth - margin;
 
     if (!wouldOverflowLeft && !wouldOverflowRight) {
       // Perfect centering case - no overflow on either side
@@ -294,7 +328,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       left: domRect.left + scrollX,
       bottom: domRect.bottom + scrollY,
       right: domRect.right + scrollX,
-      positionFromRight
+      positionFromRight,
     };
   };
 
@@ -357,11 +391,11 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       debouncedUpdate();
     };
 
-    document.addEventListener('selectionchange', handleSelectionChange);
+    document.addEventListener("selectionchange", handleSelectionChange);
 
     return () => {
       unregister();
-      document.removeEventListener('selectionchange', handleSelectionChange);
+      document.removeEventListener("selectionchange", handleSelectionChange);
     };
   }, [editor, config.debounceMs]);
 
@@ -374,12 +408,14 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
 
   // Require render function to be provided
   if (!config.render) {
-    console.warn('FloatingToolbarExtension: No render function provided in config.');
+    console.warn(
+      "FloatingToolbarExtension: No render function provided in config.",
+    );
     return null;
   }
 
   // SSR safety
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
 
   const anchorElem = config.anchorElem || document.body;
 
@@ -394,6 +430,6 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({ extension, conf
       hide,
       theme: globalConfig?.theme?.floatingToolbar || config.theme || {},
     }),
-    anchorElem
+    anchorElem,
   );
 }

@@ -1,9 +1,17 @@
-"use client"
+"use client";
 
 // Basic Editor Example - Getting Started
 // This is the simplest LexKit editor with essential text formatting
-import { createEditorSystem, boldExtension, italicExtension, historyExtension, listExtension, linkExtension, RichText } from "@lexkit/editor"
-import "./basic-editor.css"
+import {
+  createEditorSystem,
+  boldExtension,
+  italicExtension,
+  historyExtension,
+  listExtension,
+  linkExtension,
+  RichText,
+} from "@lexkit/editor";
+import "./basic-editor.css";
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
@@ -11,42 +19,42 @@ const extensions = [
   italicExtension,
   listExtension,
   linkExtension,
-  historyExtension
-] as const
+  historyExtension,
+] as const;
 
 // 2. Create typed editor system
-const { Provider, useEditor } = createEditorSystem<typeof extensions>()
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
 // Toolbar Component - Shows basic text formatting buttons
 function Toolbar() {
-  const { commands, activeStates } = useEditor()
+  const { commands, activeStates } = useEditor();
 
   return (
     <div className="basic-toolbar">
       <button
         onClick={() => commands.toggleBold()}
-        className={activeStates.bold ? 'active' : ''}
+        className={activeStates.bold ? "active" : ""}
         title="Bold (Ctrl+B)"
       >
         Bold
       </button>
       <button
         onClick={() => commands.toggleItalic()}
-        className={activeStates.italic ? 'active' : ''}
+        className={activeStates.italic ? "active" : ""}
         title="Italic (Ctrl+I)"
       >
         Italic
       </button>
       <button
         onClick={() => commands.toggleUnorderedList()}
-        className={activeStates.unorderedList ? 'active' : ''}
+        className={activeStates.unorderedList ? "active" : ""}
         title="Bullet List"
       >
         • List
       </button>
       <button
         onClick={() => commands.toggleOrderedList()}
-        className={activeStates.orderedList ? 'active' : ''}
+        className={activeStates.orderedList ? "active" : ""}
         title="Numbered List"
       >
         1. List
@@ -54,7 +62,7 @@ function Toolbar() {
       <button
         onClick={() => commands.undo()}
         disabled={!activeStates.canUndo}
-        className={!activeStates.canUndo ? 'disabled' : ''}
+        className={!activeStates.canUndo ? "disabled" : ""}
         title="Undo (Ctrl+Z)"
       >
         ↶ Undo
@@ -62,13 +70,13 @@ function Toolbar() {
       <button
         onClick={() => commands.redo()}
         disabled={!activeStates.canRedo}
-        className={!activeStates.canRedo ? 'disabled' : ''}
+        className={!activeStates.canRedo ? "disabled" : ""}
         title="Redo (Ctrl+Y)"
       >
         ↷ Redo
       </button>
     </div>
-  )
+  );
 }
 
 // Editor Component - Renders the actual editor with toolbar
@@ -80,21 +88,19 @@ function Editor() {
         classNames={{
           container: "basic-editor-container",
           contentEditable: "basic-content",
-          placeholder: "basic-placeholder"
+          placeholder: "basic-placeholder",
         }}
         placeholder="Start writing your content here..."
       />
     </div>
-  )
+  );
 }
 
 // Main Component
 export function BasicEditorExample() {
   return (
-    <Provider 
-      extensions={extensions}
-    >
+    <Provider extensions={extensions}>
       <Editor />
     </Provider>
-  )
+  );
 }

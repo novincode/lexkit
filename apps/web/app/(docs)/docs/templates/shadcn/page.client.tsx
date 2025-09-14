@@ -1,14 +1,28 @@
-'use client'
+"use client";
 
-import React, { useRef, useState } from 'react'
-import Link from 'next/link'
-import { Badge } from '@repo/ui/components/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card'
-import { Button } from '@repo/ui/components/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/tabs'
-import { SimpleCodeBlock } from '@/app/(docs)/components/simple-code-block'
-import { getRawCode, getHighlightedCode } from '@/lib/generated/code-registry'
-import { ShadcnTemplate, ShadcnTemplateRef } from '@/components/templates/shadcn/ShadcnTemplate'
+import React, { useRef, useState } from "react";
+import Link from "next/link";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
+import { SimpleCodeBlock } from "@/app/(docs)/components/simple-code-block";
+import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
+import {
+  ShadcnTemplate,
+  ShadcnTemplateRef,
+} from "@/components/templates/shadcn/ShadcnTemplate";
 import {
   Github,
   Code,
@@ -27,19 +41,19 @@ import {
   Command,
   MousePointer,
   Move,
-  Menu
-} from 'lucide-react'
+  Menu,
+} from "lucide-react";
 
 export default function ShadcnTemplatePageClient() {
-  const editorRef = useRef<ShadcnTemplateRef>(null)
-  const [isDark, setIsDark] = useState(false)
+  const editorRef = useRef<ShadcnTemplateRef>(null);
+  const [isDark, setIsDark] = useState(false);
 
   // Handle when editor is ready - inject sample content
   const handleEditorReady = React.useCallback((methods: ShadcnTemplateRef) => {
-    console.log('🎯 ShadcnTemplate ready - injecting sample content')
+    console.log("🎯 ShadcnTemplate ready - injecting sample content");
     // Only inject if editor is empty to prevent re-focus loops
-    const currentContent = methods.getMarkdown()
-    if (!currentContent || currentContent.trim() === '') {
+    const currentContent = methods.getMarkdown();
+    if (!currentContent || currentContent.trim() === "") {
       methods.injectMarkdown(`# Welcome to LexKit ShadcnTemplate
 
 This is a **modern rich text editor** built with Lexical, React, and SHADCN UI components. It includes:
@@ -65,40 +79,40 @@ This is a **modern rich text editor** built with Lexical, React, and SHADCN UI c
 
 Select some text and try the **floating toolbar** that appears, or right-click for the **context menu**. Press **Ctrl+K** to open the command palette!
 
-> **Tip**: Hover over the left edge of paragraphs to see **drag handles** for reordering content.`)
+> **Tip**: Hover over the left edge of paragraphs to see **drag handles** for reordering content.`);
     }
-  }, [])
+  }, []);
 
   const handleExportMarkdown = () => {
-    const markdown = editorRef.current?.getMarkdown()
+    const markdown = editorRef.current?.getMarkdown();
     if (markdown) {
-      const blob = new Blob([markdown], { type: 'text/markdown' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'lexkit-content.md'
-      a.click()
-      URL.revokeObjectURL(url)
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lexkit-content.md";
+      a.click();
+      URL.revokeObjectURL(url);
     }
-  }
+  };
 
   const handleExportHTML = () => {
-    const html = editorRef.current?.getHTML()
+    const html = editorRef.current?.getHTML();
     if (html) {
-      const blob = new Blob([html], { type: 'text/html' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'lexkit-content.html'
-      a.click()
-      URL.revokeObjectURL(url)
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lexkit-content.html";
+      a.click();
+      URL.revokeObjectURL(url);
     }
-  }
+  };
 
   const toggleTheme = () => {
-    setIsDark(!isDark)
-    document.documentElement.classList.toggle('dark', !isDark)
-  }
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle("dark", !isDark);
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-12">
@@ -106,11 +120,14 @@ Select some text and try the **floating toolbar** that appears, or right-click f
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">ShadcnTemplate</h1>
-          <p className="text-xl text-muted-foreground mt-2">Modern Rich Text Editor with SHADCN UI</p>
+          <p className="text-xl text-muted-foreground mt-2">
+            Modern Rich Text Editor with SHADCN UI
+          </p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          The ShadcnTemplate is a beautiful, production-ready rich text editor that combines
-          the power of Lexical with the elegance of SHADCN UI components.
+          The ShadcnTemplate is a beautiful, production-ready rich text editor
+          that combines the power of Lexical with the elegance of SHADCN UI
+          components.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -143,10 +160,13 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               onClick={toggleTheme}
               className="flex items-center gap-2"
             >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              {isDark ? 'Light' : 'Dark'}
+              {isDark ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              {isDark ? "Light" : "Dark"}
             </Button>
-     
           </div>
         </div>
 
@@ -157,15 +177,14 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               ShadcnTemplate Editor
             </CardTitle>
             <CardDescription>
-              Try the floating toolbar, context menu (right-click), command palette (Ctrl+K), and drag handles on the left edge of content blocks.
+              Try the floating toolbar, context menu (right-click), command
+              palette (Ctrl+K), and drag handles on the left edge of content
+              blocks.
             </CardDescription>
           </CardHeader>
-          <CardContent className='p-0'>
+          <CardContent className="p-0">
             <div className="space-y-4">
-              <ShadcnTemplate
-                ref={editorRef}
-                onReady={handleEditorReady}
-              />
+              <ShadcnTemplate ref={editorRef} onReady={handleEditorReady} />
             </div>
           </CardContent>
         </Card>
@@ -184,7 +203,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Context-aware toolbar that appears when you select text, providing quick access to formatting options.
+                Context-aware toolbar that appears when you select text,
+                providing quick access to formatting options.
               </p>
             </CardContent>
           </Card>
@@ -198,7 +218,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Hover over the left edge of content blocks to reveal drag handles for reordering your document.
+                Hover over the left edge of content blocks to reveal drag
+                handles for reordering your document.
               </p>
             </CardContent>
           </Card>
@@ -212,7 +233,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Right-click anywhere in the editor to access a context menu with formatting and block actions.
+                Right-click anywhere in the editor to access a context menu with
+                formatting and block actions.
               </p>
             </CardContent>
           </Card>
@@ -226,7 +248,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Press Ctrl+K to open a searchable command palette for keyboard-driven editing.
+                Press Ctrl+K to open a searchable command palette for
+                keyboard-driven editing.
               </p>
             </CardContent>
           </Card>
@@ -240,7 +263,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Beautiful modal dialogs for inserting images via URL or file upload with drag & drop support.
+                Beautiful modal dialogs for inserting images via URL or file
+                upload with drag & drop support.
               </p>
             </CardContent>
           </Card>
@@ -254,7 +278,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Insert and preview HTML content directly in your documents with live editing capabilities.
+                Insert and preview HTML content directly in your documents with
+                live editing capabilities.
               </p>
             </CardContent>
           </Card>
@@ -278,14 +303,15 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardHeader>
                 <CardTitle>Basic Usage</CardTitle>
                 <CardDescription>
-                  Get started with the ShadcnTemplate in just a few lines of code.
+                  Get started with the ShadcnTemplate in just a few lines of
+                  code.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <SimpleCodeBlock
                   title="Basic ShadcnTemplate"
-                  html={getHighlightedCode('shadcn-template-basic-usage') || ''}
-                  raw={getRawCode('shadcn-template-basic-usage') || ''}
+                  html={getHighlightedCode("shadcn-template-basic-usage") || ""}
+                  raw={getRawCode("shadcn-template-basic-usage") || ""}
                 />
               </CardContent>
             </Card>
@@ -302,8 +328,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate with Ref"
-                  html={getHighlightedCode('shadcn-template-with-ref') || ''}
-                  raw={getRawCode('shadcn-template-with-ref') || ''}
+                  html={getHighlightedCode("shadcn-template-with-ref") || ""}
+                  raw={getRawCode("shadcn-template-with-ref") || ""}
                 />
               </CardContent>
             </Card>
@@ -320,8 +346,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate Theme"
-                  html={getHighlightedCode('shadcn-template-theme') || ''}
-                  raw={getRawCode('shadcn-template-theme') || ''}
+                  html={getHighlightedCode("shadcn-template-theme") || ""}
+                  raw={getRawCode("shadcn-template-theme") || ""}
                 />
               </CardContent>
             </Card>
@@ -338,8 +364,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate Extensions"
-                  html={getHighlightedCode('shadcn-template-extensions') || ''}
-                  raw={getRawCode('shadcn-template-extensions') || ''}
+                  html={getHighlightedCode("shadcn-template-extensions") || ""}
+                  raw={getRawCode("shadcn-template-extensions") || ""}
                 />
               </CardContent>
             </Card>
@@ -358,15 +384,20 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">className?: string</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  className?: string
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
                   Additional CSS classes to apply to the editor wrapper.
                 </p>
               </div>
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">onReady?: (methods: ShadcnTemplateRef) =&gt; void</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  onReady?: (methods: ShadcnTemplateRef) =&gt; void
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Callback fired when the editor is ready with access to editor methods.
+                  Callback fired when the editor is ready with access to editor
+                  methods.
                 </p>
               </div>
             </CardContent>
@@ -378,25 +409,33 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">injectMarkdown(content: string): void</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  injectMarkdown(content: string): void
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
                   Inject markdown content into the editor.
                 </p>
               </div>
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">injectHTML(content: string): void</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  injectHTML(content: string): void
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
                   Inject HTML content into the editor.
                 </p>
               </div>
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">getMarkdown(): string</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  getMarkdown(): string
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
                   Get the current content as markdown.
                 </p>
               </div>
               <div>
-                <code className="text-sm bg-muted px-2 py-1 rounded">getHTML(): string</code>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  getHTML(): string
+                </code>
                 <p className="text-sm text-muted-foreground mt-1">
                   Get the current content as HTML.
                 </p>
@@ -410,7 +449,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Source Code</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          The ShadcnTemplate is open source. View the complete implementation on GitHub.
+          The ShadcnTemplate is open source. View the complete implementation on
+          GitHub.
         </p>
 
         <Tabs defaultValue="main" className="w-full">
@@ -433,8 +473,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate Main Component"
-                  html={getHighlightedCode('shadcn/ShadcnTemplate.tsx') || ''}
-                  raw={getRawCode('shadcn/ShadcnTemplate.tsx') || ''}
+                  html={getHighlightedCode("shadcn/ShadcnTemplate.tsx") || ""}
+                  raw={getRawCode("shadcn/ShadcnTemplate.tsx") || ""}
                 />
               </CardContent>
             </Card>
@@ -451,8 +491,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate Styles"
-                  html={getHighlightedCode('shadcn/shadcn-styles.css') || ''}
-                  raw={getRawCode('shadcn/shadcn-styles.css') || ''}
+                  html={getHighlightedCode("shadcn/shadcn-styles.css") || ""}
+                  raw={getRawCode("shadcn/shadcn-styles.css") || ""}
                 />
               </CardContent>
             </Card>
@@ -469,8 +509,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="ShadcnTemplate Theme"
-                  html={getHighlightedCode('shadcn/theme.ts') || ''}
-                  raw={getRawCode('shadcn/theme.ts') || ''}
+                  html={getHighlightedCode("shadcn/theme.ts") || ""}
+                  raw={getRawCode("shadcn/theme.ts") || ""}
                 />
               </CardContent>
             </Card>
@@ -487,8 +527,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="Command Palette Component"
-                  html={getHighlightedCode('shadcn/CommandPalette.tsx') || ''}
-                  raw={getRawCode('shadcn/CommandPalette.tsx') || ''}
+                  html={getHighlightedCode("shadcn/CommandPalette.tsx") || ""}
+                  raw={getRawCode("shadcn/CommandPalette.tsx") || ""}
                 />
               </CardContent>
             </Card>
@@ -505,8 +545,8 @@ Select some text and try the **floating toolbar** that appears, or right-click f
               <CardContent>
                 <SimpleCodeBlock
                   title="SHADCN UI Components"
-                  html={getHighlightedCode('shadcn/index.ts') || ''}
-                  raw={getRawCode('shadcn/index.ts') || ''}
+                  html={getHighlightedCode("shadcn/index.ts") || ""}
+                  raw={getRawCode("shadcn/index.ts") || ""}
                 />
               </CardContent>
             </Card>
@@ -523,5 +563,5 @@ Select some text and try the **floating toolbar** that appears, or right-click f
         </div>
       </div>
     </div>
-  )
+  );
 }

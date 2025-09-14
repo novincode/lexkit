@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@lexkit/editor/extensions/base';
+import { TextFormatExtension } from "@lexkit/editor/extensions/base";
 
 /**
  * CodeFormatExtension - Provides inline code text formatting functionality
@@ -15,9 +15,9 @@ import { TextFormatExtension } from '@lexkit/editor/extensions/base';
  * const editor = createEditorSystem(extensions);
  * ```
  */
-export class CodeFormatExtension extends TextFormatExtension<'code'> {
+export class CodeFormatExtension extends TextFormatExtension<"code"> {
   constructor() {
-    super('code');
+    super("code");
   }
 }
 

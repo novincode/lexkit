@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 const EXTENSIONS_API_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'extensions-create-extension-signature',
+    id: "extensions-create-extension-signature",
     code: `export function createExtension<
   Name extends string,
   Config extends BaseExtensionConfig,
@@ -12,12 +12,12 @@ const EXTENSIONS_API_CODES: RegisteredCodeSnippet[] = [
 >(
   config: CreateExtensionConfig<Name, Config, Commands, StateQueries, Plugins>
 ): BaseExtension<Name, Config, Commands, StateQueries, Plugins>`,
-    language: 'typescript',
-    title: 'createExtension Type Signature',
-    description: 'The complete type signature for the createExtension function'
+    language: "typescript",
+    title: "createExtension Type Signature",
+    description: "The complete type signature for the createExtension function",
   },
   {
-    id: 'extensions-create-extension-example',
+    id: "extensions-create-extension-example",
     code: `const myExtension = createExtension({
   name: 'my-extension',
   commands: (editor) => ({
@@ -33,12 +33,13 @@ const EXTENSIONS_API_CODES: RegisteredCodeSnippet[] = [
     };
   }
 });`,
-    language: 'typescript',
-    title: 'Creating an extension with createExtension',
-    description: 'Example of using createExtension to create a functional extension'
+    language: "typescript",
+    title: "Creating an extension with createExtension",
+    description:
+      "Example of using createExtension to create a functional extension",
   },
   {
-    id: 'extensions-base-extension-signature',
+    id: "extensions-base-extension-signature",
     code: `export abstract class BaseExtension<
   Name extends string = string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
@@ -48,12 +49,13 @@ const EXTENSIONS_API_CODES: RegisteredCodeSnippet[] = [
 > implements Extension<Name, Config, Commands, StateQueries, Plugins> {
   // Properties and methods...
 }`,
-    language: 'typescript',
-    title: 'BaseExtension Class Definition',
-    description: 'The abstract base class for creating extensions with OOP patterns'
+    language: "typescript",
+    title: "BaseExtension Class Definition",
+    description:
+      "The abstract base class for creating extensions with OOP patterns",
   },
   {
-    id: 'extensions-base-extension-example',
+    id: "extensions-base-extension-example",
     code: `class MyExtension extends BaseExtension<'my-extension'> {
   constructor() {
     super('my-extension');
@@ -80,12 +82,12 @@ const EXTENSIONS_API_CODES: RegisteredCodeSnippet[] = [
 }
 
 const myExtension = new MyExtension();`,
-    language: 'typescript',
-    title: 'Creating an extension with BaseExtension',
-    description: 'Example of extending BaseExtension for OOP-style extensions'
+    language: "typescript",
+    title: "Creating an extension with BaseExtension",
+    description: "Example of extending BaseExtension for OOP-style extensions",
   },
   {
-    id: 'extensions-extension-interface',
+    id: "extensions-extension-interface",
     code: `export interface Extension<
   Name extends string = string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
@@ -105,12 +107,12 @@ const myExtension = new MyExtension();`,
   getNodes(): any[];
   configure(config: Partial<Config>): this;
 }`,
-    language: 'typescript',
-    title: 'Extension Interface Definition',
-    description: 'The core Extension interface that all extensions implement'
+    language: "typescript",
+    title: "Extension Interface Definition",
+    description: "The core Extension interface that all extensions implement",
   },
   {
-    id: 'extensions-extension-category-enum',
+    id: "extensions-extension-category-enum",
     code: `export enum ExtensionCategory {
   Toolbar = 'toolbar',
   Sidebar = 'sidebar',
@@ -122,12 +124,12 @@ const myExtension = new MyExtension();`,
   Export = 'export',
   Custom = 'custom'
 }`,
-    language: 'typescript',
-    title: 'Extension Categories',
-    description: 'Available categories for organizing extensions'
+    language: "typescript",
+    title: "Extension Categories",
+    description: "Available categories for organizing extensions",
   },
   {
-    id: 'extensions-base-extension-config',
+    id: "extensions-base-extension-config",
     code: `export interface BaseExtensionConfig {
   /** Whether the extension is enabled */
   enabled?: boolean;
@@ -144,10 +146,10 @@ const myExtension = new MyExtension();`,
   /** Additional configuration properties */
   [key: string]: any;
 }`,
-    language: 'typescript',
-    title: 'Base Configuration Interface',
-    description: 'Common configuration options for all extensions'
-  }
-]
+    language: "typescript",
+    title: "Base Configuration Interface",
+    description: "Common configuration options for all extensions",
+  },
+];
 
-export default EXTENSIONS_API_CODES
+export default EXTENSIONS_API_CODES;

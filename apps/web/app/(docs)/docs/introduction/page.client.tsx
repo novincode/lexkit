@@ -1,25 +1,44 @@
-'use client'
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { BasicEditorExample } from "../../examples/BasicEditorExample"
-import { AdvancedFeaturesExample } from "../../examples/AdvancedFeaturesExample"
-import { ThemedEditorExample } from "../../examples/ThemedEditorExample"
-import { TailwindBasedExample } from "../../examples/TailwindBasedExample"
-import { DefaultTemplate, DefaultTemplateRef } from "@/components/templates/default/DefaultTemplate"
-import { Badge } from "@repo/ui/components/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
-import { CheckCircle, Zap, Palette, Play, Shield, Puzzle, Rocket, Github, BookOpen } from "lucide-react"
-import { Button } from "@repo/ui/components/button"
-import { InstallCommand } from "@/components/install-command"
-import { DynamicCodeExample } from "../../components/dynamic-code-example"
+import React from "react";
+import Link from "next/link";
+import { BasicEditorExample } from "../../examples/BasicEditorExample";
+import { AdvancedFeaturesExample } from "../../examples/AdvancedFeaturesExample";
+import { ThemedEditorExample } from "../../examples/ThemedEditorExample";
+import { TailwindBasedExample } from "../../examples/TailwindBasedExample";
+import {
+  DefaultTemplate,
+  DefaultTemplateRef,
+} from "@/components/templates/default/DefaultTemplate";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import {
+  CheckCircle,
+  Zap,
+  Palette,
+  Play,
+  Shield,
+  Puzzle,
+  Rocket,
+  Github,
+  BookOpen,
+} from "lucide-react";
+import { Button } from "@repo/ui/components/button";
+import { InstallCommand } from "@/components/install-command";
+import { DynamicCodeExample } from "../../components/dynamic-code-example";
 
 export function IntroductionPageClient() {
   const editorRef = React.useRef<DefaultTemplateRef>(null);
 
   // Handle when editor is ready - inject content immediately
   const handleEditorReady = React.useCallback((methods: DefaultTemplateRef) => {
-    console.log('🎯 Editor ready - injecting content immediately');
+    console.log("🎯 Editor ready - injecting content immediately");
     methods.injectMarkdown(`# A Developer's Journey with Rich Text Editors
 
 As a developer who's always valued clean, maintainable code, I found rich text editors to be one of the most challenging areas to work with. Complex APIs, inconsistent behaviors, and endless edge cases made building reliable editors feel like an uphill battle.
@@ -36,10 +55,13 @@ Ready to try it? Pick your package manager above and let's build something amazi
       {/* Hero Section */}
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold">LexKit — a type-safe rich text editor framework</h1>
+          <h1 className="text-4xl font-bold">
+            LexKit — a type-safe rich text editor framework
+          </h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Build editors fast. LexKit is headless and TypeScript-first, powered by Meta's Lexical. Perfect for blogs, apps, and teams.
+          Build editors fast. LexKit is headless and TypeScript-first, powered
+          by Meta's Lexical. Perfect for blogs, apps, and teams.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -67,7 +89,8 @@ Ready to try it? Pick your package manager above and let's build something amazi
         <div className="text-center space-y-4">
           <h2 className="text-3xl font-bold">What makes LexKit different</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Developer-friendly: safe commands, flexible extensions, and ready-to-use features.
+            Developer-friendly: safe commands, flexible extensions, and
+            ready-to-use features.
           </p>
         </div>
 
@@ -101,7 +124,8 @@ Ready to try it? Pick your package manager above and let's build something amazi
               </CardHeader>
               <CardContent className="pt-0">
                 <CardDescription className="text-sm leading-relaxed">
-                  Pick what you need: bold, images, tables. Get safe, auto-typed commands.
+                  Pick what you need: bold, images, tables. Get safe, auto-typed
+                  commands.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -118,7 +142,8 @@ Ready to try it? Pick your package manager above and let's build something amazi
               </CardHeader>
               <CardContent className="pt-0">
                 <CardDescription className="text-sm leading-relaxed">
-                  Use the Provider and hooks. Build UIs easily. Export to HTML or Markdown.
+                  Use the Provider and hooks. Build UIs easily. Export to HTML
+                  or Markdown.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -193,25 +218,39 @@ Ready to try it? Pick your package manager above and let's build something amazi
           </p>
         </div>
 
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Install LexKit</h3>
-            <InstallCommand packages={["@lexkit/editor"]} />
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Install Lexical Dependencies</h3>
-            <InstallCommand packages={["lexical", "@lexical/react", "@lexical/html", "@lexical/markdown", "@lexical/list", "@lexical/rich-text", "@lexical/selection", "@lexical/utils"]} />
-          </div>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">Install LexKit</h3>
+          <InstallCommand packages={["@lexkit/editor"]} />
         </div>
+
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">
+            Install Lexical Dependencies
+          </h3>
+          <InstallCommand
+            packages={[
+              "lexical",
+              "@lexical/react",
+              "@lexical/html",
+              "@lexical/markdown",
+              "@lexical/list",
+              "@lexical/rich-text",
+              "@lexical/selection",
+              "@lexical/utils",
+            ]}
+          />
+        </div>
+      </div>
 
       {/* Support Section */}
       <div className="bg-muted/50 rounded-lg p-6 space-y-4">
         <div className="space-y-2">
           <h4 className="font-semibold text-lg">Brought to you with ❤️</h4>
           <p className="text-muted-foreground leading-relaxed">
-            LexKit is free, open-source software built by developers, for developers.
-            Your support keeps this project alive — whether it's a GitHub star, bug report,
-            feature suggestion, or a small donation. Every contribution helps maintain and improve LexKit for everyone.
+            LexKit is free, open-source software built by developers, for
+            developers. Your support keeps this project alive — whether it's a
+            GitHub star, bug report, feature suggestion, or a small donation.
+            Every contribution helps maintain and improve LexKit for everyone.
           </p>
           <div className="flex items-center md:gap-6 gap-4 pt-2">
             <a
@@ -242,35 +281,44 @@ Ready to try it? Pick your package manager above and let's build something amazi
 
         <div className="space-y-12">
           <DynamicCodeExample
-            codes={['examples/BasicEditorExample.tsx', 'examples/basic-editor.css']}
+            codes={[
+              "examples/BasicEditorExample.tsx",
+              "examples/basic-editor.css",
+            ]}
             title="1. Basic Editor"
             description="Basic text formatting: bold, italic, lists."
             preview={<BasicEditorExample />}
-            tabs={['preview', 'component']}
+            tabs={["preview", "component"]}
           />
 
           <DynamicCodeExample
-            codes={['examples/ThemedEditorExample.tsx', 'examples/themed-editor.css']}
+            codes={[
+              "examples/ThemedEditorExample.tsx",
+              "examples/themed-editor.css",
+            ]}
             title="2. Themed Editor"
             description="Custom themes and styling."
             preview={<ThemedEditorExample />}
-            tabs={['preview', 'component', 'css']}
+            tabs={["preview", "component", "css"]}
           />
 
           <DynamicCodeExample
-            codes={['examples/AdvancedFeaturesExample.tsx', 'examples/advanced-editor.css']}
+            codes={[
+              "examples/AdvancedFeaturesExample.tsx",
+              "examples/advanced-editor.css",
+            ]}
             title="3. Advanced Features"
             description="Tables, images, exports, and more."
             preview={<AdvancedFeaturesExample />}
-            tabs={['preview', 'component']}
+            tabs={["preview", "component"]}
           />
 
           <DynamicCodeExample
-            codes={['examples/TailwindBasedExample.tsx']}
+            codes={["examples/TailwindBasedExample.tsx"]}
             title="4. Tailwind Theming"
             description="Pure Tailwind CSS styling — no custom CSS files."
             preview={<TailwindBasedExample />}
-            tabs={['preview', 'component']}
+            tabs={["preview", "component"]}
           />
         </div>
       </div>
@@ -281,7 +329,8 @@ Ready to try it? Pick your package manager above and let's build something amazi
           <div className="space-y-3">
             <h3 className="text-2xl font-bold">Continue your journey</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Ready to build something amazing? Explore our documentation and examples.
+              Ready to build something amazing? Explore our documentation and
+              examples.
             </p>
           </div>
           <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
@@ -316,5 +365,5 @@ Ready to try it? Pick your package manager above and let's build something amazi
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

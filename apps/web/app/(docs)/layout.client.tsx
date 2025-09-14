@@ -1,19 +1,19 @@
-'use client'
-import { TopNavigation } from "@/components/top-navigation"
-import { Button } from "@repo/ui/components/button"
-import { Sidebar } from "lucide-react"
-import { useState } from "react"
-import "./docs.css"
-import "./styles/prism.css"
-import { Footer } from "@/components/footer"
-import { DocsSidebar } from "./components/docs-sidebar"
+"use client";
+import { TopNavigation } from "@/components/top-navigation";
+import { Button } from "@repo/ui/components/button";
+import { Sidebar } from "lucide-react";
+import { useState } from "react";
+import "./docs.css";
+import "./styles/prism.css";
+import { Footer } from "@/components/footer";
+import { DocsSidebar } from "./components/docs-sidebar";
 
 interface DocsLayoutClientProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function DocsLayoutClient({ children }: DocsLayoutClientProps) {
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -55,5 +55,5 @@ export function DocsLayoutClient({ children }: DocsLayoutClientProps) {
 
       <Footer />
     </div>
-  )
+  );
 }

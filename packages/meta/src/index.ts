@@ -8,4 +8,4 @@
  */
 
 // Re-export everything from the main editor package
-export * from '@lexkit/editor';
+export * from "@lexkit/editor";

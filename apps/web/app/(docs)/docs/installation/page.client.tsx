@@ -1,13 +1,19 @@
-'use client'
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { Badge } from "@repo/ui/components/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
-import { Button } from "@repo/ui/components/button"
-import { InstallCommand } from "@/components/install-command"
-import { DynamicCodeExample } from "../../components/dynamic-code-example"
-import { BasicEditorExample } from "../../examples/BasicEditorExample"
+import React from "react";
+import Link from "next/link";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
+import { InstallCommand } from "@/components/install-command";
+import { DynamicCodeExample } from "../../components/dynamic-code-example";
+import { BasicEditorExample } from "../../examples/BasicEditorExample";
 import {
   CheckCircle,
   AlertTriangle,
@@ -19,8 +25,8 @@ import {
   Wrench,
   Layers,
   Shield,
-  Package
-} from "lucide-react"
+  Package,
+} from "lucide-react";
 
 export function InstallationPageClient() {
   return (
@@ -29,11 +35,14 @@ export function InstallationPageClient() {
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Installation Guide</h1>
-          <p className="text-xl text-muted-foreground mt-2">Get LexKit running in your project</p>
+          <p className="text-xl text-muted-foreground mt-2">
+            Get LexKit running in your project
+          </p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Follow our step-by-step guide to install LexKit and its peer dependencies.
-          We'll get you from zero to a working editor in under 5 minutes.
+          Follow our step-by-step guide to install LexKit and its peer
+          dependencies. We'll get you from zero to a working editor in under 5
+          minutes.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -53,9 +62,12 @@ export function InstallationPageClient() {
 
       {/* Understanding Peer Dependencies */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Understanding LexKit's Architecture</h2>
+        <h2 className="text-3xl font-bold text-center">
+          Understanding LexKit's Architecture
+        </h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          LexKit is built on Meta's Lexical framework. Here's why this matters for your installation.
+          LexKit is built on Meta's Lexical framework. Here's why this matters
+          for your installation.
         </p>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -68,8 +80,9 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground leading-relaxed">
-                LexKit doesn't bundle Lexical — instead, it declares it as a peer dependency.
-                This gives you full control over versioning and reduces bundle size.
+                LexKit doesn't bundle Lexical — instead, it declares it as a
+                peer dependency. This gives you full control over versioning and
+                reduces bundle size.
               </p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
@@ -97,14 +110,15 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground leading-relaxed">
-                You'll install both LexKit and its Lexical dependencies together.
-                This ensures compatibility and gives you access to all Lexical's features.
+                You'll install both LexKit and its Lexical dependencies
+                together. This ensures compatibility and gives you access to all
+                Lexical's features.
               </p>
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm font-medium mb-2">Pro Tip:</p>
                 <p className="text-sm text-muted-foreground">
-                  Always check our documentation for the recommended Lexical version
-                  that matches your LexKit version.
+                  Always check our documentation for the recommended Lexical
+                  version that matches your LexKit version.
                 </p>
               </div>
             </CardContent>
@@ -132,7 +146,8 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-base leading-relaxed mb-4">
-                Start with the main LexKit package that provides our type-safe editor system.
+                Start with the main LexKit package that provides our type-safe
+                editor system.
               </CardDescription>
               <InstallCommand packages={["@lexkit/editor"]} />
             </CardContent>
@@ -147,9 +162,21 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-base leading-relaxed mb-4">
-                Install the Lexical packages that power LexKit's functionality. These are peer dependencies.
+                Install the Lexical packages that power LexKit's functionality.
+                These are peer dependencies.
               </CardDescription>
-              <InstallCommand packages={["lexical", "@lexical/react", "@lexical/html", "@lexical/markdown", "@lexical/list", "@lexical/rich-text", "@lexical/selection", "@lexical/utils"]} />
+              <InstallCommand
+                packages={[
+                  "lexical",
+                  "@lexical/react",
+                  "@lexical/html",
+                  "@lexical/markdown",
+                  "@lexical/list",
+                  "@lexical/rich-text",
+                  "@lexical/selection",
+                  "@lexical/utils",
+                ]}
+              />
             </CardContent>
           </Card>
         </div>
@@ -165,11 +192,11 @@ export function InstallationPageClient() {
         </div>
 
         <DynamicCodeExample
-          codes={['examples/BasicEditorExample.tsx']}
+          codes={["examples/BasicEditorExample.tsx"]}
           title="Your First LexKit Editor"
           description="A simple editor with basic formatting capabilities."
           preview={<BasicEditorExample />}
-          tabs={['preview', 'component']}
+          tabs={["preview", "component"]}
         />
       </div>
 
@@ -190,8 +217,9 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-base leading-relaxed">
-                If you see version conflicts, try installing with the <code>--legacy-peer-deps</code> flag
-                or check our documentation for compatible version combinations.
+                If you see version conflicts, try installing with the{" "}
+                <code>--legacy-peer-deps</code> flag or check our documentation
+                for compatible version combinations.
               </CardDescription>
             </CardContent>
           </Card>
@@ -205,8 +233,9 @@ export function InstallationPageClient() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-base leading-relaxed">
-                Make sure your TypeScript version is compatible. LexKit requires TypeScript 4.5+
-                and proper type definitions for all Lexical packages.
+                Make sure your TypeScript version is compatible. LexKit requires
+                TypeScript 4.5+ and proper type definitions for all Lexical
+                packages.
               </CardDescription>
             </CardContent>
           </Card>
@@ -219,7 +248,8 @@ export function InstallationPageClient() {
           <div className="space-y-3">
             <h3 className="text-2xl font-bold">Ready to Build?</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Now that LexKit is installed, let's start building amazing editors!
+              Now that LexKit is installed, let's start building amazing
+              editors!
             </p>
           </div>
           <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
@@ -248,5 +278,5 @@ export function InstallationPageClient() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

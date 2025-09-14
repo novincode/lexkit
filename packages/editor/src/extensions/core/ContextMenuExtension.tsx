@@ -1,7 +1,7 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import React from 'react';
+import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import React from "react";
 
 /**
  * Context menu item configuration
@@ -43,7 +43,7 @@ export type ContextMenuStateQueries = {
  * Provides a headless context menu system that can be triggered by other extensions.
  */
 export class ContextMenuExtension extends BaseExtension<
-  'contextMenu',
+  "contextMenu",
   any,
   ContextMenuCommands,
   ContextMenuStateQueries,
@@ -53,7 +53,7 @@ export class ContextMenuExtension extends BaseExtension<
   private listeners: ((config: ContextMenuConfig | null) => void)[] = [];
 
   constructor() {
-    super('contextMenu', [ExtensionCategory.Toolbar]);
+    super("contextMenu", [ExtensionCategory.Toolbar]);
   }
 
   register(editor: LexicalEditor): () => void {
@@ -65,9 +65,9 @@ export class ContextMenuExtension extends BaseExtension<
 
     const editorElement = editor.getRootElement();
     if (editorElement) {
-      editorElement.addEventListener('contextmenu', handleContextMenu);
+      editorElement.addEventListener("contextmenu", handleContextMenu);
       return () => {
-        editorElement.removeEventListener('contextmenu', handleContextMenu);
+        editorElement.removeEventListener("contextmenu", handleContextMenu);
       };
     }
 
@@ -83,13 +83,13 @@ export class ContextMenuExtension extends BaseExtension<
       hideContextMenu: () => {
         this.contextMenuConfig = null;
         this.notifyListeners(null);
-      }
+      },
     };
   }
 
   getStateQueries(editor: LexicalEditor): ContextMenuStateQueries {
     return {
-      isContextMenuOpen: () => Promise.resolve(this.contextMenuConfig !== null)
+      isContextMenuOpen: () => Promise.resolve(this.contextMenuConfig !== null),
     };
   }
 
@@ -99,12 +99,12 @@ export class ContextMenuExtension extends BaseExtension<
   subscribe(listener: (config: ContextMenuConfig | null) => void): () => void {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners(config: ContextMenuConfig | null) {
-    this.listeners.forEach(listener => listener(config));
+    this.listeners.forEach((listener) => listener(config));
   }
 
   getCurrentConfig(): ContextMenuConfig | null {

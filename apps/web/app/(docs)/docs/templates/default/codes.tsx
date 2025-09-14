@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 const DEFAULT_TEMPLATE_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'default-template-basic-usage',
+    id: "default-template-basic-usage",
     code: `import { DefaultTemplate } from '@lexkit/editor/templates'
 
 function MyEditor() {
@@ -16,12 +16,12 @@ function MyEditor() {
     />
   )
 }`,
-    language: 'tsx',
-    title: 'Basic DefaultTemplate Usage',
-    description: 'Create a basic editor with the DefaultTemplate'
+    language: "tsx",
+    title: "Basic DefaultTemplate Usage",
+    description: "Create a basic editor with the DefaultTemplate",
   },
   {
-    id: 'default-template-with-ref',
+    id: "default-template-with-ref",
     code: `import { useRef } from 'react'
 import { DefaultTemplate, DefaultTemplateRef } from '@lexkit/editor/templates'
 
@@ -41,12 +41,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'DefaultTemplate with Ref',
-    description: 'Access editor methods using a ref'
+    language: "tsx",
+    title: "DefaultTemplate with Ref",
+    description: "Access editor methods using a ref",
   },
   {
-    id: 'default-template-extensions',
+    id: "default-template-extensions",
     code: `import {
   boldExtension,
   italicExtension,
@@ -72,12 +72,12 @@ const extensions = [
   codeExtension,
   // ... add more extensions as needed
 ] as const`,
-    language: 'typescript',
-    title: 'DefaultTemplate Extensions',
-    description: 'Configure extensions for the DefaultTemplate'
+    language: "typescript",
+    title: "DefaultTemplate Extensions",
+    description: "Configure extensions for the DefaultTemplate",
   },
   {
-    id: 'default-template-create-system',
+    id: "default-template-create-system",
     code: `import { createEditorSystem } from '@lexkit/editor'
 
 // Define your extensions
@@ -89,12 +89,12 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>()
 // Extract types for type safety
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>
 type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
-    language: 'typescript',
-    title: 'Create Editor System',
-    description: 'Set up a typed editor system with extensions'
+    language: "typescript",
+    title: "Create Editor System",
+    description: "Set up a typed editor system with extensions",
   },
   {
-    id: 'default-template-toolbar',
+    id: "default-template-toolbar",
     code: `function Toolbar({ commands, activeStates }: {
   commands: EditorCommands
   activeStates: EditorStateQueries
@@ -116,12 +116,12 @@ type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Custom Toolbar',
-    description: 'Create a custom toolbar with command buttons'
+    language: "tsx",
+    title: "Custom Toolbar",
+    description: "Create a custom toolbar with command buttons",
   },
   {
-    id: 'default-template-theme',
+    id: "default-template-theme",
     code: `const customTheme = {
   toolbar: 'my-toolbar',
   editor: 'my-editor',
@@ -141,12 +141,12 @@ type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
 }
 
 <DefaultTemplate theme={customTheme} />`,
-    language: 'typescript',
-    title: 'Custom Theme',
-    description: 'Apply custom CSS classes with a theme object'
+    language: "typescript",
+    title: "Custom Theme",
+    description: "Apply custom CSS classes with a theme object",
   },
   {
-    id: 'default-template-css-variables',
+    id: "default-template-css-variables",
     code: `:root {
   --editor-bg: #ffffff;
   --editor-text: #000000;
@@ -160,12 +160,12 @@ type EditorStateQueries = ExtractStateQueries<typeof extensions>`,
   --toolbar-bg: #2a2a2a;
   --button-hover: #3a3a3a;
 }`,
-    language: 'css',
-    title: 'CSS Variables for Theming',
-    description: 'Use CSS variables for dynamic theming'
+    language: "css",
+    title: "CSS Variables for Theming",
+    description: "Use CSS variables for dynamic theming",
   },
   {
-    id: 'default-template-command-palette',
+    id: "default-template-command-palette",
     code: `import { commandPaletteExtension } from '@lexkit/editor'
 
 // Add to extensions array
@@ -192,12 +192,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Command Palette',
-    description: 'Add a command palette for keyboard-driven editing'
+    language: "tsx",
+    title: "Command Palette",
+    description: "Add a command palette for keyboard-driven editing",
   },
   {
-    id: 'default-template-image-handling',
+    id: "default-template-image-handling",
     code: `function ImageHandler({ commands }: { commands: EditorCommands }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -232,12 +232,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Image Handling',
-    description: 'Handle image uploads and insertion'
+    language: "tsx",
+    title: "Image Handling",
+    description: "Handle image uploads and insertion",
   },
   {
-    id: 'default-template-markdown-import',
+    id: "default-template-markdown-import",
     code: `import { markdownExtension } from '@lexkit/editor'
 
 // Add to extensions
@@ -266,10 +266,10 @@ This is **bold** and *italic* text.
 
   return <DefaultTemplate ref={editorRef} onReady={loadMarkdown} />
 }`,
-    language: 'tsx',
-    title: 'Markdown Support',
-    description: 'Import and export markdown content'
-  }
-]
+    language: "tsx",
+    title: "Markdown Support",
+    description: "Import and export markdown content",
+  },
+];
 
-export default DEFAULT_TEMPLATE_CODES
+export default DEFAULT_TEMPLATE_CODES;

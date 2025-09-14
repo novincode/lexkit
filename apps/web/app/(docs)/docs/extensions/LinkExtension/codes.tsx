@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '../../../lib/types'
+import { RegisteredCodeSnippet } from "../../../lib/types";
 
 export const LINK_EXTENSION_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'link-extension-basic-usage',
+    id: "link-extension-basic-usage",
     code: `import { createEditorSystem, linkExtension } from '@lexkit/editor'
 
 const extensions = [linkExtension] as const
@@ -28,13 +28,13 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'tsx',
-    title: 'Basic Link Extension Usage',
-    description: 'Simple setup with manual link creation',
-    highlightLines: [3, 4, 5, 10, 11, 12, 15, 16, 17]
+    language: "tsx",
+    title: "Basic Link Extension Usage",
+    description: "Simple setup with manual link creation",
+    highlightLines: [3, 4, 5, 10, 11, 12, 15, 16, 17],
   },
   {
-    id: 'link-extension-auto-link-text',
+    id: "link-extension-auto-link-text",
     code: `import { linkExtension } from '@lexkit/editor'
 
 const extensions = [
@@ -42,13 +42,13 @@ const extensions = [
     autoLinkText: true  // Auto-convert URLs as you type
   })
 ] as const`,
-    language: 'typescript',
-    title: 'Auto-Link Text Configuration',
-    description: 'Enable automatic link creation when typing URLs',
-    highlightLines: [4, 5]
+    language: "typescript",
+    title: "Auto-Link Text Configuration",
+    description: "Enable automatic link creation when typing URLs",
+    highlightLines: [4, 5],
   },
   {
-    id: 'link-extension-custom-validation',
+    id: "link-extension-custom-validation",
     code: `import { linkExtension } from '@lexkit/editor'
 
 const extensions = [
@@ -61,13 +61,13 @@ const extensions = [
     }
   })
 ] as const`,
-    language: 'typescript',
-    title: 'Custom URL Validation',
-    description: 'Use custom validation for URLs',
-    highlightLines: [5, 6, 7, 8]
+    language: "typescript",
+    title: "Custom URL Validation",
+    description: "Use custom validation for URLs",
+    highlightLines: [5, 6, 7, 8],
   },
   {
-    id: 'link-extension-commands',
+    id: "link-extension-commands",
     code: `function LinkToolbar() {
   const { commands, activeStates } = useEditor()
 
@@ -103,13 +103,13 @@ const extensions = [
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Link Commands Usage',
-    description: 'Using link extension commands in components',
-    highlightLines: [4, 5, 6, 7, 11, 12, 13, 14, 17, 18, 19, 20]
+    language: "tsx",
+    title: "Link Commands Usage",
+    description: "Using link extension commands in components",
+    highlightLines: [4, 5, 6, 7, 11, 12, 13, 14, 17, 18, 19, 20],
   },
   {
-    id: 'link-extension-paste-behavior',
+    id: "link-extension-paste-behavior",
     code: `// LinkExtension Paste Behavior:
 //
 // 1. Pasting URL at cursor (no selection):
@@ -126,33 +126,33 @@ const extensions = [
 //    - Normal paste behavior (no link creation)
 //
 // Note: autoLinkText setting only affects typing, not pasting`,
-    language: 'typescript',
-    title: 'Paste Behavior Explanation',
-    description: 'How LinkExtension handles different paste scenarios',
-    highlightLines: [3, 7, 11, 15, 19]
+    language: "typescript",
+    title: "Paste Behavior Explanation",
+    description: "How LinkExtension handles different paste scenarios",
+    highlightLines: [3, 7, 11, 15, 19],
   },
   {
-    id: 'link-extension-disable-auto-link-urls',
+    id: "link-extension-disable-auto-link-urls",
     code: `const extensions = [
   linkExtension.configure({
     autoLinkUrls: false  // Pasted URLs remain as plain text
   })
 ] as const`,
-    language: 'typescript',
-    title: 'Disable Auto-Link URLs',
-    description: 'Disable automatic linking for pasted URLs'
+    language: "typescript",
+    title: "Disable Auto-Link URLs",
+    description: "Disable automatic linking for pasted URLs",
   },
   {
-    id: 'link-extension-link-selected-text-on-paste',
+    id: "link-extension-link-selected-text-on-paste",
     code: `const extensions = [
   linkExtension.configure({
     linkSelectedTextOnPaste: false  // Replace selected text with URL instead of linking it
   })
 ] as const`,
-    language: 'typescript',
-    title: 'Control Selected Text Paste Behavior',
-    description: 'Control behavior when pasting URLs over selected text'
-  }
-]
+    language: "typescript",
+    title: "Control Selected Text Paste Behavior",
+    description: "Control behavior when pasting URLs over selected text",
+  },
+];
 
-export default LINK_EXTENSION_CODES
+export default LINK_EXTENSION_CODES;

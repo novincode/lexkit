@@ -1,7 +1,14 @@
-import React from 'react';
-import { BaseExtension } from '@lexkit/editor/extensions/base/BaseExtension';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import React from "react";
+import { BaseExtension } from "@lexkit/editor/extensions/base/BaseExtension";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode,
+} from "lexical";
 
 // Define the commands interface
 type TestCommands = {
@@ -18,23 +25,23 @@ type TestStateQueries = {
 
 // Create the extension class extending BaseExtension
 class TestBaseExtensionClass extends BaseExtension<
-  'test-base-extension',
+  "test-base-extension",
   {},
   TestCommands,
   TestStateQueries,
   React.ReactNode[]
 > {
   constructor() {
-    super('test-base-extension', [ExtensionCategory.Toolbar]);
+    super("test-base-extension", [ExtensionCategory.Toolbar]);
   }
 
   // Implement the required register method
   register(editor: LexicalEditor): () => void {
-    console.log('TestBaseExtension registered!');
+    console.log("TestBaseExtension registered!");
 
     // Return cleanup function
     return () => {
-      console.log('TestBaseExtension cleaned up!');
+      console.log("TestBaseExtension cleaned up!");
     };
   }
 
@@ -60,8 +67,8 @@ class TestBaseExtensionClass extends BaseExtension<
       },
 
       getWordCount: () => {
-        alert('Hello World from BaseExtension!');
-      }
+        alert("Hello World from BaseExtension!");
+      },
     };
   }
 
@@ -84,7 +91,7 @@ class TestBaseExtensionClass extends BaseExtension<
             resolve(!root.getTextContent().trim());
           });
         });
-      }
+      },
     };
   }
 }

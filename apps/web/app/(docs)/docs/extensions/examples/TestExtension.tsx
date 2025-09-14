@@ -1,7 +1,14 @@
-import React from 'react';
-import { createExtension } from '@lexkit/editor';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { LexicalEditor, $getSelection, $isRangeSelection, $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import React from "react";
+import { createExtension } from "@lexkit/editor";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode,
+} from "lexical";
 
 // Define the commands interface
 type TestCommands = {
@@ -17,8 +24,14 @@ type TestStateQueries = {
 };
 
 // Create the extension using the new createExtension function
-const TestExtension = createExtension<'test-extension', {}, TestCommands, TestStateQueries, React.ReactNode[]>({
-  name: 'test-extension',
+const TestExtension = createExtension<
+  "test-extension",
+  {},
+  TestCommands,
+  TestStateQueries,
+  React.ReactNode[]
+>({
+  name: "test-extension",
   category: [ExtensionCategory.Toolbar],
 
   // Define commands
@@ -42,8 +55,8 @@ const TestExtension = createExtension<'test-extension', {}, TestCommands, TestSt
     },
 
     getWordCount: () => {
-      alert('Hello World');
-    }
+      alert("Hello World");
+    },
   }),
 
   // Define state queries
@@ -64,19 +77,18 @@ const TestExtension = createExtension<'test-extension', {}, TestCommands, TestSt
           resolve(!root.getTextContent().trim());
         });
       });
-    }
+    },
   }),
 
   // Initialize function (optional)
   initialize: (editor) => {
-    console.log('TestExtension initialized!');
+    console.log("TestExtension initialized!");
 
     // Return cleanup function
     return () => {
-      console.log('TestExtension cleaned up!');
+      console.log("TestExtension cleaned up!");
     };
-  }
+  },
 });
 
 export { TestExtension };
-

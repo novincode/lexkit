@@ -1,10 +1,10 @@
-import { ComponentType, CSSProperties } from 'react';
-import { BaseExtensionConfig } from '@lexkit/editor/extensions/types';
+import { ComponentType, CSSProperties } from "react";
+import { BaseExtensionConfig } from "@lexkit/editor/extensions/types";
 
 /**
  * Supported alignment options for media elements
  */
-export type Alignment = 'left' | 'right' | 'center' | 'none';
+export type Alignment = "left" | "right" | "center" | "none";
 
 /**
  * Payload interface for image insertion and manipulation
@@ -47,7 +47,7 @@ export interface ImageComponentProps extends ImagePayload {
  */
 export interface SerializedImageNode {
   /** Node type identifier */
-  type: 'image';
+  type: "image";
   /** Version for migration support */
   version: number;
   /** Image source URL */
@@ -77,9 +77,9 @@ export interface ImageExtensionConfig extends BaseExtensionConfig {
   /** Default alignment for new images */
   defaultAlignment?: Alignment;
   /** CSS class names for different alignments and elements */
-  classNames?: Partial<Record<Alignment | 'wrapper' | 'caption', string>>;
+  classNames?: Partial<Record<Alignment | "wrapper" | "caption", string>>;
   /** CSS styles for different alignments and elements */
-  styles?: Partial<Record<Alignment | 'wrapper' | 'caption', CSSProperties>>;
+  styles?: Partial<Record<Alignment | "wrapper" | "caption", CSSProperties>>;
   /** Custom component for rendering images */
   customRenderer?: ComponentType<ImageComponentProps>;
   /** Enable/disable image resizing (default: true) */

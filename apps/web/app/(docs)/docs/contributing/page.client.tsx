@@ -1,12 +1,18 @@
-'use client'
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { Badge } from '@repo/ui/components/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card';
-import { Button } from '@repo/ui/components/button';
-import { SimpleCodeBlock } from '@/app/(docs)/components/simple-code-block';
-import { getRawCode, getHighlightedCode } from '@/lib/generated/code-registry';
+import React from "react";
+import Link from "next/link";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
+import { SimpleCodeBlock } from "@/app/(docs)/components/simple-code-block";
+import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
 import {
   Github,
   GitBranch,
@@ -20,8 +26,8 @@ import {
   MessageSquare,
   FileText,
   Terminal,
-  Settings
-} from 'lucide-react';
+  Settings,
+} from "lucide-react";
 
 export default function ContributingPageClient() {
   return (
@@ -30,7 +36,9 @@ export default function ContributingPageClient() {
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Contributing to LexKit</h1>
-          <p className="text-xl text-muted-foreground mt-2">Help us build the future of rich text editing</p>
+          <p className="text-xl text-muted-foreground mt-2">
+            Help us build the future of rich text editing
+          </p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
           LexKit is an open-source project built with modern web technologies.
@@ -56,7 +64,8 @@ export default function ContributingPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Getting Started</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          LexKit is a monorepo built with modern tools. Here's how to get started with development.
+          LexKit is a monorepo built with modern tools. Here's how to get
+          started with development.
         </p>
 
         <div className="space-y-6">
@@ -73,8 +82,8 @@ export default function ContributingPageClient() {
               </p>
               <SimpleCodeBlock
                 title="Clone the LexKit repository"
-                html={getHighlightedCode('contributing-clone-repo') || ''}
-                raw={getRawCode('contributing-clone-repo') || ''}
+                html={getHighlightedCode("contributing-clone-repo") || ""}
+                raw={getRawCode("contributing-clone-repo") || ""}
               />
             </CardContent>
           </Card>
@@ -88,12 +97,13 @@ export default function ContributingPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                LexKit uses pnpm for package management. Install all dependencies:
+                LexKit uses pnpm for package management. Install all
+                dependencies:
               </p>
               <SimpleCodeBlock
                 title="Install dependencies"
-                html={getHighlightedCode('contributing-install-deps') || ''}
-                raw={getRawCode('contributing-install-deps') || ''}
+                html={getHighlightedCode("contributing-install-deps") || ""}
+                raw={getRawCode("contributing-install-deps") || ""}
               />
             </CardContent>
           </Card>
@@ -111,8 +121,8 @@ export default function ContributingPageClient() {
               </p>
               <SimpleCodeBlock
                 title="Start the development server"
-                html={getHighlightedCode('contributing-dev-server') || ''}
-                raw={getRawCode('contributing-dev-server') || ''}
+                html={getHighlightedCode("contributing-dev-server") || ""}
+                raw={getRawCode("contributing-dev-server") || ""}
               />
             </CardContent>
           </Card>
@@ -130,8 +140,8 @@ export default function ContributingPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="LexKit Monorepo Structure"
-              html={getHighlightedCode('contributing-project-structure') || ''}
-              raw={getRawCode('contributing-project-structure') || ''}
+              html={getHighlightedCode("contributing-project-structure") || ""}
+              raw={getRawCode("contributing-project-structure") || ""}
             />
           </CardContent>
         </Card>
@@ -146,7 +156,8 @@ export default function ContributingPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Core packages including the editor system, UI components, and TypeScript configurations.
+                Core packages including the editor system, UI components, and
+                TypeScript configurations.
               </p>
             </CardContent>
           </Card>
@@ -160,7 +171,8 @@ export default function ContributingPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                The main web application with documentation, demos, and examples.
+                The main web application with documentation, demos, and
+                examples.
               </p>
             </CardContent>
           </Card>
@@ -185,15 +197,18 @@ export default function ContributingPageClient() {
             <CardContent>
               <div className="space-y-4">
                 <p className="text-muted-foreground leading-relaxed">
-                  Create feature branches from <code>main</code> for all changes:
+                  Create feature branches from <code>main</code> for all
+                  changes:
                 </p>
                 <SimpleCodeBlock
                   title="Create a feature branch"
-                  html={getHighlightedCode('contributing-create-branch') || ''}
-                  raw={getRawCode('contributing-create-branch') || ''}
+                  html={getHighlightedCode("contributing-create-branch") || ""}
+                  raw={getRawCode("contributing-create-branch") || ""}
                 />
                 <p className="text-muted-foreground leading-relaxed">
-                  Use descriptive branch names like <code>feature/add-link-extension</code> or <code>fix/toolbar-bug</code>.
+                  Use descriptive branch names like{" "}
+                  <code>feature/add-link-extension</code> or{" "}
+                  <code>fix/toolbar-bug</code>.
                 </p>
               </div>
             </CardContent>
@@ -213,8 +228,8 @@ export default function ContributingPageClient() {
                 </p>
                 <SimpleCodeBlock
                   title="Run quality checks"
-                  html={getHighlightedCode('contributing-run-checks') || ''}
-                  raw={getRawCode('contributing-run-checks') || ''}
+                  html={getHighlightedCode("contributing-run-checks") || ""}
+                  raw={getRawCode("contributing-run-checks") || ""}
                 />
               </div>
             </CardContent>
@@ -262,7 +277,9 @@ export default function ContributingPageClient() {
             <CardContent>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li>Use strict TypeScript types</li>
-                <li>Avoid <code>any</code> types when possible</li>
+                <li>
+                  Avoid <code>any</code> types when possible
+                </li>
                 <li>Document complex type definitions</li>
                 <li>Use utility types for common patterns</li>
               </ul>
@@ -340,7 +357,8 @@ export default function ContributingPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">
-                  Report bugs, request features, or ask questions on our GitHub repository.
+                  Report bugs, request features, or ask questions on our GitHub
+                  repository.
                 </p>
               </CardContent>
             </Card>
@@ -356,7 +374,8 @@ export default function ContributingPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">
-                  Join community discussions, share ideas, and get help from other contributors.
+                  Join community discussions, share ideas, and get help from
+                  other contributors.
                 </p>
               </CardContent>
             </Card>
@@ -364,5 +383,5 @@ export default function ContributingPageClient() {
         </div>
       </div>
     </div>
-  )
+  );
 }

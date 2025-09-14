@@ -9,8 +9,9 @@
 **Solutions**:
 
 1. **Built-in Error Handling**: The `richTextExtension` includes automatic error boundaries, but you can still add your own for additional safety:
+
 ```tsx
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary } from "react-error-boundary";
 
 function EditorWithErrorBoundary() {
   return (
@@ -22,8 +23,9 @@ function EditorWithErrorBoundary() {
 ```
 
 2. **Verify Provider Setup**: Ensure you're using the Provider correctly:
+
 ```tsx
-import { Provider } from '@lexkit/editor';
+import { Provider } from "@lexkit/editor";
 
 function App() {
   return (
@@ -46,25 +48,25 @@ function App() {
 **Solutions**:
 
 1. **Verify Extension Registration**:
-```tsx
-import { HistoryExtension, TextFormatExtension } from '@lexkit/editor';
 
-const extensions = [
-  HistoryExtension,
-  TextFormatExtension
-];
+```tsx
+import { HistoryExtension, TextFormatExtension } from "@lexkit/editor";
+
+const extensions = [HistoryExtension, TextFormatExtension];
 ```
 
 2. **Check Extension Dependencies**: Some extensions require others:
+
 ```tsx
 // HistoryExtension requires Lexical's HistoryPlugin
 const extensions = [
   HistoryExtension, // Must come before other extensions
-  TextFormatExtension
+  TextFormatExtension,
 ];
 ```
 
 3. **Extension Order Matters**: Order extensions by dependency:
+
 ```tsx
 const extensions = [
   // Core extensions first
@@ -72,7 +74,7 @@ const extensions = [
   // Then formatting
   TextFormatExtension,
   // Then custom extensions
-  YourCustomExtension
+  YourCustomExtension,
 ];
 ```
 
@@ -83,16 +85,18 @@ const extensions = [
 **Solutions**:
 
 1. **Check Theme Configuration**:
+
 ```tsx
 const config = {
   theme: {
-    editor: 'your-editor-class',
-    toolbar: 'your-toolbar-class'
-  }
+    editor: "your-editor-class",
+    toolbar: "your-toolbar-class",
+  },
 };
 ```
 
 2. **CSS Loading Order**: Ensure your CSS loads after LexKit's styles:
+
 ```html
 <!-- Load LexKit first -->
 <link rel="stylesheet" href="lexkit-styles.css" />
@@ -101,12 +105,17 @@ const config = {
 ```
 
 3. **CSS Specificity**: Use more specific selectors if needed:
+
 ```css
 /* Instead of */
-.editor { border: 1px solid red; }
+.editor {
+  border: 1px solid red;
+}
 
 /* Use */
-.my-app .editor { border: 1px solid red; }
+.my-app .editor {
+  border: 1px solid red;
+}
 ```
 
 ### TypeScript Errors
@@ -116,20 +125,23 @@ const config = {
 **Solutions**:
 
 1. **Check Type Definitions**: Ensure you have the latest types:
+
 ```bash
 npm install @lexkit/editor@latest
 ```
 
 2. **Import Types Correctly**:
+
 ```tsx
-import type { EditorConfig, Extension } from '@lexkit/editor';
+import type { EditorConfig, Extension } from "@lexkit/editor";
 ```
 
 3. **Generic Type Issues**: Provide explicit types when needed:
+
 ```tsx
 const config: EditorConfig = {
   theme: yourTheme,
-  namespace: 'MyEditor'
+  namespace: "MyEditor",
 };
 ```
 
@@ -140,22 +152,25 @@ const config: EditorConfig = {
 **Solutions**:
 
 1. **Tree Shaking**: Import only what you need:
+
 ```tsx
 // Good
-import { Provider, HistoryExtension } from '@lexkit/editor';
+import { Provider, HistoryExtension } from "@lexkit/editor";
 
 // Avoid
-import * as LexKit from '@lexkit/editor';
+import * as LexKit from "@lexkit/editor";
 ```
 
 2. **Bundle Analyzer**: Check what's taking up space:
+
 ```bash
 npx webpack-bundle-analyzer dist/static/js/*.js
 ```
 
 3. **Dynamic Imports**: Load extensions dynamically:
+
 ```tsx
-const extensions = await import('./extensions');
+const extensions = await import("./extensions");
 ```
 
 ### Performance Issues
@@ -165,14 +180,16 @@ const extensions = await import('./extensions');
 **Solutions**:
 
 1. **Debounce Updates**: For frequent updates:
-```tsx
-import { useDebounce } from 'use-debounce';
 
-const [value, setValue] = useState('');
+```tsx
+import { useDebounce } from "use-debounce";
+
+const [value, setValue] = useState("");
 const debouncedValue = useDebounce(value, 300);
 ```
 
 2. **Memoize Components**:
+
 ```tsx
 const Toolbar = React.memo(({ children }) => (
   <div className="toolbar">{children}</div>
@@ -180,6 +197,7 @@ const Toolbar = React.memo(({ children }) => (
 ```
 
 3. **Virtual Scrolling**: For large documents:
+
 ```tsx
 // Use react-window or similar for large content
 ```
@@ -191,12 +209,14 @@ const Toolbar = React.memo(({ children }) => (
 **Solutions**:
 
 1. **Isolate Plugins**: Test extensions individually:
+
 ```tsx
 // Test one at a time
 const extensions = [HistoryExtension]; // Only one extension
 ```
 
 2. **Check Plugin Order**: Some plugins need specific ordering:
+
 ```tsx
 const extensions = [
   // History first
@@ -204,17 +224,18 @@ const extensions = [
   // Then others
   TextFormatExtension,
   // Custom last
-  YourExtension
+  YourExtension,
 ];
 ```
 
 3. **Plugin Configuration**: Ensure proper configuration:
+
 ```tsx
 const config = {
   plugins: {
     history: { maxUndoRedoSteps: 10 },
     // Other plugin configs
-  }
+  },
 };
 ```
 
@@ -225,6 +246,7 @@ const config = {
 **Solutions**:
 
 1. **Use Correct Format**: Match export/import formats:
+
 ```tsx
 // Export
 const html = editor.getHTML();
@@ -236,23 +258,25 @@ editor.setJSON(json);
 ```
 
 2. **Handle Errors**: Wrap serialization in try-catch:
+
 ```tsx
 try {
   const content = editor.getHTML();
-  localStorage.setItem('editor-content', content);
+  localStorage.setItem("editor-content", content);
 } catch (error) {
-  console.error('Failed to save content:', error);
+  console.error("Failed to save content:", error);
 }
 ```
 
 3. **Validate Content**: Check content before loading:
+
 ```tsx
-const savedContent = localStorage.getItem('editor-content');
+const savedContent = localStorage.getItem("editor-content");
 if (savedContent) {
   try {
     editor.setHTML(savedContent);
   } catch (error) {
-    console.error('Failed to load content:', error);
+    console.error("Failed to load content:", error);
   }
 }
 ```
@@ -270,12 +294,14 @@ if (savedContent) {
    - Edge 79+
 
 2. **Polyfills**: Add necessary polyfills:
+
 ```tsx
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 ```
 
 3. **CSS Support**: Ensure CSS Grid and Flexbox support:
+
 ```css
 /* Fallback for older browsers */
 .editor {
@@ -291,19 +317,22 @@ import 'regenerator-runtime/runtime';
 **Solutions**:
 
 1. **Build Configuration**: Check your build setup:
+
 ```tsx
 // next.config.js
 module.exports = {
-  transpilePackages: ['@lexkit/editor']
+  transpilePackages: ["@lexkit/editor"],
 };
 ```
 
 2. **Environment Variables**: Ensure proper env setup:
+
 ```bash
 NODE_ENV=production npm run build
 ```
 
 3. **Static Assets**: Verify static files are served correctly:
+
 ```tsx
 // Check if CSS/JS files are accessible
 ```
@@ -331,7 +360,7 @@ Enable debug mode for additional logging:
 ```tsx
 const config = {
   debug: true,
-  logLevel: 'verbose'
+  logLevel: "verbose",
 };
 ```
 

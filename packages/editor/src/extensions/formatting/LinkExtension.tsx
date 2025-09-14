@@ -1,26 +1,41 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, PASTE_COMMAND, $createTextNode } from 'lexical';
-import { $isLinkNode, TOGGLE_LINK_COMMAND, LinkNode, AutoLinkNode, $createLinkNode } from '@lexical/link';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { BaseExtensionConfig, ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
-import { AutoLinkPlugin } from '@lexical/react/LexicalAutoLinkPlugin';
-import React from 'react';
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  PASTE_COMMAND,
+  $createTextNode,
+} from "lexical";
+import {
+  $isLinkNode,
+  TOGGLE_LINK_COMMAND,
+  LinkNode,
+  AutoLinkNode,
+  $createLinkNode,
+} from "@lexical/link";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import {
+  BaseExtensionConfig,
+  ExtensionCategory,
+} from "@lexkit/editor/extensions/types";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
+import React from "react";
 
 /**
  * Configuration for the link extension.
  */
 export interface LinkConfig extends BaseExtensionConfig {
-  /** 
+  /**
    * Whether to automatically link URLs as you type them in the editor.
-   * Uses real-time pattern matching. Default: false 
+   * Uses real-time pattern matching. Default: false
    */
   autoLinkText?: boolean;
-  /** 
+  /**
    * Whether to automatically link URLs when pasted into the editor.
    * When false, pasted URLs remain as plain text. Default: true
    */
   autoLinkUrls?: boolean;
-  /** 
+  /**
    * Whether to link selected text when pasting URLs over it.
    * When true: selected text becomes a link with the pasted URL.
    * When false: selected text is replaced with the pasted URL and then linked. Default: true
@@ -48,13 +63,13 @@ export type LinkStateQueries = {
 
 /**
  * Link extension for creating and managing hyperlinks.
- * 
+ *
  * Features:
  * - Manual link creation via commands
  * - Built-in paste URL handling (always creates links when pasting URLs)
  * - Optional auto-linking as you type
  * - Click to follow links, click again to edit
- * 
+ *
  * Uses Lexical's built-in LinkPlugin which handles:
  * - Pasting URLs over selected text (converts selection to link)
  * - Pasting URLs at cursor (creates new link)
@@ -69,7 +84,7 @@ export type LinkStateQueries = {
  *     linkSelectedTextOnPaste: false // Optional: replace selected text instead of linking it
  *   })
  * ] as const;
- * 
+ *
  * function MyEditor() {
  *   const { commands, activeStates } = useEditor();
  *   return (
@@ -84,7 +99,7 @@ export type LinkStateQueries = {
  * ```
  */
 export class LinkExtension extends BaseExtension<
-  'link',
+  "link",
   LinkConfig,
   LinkCommands,
   LinkStateQueries,
@@ -94,7 +109,7 @@ export class LinkExtension extends BaseExtension<
    * Creates a new link extension instance.
    */
   constructor() {
-    super('link', [ExtensionCategory.Toolbar]);
+    super("link", [ExtensionCategory.Toolbar]);
     this.config = {
       autoLinkText: false,
       linkSelectedTextOnPaste: true, // Link selected text when pasting URLs
@@ -105,7 +120,7 @@ export class LinkExtension extends BaseExtension<
         } catch {
           return false;
         }
-      }
+      },
     };
   }
 
@@ -121,7 +136,7 @@ export class LinkExtension extends BaseExtension<
         const clipboardData = event.clipboardData;
         if (!clipboardData) return false;
 
-        const pastedText = clipboardData.getData('text/plain');
+        const pastedText = clipboardData.getData("text/plain");
         if (!pastedText) return false;
 
         // Check if pasted text is a valid URL
@@ -168,7 +183,7 @@ export class LinkExtension extends BaseExtension<
 
         return false;
       },
-      3 // Higher priority than LinkPlugin's default
+      3, // Higher priority than LinkPlugin's default
     );
 
     return () => {
@@ -192,20 +207,18 @@ export class LinkExtension extends BaseExtension<
    */
   getPlugins(): React.ReactElement[] {
     const plugins: React.ReactElement[] = [];
-    
+
     // Always include LinkPlugin for basic link functionality
     // Our paste handler will override its behavior when needed
     plugins.push(
-      <LinkPlugin 
-        key="link-plugin" 
-        validateUrl={this.config.validateUrl} 
-      />
+      <LinkPlugin key="link-plugin" validateUrl={this.config.validateUrl} />,
     );
-    
+
     // Optional: Auto-link as you type
     if (this.config.autoLinkText) {
       const urlMatcher = (text: string) => {
-        const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+        const urlRegex =
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
         const match = urlRegex.exec(text);
         if (match && this.config.validateUrl!(match[0])) {
           return {
@@ -217,15 +230,10 @@ export class LinkExtension extends BaseExtension<
         }
         return null;
       };
-      
-      plugins.push(
-        <AutoLinkPlugin 
-          key="auto-link" 
-          matchers={[urlMatcher]} 
-        />
-      );
+
+      plugins.push(<AutoLinkPlugin key="auto-link" matchers={[urlMatcher]} />);
     }
-    
+
     return plugins;
   }
 
@@ -249,7 +257,7 @@ export class LinkExtension extends BaseExtension<
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, url);
         } else {
           // Prompt for URL if not provided
-          const linkUrl = prompt('Enter URL:');
+          const linkUrl = prompt("Enter URL:");
           if (linkUrl) {
             editor.dispatchCommand(TOGGLE_LINK_COMMAND, linkUrl);
           }
@@ -258,7 +266,7 @@ export class LinkExtension extends BaseExtension<
 
       removeLink: () => {
         editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-      }
+      },
     };
   }
 
@@ -297,7 +305,7 @@ export class LinkExtension extends BaseExtension<
               resolve(false);
             }
           });
-        })
+        }),
     };
   }
 }

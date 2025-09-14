@@ -1,10 +1,10 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { $setBlocksType } from '@lexical/selection';
-import { $createCodeNode, $isCodeNode, CodeNode } from '@lexical/code';
-import { $createParagraphNode } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
+import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import { $setBlocksType } from "@lexical/selection";
+import { $createCodeNode, $isCodeNode, CodeNode } from "@lexical/code";
+import { $createParagraphNode } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { ReactNode } from "react";
 
 /**
  * Commands provided by the CodeExtension for toggling code blocks
@@ -45,14 +45,14 @@ export type CodeStateQueries = {
  * ```
  */
 export class CodeExtension extends BaseExtension<
-  'code',
+  "code",
   {},
   CodeCommands,
   CodeStateQueries,
   ReactNode[]
 > {
   constructor() {
-    super('code', [ExtensionCategory.Toolbar]);
+    super("code", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -93,7 +93,7 @@ export class CodeExtension extends BaseExtension<
       if ($isRangeSelection(selection)) {
         // Check if already in code block
         const currentFormat = this.getCurrentFormatSync();
-        if (currentFormat === 'code') {
+        if (currentFormat === "code") {
           // Exit code block - convert to paragraph
           $setBlocksType(selection, () => $createParagraphNode());
           return;
@@ -112,7 +112,7 @@ export class CodeExtension extends BaseExtension<
    */
   getStateQueries(editor: LexicalEditor): CodeStateQueries {
     return {
-      isInCodeBlock: () => Promise.resolve(this.isFormat('code', editor)),
+      isInCodeBlock: () => Promise.resolve(this.isFormat("code", editor)),
     };
   }
 
@@ -122,7 +122,7 @@ export class CodeExtension extends BaseExtension<
    * @param editor - The Lexical editor instance
    * @returns True if all selected nodes match the format
    */
-  private isFormat(format: 'code', editor: LexicalEditor): boolean {
+  private isFormat(format: "code", editor: LexicalEditor): boolean {
     let matches = true;
     editor.getEditorState().read(() => {
       const selection = $getSelection();
@@ -168,8 +168,8 @@ export class CodeExtension extends BaseExtension<
    * @param node - The node to check
    * @returns The format type or null
    */
-  private getNodeFormat(node: CodeNode): 'code' | null {
-    if ($isCodeNode(node)) return 'code';
+  private getNodeFormat(node: CodeNode): "code" | null {
+    if ($isCodeNode(node)) return "code";
     return null;
   }
 
@@ -177,7 +177,7 @@ export class CodeExtension extends BaseExtension<
    * Get the current format synchronously (for use inside editor.update())
    * @returns The current format or null
    */
-  private getCurrentFormatSync(): 'code' | null {
+  private getCurrentFormatSync(): "code" | null {
     const selection = $getSelection();
     if (!$isRangeSelection(selection)) return null;
     const anchorNode = selection.anchor.getNode();

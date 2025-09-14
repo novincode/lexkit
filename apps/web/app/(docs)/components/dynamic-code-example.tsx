@@ -1,35 +1,40 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
-import { Button } from "@repo/ui/components/button"
-import { ScrollArea } from "@repo/ui/components/scroll-area"
-import { cn } from "@repo/ui/lib/utils"
-import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry"
-import { Copy, Check } from "lucide-react"
+import { useMemo, useState } from "react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
+import { Button } from "@repo/ui/components/button";
+import { ScrollArea } from "@repo/ui/components/scroll-area";
+import { cn } from "@repo/ui/lib/utils";
+import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
+import { Copy, Check } from "lucide-react";
 
 interface DynamicCodeExampleProps {
-  codes: string[]
-  title?: string
-  description?: string
-  preview: React.ReactNode
-  className?: string
-  tabs?: string[] // Optional: array of tab IDs to show (e.g., ['preview', 'component', 'css'])
+  codes: string[];
+  title?: string;
+  description?: string;
+  preview: React.ReactNode;
+  className?: string;
+  tabs?: string[]; // Optional: array of tab IDs to show (e.g., ['preview', 'component', 'css'])
 }
 
 // CopyButton component
 function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err)
+      console.error("Failed to copy text: ", err);
     }
-  }
+  };
 
   return (
     <Button
@@ -51,7 +56,7 @@ function CopyButton({ text }: { text: string }) {
         </>
       )}
     </Button>
-  )
+  );
 }
 
 export function DynamicCodeExample({
@@ -60,21 +65,25 @@ export function DynamicCodeExample({
   description,
   preview,
   className,
-  tabs
+  tabs,
 }: DynamicCodeExampleProps) {
   const codeData = useMemo(() => {
-    const data: Record<string, { raw: string; highlighted: string }> = {}
-    codes.forEach(code => {
-      const raw = getRawCode(code)
-      const highlighted = getHighlightedCode(code)
+    const data: Record<string, { raw: string; highlighted: string }> = {};
+    codes.forEach((code) => {
+      const raw = getRawCode(code);
+      const highlighted = getHighlightedCode(code);
       if (raw && highlighted) {
-        data[code] = { raw, highlighted }
+        data[code] = { raw, highlighted };
       }
-    })
-    return data
-  }, [codes])
+    });
+    return data;
+  }, [codes]);
 
-  const filteredTabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
+  const filteredTabs: Array<{
+    id: string;
+    label: string;
+    content: React.ReactNode;
+  }> = [];
 
   // Always add preview tab
   const previewTab = {
@@ -82,26 +91,24 @@ export function DynamicCodeExample({
     label: "Preview",
     content: (
       <div className="flex min-h-[400px] items-center justify-center rounded-lg border bg-background p-8">
-        <div>
-          {preview}
-        </div>
+        <div>{preview}</div>
       </div>
     ),
-    alwaysShow: true
-  }
+    alwaysShow: true,
+  };
 
   if (!tabs || tabs.includes("preview")) {
-    filteredTabs.push(previewTab)
+    filteredTabs.push(previewTab);
   }
 
   // Add code tabs
   codes.forEach((code, index) => {
-    const codeInfo = codeData[code]
+    const codeInfo = codeData[code];
     if (codeInfo) {
       // Use custom tab label if provided, otherwise extract filename
-      const fileName = code.split('/').pop() || code
-      const customLabel = tabs && tabs[index + 1] ? tabs[index + 1] : null
-      const label = customLabel || fileName
+      const fileName = code.split("/").pop() || code;
+      const customLabel = tabs && tabs[index + 1] ? tabs[index + 1] : null;
+      const label = customLabel || fileName;
 
       const tab = {
         id: code, // use the code path as id
@@ -110,43 +117,39 @@ export function DynamicCodeExample({
           <ScrollArea className="relative h-[80vh] overflow-hidden rounded-lg">
             <div className="">
               <CopyButton text={codeInfo.raw} />
-                <div
-                  className="w-full "
-                  dangerouslySetInnerHTML={{ __html: codeInfo.highlighted }}
-                />
+              <div
+                className="w-full "
+                dangerouslySetInnerHTML={{ __html: codeInfo.highlighted }}
+              />
             </div>
           </ScrollArea>
         ),
-        alwaysShow: true
-      }
+        alwaysShow: true,
+      };
 
-      const customTabName = tabs && index + 1 < tabs.length ? tabs[index + 1] : null
-      const shouldShowTab = !tabs ||
+      const customTabName =
+        tabs && index + 1 < tabs.length ? tabs[index + 1] : null;
+      const shouldShowTab =
+        !tabs ||
         tabs.includes(code) ||
         tabs.includes(label.toLowerCase()) ||
-        (customTabName && tabs.includes(customTabName))
+        (customTabName && tabs.includes(customTabName));
 
       if (shouldShowTab) {
-        filteredTabs.push(tab)
+        filteredTabs.push(tab);
       }
     }
-  })
+  });
 
   return (
     <div className={cn("not-prose my-6", className)}>
-      {title && (
-        <h4 className="mb-2 text-lg font-semibold">
-          {title}
-        </h4>
-      )}
+      {title && <h4 className="mb-2 text-lg font-semibold">{title}</h4>}
 
       {description && (
-        <p className="mb-4 text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="mb-4 text-sm text-muted-foreground">{description}</p>
       )}
 
-      <Tabs defaultValue="preview" >
+      <Tabs defaultValue="preview">
         <TabsList className="inline-flex self-baseline h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-auto overflow-x-auto">
           {filteredTabs.map((tab) => (
             <TabsTrigger
@@ -166,5 +169,5 @@ export function DynamicCodeExample({
         ))}
       </Tabs>
     </div>
-  )
+  );
 }

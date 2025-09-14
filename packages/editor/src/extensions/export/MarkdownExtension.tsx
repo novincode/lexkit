@@ -1,11 +1,15 @@
-import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { BaseExtensionConfig } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
-import { $convertToMarkdownString, $convertFromMarkdownString, TRANSFORMERS } from '@lexical/markdown';
-import { $getRoot, $createParagraphNode } from 'lexical';
-import { HTMLEmbedNode } from '../media/HTMLEmbedExtension';
+import { LexicalEditor } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { BaseExtensionConfig } from "@lexkit/editor/extensions/types";
+import { ReactNode } from "react";
+import {
+  $convertToMarkdownString,
+  $convertFromMarkdownString,
+  TRANSFORMERS,
+} from "@lexical/markdown";
+import { $getRoot, $createParagraphNode } from "lexical";
+import { HTMLEmbedNode } from "../media/HTMLEmbedExtension";
 
 /**
  * Configuration options for the Markdown extension.
@@ -70,7 +74,7 @@ export type MarkdownStateQueries = {
  * ```
  */
 export class MarkdownExtension extends BaseExtension<
-  'markdown',
+  "markdown",
   MarkdownConfig & BaseExtensionConfig,
   MarkdownCommands,
   MarkdownStateQueries,
@@ -82,7 +86,7 @@ export class MarkdownExtension extends BaseExtension<
    * Creates a new Markdown extension instance.
    */
   constructor() {
-    super('markdown', [ExtensionCategory.Toolbar]);
+    super("markdown", [ExtensionCategory.Toolbar]);
     this.config = { customTransformers: [] };
   }
 
@@ -115,7 +119,10 @@ export class MarkdownExtension extends BaseExtension<
    * @returns Object containing Markdown import/export commands
    */
   getCommands(editor: LexicalEditor): MarkdownCommands {
-    const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
+    const transformers = [
+      ...(this.config.customTransformers || []),
+      ...TRANSFORMERS,
+    ];
 
     return {
       exportToMarkdown: () => {
@@ -123,8 +130,8 @@ export class MarkdownExtension extends BaseExtension<
           try {
             return $convertToMarkdownString(transformers);
           } catch (error) {
-            console.error('❌ Markdown export error:', error);
-            return '';
+            console.error("❌ Markdown export error:", error);
+            return "";
           }
         });
       },
@@ -136,61 +143,76 @@ export class MarkdownExtension extends BaseExtension<
         }
 
         const performImport = () => {
-          editor.update(() => {
-            try {
-              const transformers = [...(this.config.customTransformers || []), ...TRANSFORMERS];
-              
-              const root = $getRoot();
-              root.clear();
+          editor.update(
+            () => {
+              try {
+                const transformers = [
+                  ...(this.config.customTransformers || []),
+                  ...TRANSFORMERS,
+                ];
 
-              if (!markdown.trim()) {
-                root.append($createParagraphNode());
-                return;
-              }
+                const root = $getRoot();
+                root.clear();
 
-              // Pre-process html-embed blocks
-              let processedMarkdown = markdown;
-              const htmlEmbedBlocks: { html: string; placeholder: string }[] = [];
-              
-              processedMarkdown = processedMarkdown.replace(/```html-embed\s*\n([\s\S]*?)\n```/g, (match, htmlContent) => {
-                const placeholder = `HTMLEMBEDPLACEHOLDER${htmlEmbedBlocks.length}HTMLEMBEDPLACEHOLDER`;
-                htmlEmbedBlocks.push({ html: htmlContent.trim(), placeholder });
-                return placeholder;
-              });
+                if (!markdown.trim()) {
+                  root.append($createParagraphNode());
+                  return;
+                }
 
-              $convertFromMarkdownString(processedMarkdown, transformers);
+                // Pre-process html-embed blocks
+                let processedMarkdown = markdown;
+                const htmlEmbedBlocks: { html: string; placeholder: string }[] =
+                  [];
 
-              // Replace placeholders with HTML embed nodes
-              if (htmlEmbedBlocks.length > 0) {
-                const traverseAndReplace = (node: any) => {
-                  if (node.getTextContent?.()) {
-                    const text = node.getTextContent();
-                    for (const { html, placeholder } of htmlEmbedBlocks) {
-                      if (text === placeholder) {
-                        const payload = { html, preview: true };
-                        const embedNode = new HTMLEmbedNode(payload);
-                        if (node !== root && node.getParent?.()) {
-                          node.replace(embedNode);
-                          return;
+                processedMarkdown = processedMarkdown.replace(
+                  /```html-embed\s*\n([\s\S]*?)\n```/g,
+                  (match, htmlContent) => {
+                    const placeholder = `HTMLEMBEDPLACEHOLDER${htmlEmbedBlocks.length}HTMLEMBEDPLACEHOLDER`;
+                    htmlEmbedBlocks.push({
+                      html: htmlContent.trim(),
+                      placeholder,
+                    });
+                    return placeholder;
+                  },
+                );
+
+                $convertFromMarkdownString(processedMarkdown, transformers);
+
+                // Replace placeholders with HTML embed nodes
+                if (htmlEmbedBlocks.length > 0) {
+                  const traverseAndReplace = (node: any) => {
+                    if (node.getTextContent?.()) {
+                      const text = node.getTextContent();
+                      for (const { html, placeholder } of htmlEmbedBlocks) {
+                        if (text === placeholder) {
+                          const payload = { html, preview: true };
+                          const embedNode = new HTMLEmbedNode(payload);
+                          if (node !== root && node.getParent?.()) {
+                            node.replace(embedNode);
+                            return;
+                          }
                         }
                       }
                     }
-                  }
-                  
-                  if (node.getChildren?.()) {
-                    [...node.getChildren()].forEach(child => traverseAndReplace(child));
-                  }
-                };
-                
-                traverseAndReplace(root);
+
+                    if (node.getChildren?.()) {
+                      [...node.getChildren()].forEach((child) =>
+                        traverseAndReplace(child),
+                      );
+                    }
+                  };
+
+                  traverseAndReplace(root);
+                }
+              } catch (error) {
+                console.error("❌ Markdown import error:", error);
+                const root = $getRoot();
+                root.clear();
+                root.append($createParagraphNode());
               }
-            } catch (error) {
-              console.error('❌ Markdown import error:', error);
-              const root = $getRoot();
-              root.clear();
-              root.append($createParagraphNode());
-            }
-          }, { discrete: true });
+            },
+            { discrete: true },
+          );
         };
 
         if (immediate) {

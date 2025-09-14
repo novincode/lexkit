@@ -1,12 +1,21 @@
-'use client'
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { DefaultTemplate, DefaultTemplateRef } from "@/components/templates/default/DefaultTemplate"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card"
-import { Separator } from "@repo/ui/components/separator"
+import React from "react";
+import Link from "next/link";
+import {
+  DefaultTemplate,
+  DefaultTemplateRef,
+} from "@/components/templates/default/DefaultTemplate";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Separator } from "@repo/ui/components/separator";
 import {
   Zap,
   Shield,
@@ -23,16 +32,16 @@ import {
   Heart,
   BookOpen,
   Play,
-  ChevronDown
-} from "lucide-react"
-import { InstallCommand } from "@/components/install-command"
+  ChevronDown,
+} from "lucide-react";
+import { InstallCommand } from "@/components/install-command";
 
 export function HomePageClient() {
   const editorRef = React.useRef<DefaultTemplateRef>(null);
 
   // Handle when editor is ready - inject content immediately
   const handleEditorReady = React.useCallback((methods: DefaultTemplateRef) => {
-    console.log('🎯 Editor ready - injecting content immediately');
+    console.log("🎯 Editor ready - injecting content immediately");
     methods.injectMarkdown(`# Welcome to LexKit
 
 **Build amazing React-based rich text editors with ease**
@@ -66,7 +75,10 @@ That's it! You're ready to build something amazing.`);
             {/* Content Section */}
             <div className="space-y-8 max-w-4xl">
               <div className="space-y-4">
-                <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
+                <Badge
+                  variant="outline"
+                  className="px-4 py-2 text-sm font-medium"
+                >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Open Source & Free
                 </Badge>
@@ -75,8 +87,9 @@ That's it! You're ready to build something amazing.`);
                   <span className="text-primary block">Rich Text Editors</span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                  LexKit is a modern, type-safe React framework built on Meta's Lexical.
-                  Create powerful editors with ease — perfect for blogs, apps, and teams.
+                  LexKit is a modern, type-safe React framework built on Meta's
+                  Lexical. Create powerful editors with ease — perfect for
+                  blogs, apps, and teams.
                 </p>
               </div>
 
@@ -87,8 +100,17 @@ That's it! You're ready to build something amazing.`);
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-                  <a href="https://github.com/novincode/lexkit" target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="text-lg px-8 py-6"
+                  asChild
+                >
+                  <a
+                    href="https://github.com/novincode/lexkit"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Github className="mr-2 h-5 w-5" />
                     View on GitHub
                   </a>
@@ -135,7 +157,8 @@ That's it! You're ready to build something amazing.`);
               Why Choose LexKit?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Built for React developers who want powerful editors without the complexity of raw Lexical
+              Built for React developers who want powerful editors without the
+              complexity of raw Lexical
             </p>
           </div>
 
@@ -149,7 +172,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Optimized for speed with minimal bundle size. Handles large documents effortlessly with smooth scrolling and editing.
+                  Optimized for speed with minimal bundle size. Handles large
+                  documents effortlessly with smooth scrolling and editing.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -163,7 +187,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Full TypeScript support with auto-completion. Safe commands and state management prevent runtime errors.
+                  Full TypeScript support with auto-completion. Safe commands
+                  and state management prevent runtime errors.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -177,7 +202,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  25+ built-in extensions for tables, images, links, and more. Easy to create custom extensions for your needs.
+                  25+ built-in extensions for tables, images, links, and more.
+                  Easy to create custom extensions for your needs.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -191,7 +217,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Purpose-built for React with modern hooks and components. CSS custom properties for easy theming and customization.
+                  Purpose-built for React with modern hooks and components. CSS
+                  custom properties for easy theming and customization.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -205,7 +232,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Battle-tested in production. Comprehensive documentation, examples, and active community support.
+                  Battle-tested in production. Comprehensive documentation,
+                  examples, and active community support.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -219,7 +247,8 @@ That's it! You're ready to build something amazing.`);
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Intuitive API design with excellent developer tools. Fast setup and clear documentation for rapid development.
+                  Intuitive API design with excellent developer tools. Fast
+                  setup and clear documentation for rapid development.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -236,7 +265,8 @@ That's it! You're ready to build something amazing.`);
                 Get Started in Minutes
               </h2>
               <p className="text-xl text-muted-foreground">
-                Install LexKit and start building powerful React editors immediately
+                Install LexKit and start building powerful React editors
+                immediately
               </p>
             </div>
 
@@ -247,8 +277,21 @@ That's it! You're ready to build something amazing.`);
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Install Lexical Dependencies</h3>
-                <InstallCommand packages={["lexical", "@lexical/react", "@lexical/html", "@lexical/markdown", "@lexical/list", "@lexical/rich-text", "@lexical/selection", "@lexical/utils"]} />
+                <h3 className="text-lg font-semibold">
+                  Install Lexical Dependencies
+                </h3>
+                <InstallCommand
+                  packages={[
+                    "lexical",
+                    "@lexical/react",
+                    "@lexical/html",
+                    "@lexical/markdown",
+                    "@lexical/list",
+                    "@lexical/rich-text",
+                    "@lexical/selection",
+                    "@lexical/utils",
+                  ]}
+                />
               </div>
             </div>
 
@@ -279,7 +322,8 @@ That's it! You're ready to build something amazing.`);
                 Ready to Build Something Amazing?
               </h2>
               <p className="text-xl text-muted-foreground">
-                Join thousands of React developers building better editors with LexKit
+                Join thousands of React developers building better editors with
+                LexKit
               </p>
             </div>
 
@@ -290,8 +334,17 @@ That's it! You're ready to build something amazing.`);
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-                <a href="https://github.com/novincode/lexkit" target="_blank" rel="noopener noreferrer">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 py-6"
+                asChild
+              >
+                <a
+                  href="https://github.com/novincode/lexkit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Github className="mr-2 h-5 w-5" />
                   Star on GitHub
                 </a>
@@ -307,5 +360,5 @@ That's it! You're ready to build something amazing.`);
         </div>
       </section>
     </div>
-  )
+  );
 }

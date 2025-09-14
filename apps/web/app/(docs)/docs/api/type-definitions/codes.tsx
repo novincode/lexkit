@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 const TYPE_DEFINITIONS_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'type-definitions-editor-config',
+    id: "type-definitions-editor-config",
     code: `export interface EditorConfig {
   /** Theme configuration for different node types */
   theme?: LexKitTheme;
@@ -11,24 +11,24 @@ const TYPE_DEFINITIONS_CODES: RegisteredCodeSnippet[] = [
   /** Additional configuration options */
   [key: string]: any;
 }`,
-    language: 'typescript',
-    title: 'EditorConfig Interface',
-    description: 'Configuration options for the Lexical editor'
+    language: "typescript",
+    title: "EditorConfig Interface",
+    description: "Configuration options for the Lexical editor",
   },
   {
-    id: 'type-definitions-node-theme',
+    id: "type-definitions-node-theme",
     code: `export interface NodeTheme {
   /** CSS class name for the node */
   className?: string;
   /** Inline CSS styles for the node */
   style?: CSSProperties;
 }`,
-    language: 'typescript',
-    title: 'NodeTheme Interface',
-    description: 'Theme configuration for individual nodes'
+    language: "typescript",
+    title: "NodeTheme Interface",
+    description: "Theme configuration for individual nodes",
   },
   {
-    id: 'type-definitions-editor-context-type',
+    id: "type-definitions-editor-context-type",
     code: `export interface EditorContextType<Exts extends readonly Extension[]> {
   /** The Lexical editor instance */
   editor: LexicalEditor | null;
@@ -87,12 +87,12 @@ const TYPE_DEFINITIONS_CODES: RegisteredCodeSnippet[] = [
   /** Check if a specific extension is registered */
   hasExtension: (name: Exts[number]['name']) => boolean;
 }`,
-    language: 'typescript',
-    title: 'EditorContextType Interface',
-    description: 'Main context type for the Lexical editor with extensions'
+    language: "typescript",
+    title: "EditorContextType Interface",
+    description: "Main context type for the Lexical editor with extensions",
   },
   {
-    id: 'type-definitions-extension-category-enum',
+    id: "type-definitions-extension-category-enum",
     code: `export enum ExtensionCategory {
   Toolbar = 'toolbar',
   Sidebar = 'sidebar',
@@ -100,24 +100,24 @@ const TYPE_DEFINITIONS_CODES: RegisteredCodeSnippet[] = [
   Floating = 'floating',
   // Add more as needed
 }`,
-    language: 'typescript',
-    title: 'ExtensionCategory Enum',
-    description: 'Categories that extensions can belong to'
+    language: "typescript",
+    title: "ExtensionCategory Enum",
+    description: "Categories that extensions can belong to",
   },
   {
-    id: 'type-definitions-base-extension-config',
+    id: "type-definitions-base-extension-config",
     code: `export interface BaseExtensionConfig {
   showInToolbar?: boolean;
   category?: ExtensionCategory[];
   position?: 'before' | 'after';
   [key: string]: any;
 }`,
-    language: 'typescript',
-    title: 'BaseExtensionConfig Interface',
-    description: 'Base configuration interface for all extensions'
+    language: "typescript",
+    title: "BaseExtensionConfig Interface",
+    description: "Base configuration interface for all extensions",
   },
   {
-    id: 'type-definitions-extension-interface',
+    id: "type-definitions-extension-interface",
     code: `export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends Record<string, any> = {}, StateQueries extends Record<string, () => Promise<boolean>> = {}, Plugins extends ReactNode[] = ReactNode[]> {
   /** Unique identifier for this extension */
   name: Name;
@@ -158,21 +158,21 @@ const TYPE_DEFINITIONS_CODES: RegisteredCodeSnippet[] = [
   /** Get toolbar items (legacy) */
   // getToolbarItems?(): ToolbarItem<Commands>[];
 }`,
-    language: 'typescript',
-    title: 'Extension Interface',
-    description: 'Core extension interface that all extensions must implement'
+    language: "typescript",
+    title: "Extension Interface",
+    description: "Core extension interface that all extensions must implement",
   },
   {
-    id: 'type-definitions-base-commands',
+    id: "type-definitions-base-commands",
     code: `export interface BaseCommands {
   formatText: (format: TextFormatType, value?: boolean | string) => void;
 }`,
-    language: 'typescript',
-    title: 'BaseCommands Interface',
-    description: 'Base commands that are always available'
+    language: "typescript",
+    title: "BaseCommands Interface",
+    description: "Base commands that are always available",
   },
   {
-    id: 'type-definitions-extract-types',
+    id: "type-definitions-extract-types",
     code: `// Infer unions from array of extensions
 export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
 export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
@@ -184,12 +184,13 @@ export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[
 export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQueries<
   ReturnType<NonNullable<Exts[number]['getStateQueries']>>
 >;`,
-    language: 'typescript',
-    title: 'Type Extraction Utilities',
-    description: 'Utility types for extracting information from extension arrays'
+    language: "typescript",
+    title: "Type Extraction Utilities",
+    description:
+      "Utility types for extracting information from extension arrays",
   },
   {
-    id: 'type-definitions-editor-context-type-extensions',
+    id: "type-definitions-editor-context-type-extensions",
     code: `export interface EditorContextType<Exts extends readonly Extension[]> {
   /** Raw Lexical editor instance */
   editor: LexicalEditor | null;
@@ -245,12 +246,13 @@ export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQ
   /** Check if a specific extension is loaded */
   hasExtension: (name: ExtractNames<Exts>) => boolean;
 }`,
-    language: 'typescript',
-    title: 'EditorContextType (Extensions)',
-    description: 'Context type for the editor system, generic over the extensions array'
+    language: "typescript",
+    title: "EditorContextType (Extensions)",
+    description:
+      "Context type for the editor system, generic over the extensions array",
   },
   {
-    id: 'type-definitions-typed-extension-usage',
+    id: "type-definitions-typed-extension-usage",
     code: `const extensions = [
   boldExtension,
   italicExtension,
@@ -265,10 +267,10 @@ const MyEditor: React.FC = () => {
   // commands has all available commands with proper types
   // activeStates has all state queries with boolean types
 };`,
-    language: 'typescript',
-    title: 'Typed Extension Usage',
-    description: 'Creating type-safe extension arrays and editor contexts'
-  }
-]
+    language: "typescript",
+    title: "Typed Extension Usage",
+    description: "Creating type-safe extension arrays and editor contexts",
+  },
+];
 
-export default TYPE_DEFINITIONS_CODES
+export default TYPE_DEFINITIONS_CODES;

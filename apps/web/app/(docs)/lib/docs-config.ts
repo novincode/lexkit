@@ -1,13 +1,13 @@
 export interface DocsSection {
-  title: string
-  items: DocsItem[]
+  title: string;
+  items: DocsItem[];
 }
 
 export interface DocsItem {
-  title: string
-  href: string
-  description?: string
-  isNew?: boolean
+  title: string;
+  href: string;
+  description?: string;
+  isNew?: boolean;
 }
 
 export const docsConfig: DocsSection[] = [
@@ -17,19 +17,19 @@ export const docsConfig: DocsSection[] = [
       {
         title: "Introduction",
         href: "/docs/introduction",
-        description: "Learn about LexKit and what makes it special"
+        description: "Learn about LexKit and what makes it special",
       },
       {
         title: "Installation",
         href: "/docs/installation",
-        description: "How to install and set up LexKit"
+        description: "How to install and set up LexKit",
       },
       {
         title: "Get Started",
         href: "/docs/get-started",
-        description: "Get up and running in minutes"
-      }
-    ]
+        description: "Get up and running in minutes",
+      },
+    ],
   },
   {
     title: "Core Concepts",
@@ -37,14 +37,14 @@ export const docsConfig: DocsSection[] = [
       {
         title: "Extensions",
         href: "/docs/extensions",
-        description: "Understanding the extension system"
+        description: "Understanding the extension system",
       },
       {
         title: "Theming",
         href: "/docs/theming",
-        description: "Customize the look and feel"
-      }
-    ]
+        description: "Customize the look and feel",
+      },
+    ],
   },
   {
     title: "Templates",
@@ -52,15 +52,14 @@ export const docsConfig: DocsSection[] = [
       {
         title: "Default Template",
         href: "/docs/templates/default",
-        description: "Basic editor setup"
+        description: "Basic editor setup",
       },
       {
         title: "Shadcn Template",
         href: "/docs/templates/shadcn",
-        description: "Editor with Shadcn UI components"
+        description: "Editor with Shadcn UI components",
       },
-      
-    ]
+    ],
   },
   {
     title: "Extensions",
@@ -68,14 +67,14 @@ export const docsConfig: DocsSection[] = [
       {
         title: "LinkExtension",
         href: "/docs/extensions/LinkExtension",
-        description: "Create and manage hyperlinks with smart paste behavior"
+        description: "Create and manage hyperlinks with smart paste behavior",
       },
       {
         title: "DraggableBlockExtension",
         href: "/docs/extensions/DraggableBlockExtension",
-        description: "Add drag-and-drop functionality to content blocks"
-      }
-    ]
+        description: "Add drag-and-drop functionality to content blocks",
+      },
+    ],
   },
   {
     title: "Core API",
@@ -83,23 +82,23 @@ export const docsConfig: DocsSection[] = [
       {
         title: "createEditorSystem",
         href: "/docs/api/create-editor-system",
-        description: "Core system creation and configuration"
+        description: "Core system creation and configuration",
       },
       {
         title: "Extensions API",
         href: "/docs/api/extensions",
-        description: "Building and using extensions"
+        description: "Building and using extensions",
       },
       {
         title: "Type Definitions",
         href: "/docs/api/type-definitions",
-        description: "Complete TypeScript definitions"
+        description: "Complete TypeScript definitions",
       },
       {
         title: "Contributing",
         href: "/docs/contributing",
-        description: "How to contribute and extend LexKit"
-      }
-    ]
-  }
-]
+        description: "How to contribute and extend LexKit",
+      },
+    ],
+  },
+];

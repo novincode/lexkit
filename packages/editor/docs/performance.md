@@ -7,35 +7,37 @@ LexKit is built for performance, but like any rich text editor, there are optimi
 ## Core Performance Principles
 
 ### 1. Minimal Re-renders
+
 LexKit uses React's reconciliation efficiently, but you can help by:
 
 ```tsx
 // Use React.memo for toolbar components
 const ToolbarButton = React.memo(({ active, onClick, children }) => (
-  <button
-    className={`toolbar-btn ${active ? 'active' : ''}`}
-    onClick={onClick}
-  >
+  <button className={`toolbar-btn ${active ? "active" : ""}`} onClick={onClick}>
     {children}
   </button>
 ));
 
 // Memoize expensive computations
-const toolbarItems = React.useMemo(() => [
-  { icon: BoldIcon, command: 'bold' },
-  { icon: ItalicIcon, command: 'italic' },
-  // ... more items
-], []);
+const toolbarItems = React.useMemo(
+  () => [
+    { icon: BoldIcon, command: "bold" },
+    { icon: ItalicIcon, command: "italic" },
+    // ... more items
+  ],
+  [],
+);
 ```
 
 ### 2. Debounced Updates
+
 For frequent content changes, debounce saves:
 
 ```tsx
-import { useDebounce } from 'use-debounce';
+import { useDebounce } from "use-debounce";
 
 function AutoSaveEditor() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const debouncedContent = useDebounce(content, 1000);
 
   // Save only when debouncedContent changes
@@ -45,33 +47,34 @@ function AutoSaveEditor() {
     }
   }, [debouncedContent]);
 
-  return (
-    <Editor
-      value={content}
-      onChange={setContent}
-    />
-  );
+  return <Editor value={content} onChange={setContent} />;
 }
 ```
 
 ## Bundle Size Optimization
 
 ### Tree Shaking
+
 Import only what you need:
 
 ```tsx
 // ✅ Good - Only imports what you use
-import { Provider, HistoryExtension, TextFormatExtension } from '@lexkit/editor';
+import {
+  Provider,
+  HistoryExtension,
+  TextFormatExtension,
+} from "@lexkit/editor";
 
 // ❌ Bad - Imports everything
-import * as LexKit from '@lexkit/editor';
+import * as LexKit from "@lexkit/editor";
 
 // ✅ Better - Import types separately
-import type { EditorConfig } from '@lexkit/editor';
-import { Provider } from '@lexkit/editor';
+import type { EditorConfig } from "@lexkit/editor";
+import { Provider } from "@lexkit/editor";
 ```
 
 ### Dynamic Imports
+
 Load extensions on demand:
 
 ```tsx
@@ -79,13 +82,14 @@ const [extensions, setExtensions] = useState([]);
 
 useEffect(() => {
   // Load extensions dynamically
-  import('./extensions').then(({ default: exts }) => {
+  import("./extensions").then(({ default: exts }) => {
     setExtensions(exts);
   });
 }, []);
 ```
 
 ### Bundle Analysis
+
 Use tools to identify large dependencies:
 
 ```bash
@@ -99,28 +103,30 @@ npx rollup-plugin-visualizer dist/stats.html
 ## Memory Management
 
 ### Large Document Handling
+
 For documents with many nodes:
 
 ```tsx
 // Use virtual scrolling for large documents
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList as List } from "react-window";
 
 // Limit undo/redo history
 const config = {
   history: {
-    maxUndoRedoSteps: 50 // Default is 1000
-  }
+    maxUndoRedoSteps: 50, // Default is 1000
+  },
 };
 ```
 
 ### Cleanup Event Listeners
+
 LexKit handles most cleanup, but for custom extensions:
 
 ```tsx
 class MyExtension extends BaseExtension {
   cleanup() {
     // Remove any custom event listeners
-    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener("resize", this.handleResize);
   }
 }
 ```
@@ -128,6 +134,7 @@ class MyExtension extends BaseExtension {
 ## Rendering Optimizations
 
 ### CSS Containment
+
 Use CSS containment for better performance:
 
 ```css
@@ -141,19 +148,21 @@ Use CSS containment for better performance:
 ```
 
 ### Avoid Layout Thrashing
+
 Batch DOM updates:
 
 ```tsx
 // Instead of multiple style changes
-element.style.width = '100px';
-element.style.height = '100px';
-element.style.margin = '10px';
+element.style.width = "100px";
+element.style.height = "100px";
+element.style.margin = "10px";
 
 // Use a single class change
-element.className = 'optimized-styles';
+element.className = "optimized-styles";
 ```
 
 ### Image Optimization
+
 For image-heavy content:
 
 ```tsx
@@ -175,6 +184,7 @@ const LazyImage = ({ src, alt }) => {
 ## Extension Performance
 
 ### Efficient Extension Design
+
 Write performant extensions:
 
 ```tsx
@@ -194,13 +204,14 @@ class OptimizedExtension extends BaseExtension {
 ```
 
 ### Extension Loading Strategy
+
 Load extensions based on user needs:
 
 ```tsx
 const getExtensions = (userPlan) => {
   const baseExtensions = [HistoryExtension];
 
-  if (userPlan === 'pro') {
+  if (userPlan === "pro") {
     return [...baseExtensions, ImageExtension, TableExtension];
   }
 
@@ -211,20 +222,21 @@ const getExtensions = (userPlan) => {
 ## Network Optimization
 
 ### Content Loading
+
 Optimize content fetching:
 
 ```tsx
 // Use React Query for caching
-import { useQuery } from 'react-query';
+import { useQuery } from "react-query";
 
 function EditorWithContent({ documentId }) {
   const { data: content } = useQuery(
-    ['document', documentId],
+    ["document", documentId],
     () => fetchDocument(documentId),
     {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000 // 10 minutes
-    }
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
   );
 
   return <Editor initialContent={content} />;
@@ -232,19 +244,20 @@ function EditorWithContent({ documentId }) {
 ```
 
 ### Real-time Collaboration
+
 For collaborative editing:
 
 ```tsx
 // Use operational transforms or CRDTs
-import { useYjs } from 'react-yjs';
+import { useYjs } from "react-yjs";
 
 function CollaborativeEditor() {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
 
   // Sync with other users
   useYjs({
     content,
-    onChange: setContent
+    onChange: setContent,
   });
 
   return <Editor value={content} onChange={setContent} />;
@@ -254,22 +267,23 @@ function CollaborativeEditor() {
 ## Monitoring & Profiling
 
 ### Performance Monitoring
+
 Track editor performance:
 
 ```tsx
 // Use React DevTools Profiler
-import { Profiler } from 'react';
+import { Profiler } from "react";
 
 <Profiler id="editor" onRender={onRenderCallback}>
   <Editor />
-</Profiler>
+</Profiler>;
 
 // Custom performance tracking
 const trackPerformance = () => {
   const start = performance.now();
 
   // Editor operation
-  editor.insertText('Hello');
+  editor.insertText("Hello");
 
   const end = performance.now();
   console.log(`Operation took ${end - start}ms`);
@@ -277,6 +291,7 @@ const trackPerformance = () => {
 ```
 
 ### Memory Leak Detection
+
 Monitor for memory leaks:
 
 ```tsx
@@ -285,7 +300,7 @@ Monitor for memory leaks:
 useEffect(() => {
   const interval = setInterval(() => {
     if (performance.memory) {
-      console.log('Memory usage:', performance.memory.usedJSHeapSize);
+      console.log("Memory usage:", performance.memory.usedJSHeapSize);
     }
   }, 5000);
 
@@ -296,12 +311,13 @@ useEffect(() => {
 ## Configuration Optimizations
 
 ### Editor Configuration
+
 Optimize editor settings:
 
 ```tsx
 const optimizedConfig = {
   // Reduce re-renders
-  namespace: 'OptimizedEditor',
+  namespace: "OptimizedEditor",
 
   // Limit features for better performance
   theme: minimalTheme,
@@ -309,22 +325,23 @@ const optimizedConfig = {
   // Disable unused features
   disabled: {
     spellcheck: true,
-    grammar: true
+    grammar: true,
   },
 
   // Optimize plugins
   plugins: {
     history: {
-      maxUndoRedoSteps: 50
+      maxUndoRedoSteps: 50,
     },
     autocomplete: {
-      debounceMs: 200
-    }
-  }
+      debounceMs: 200,
+    },
+  },
 };
 ```
 
 ### Build Optimizations
+
 Configure your build for better performance:
 
 ```tsx
@@ -332,22 +349,23 @@ Configure your build for better performance:
 module.exports = {
   optimization: {
     splitChunks: {
-      chunks: 'all',
+      chunks: "all",
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all'
-        }
-      }
-    }
-  }
+          name: "vendors",
+          chunks: "all",
+        },
+      },
+    },
+  },
 };
 ```
 
 ## Advanced Techniques
 
 ### Web Workers
+
 Offload heavy processing:
 
 ```tsx
@@ -358,7 +376,7 @@ self.onmessage = (e) => {
 };
 
 // In your component
-const worker = new Worker('worker.js');
+const worker = new Worker("worker.js");
 
 const handleHeavyTask = (data) => {
   worker.postMessage(data);
@@ -369,21 +387,22 @@ const handleHeavyTask = (data) => {
 ```
 
 ### Service Worker Caching
+
 Cache editor assets:
 
 ```tsx
 // service-worker.js
-const CACHE_NAME = 'lexkit-v1';
+const CACHE_NAME = "lexkit-v1";
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
-        '/editor.js',
-        '/editor.css',
+        "/editor.js",
+        "/editor.css",
         // Other assets
       ]);
-    })
+    }),
   );
 });
 ```
@@ -405,6 +424,7 @@ self.addEventListener('install', (event) => {
 ## Measuring Performance
 
 ### Key Metrics
+
 Track these performance indicators:
 
 ```tsx
@@ -413,10 +433,10 @@ const measureTTI = () => {
   // Use Performance API
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      console.log('TTI:', entry.startTime);
+      console.log("TTI:", entry.startTime);
     }
   });
-  observer.observe({ entryTypes: ['measure'] });
+  observer.observe({ entryTypes: ["measure"] });
 };
 
 // Memory usage
@@ -425,39 +445,44 @@ const measureMemory = () => {
     return {
       used: performance.memory.usedJSHeapSize,
       total: performance.memory.totalJSHeapSize,
-      limit: performance.memory.jsHeapSizeLimit
+      limit: performance.memory.jsHeapSizeLimit,
     };
   }
 };
 ```
 
 ### Performance Budgets
+
 Set performance goals:
 
 ```tsx
 // Bundle size budget
 const BUDGETS = {
-  bundleSize: '200KB',
-  firstPaint: '1000ms',
-  timeToInteractive: '3000ms'
+  bundleSize: "200KB",
+  firstPaint: "1000ms",
+  timeToInteractive: "3000ms",
 };
 ```
 
 ## Common Performance Issues
 
 ### Slow Initial Load
+
 - **Cause**: Large bundle size
 - **Solution**: Code splitting, lazy loading
 
 ### Laggy Typing
+
 - **Cause**: Excessive re-renders
 - **Solution**: Debounce, memoization
 
 ### Memory Leaks
+
 - **Cause**: Uncleaned event listeners
 - **Solution**: Proper cleanup in useEffect
 
 ### Large Document Slowness
+
 - **Cause**: Too many DOM nodes
 - **Solution**: Virtual scrolling, pagination
 

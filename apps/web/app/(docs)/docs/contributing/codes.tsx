@@ -1,25 +1,25 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 const CONTRIBUTING_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'contributing-clone-repo',
-    language: 'bash',
+    id: "contributing-clone-repo",
+    language: "bash",
     code: `git clone https://github.com/novincode/lexkit.git
-cd lexkit`
+cd lexkit`,
   },
   {
-    id: 'contributing-install-deps',
-    language: 'bash',
-    code: `pnpm install`
+    id: "contributing-install-deps",
+    language: "bash",
+    code: `pnpm install`,
   },
   {
-    id: 'contributing-dev-server',
-    language: 'bash',
-    code: `pnpm run dev`
+    id: "contributing-dev-server",
+    language: "bash",
+    code: `pnpm run dev`,
   },
   {
-    id: 'contributing-project-structure',
-    language: 'text',
+    id: "contributing-project-structure",
+    language: "text",
     code: `lexkit/
 ├── apps/
 │   └── web/                 # Main web application
@@ -35,20 +35,20 @@ cd lexkit`
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── turbo.json
-└── tsconfig.json`
+└── tsconfig.json`,
   },
   {
-    id: 'contributing-create-branch',
-    language: 'bash',
-    code: `git checkout -b feature/your-feature-name`
+    id: "contributing-create-branch",
+    language: "bash",
+    code: `git checkout -b feature/your-feature-name`,
   },
   {
-    id: 'contributing-run-checks',
-    language: 'bash',
+    id: "contributing-run-checks",
+    language: "bash",
     code: `pnpm run lint
 pnpm run type-check
-pnpm run test`
-  }
-]
+pnpm run test`,
+  },
+];
 
-export default CONTRIBUTING_CODES
+export default CONTRIBUTING_CODES;

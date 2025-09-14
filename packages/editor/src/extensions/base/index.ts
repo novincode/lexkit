@@ -1,2 +1,2 @@
-export * from './BaseExtension';
-export * from './TextFormatExtension';
+export * from "./BaseExtension";
+export * from "./TextFormatExtension";

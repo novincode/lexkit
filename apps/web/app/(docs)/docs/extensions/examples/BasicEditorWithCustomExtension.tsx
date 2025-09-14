@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { LexicalEditor } from 'lexical';
-import { createEditorSystem } from '@lexkit/editor/core/createEditorSystem';
-import { RichText } from '@lexkit/editor';
-import { TestExtension } from './TestExtension';
-import '../../../examples/basic-editor.css'; // Reuse the basic editor CSS
+import React, { useState, useEffect } from "react";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { LexicalEditor } from "lexical";
+import { createEditorSystem } from "@lexkit/editor/core/createEditorSystem";
+import { RichText } from "@lexkit/editor";
+import { TestExtension } from "./TestExtension";
+import "../../../examples/basic-editor.css"; // Reuse the basic editor CSS
 
 // Define the extensions array
 const extensions = [TestExtension] as const;
@@ -20,24 +20,20 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 function Toolbar() {
   const { commands, activeStates } = useEditor();
 
-  return ( 
+  return (
     <div className="basic-toolbar">
       <button onClick={() => commands.insertTimestamp()}>
         Insert Timestamp
       </button>
-      <button onClick={() => commands.clearContent()}>
-        Clear Content
-      </button>
-      <button onClick={() => commands.getWordCount()}>
-        Hello World
-      </button>
+      <button onClick={() => commands.clearContent()}>Clear Content</button>
+      <button onClick={() => commands.getWordCount()}>Hello World</button>
     </div>
   );
 }
 
 // Editor content component
 function EditorContent() {
-  const [editorState, setEditorState] = useState<string>('');
+  const [editorState, setEditorState] = useState<string>("");
 
   const onChange = (editorState: any) => {
     setEditorState(JSON.stringify(editorState.toJSON()));
@@ -50,7 +46,7 @@ function EditorContent() {
         placeholder="Start typing..."
         classNames={{
           contentEditable: "basic-content",
-          placeholder: "basic-placeholder"
+          placeholder: "basic-placeholder",
         }}
       />
       <OnChangePlugin onChange={onChange} />
@@ -62,7 +58,7 @@ function EditorContent() {
 // Main component
 export default function BasicEditorWithCustomExtension() {
   const initialConfig = {
-    namespace: 'basic-editor',
+    namespace: "basic-editor",
     theme: {},
     onError: (error: Error) => console.error(error),
   };

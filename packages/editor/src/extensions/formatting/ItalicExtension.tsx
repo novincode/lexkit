@@ -1,15 +1,15 @@
-import { TextFormatExtension } from '@lexkit/editor/extensions/base';
+import { TextFormatExtension } from "@lexkit/editor/extensions/base";
 
 /**
  * Italic text formatting extension.
  * Provides italic text formatting functionality with toggle command and state tracking.
  */
-export class ItalicExtension extends TextFormatExtension<'italic'> {
+export class ItalicExtension extends TextFormatExtension<"italic"> {
   /**
    * Creates a new italic extension instance.
    */
   constructor() {
-    super('italic');
+    super("italic");
   }
 }
 

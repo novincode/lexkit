@@ -25,6 +25,7 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 ```
 
 This provides:
+
 - Strongly typed commands and state
 - Automatic plugin aggregation
 - Extension lifecycle management
@@ -79,8 +80,8 @@ abstract class TextFormatExtension<Name extends TextFormatType>
 ### Basic Setup
 
 ```tsx
-import { createEditorSystem } from '@lexkit/editor';
-import { boldExtension, italicExtension } from '@lexkit/editor/extensions';
+import { createEditorSystem } from "@lexkit/editor";
+import { boldExtension, italicExtension } from "@lexkit/editor/extensions";
 
 const extensions = [boldExtension, italicExtension] as const;
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -98,18 +99,20 @@ function Editor() {
 ### Custom Extensions
 
 ```tsx
-import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { BaseExtension } from "@lexkit/editor/extensions/base";
 
-class MyExtension extends BaseExtension<'myExtension'> {
+class MyExtension extends BaseExtension<"myExtension"> {
   getCommands(editor) {
     return {
-      insertMyBlock: () => { /* implementation */ }
+      insertMyBlock: () => {
+        /* implementation */
+      },
     };
   }
 
   getStateQueries(editor) {
     return {
-      hasMyBlock: () => Promise.resolve(false)
+      hasMyBlock: () => Promise.resolve(false),
     };
   }
 }
@@ -148,8 +151,10 @@ Extensions can be configured:
 
 ```tsx
 const configuredExtension = imageExtension.configure({
-  uploadHandler: async (file) => { /* upload logic */ },
-  defaultAlignment: 'center'
+  uploadHandler: async (file) => {
+    /* upload logic */
+  },
+  defaultAlignment: "center",
 });
 ```
 

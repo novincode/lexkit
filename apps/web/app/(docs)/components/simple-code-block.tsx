@@ -1,33 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@repo/ui/components/button"
-import { ScrollArea } from "@repo/ui/components/scroll-area"
-import { Copy, Check, Maximize } from "lucide-react"
-import { cn } from "@repo/ui/lib/utils"
+import { useState } from "react";
+import { Button } from "@repo/ui/components/button";
+import { ScrollArea } from "@repo/ui/components/scroll-area";
+import { Copy, Check, Maximize } from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
 
 interface SimpleCodeBlockProps {
-  html: string
-  raw: string
-  title?: string
-  className?: string
-  height?: string
-  showCopy?: boolean
+  html: string;
+  raw: string;
+  title?: string;
+  className?: string;
+  height?: string;
+  showCopy?: boolean;
 }
 
 // CopyButton component
 function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err)
+      console.error("Failed to copy text: ", err);
     }
-  }
+  };
 
   return (
     <Button
@@ -49,7 +49,7 @@ function CopyButton({ text }: { text: string }) {
         </>
       )}
     </Button>
-  )
+  );
 }
 
 // ExpandButton component
@@ -64,7 +64,7 @@ function ExpandButton({ onExpand }: { onExpand: () => void }) {
     >
       <Maximize className="h-3 w-3" />
     </Button>
-  )
+  );
 }
 
 export function SimpleCodeBlock({
@@ -73,13 +73,13 @@ export function SimpleCodeBlock({
   title,
   className,
   height = "min-h-64",
-  showCopy = true
+  showCopy = true,
 }: SimpleCodeBlockProps) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(false);
 
   const handleExpand = () => {
-    setExpanded(true)
-  }
+    setExpanded(true);
+  };
 
   return (
     <div className={cn("not-prose  max-w-full dark", className)}>
@@ -89,16 +89,18 @@ export function SimpleCodeBlock({
         </h4>
       )}
 
-      <ScrollArea className={cn("relative overflow-hidden rounded-lg ", expanded ? "h-auto max-h-screen" : height)}>
+      <ScrollArea
+        className={cn(
+          "relative overflow-hidden rounded-lg ",
+          expanded ? "h-auto max-h-screen" : height,
+        )}
+      >
         <div className="absolute top-2 right-2 flex gap-2">
           {!expanded && <ExpandButton onExpand={handleExpand} />}
           {showCopy && <CopyButton text={raw} />}
         </div>
-        <div
-          className="w-full"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div className="w-full" dangerouslySetInnerHTML={{ __html: html }} />
       </ScrollArea>
     </div>
-  )
+  );
 }

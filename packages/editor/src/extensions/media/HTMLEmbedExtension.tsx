@@ -1,7 +1,7 @@
 // HTMLEmbedExtension.tsx
 // Clean, scalable, headless HTML embed extension that works across all tabs
 
-import React, { useState, ReactNode, useRef } from 'react';
+import React, { useState, ReactNode, useRef } from "react";
 import {
   LexicalEditor,
   DecoratorNode,
@@ -13,12 +13,12 @@ import {
   DOMConversionMap,
   DOMConversionOutput,
   SerializedLexicalNode,
-  Spread
-} from 'lexical';
-import { BaseExtension } from '../base/BaseExtension';
-import { ExtensionCategory, BaseExtensionConfig } from '../types';
-import { LexKitTheme } from '../../core/theme';
-import { useBaseEditor as useEditor } from '../../core/createEditorSystem'; // Use base for untyped access
+  Spread,
+} from "lexical";
+import { BaseExtension } from "../base/BaseExtension";
+import { ExtensionCategory, BaseExtensionConfig } from "../types";
+import { LexKitTheme } from "../../core/theme";
+import { useBaseEditor as useEditor } from "../../core/createEditorSystem"; // Use base for untyped access
 
 // No shared defaults - use core theme
 
@@ -124,7 +124,7 @@ type SerializedHTMLEmbedNode = Spread<
     /** Preview mode state */
     preview: boolean;
     /** Node type identifier */
-    type: 'html-embed';
+    type: "html-embed";
     /** Version for migration support */
     version: 1;
   },
@@ -154,7 +154,7 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
    * @returns The node type string
    */
   static getType(): string {
-    return 'html-embed';
+    return "html-embed";
   }
 
   /**
@@ -181,9 +181,9 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
    * @returns The DOM element
    */
   createDOM(): HTMLElement {
-    const div = document.createElement('div');
-    div.setAttribute('data-lexical-html-embed', 'true');
-    div.className = 'html-embed-container';
+    const div = document.createElement("div");
+    div.setAttribute("data-lexical-html-embed", "true");
+    div.className = "html-embed-container";
     return div;
   }
 
@@ -202,7 +202,9 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
    */
   static importJSON(serialized: SerializedHTMLEmbedNode): HTMLEmbedNode {
     const payload: HTMLEmbedPayload = {
-      html: serialized.html || '<div style="padding: 20px;  border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
+      html:
+        serialized.html ||
+        '<div style="padding: 20px;  border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
       preview: serialized.preview ?? true,
     };
     return new HTMLEmbedNode(payload);
@@ -214,7 +216,7 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
    */
   exportJSON(): SerializedHTMLEmbedNode {
     return {
-      type: 'html-embed',
+      type: "html-embed",
       html: this.__payload.html,
       preview: this.__payload.preview,
       version: 1,
@@ -225,12 +227,12 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
   static importDOM(): DOMConversionMap | null {
     return {
       div: (domNode: HTMLElement) => {
-        if (!domNode.hasAttribute('data-lexical-html-embed')) {
+        if (!domNode.hasAttribute("data-lexical-html-embed")) {
           return null;
         }
         return {
           conversion: (element: HTMLElement): DOMConversionOutput => {
-            const html = element.getAttribute('data-html-content') || '';
+            const html = element.getAttribute("data-html-content") || "";
             const payload: HTMLEmbedPayload = { html, preview: true };
             return { node: new HTMLEmbedNode(payload) };
           },
@@ -239,13 +241,18 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
       },
       p: (domNode: HTMLElement) => {
         // Check if this paragraph contains our html embed div
-        const embedDiv = domNode.querySelector('div[data-lexical-html-embed="true"]');
+        const embedDiv = domNode.querySelector(
+          'div[data-lexical-html-embed="true"]',
+        );
         if (embedDiv) {
           return {
             conversion: (element: HTMLElement): DOMConversionOutput => {
-              const embedElement = element.querySelector('div[data-lexical-html-embed="true"]') as HTMLElement;
+              const embedElement = element.querySelector(
+                'div[data-lexical-html-embed="true"]',
+              ) as HTMLElement;
               if (embedElement) {
-                const html = embedElement.getAttribute('data-html-content') || '';
+                const html =
+                  embedElement.getAttribute("data-html-content") || "";
                 const payload: HTMLEmbedPayload = { html, preview: true };
                 return { node: new HTMLEmbedNode(payload) };
               }
@@ -260,9 +267,9 @@ export class HTMLEmbedNode extends DecoratorNode<ReactNode> {
   }
 
   exportDOM(): { element: HTMLElement } {
-    const element = document.createElement('div');
-    element.setAttribute('data-lexical-html-embed', 'true');
-    element.setAttribute('data-html-content', this.__payload.html);
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-html-embed", "true");
+    element.setAttribute("data-html-content", this.__payload.html);
     // Don't set innerHTML to avoid duplication - the data-html-content is sufficient
     return { element };
   }
@@ -306,7 +313,9 @@ const HTMLEmbedComponent: React.FC<{
 }> = ({ nodeKey, payload, editor }) => {
   const { config, extensions } = useEditor();
   // Fetch extension-specific config (for renderers, per-extension overrides)
-  const embedExtension = extensions.find((ext: any) => ext.name === 'htmlEmbed') as HTMLEmbedExtension | undefined;
+  const embedExtension = extensions.find(
+    (ext: any) => ext.name === "htmlEmbed",
+  ) as HTMLEmbedExtension | undefined;
   const embedConfig = embedExtension?.config as HTMLEmbedConfig | undefined;
 
   // Global theme section
@@ -347,26 +356,50 @@ const HTMLEmbedComponent: React.FC<{
 
   // Merged styles: extension config -> global theme (no defaults since core theme doesn't have them)
   const mergedStyles = {
-    container: { ...embedConfig?.styles?.container, ...globalHtmlEmbedTheme.styles?.container },
-    preview: { ...embedConfig?.styles?.preview, ...globalHtmlEmbedTheme.styles?.preview },
-    editor: { ...embedConfig?.styles?.editor, ...globalHtmlEmbedTheme.styles?.editor },
-    textarea: { ...embedConfig?.styles?.textarea, ...globalHtmlEmbedTheme.styles?.textarea },
-    toggle: { ...embedConfig?.styles?.toggle, ...globalHtmlEmbedTheme.styles?.toggle },
-    content: { ...embedConfig?.styles?.content, ...globalHtmlEmbedTheme.styles?.content },
+    container: {
+      ...embedConfig?.styles?.container,
+      ...globalHtmlEmbedTheme.styles?.container,
+    },
+    preview: {
+      ...embedConfig?.styles?.preview,
+      ...globalHtmlEmbedTheme.styles?.preview,
+    },
+    editor: {
+      ...embedConfig?.styles?.editor,
+      ...globalHtmlEmbedTheme.styles?.editor,
+    },
+    textarea: {
+      ...embedConfig?.styles?.textarea,
+      ...globalHtmlEmbedTheme.styles?.textarea,
+    },
+    toggle: {
+      ...embedConfig?.styles?.toggle,
+      ...globalHtmlEmbedTheme.styles?.toggle,
+    },
+    content: {
+      ...embedConfig?.styles?.content,
+      ...globalHtmlEmbedTheme.styles?.content,
+    },
   };
 
   // Merged theme classes: extension config -> global theme (core theme provides defaults)
   const mergedThemeClasses = {
-    container: embedConfig?.theme?.container || globalHtmlEmbedTheme.container || '',
-    preview: embedConfig?.theme?.preview || globalHtmlEmbedTheme.preview || '',
-    editor: embedConfig?.theme?.editor || globalHtmlEmbedTheme.editor || '',
-    textarea: embedConfig?.theme?.textarea || globalHtmlEmbedTheme.textarea || '',
-    toggle: embedConfig?.theme?.toggle || globalHtmlEmbedTheme.toggle || '',
-    content: embedConfig?.theme?.content || globalHtmlEmbedTheme.content || '',
+    container:
+      embedConfig?.theme?.container || globalHtmlEmbedTheme.container || "",
+    preview: embedConfig?.theme?.preview || globalHtmlEmbedTheme.preview || "",
+    editor: embedConfig?.theme?.editor || globalHtmlEmbedTheme.editor || "",
+    textarea:
+      embedConfig?.theme?.textarea || globalHtmlEmbedTheme.textarea || "",
+    toggle: embedConfig?.theme?.toggle || globalHtmlEmbedTheme.toggle || "",
+    content: embedConfig?.theme?.content || globalHtmlEmbedTheme.content || "",
   };
 
   // Default renderers
-  const defaultContainerRenderer = ({ children, className, style }: {
+  const defaultContainerRenderer = ({
+    children,
+    className,
+    style,
+  }: {
     children: ReactNode;
     className: string;
     style?: React.CSSProperties;
@@ -382,7 +415,7 @@ const HTMLEmbedComponent: React.FC<{
     className,
     style,
     toggleClassName,
-    toggleStyle
+    toggleStyle,
   }: {
     html: string;
     onToggleEdit: () => void;
@@ -427,7 +460,7 @@ const HTMLEmbedComponent: React.FC<{
     textareaClassName,
     textareaStyle,
     toggleClassName,
-    toggleStyle
+    toggleStyle,
   }: {
     html: string;
     onTogglePreview: () => void;
@@ -469,8 +502,10 @@ const HTMLEmbedComponent: React.FC<{
   );
 
   // Use custom renderers from extension config if provided, otherwise defaults
-  const ContainerRenderer = embedConfig?.containerRenderer || defaultContainerRenderer;
-  const PreviewRenderer = embedConfig?.previewRenderer || defaultPreviewRenderer;
+  const ContainerRenderer =
+    embedConfig?.containerRenderer || defaultContainerRenderer;
+  const PreviewRenderer =
+    embedConfig?.previewRenderer || defaultPreviewRenderer;
   const EditorRenderer = embedConfig?.editorRenderer || defaultEditorRenderer;
 
   return (
@@ -506,18 +541,19 @@ const HTMLEmbedComponent: React.FC<{
 
 // Extension class
 export class HTMLEmbedExtension extends BaseExtension<
-  'htmlEmbed',
+  "htmlEmbed",
   HTMLEmbedConfig,
   HTMLEmbedCommands,
   HTMLEmbedQueries,
   ReactNode[]
 > {
   constructor(config?: Partial<HTMLEmbedConfig>) {
-    super('htmlEmbed', [ExtensionCategory.Toolbar]);
+    super("htmlEmbed", [ExtensionCategory.Toolbar]);
 
     // Default configuration
     this.config = {
-      defaultHtml: '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
+      defaultHtml:
+        '<div style="padding: 20px; border-radius: 8px; text-align: center;"><h3>Custom HTML Block</h3><p>Edit this HTML to create your custom embed!</p></div>',
       defaultPreview: false,
       ...config,
     } as HTMLEmbedConfig;
@@ -576,29 +612,35 @@ export class HTMLEmbedExtension extends BaseExtension<
 
   getStateQueries(editor: LexicalEditor): HTMLEmbedQueries {
     return {
-      isHTMLEmbedSelected: () => new Promise((resolve) => {
-        editor.getEditorState().read(() => {
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const hasHTMLEmbed = selection.getNodes().some(node => node instanceof HTMLEmbedNode);
-            resolve(hasHTMLEmbed);
-          } else {
-            resolve(false);
-          }
-        });
-      }),
+      isHTMLEmbedSelected: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+              const hasHTMLEmbed = selection
+                .getNodes()
+                .some((node) => node instanceof HTMLEmbedNode);
+              resolve(hasHTMLEmbed);
+            } else {
+              resolve(false);
+            }
+          });
+        }),
 
-      isHTMLPreviewMode: () => new Promise((resolve) => {
-        editor.getEditorState().read(() => {
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const embedNode = selection.getNodes().find(node => node instanceof HTMLEmbedNode) as HTMLEmbedNode;
-            resolve(embedNode ? embedNode.getPayload().preview : false);
-          } else {
-            resolve(false);
-          }
-        });
-      }),
+      isHTMLPreviewMode: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+              const embedNode = selection
+                .getNodes()
+                .find((node) => node instanceof HTMLEmbedNode) as HTMLEmbedNode;
+              resolve(embedNode ? embedNode.getPayload().preview : false);
+            } else {
+              resolve(false);
+            }
+          });
+        }),
     };
   }
 }
@@ -608,32 +650,36 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
   dependencies: [HTMLEmbedNode],
   export: (node: any) => {
     // Check if this is our HTML embed node
-    if (node && typeof node.getType === 'function' && node.getType() === 'html-embed') {
+    if (
+      node &&
+      typeof node.getType === "function" &&
+      node.getType() === "html-embed"
+    ) {
       try {
         const payload = node.getPayload();
-        const result = '```html-embed\n' + payload.html + '\n```';
+        const result = "```html-embed\n" + payload.html + "\n```";
         return result;
       } catch (error) {
-        console.error('❌ Error exporting HTML embed:', error);
+        console.error("❌ Error exporting HTML embed:", error);
         return null;
       }
     }
-    
+
     return null;
   },
   regExp: /^```html-embed\s*\n([\s\S]*?)\n```$/,
   replace: (parentNode: any, _children: any[], match: RegExpMatchArray) => {
-    const html = match[1] || '';
-    
+    const html = match[1] || "";
+
     try {
       const payload: HTMLEmbedPayload = { html, preview: true };
       const node = new HTMLEmbedNode(payload);
       parentNode.replace(node);
     } catch (error) {
-      console.error('❌ Error creating HTML embed node:', error);
+      console.error("❌ Error creating HTML embed node:", error);
     }
   },
-  type: 'element' as const,
+  type: "element" as const,
 };
 
 // Export instances

@@ -1,10 +1,15 @@
-import { LexicalEditor, TextFormatType, EditorThemeClasses } from 'lexical';
-import { ReactNode, CSSProperties } from 'react';
-import { Extension, ExtensionCategory } from '@lexkit/editor/extensions';
-import { LexKitTheme } from './theme';
+import { LexicalEditor, TextFormatType, EditorThemeClasses } from "lexical";
+import { ReactNode, CSSProperties } from "react";
+import { Extension, ExtensionCategory } from "@lexkit/editor/extensions";
+import { LexKitTheme } from "./theme";
 
-export type { Extension, ExtensionCategory } from '../extensions';
-export type { LexKitTheme, defaultLexKitTheme, mergeThemes, isLexKitTheme } from './theme';
+export type { Extension, ExtensionCategory } from "../extensions";
+export type {
+  LexKitTheme,
+  defaultLexKitTheme,
+  mergeThemes,
+  isLexKitTheme,
+} from "./theme";
 
 /**
  * Theme configuration for individual nodes
@@ -92,5 +97,5 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   /** Plugins that render after children */
   pluginsAfter: ReactNode[];
   /** Check if a specific extension is registered */
-  hasExtension: (name: Exts[number]['name']) => boolean;
+  hasExtension: (name: Exts[number]["name"]) => boolean;
 }

@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@lexkit/editor/extensions/base';
+import { TextFormatExtension } from "@lexkit/editor/extensions/base";
 
 /**
  * Bold text formatting extension.
@@ -22,12 +22,12 @@ import { TextFormatExtension } from '@lexkit/editor/extensions/base';
  * }
  * ```
  */
-export class BoldExtension extends TextFormatExtension<'bold'> {
+export class BoldExtension extends TextFormatExtension<"bold"> {
   /**
    * Creates a new bold extension instance.
    */
   constructor() {
-    super('bold');
+    super("bold");
   }
 }
 

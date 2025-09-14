@@ -14,13 +14,16 @@ function createEditorSystem<Extensions>() => {
 Creates a typed editor system based on the provided extensions array.
 
 **Type Parameters:**
+
 - `Extensions`: Array of extension instances
 
 **Returns:**
+
 - `Provider`: React component that provides editor context
 - `useEditor`: Hook to access editor functionality
 
 **Example:**
+
 ```tsx
 const extensions = [boldExtension, italicExtension] as const;
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -54,6 +57,7 @@ Commands are functions that modify the editor state. Available commands depend o
 ### Extension Commands
 
 #### Text Formatting
+
 - `toggleBold()`: Toggle bold formatting
 - `toggleItalic()`: Toggle italic formatting
 - `toggleUnderline()`: Toggle underline formatting
@@ -62,6 +66,7 @@ Commands are functions that modify the editor state. Available commands depend o
 - `removeLink()`: Remove a link
 
 #### Structure
+
 - `toggleHeading(level)`: Toggle heading (h1-h6)
 - `toggleParagraph()`: Convert to paragraph
 - `toggleQuote()`: Toggle blockquote
@@ -69,15 +74,18 @@ Commands are functions that modify the editor state. Available commands depend o
 - `toggleOrderedList()`: Toggle numbered list
 
 #### History
+
 - `undo()`: Undo last action
 - `redo()`: Redo last undone action
 
 #### Media
+
 - `insertImage(payload)`: Insert image
 - `setImageAlignment(alignment)`: Set image alignment
 - `setImageCaption(caption)`: Set image caption
 
 #### Export/Import
+
 - `exportToHTML()`: Export content as HTML
 - `importFromHTML(html)`: Import HTML content
 - `exportToMarkdown()`: Export content as Markdown
@@ -108,74 +116,88 @@ State queries are async functions that return the current editor state.
 ### Text Formatting Extensions
 
 #### BoldExtension
+
 Provides bold text formatting.
 
 ```tsx
-import { boldExtension } from '@lexkit/editor/extensions';
+import { boldExtension } from "@lexkit/editor/extensions";
 ```
 
 #### ItalicExtension
+
 Provides italic text formatting.
 
 #### UnderlineExtension
+
 Provides underline text formatting.
 
 #### StrikethroughExtension
+
 Provides strikethrough text formatting.
 
 #### LinkExtension
+
 Provides link creation and management.
 
 **Configuration:**
+
 ```tsx
 const configuredLinkExtension = linkExtension.configure({
   pasteListener: {
-    insert: boolean,  // Auto-convert pasted URLs to links
-    autoLink: boolean // Auto-link URLs as you type
+    insert: boolean, // Auto-convert pasted URLs to links
+    autoLink: boolean, // Auto-link URLs as you type
   },
   validateUrl: (url: string) => boolean,
-  defaultAttributes: Record<string, string>
+  defaultAttributes: Record<string, string>,
 });
 ```
 
 ### Structure Extensions
 
 #### BlockFormatExtension
+
 Provides heading, paragraph, and quote formatting.
 
 #### ListExtension
+
 Provides bulleted and numbered list functionality.
 
 ### Media Extensions
 
 #### ImageExtension
+
 Provides image insertion and management.
 
 **Configuration:**
+
 ```tsx
 const configuredImageExtension = imageExtension.configure({
   uploadHandler: async (file: File) => string,
-  defaultAlignment: 'center' | 'left' | 'right' | 'none',
+  defaultAlignment: "center" | "left" | "right" | "none",
   resizable: boolean,
   pasteListener: { insert: boolean, replace: boolean },
-  debug: boolean
+  debug: boolean,
 });
 ```
 
 #### HTMLEmbedExtension
+
 Provides HTML embed functionality.
 
 ### Export/Import Extensions
 
 #### HTMLExtension
+
 Provides HTML export/import functionality.
 
 #### MarkdownExtension
+
 Provides Markdown export/import functionality.
 
 ### Utility Extensions
 
 #### HistoryExtension
+
 Provides undo/redo functionality.
 
 ## Configuration
@@ -206,10 +228,10 @@ const configuredExtension = extension.configure({
 
 ```tsx
 enum ExtensionCategory {
-  Toolbar = 'toolbar',
-  Sidebar = 'sidebar',
-  ContextMenu = 'contextmenu',
-  Floating = 'floating'
+  Toolbar = "toolbar",
+  Sidebar = "sidebar",
+  ContextMenu = "contextmenu",
+  Floating = "floating",
 }
 ```
 

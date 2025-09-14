@@ -1,16 +1,16 @@
-import { RegisteredCodeSnippet } from '../../../lib/types'
+import { RegisteredCodeSnippet } from "../../../lib/types";
 
 const DRAGGABLE_BLOCK_EXTENSION_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'draggable-block-import',
+    id: "draggable-block-import",
     code: `import { draggableBlockExtension } from '@lexkit/editor/extensions'
 import { DefaultTemplate } from '@lexkit/editor/templates'`,
-    language: 'typescript',
-    title: 'Import DraggableBlockExtension',
-    description: 'Import the extension and template'
+    language: "typescript",
+    title: "Import DraggableBlockExtension",
+    description: "Import the extension and template",
   },
   {
-    id: 'draggable-block-basic-usage',
+    id: "draggable-block-basic-usage",
     code: `function MyEditor() {
   return (
     <DefaultTemplate
@@ -21,13 +21,13 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     />
   )
 }`,
-    language: 'tsx',
-    title: 'Basic Usage',
-    description: 'Add drag-and-drop to your editor',
-    highlightLines: [3, 4, 5, 6]
+    language: "tsx",
+    title: "Basic Usage",
+    description: "Add drag-and-drop to your editor",
+    highlightLines: [3, 4, 5, 6],
   },
   {
-    id: 'draggable-block-configuration',
+    id: "draggable-block-configuration",
     code: `const extensionsWithDraggable = [
   draggableBlockExtension.configure({
     showMoveButtons: true,        // Show up/down buttons
@@ -44,13 +44,13 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
   }),
   historyExtension
 ] as const`,
-    language: 'tsx',
-    title: 'Configuration Options',
-    description: 'Customize drag-and-drop behavior',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    language: "tsx",
+    title: "Configuration Options",
+    description: "Customize drag-and-drop behavior",
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
   },
   {
-    id: 'draggable-block-styling',
+    id: "draggable-block-styling",
     code: `.my-drag-handle {
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -81,12 +81,12 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
 .my-drop-indicator.active {
   opacity: 1;
 }`,
-    language: 'css',
-    title: 'Custom Styling',
-    description: 'Style drag handles and drop indicators'
+    language: "css",
+    title: "Custom Styling",
+    description: "Style drag handles and drop indicators",
   },
   {
-    id: 'draggable-block-events',
+    id: "draggable-block-events",
     code: `function MyEditor() {
   const handleDragStart = () => {
     console.log('Drag started')
@@ -120,13 +120,15 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
 
   return <DefaultTemplate extensions={extensions} />
 }`,
-    language: 'tsx',
-    title: 'Custom Handle Renderer',
-    description: 'Create custom drag handles with full control',
-    highlightLines: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    language: "tsx",
+    title: "Custom Handle Renderer",
+    description: "Create custom drag handles with full control",
+    highlightLines: [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    ],
   },
   {
-    id: 'draggable-block-reactive-state',
+    id: "draggable-block-reactive-state",
     code: `function MyToolbar() {
   const { commands, activeStates } = useEditor()
 
@@ -149,13 +151,13 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Reactive State Usage',
-    description: 'Access drag state reactively without polling',
-    highlightLines: [5, 6, 17]
+    language: "tsx",
+    title: "Reactive State Usage",
+    description: "Access drag state reactively without polling",
+    highlightLines: [5, 6, 17],
   },
   {
-    id: 'draggable-block-commands',
+    id: "draggable-block-commands",
     code: `function MyEditor() {
   const { commands, activeStates } = useEditor()
 
@@ -182,11 +184,11 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Using Commands',
-    description: 'Programmatically control block movement',
-    highlightLines: [6, 11, 12, 13, 14, 15, 16]
-  }
-]
+    language: "tsx",
+    title: "Using Commands",
+    description: "Programmatically control block movement",
+    highlightLines: [6, 11, 12, 13, 14, 15, 16],
+  },
+];
 
-export default DRAGGABLE_BLOCK_EXTENSION_CODES
+export default DRAGGABLE_BLOCK_EXTENSION_CODES;

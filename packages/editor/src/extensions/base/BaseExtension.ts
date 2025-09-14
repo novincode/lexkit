@@ -1,6 +1,11 @@
-import { LexicalEditor, TextFormatType } from 'lexical';
-import { ComponentType, CSSProperties, ReactNode } from 'react';
-import { BaseExtensionConfig, Extension, ExtensionCategory, ToolbarItem } from '@lexkit/editor/extensions/types';
+import { LexicalEditor, TextFormatType } from "lexical";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import {
+  BaseExtensionConfig,
+  Extension,
+  ExtensionCategory,
+  ToolbarItem,
+} from "@lexkit/editor/extensions/types";
 
 /**
  * Abstract base class for all LexKit extensions.
@@ -17,8 +22,9 @@ export abstract class BaseExtension<
   Config extends BaseExtensionConfig = BaseExtensionConfig,
   Commands extends Record<string, any> = {},
   StateQueries extends Record<string, () => Promise<boolean>> = {},
-  Plugins extends ReactNode[] = ReactNode[]
-> implements Extension<Name, Config, Commands, StateQueries, Plugins> {
+  Plugins extends ReactNode[] = ReactNode[],
+> implements Extension<Name, Config, Commands, StateQueries, Plugins>
+{
   /** The unique name identifier for this extension */
   name: Name;
 
@@ -32,7 +38,10 @@ export abstract class BaseExtension<
   supportedFormats: readonly TextFormatType[] = [];
 
   /** Node rendering overrides */
-  public nodeOverrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean } = {};
+  public nodeOverrides: {
+    createDOM?: (config: any) => HTMLElement;
+    updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean;
+  } = {};
 
   /**
    * Creates a new extension instance.
@@ -40,7 +49,10 @@ export abstract class BaseExtension<
    * @param name - The unique name for this extension
    * @param category - Categories this extension belongs to
    */
-  constructor(name: Name, category: ExtensionCategory[] = [ExtensionCategory.Toolbar]) {
+  constructor(
+    name: Name,
+    category: ExtensionCategory[] = [ExtensionCategory.Toolbar],
+  ) {
     this.name = name;
     this.category = category;
   }
@@ -52,7 +64,9 @@ export abstract class BaseExtension<
    * @param config - Partial configuration to merge with existing config
    * @returns New extension instance with updated config
    */
-  configure(config: Partial<Config>): Extension<Name, Config, Commands, StateQueries, Plugins> {
+  configure(
+    config: Partial<Config>,
+  ): Extension<Name, Config, Commands, StateQueries, Plugins> {
     this.config = { ...this.config, ...config };
     return this;
   }
@@ -81,7 +95,14 @@ export abstract class BaseExtension<
    * @param CustomUI - Custom React component to use
    * @returns This extension instance for chaining
    */
-  overrideUI(CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>): Extension<Name, Config, Commands, StateQueries, Plugins> {
+  overrideUI(
+    CustomUI: ComponentType<{
+      selected?: boolean;
+      className?: string;
+      style?: CSSProperties;
+      [key: string]: any;
+    }>,
+  ): Extension<Name, Config, Commands, StateQueries, Plugins> {
     // For node rendering, perhaps
     return this;
   }
@@ -92,7 +113,10 @@ export abstract class BaseExtension<
    * @param overrides - DOM creation and update functions
    * @returns This extension instance for chaining
    */
-  overrideNodeRender(overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }): Extension<Name, Config, Commands, StateQueries, Plugins> {
+  overrideNodeRender(overrides: {
+    createDOM?: (config: any) => HTMLElement;
+    updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean;
+  }): Extension<Name, Config, Commands, StateQueries, Plugins> {
     this.nodeOverrides = { ...this.nodeOverrides, ...overrides };
     return this;
   }

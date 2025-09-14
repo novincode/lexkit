@@ -1,44 +1,51 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { BookOpen, Github, ExternalLink } from "lucide-react"
-import { Badge } from "@repo/ui/components/badge"
-import { ScrollArea } from "@repo/ui/components/scroll-area"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@repo/ui/components/sheet"
-import { docsConfig } from "../lib/docs-config"
-import { cn } from "@repo/ui/lib/utils"
-import { useEffect } from "react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { BookOpen, Github, ExternalLink } from "lucide-react";
+import { Badge } from "@repo/ui/components/badge";
+import { ScrollArea } from "@repo/ui/components/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@repo/ui/components/sheet";
+import { docsConfig } from "../lib/docs-config";
+import { cn } from "@repo/ui/lib/utils";
+import { useEffect } from "react";
 
 interface DocsSidebarProps {
-  className?: string
-  isMobile?: boolean
-  isOpen?: boolean
-  onClose?: () => void
+  className?: string;
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export function DocsSidebar({
   className,
   isMobile = false,
   isOpen = false,
-  onClose
+  onClose,
 }: DocsSidebarProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   useEffect(() => {
     // Small delay to ensure DOM is updated
     const timer = setTimeout(() => {
-      const activeLink = document.querySelector('[data-active="true"]') as HTMLElement
+      const activeLink = document.querySelector(
+        '[data-active="true"]',
+      ) as HTMLElement;
       if (activeLink) {
         activeLink.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
+          behavior: "smooth",
+          block: "center",
+        });
       }
-    }, 100)
+    }, 100);
 
-    return () => clearTimeout(timer)
-  }, [pathname])
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   const SidebarContent = () => (
     <div className="flex flex-col max-h-full  flex-auto">
@@ -59,7 +66,7 @@ export function DocsSidebar({
                 </h3>
                 <ul className="space-y-1">
                   {section.items.map((item) => {
-                    const isActive = pathname === item.href
+                    const isActive = pathname === item.href;
                     return (
                       <li key={item.href}>
                         <Link
@@ -68,7 +75,7 @@ export function DocsSidebar({
                             "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
                             isActive
                               ? "bg-secondary border border-border font-medium"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted",
                           )}
                           onClick={isMobile ? onClose : undefined}
                           data-active={isActive ? "true" : "false"}
@@ -81,7 +88,7 @@ export function DocsSidebar({
                           )}
                         </Link>
                       </li>
-                    )
+                    );
                   })}
                 </ul>
               </div>
@@ -115,7 +122,7 @@ export function DocsSidebar({
         </div>
       </div>
     </div>
-  )
+  );
 
   if (isMobile) {
     return (
@@ -127,12 +134,12 @@ export function DocsSidebar({
           <SidebarContent />
         </SheetContent>
       </Sheet>
-    )
+    );
   }
 
   return (
     <div className="flex flex-col h-full bg-background">
       <SidebarContent />
     </div>
-  )
+  );
 }

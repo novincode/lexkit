@@ -1,14 +1,55 @@
-"use client"
+"use client";
 
 // Advanced Features Example - Full-Featured Editor
 // This example shows advanced features like images, tables, code blocks, and more
-import React, { useState, useEffect } from "react"
-import { Button } from "@repo/ui/components/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/select"
-import { createEditorSystem, boldExtension, italicExtension, underlineExtension, listExtension, imageExtension, linkExtension, historyExtension, htmlExtension, markdownExtension, tableExtension, codeExtension, codeFormatExtension, blockFormatExtension, RichText, defaultLexKitTheme } from "@lexkit/editor"
-import { Bold, Italic, Underline, List, ListOrdered, Code, Table, Image, Link, Undo, Redo } from "lucide-react"
-import "./advanced-editor.css"
+import React, { useState, useEffect } from "react";
+import { Button } from "@repo/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/select";
+import {
+  createEditorSystem,
+  boldExtension,
+  italicExtension,
+  underlineExtension,
+  listExtension,
+  imageExtension,
+  linkExtension,
+  historyExtension,
+  htmlExtension,
+  markdownExtension,
+  tableExtension,
+  codeExtension,
+  codeFormatExtension,
+  blockFormatExtension,
+  RichText,
+  defaultLexKitTheme,
+} from "@lexkit/editor";
+import {
+  Bold,
+  Italic,
+  Underline,
+  List,
+  ListOrdered,
+  Code,
+  Table,
+  Image,
+  Link,
+  Undo,
+  Redo,
+} from "lucide-react";
+import "./advanced-editor.css";
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
@@ -24,27 +65,27 @@ const extensions = [
   blockFormatExtension,
   htmlExtension,
   markdownExtension,
-  historyExtension
-] as const
+  historyExtension,
+] as const;
 
 // 2. Create typed editor system
-const { Provider, useEditor } = createEditorSystem<typeof extensions>()
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
 // Advanced Toolbar Component
 function AdvancedToolbar() {
-  const { commands, activeStates } = useEditor()
+  const { commands, activeStates } = useEditor();
 
   // Get current block type for dropdown sync
-  const [currentBlockType, setCurrentBlockType] = useState('p')
+  const [currentBlockType, setCurrentBlockType] = useState("p");
 
   // Update current block type when selection changes
   useEffect(() => {
     const updateBlockType = async () => {
-      const blockType = commands.getCurrentBlockType()
-      setCurrentBlockType(blockType)
-    }
-    updateBlockType()
-  }, [commands, activeStates]) // Re-run when activeStates change
+      const blockType = commands.getCurrentBlockType();
+      setCurrentBlockType(blockType);
+    };
+    updateBlockType();
+  }, [commands, activeStates]); // Re-run when activeStates change
 
   return (
     <div className="advanced-editor-toolbar">
@@ -80,13 +121,16 @@ function AdvancedToolbar() {
 
       {/* Paragraph Types */}
       <div className="advanced-editor-toolbar-group">
-        <Select value={currentBlockType} onValueChange={(value) => {
-          if (value === 'h1') commands.toggleHeading('h1')
-          else if (value === 'h2') commands.toggleHeading('h2')
-          else if (value === 'h3') commands.toggleHeading('h3')
-          else if (value === 'quote') commands.toggleQuote()
-          else if (value === 'p') commands.toggleParagraph()
-        }}>
+        <Select
+          value={currentBlockType}
+          onValueChange={(value) => {
+            if (value === "h1") commands.toggleHeading("h1");
+            else if (value === "h2") commands.toggleHeading("h2");
+            else if (value === "h3") commands.toggleHeading("h3");
+            else if (value === "quote") commands.toggleQuote();
+            else if (value === "p") commands.toggleParagraph();
+          }}
+        >
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Format" />
           </SelectTrigger>
@@ -138,7 +182,9 @@ function AdvancedToolbar() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => commands.insertTable({ rows: 4, columns: 4, includeHeaders: true })}
+          onClick={() =>
+            commands.insertTable({ rows: 4, columns: 4, includeHeaders: true })
+          }
           title="Insert 4x4 Table with Headers"
         >
           <Table size={16} />
@@ -151,10 +197,10 @@ function AdvancedToolbar() {
           variant="ghost"
           size="sm"
           onClick={() => {
-            const src = prompt('Enter image URL:')
+            const src = prompt("Enter image URL:");
             if (src) {
-              const alt = prompt('Enter alt text:') || 'Image'
-              commands.insertImage({ src, alt })
+              const alt = prompt("Enter alt text:") || "Image";
+              commands.insertImage({ src, alt });
             }
           }}
           title="Insert Image"
@@ -166,10 +212,10 @@ function AdvancedToolbar() {
           variant="ghost"
           size="sm"
           onClick={() => {
-            const url = prompt('Enter link URL:')
-            const text = prompt('Enter link text:')
+            const url = prompt("Enter link URL:");
+            const text = prompt("Enter link text:");
             if (url && text) {
-              commands.insertLink(url, text)
+              commands.insertLink(url, text);
             }
           }}
           title="Insert Link"
@@ -201,7 +247,7 @@ function AdvancedToolbar() {
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 // Advanced Editor Component
@@ -213,31 +259,31 @@ function AdvancedEditor() {
         placeholder="Start writing with advanced features like images, links, HTML export, and Markdown support..."
         classNames={{
           contentEditable: "advanced-editor-content",
-          placeholder: "advanced-editor-placeholder"
+          placeholder: "advanced-editor-placeholder",
         }}
       />
     </div>
-  )
+  );
 }
 
 // Internal component that uses the editor
 function AdvancedFeaturesExampleInner() {
-  const [htmlDialogOpen, setHtmlDialogOpen] = useState(false)
-  const [exportedHtml, setExportedHtml] = useState("")
+  const [htmlDialogOpen, setHtmlDialogOpen] = useState(false);
+  const [exportedHtml, setExportedHtml] = useState("");
 
   // Get commands from the editor context
-  const { commands } = useEditor()
+  const { commands } = useEditor();
 
   const handleExportHtml = async () => {
     try {
-      const html = await commands.exportToHTML()
-      setExportedHtml(html)
-      setHtmlDialogOpen(true)
+      const html = await commands.exportToHTML();
+      setExportedHtml(html);
+      setHtmlDialogOpen(true);
     } catch (error) {
-      console.error('Failed to export HTML:', error)
-      alert('Failed to export HTML')
+      console.error("Failed to export HTML:", error);
+      alert("Failed to export HTML");
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -261,16 +307,13 @@ function AdvancedFeaturesExampleInner() {
         </Dialog>
       </div>
     </div>
-  )
+  );
 }
 
 export function AdvancedFeaturesExample() {
   return (
-    <Provider 
-      extensions={extensions}
-      config={{ theme: defaultLexKitTheme }}
-    >
+    <Provider extensions={extensions} config={{ theme: defaultLexKitTheme }}>
       <AdvancedFeaturesExampleInner />
     </Provider>
-  )
+  );
 }

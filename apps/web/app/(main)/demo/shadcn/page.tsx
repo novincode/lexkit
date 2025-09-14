@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import React from 'react';
-import { ShadcnTemplate } from '../../../../components/templates/shadcn';
+import React from "react";
+import { ShadcnTemplate } from "../../../../components/templates/shadcn";
 
 export default function ShadcnTemplatePage() {
   return (

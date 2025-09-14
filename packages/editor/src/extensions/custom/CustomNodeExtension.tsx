@@ -19,28 +19,31 @@ import {
   LexicalEditor,
   DOMConversionMap,
   DOMExportOutput,
-} from 'lexical';
-import { ReactNode, useEffect, useState } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { BaseExtensionConfig, ExtensionCategory } from '@lexkit/editor/extensions/types';
+} from "lexical";
+import { ReactNode, useEffect, useState } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import {
+  BaseExtensionConfig,
+  ExtensionCategory,
+} from "@lexkit/editor/extensions/types";
 
 // JSX to DOM converter - the magic happens here!
 function jsxToDOM(jsxElement: React.ReactElement): HTMLElement {
   // Render JSX to HTML string
   const htmlString = renderToStaticMarkup(jsxElement);
-  
+
   // Create a temporary container
-  const tempDiv = document.createElement('div');
+  const tempDiv = document.createElement("div");
   tempDiv.innerHTML = htmlString;
-  
+
   // Return the first child (the actual element)
   const element = tempDiv.firstElementChild as HTMLElement;
-  
+
   // Clean up
   tempDiv.remove();
-  
+
   return element;
 }
 
@@ -48,11 +51,14 @@ function jsxToDOM(jsxElement: React.ReactElement): HTMLElement {
 type CustomPayload = Record<string, any>;
 
 // Serialized with children if container
-type SerializedCustomNode = Spread<{
-  type: string;
-  payload: CustomPayload;
-  children?: SerializedLexicalNode[];
-}, SerializedLexicalNode>;
+type SerializedCustomNode = Spread<
+  {
+    type: string;
+    payload: CustomPayload;
+    children?: SerializedLexicalNode[];
+  },
+  SerializedLexicalNode
+>;
 
 // Config interface
 interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
@@ -77,9 +83,16 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
     updatePayload: (newPayload: Partial<CustomPayload>) => void;
   }) => React.ReactElement;
   createDOM?: (config: EditorConfig, node: LexicalNode) => HTMLElement;
-  updateDOM?: (prevNode: LexicalNode, dom: HTMLElement, config: EditorConfig) => boolean;
+  updateDOM?: (
+    prevNode: LexicalNode,
+    dom: HTMLElement,
+    config: EditorConfig,
+  ) => boolean;
   importDOM?: () => DOMConversionMap;
-  exportDOM?: (editor: LexicalEditor, options: { element: HTMLElement; node: LexicalNode }) => DOMExportOutput;
+  exportDOM?: (
+    editor: LexicalEditor,
+    options: { element: HTMLElement; node: LexicalNode },
+  ) => DOMExportOutput;
   commands?: (editor: LexicalEditor) => CustomCommands;
   stateQueries?: (editor: LexicalEditor) => CustomStateQueries;
 }
@@ -117,28 +130,30 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
 export function createCustomNodeExtension<
   Name extends string,
   Commands extends Record<string, any> = {},
-  StateQueries extends Record<string, () => Promise<boolean>> = {}
+  StateQueries extends Record<string, () => Promise<boolean>> = {},
 >(
-  userConfig: CustomNodeConfig<Commands, StateQueries>
+  userConfig: CustomNodeConfig<Commands, StateQueries>,
 ): {
   extension: BaseExtension<Name, BaseExtensionConfig, Commands, StateQueries>;
-  $createCustomNode: (payload?: CustomPayload) => ElementNode | DecoratorNode<ReactNode>;
+  $createCustomNode: (
+    payload?: CustomPayload,
+  ) => ElementNode | DecoratorNode<ReactNode>;
   jsxToDOM: (jsxElement: React.ReactElement) => HTMLElement;
 } {
   const isContainer = userConfig.isContainer ?? false;
-  const INSERT_CUSTOM_NODE = createCommand<CustomPayload>('insert-custom-node');
+  const INSERT_CUSTOM_NODE = createCommand<CustomPayload>("insert-custom-node");
 
   // React component for rendering (used by both Element and Decorator nodes)
-  function CustomNodeComponent({ 
-    node, 
-    payload, 
-    nodeKey, 
-    children 
-  }: { 
-    node: LexicalNode; 
-    payload: CustomPayload; 
-    nodeKey: string; 
-    children?: ReactNode 
+  function CustomNodeComponent({
+    node,
+    payload,
+    nodeKey,
+    children,
+  }: {
+    node: LexicalNode;
+    payload: CustomPayload;
+    nodeKey: string;
+    children?: ReactNode;
   }) {
     const [editor] = useLexicalComposerContext();
     const [isSelected, setIsSelected] = useState(false);
@@ -148,7 +163,8 @@ export function createCustomNodeExtension<
         editorState.read(() => {
           const selection = $getSelection();
           setIsSelected(
-            $isNodeSelection(selection) && selection.getNodes().some((n) => n.__key === nodeKey)
+            $isNodeSelection(selection) &&
+              selection.getNodes().some((n) => n.__key === nodeKey),
           );
         });
       });
@@ -157,18 +173,23 @@ export function createCustomNodeExtension<
     const updatePayload = (newPayload: Partial<CustomPayload>) => {
       editor.update(() => {
         const writable = node.getWritable();
-        (writable as any).__payload = { ...(writable as any).__payload, ...newPayload };
+        (writable as any).__payload = {
+          ...(writable as any).__payload,
+          ...newPayload,
+        };
       });
     };
 
-    return userConfig.render ? userConfig.render({
-      node,
-      payload,
-      children,
-      nodeKey,
-      isSelected,
-      updatePayload,
-    }) : null;
+    return userConfig.render
+      ? userConfig.render({
+          node,
+          payload,
+          children,
+          nodeKey,
+          isSelected,
+          updatePayload,
+        })
+      : null;
   }
 
   // Element Node for containers
@@ -184,11 +205,7 @@ export function createCustomNodeExtension<
       return new CustomElementNode(node.__payload, node.__nodeType, node.__key);
     }
 
-    constructor(
-      payload: CustomPayload = {},
-      nodeType: string,
-      key?: NodeKey
-    ) {
+    constructor(payload: CustomPayload = {}, nodeType: string, key?: NodeKey) {
       super(key);
       this.__payload = payload;
       this.__nodeType = nodeType;
@@ -220,13 +237,16 @@ export function createCustomNodeExtension<
       return userConfig.importDOM ? userConfig.importDOM() : {};
     }
 
-    static exportDOM(editor: LexicalEditor, { node }: { node: LexicalNode }): DOMExportOutput {
+    static exportDOM(
+      editor: LexicalEditor,
+      { node }: { node: LexicalNode },
+    ): DOMExportOutput {
       if (userConfig.exportDOM) {
-        const element = document.createElement('div');
+        const element = document.createElement("div");
         return userConfig.exportDOM(editor, { element, node });
       }
-      const element = document.createElement('div');
-      element.setAttribute('data-custom-node-type', userConfig.nodeType);
+      const element = document.createElement("div");
+      element.setAttribute("data-custom-node-type", userConfig.nodeType);
       return { element };
     }
 
@@ -235,9 +255,9 @@ export function createCustomNodeExtension<
         type: this.__nodeType,
         version: 1,
         payload: this.__payload,
-        children: this.getChildren().map(child => child.exportJSON()),
+        children: this.getChildren().map((child) => child.exportJSON()),
         direction: null,
-        format: '',
+        format: "",
         indent: 0,
       } as any;
     }
@@ -245,11 +265,11 @@ export function createCustomNodeExtension<
     createDOM(config: EditorConfig): HTMLElement {
       if (userConfig.createDOM) {
         const element = userConfig.createDOM(config, this);
-        element.setAttribute('data-custom-node-type', this.__nodeType);
-        element.setAttribute('data-lexical-key', this.getKey());
+        element.setAttribute("data-custom-node-type", this.__nodeType);
+        element.setAttribute("data-lexical-key", this.getKey());
         return element;
       }
-      
+
       // NEW: JSX support for containers!
       if (userConfig.jsx) {
         const jsxElement = userConfig.jsx({
@@ -259,30 +279,34 @@ export function createCustomNodeExtension<
           isSelected: false, // Will be updated by selection listener
           updatePayload: (newPayload: Partial<CustomPayload>) => {
             this.setPayload(newPayload);
-          }
+          },
         });
-        
+
         const element = jsxToDOM(jsxElement);
-        element.setAttribute('data-custom-node-type', this.__nodeType);
-        element.setAttribute('data-lexical-key', this.getKey());
+        element.setAttribute("data-custom-node-type", this.__nodeType);
+        element.setAttribute("data-lexical-key", this.getKey());
         return element;
       }
-      
-      const element = document.createElement('div');
-      element.setAttribute('data-custom-node-type', this.__nodeType);
-      element.setAttribute('data-lexical-key', this.getKey());
-      
+
+      const element = document.createElement("div");
+      element.setAttribute("data-custom-node-type", this.__nodeType);
+      element.setAttribute("data-lexical-key", this.getKey());
+
       // Add basic styling for containers
-      element.style.border = '2px solid #ccc';
-      element.style.borderRadius = '8px';
-      element.style.padding = '16px';
-      element.style.margin = '8px 0';
-      element.style.position = 'relative';
-      
+      element.style.border = "2px solid #ccc";
+      element.style.borderRadius = "8px";
+      element.style.padding = "16px";
+      element.style.margin = "8px 0";
+      element.style.position = "relative";
+
       return element;
     }
 
-    updateDOM(prevNode: CustomElementNode, dom: HTMLElement, config: EditorConfig): boolean {
+    updateDOM(
+      prevNode: CustomElementNode,
+      dom: HTMLElement,
+      config: EditorConfig,
+    ): boolean {
       if (userConfig.updateDOM) {
         return userConfig.updateDOM(prevNode, dom, config);
       }
@@ -295,7 +319,10 @@ export function createCustomNodeExtension<
 
     setPayload(newPayload: Partial<CustomPayload>): void {
       const writable = this.getWritable();
-      (writable as CustomElementNode).__payload = { ...this.__payload, ...newPayload };
+      (writable as CustomElementNode).__payload = {
+        ...this.__payload,
+        ...newPayload,
+      };
     }
   }
 
@@ -309,14 +336,14 @@ export function createCustomNodeExtension<
     }
 
     static clone(node: CustomDecoratorNode): CustomDecoratorNode {
-      return new CustomDecoratorNode(node.__payload, node.__nodeType, node.__key);
+      return new CustomDecoratorNode(
+        node.__payload,
+        node.__nodeType,
+        node.__key,
+      );
     }
 
-    constructor(
-      payload: CustomPayload = {},
-      nodeType: string,
-      key?: NodeKey
-    ) {
+    constructor(payload: CustomPayload = {}, nodeType: string, key?: NodeKey) {
       super(key);
       this.__payload = payload;
       this.__nodeType = nodeType;
@@ -335,13 +362,16 @@ export function createCustomNodeExtension<
       return userConfig.importDOM ? userConfig.importDOM() : {};
     }
 
-    static exportDOM(editor: LexicalEditor, { node }: { node: LexicalNode }): DOMExportOutput {
+    static exportDOM(
+      editor: LexicalEditor,
+      { node }: { node: LexicalNode },
+    ): DOMExportOutput {
       if (userConfig.exportDOM) {
-        const element = document.createElement('span');
+        const element = document.createElement("span");
         return userConfig.exportDOM(editor, { element, node });
       }
-      const element = document.createElement('span');
-      element.setAttribute('data-custom-node-type', userConfig.nodeType);
+      const element = document.createElement("span");
+      element.setAttribute("data-custom-node-type", userConfig.nodeType);
       return { element };
     }
 
@@ -349,24 +379,28 @@ export function createCustomNodeExtension<
       return {
         type: this.__nodeType,
         version: 1,
-        payload: this.__payload
+        payload: this.__payload,
       } as any;
     }
 
     createDOM(config: EditorConfig): HTMLElement {
-      const element = document.createElement('span');
-      element.setAttribute('data-custom-node-type', this.__nodeType);
-      
+      const element = document.createElement("span");
+      element.setAttribute("data-custom-node-type", this.__nodeType);
+
       if (userConfig.createDOM) {
         const customElement = userConfig.createDOM(config, this);
-        customElement.setAttribute('data-custom-node-type', this.__nodeType);
+        customElement.setAttribute("data-custom-node-type", this.__nodeType);
         return customElement;
       }
-      
+
       return element;
     }
 
-    updateDOM(prevNode: CustomDecoratorNode, dom: HTMLElement, config: EditorConfig): boolean {
+    updateDOM(
+      prevNode: CustomDecoratorNode,
+      dom: HTMLElement,
+      config: EditorConfig,
+    ): boolean {
       if (userConfig.updateDOM) {
         return userConfig.updateDOM(prevNode, dom, config);
       }
@@ -379,34 +413,41 @@ export function createCustomNodeExtension<
 
     setPayload(newPayload: Partial<CustomPayload>): void {
       const writable = this.getWritable();
-      (writable as CustomDecoratorNode).__payload = { ...this.__payload, ...newPayload };
+      (writable as CustomDecoratorNode).__payload = {
+        ...this.__payload,
+        ...newPayload,
+      };
     }
 
     decorate(): ReactNode {
-      return <CustomNodeComponent 
-        node={this} 
-        payload={this.__payload} 
-        nodeKey={this.__key}
-        children={undefined}
-      />;
+      return (
+        <CustomNodeComponent
+          node={this}
+          payload={this.__payload}
+          nodeKey={this.__key}
+          children={undefined}
+        />
+      );
     }
   }
 
   // Helper to create node
-  function $createCustomNode(payload: CustomPayload = userConfig.defaultPayload || {}): CustomElementNode | CustomDecoratorNode {
+  function $createCustomNode(
+    payload: CustomPayload = userConfig.defaultPayload || {},
+  ): CustomElementNode | CustomDecoratorNode {
     if (isContainer) {
       // For containers, always use ElementNode regardless of render prop
       const node = new CustomElementNode(payload, userConfig.nodeType);
-      
+
       if (userConfig.initialChildren) {
         const initialChildren = userConfig.initialChildren();
-        initialChildren.forEach(childData => {
-          if (childData.type === 'paragraph') {
+        initialChildren.forEach((childData) => {
+          if (childData.type === "paragraph") {
             const paragraph = $createParagraphNode();
             if ((childData as any).children) {
               (childData as any).children.forEach((textChild: any) => {
-                if (textChild.type === 'text') {
-                  paragraph.append($createTextNode(textChild.text || ''));
+                if (textChild.type === "text") {
+                  paragraph.append($createTextNode(textChild.text || ""));
                 }
               });
             }
@@ -416,10 +457,10 @@ export function createCustomNodeExtension<
       } else {
         // Default empty paragraph
         const paragraph = $createParagraphNode();
-        paragraph.append($createTextNode(''));
+        paragraph.append($createTextNode(""));
         node.append(paragraph);
       }
-      
+
       return node;
     } else {
       // For non-containers, use DecoratorNode
@@ -428,7 +469,12 @@ export function createCustomNodeExtension<
   }
 
   // Extension class
-  class CustomNodeExtension extends BaseExtension<Name, BaseExtensionConfig, Commands, StateQueries> {
+  class CustomNodeExtension extends BaseExtension<
+    Name,
+    BaseExtensionConfig,
+    Commands,
+    StateQueries
+  > {
     constructor() {
       super(userConfig.nodeType as Name, [ExtensionCategory.Toolbar]);
     }
@@ -448,40 +494,54 @@ export function createCustomNodeExtension<
           });
           return true;
         },
-        COMMAND_PRIORITY_EDITOR
+        COMMAND_PRIORITY_EDITOR,
       );
 
       // Handle selection updates for ElementNodes
-      const unregisterUpdate = editor.registerUpdateListener(({ editorState, prevEditorState }) => {
-        if (isContainer) {
-          // For containers, we need to update DOM styling based on selection
-          editorState.read(() => {
-            const selection = $getSelection();
-            const selectedNodes = $isNodeSelection(selection) ? selection.getNodes() : [];
-            
-            // Update all custom element nodes
-            editor.getEditorState().read(() => {
-              const root = $getRoot();
-              const updateNode = (node: LexicalNode) => {
-                if (node.getType() === userConfig.nodeType) {
-                  const isSelected = selectedNodes.some(n => n.__key === node.__key);
-                  const domElement = document.querySelector(`[data-lexical-key="${node.__key}"]`);
-                  if (domElement) {
-                    domElement.setAttribute('data-selected', isSelected.toString());
-                    (domElement as HTMLElement).style.borderColor = isSelected ? '#007ACC' : '#ccc';
-                    (domElement as HTMLElement).style.backgroundColor = isSelected ? '#f0f8ff' : 'transparent';
+      const unregisterUpdate = editor.registerUpdateListener(
+        ({ editorState, prevEditorState }) => {
+          if (isContainer) {
+            // For containers, we need to update DOM styling based on selection
+            editorState.read(() => {
+              const selection = $getSelection();
+              const selectedNodes = $isNodeSelection(selection)
+                ? selection.getNodes()
+                : [];
+
+              // Update all custom element nodes
+              editor.getEditorState().read(() => {
+                const root = $getRoot();
+                const updateNode = (node: LexicalNode) => {
+                  if (node.getType() === userConfig.nodeType) {
+                    const isSelected = selectedNodes.some(
+                      (n) => n.__key === node.__key,
+                    );
+                    const domElement = document.querySelector(
+                      `[data-lexical-key="${node.__key}"]`,
+                    );
+                    if (domElement) {
+                      domElement.setAttribute(
+                        "data-selected",
+                        isSelected.toString(),
+                      );
+                      (domElement as HTMLElement).style.borderColor = isSelected
+                        ? "#007ACC"
+                        : "#ccc";
+                      (domElement as HTMLElement).style.backgroundColor =
+                        isSelected ? "#f0f8ff" : "transparent";
+                    }
                   }
-                }
-                // Only recurse into ElementNodes
-                if ('getChildren' in node) {
-                  (node as ElementNode).getChildren().forEach(updateNode);
-                }
-              };
-              updateNode(root);
+                  // Only recurse into ElementNodes
+                  if ("getChildren" in node) {
+                    (node as ElementNode).getChildren().forEach(updateNode);
+                  }
+                };
+                updateNode(root);
+              });
             });
-          });
-        }
-      });
+          }
+        },
+      );
 
       return () => {
         unregisterInsert();
@@ -495,23 +555,37 @@ export function createCustomNodeExtension<
 
     getCommands(editor: LexicalEditor): Commands {
       const defaultCommands = {
-        insertCustomNode: (payload: CustomPayload) => editor.dispatchCommand(INSERT_CUSTOM_NODE, payload),
+        insertCustomNode: (payload: CustomPayload) =>
+          editor.dispatchCommand(INSERT_CUSTOM_NODE, payload),
       } as unknown as Partial<Commands>;
 
-      return { ...defaultCommands, ...(userConfig.commands ? userConfig.commands(editor) : {}) } as Commands;
+      return {
+        ...defaultCommands,
+        ...(userConfig.commands ? userConfig.commands(editor) : {}),
+      } as Commands;
     }
 
     getStateQueries(editor: LexicalEditor): StateQueries {
       const defaultQueries = {
-        isCustomNodeActive: () => new Promise((resolve) => {
-          editor.getEditorState().read(() => {
-            const selection = $getSelection();
-            resolve(!!selection && $isNodeSelection(selection) && selection.getNodes().some((n) => n.getType() === userConfig.nodeType));
-          });
-        }),
+        isCustomNodeActive: () =>
+          new Promise((resolve) => {
+            editor.getEditorState().read(() => {
+              const selection = $getSelection();
+              resolve(
+                !!selection &&
+                  $isNodeSelection(selection) &&
+                  selection
+                    .getNodes()
+                    .some((n) => n.getType() === userConfig.nodeType),
+              );
+            });
+          }),
       } as unknown as Partial<StateQueries>;
 
-      return { ...defaultQueries, ...(userConfig.stateQueries ? userConfig.stateQueries(editor) : {}) } as StateQueries;
+      return {
+        ...defaultQueries,
+        ...(userConfig.stateQueries ? userConfig.stateQueries(editor) : {}),
+      } as StateQueries;
     }
   }
 

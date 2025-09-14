@@ -1,9 +1,16 @@
-import { UNDO_COMMAND, REDO_COMMAND, CLEAR_HISTORY_COMMAND, CAN_UNDO_COMMAND, CAN_REDO_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
-import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import {
+  UNDO_COMMAND,
+  REDO_COMMAND,
+  CLEAR_HISTORY_COMMAND,
+  CAN_UNDO_COMMAND,
+  CAN_REDO_COMMAND,
+  COMMAND_PRIORITY_LOW,
+} from "lexical";
+import { LexicalEditor } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { ReactNode } from "react";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 
 /**
  * Commands provided by the history extension.
@@ -49,7 +56,7 @@ export type HistoryCommands = {
  * ```
  */
 export class HistoryExtension extends BaseExtension<
-  'history',
+  "history",
   any,
   HistoryCommands,
   { canUndo: () => Promise<boolean>; canRedo: () => Promise<boolean> },
@@ -62,7 +69,7 @@ export class HistoryExtension extends BaseExtension<
    * Creates a new history extension instance.
    */
   constructor() {
-    super('history', [ExtensionCategory.Toolbar]);
+    super("history", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -79,7 +86,7 @@ export class HistoryExtension extends BaseExtension<
         this.canUndoState = payload;
         return false;
       },
-      COMMAND_PRIORITY_LOW
+      COMMAND_PRIORITY_LOW,
     );
 
     const unregisterRedo = editor.registerCommand(
@@ -88,7 +95,7 @@ export class HistoryExtension extends BaseExtension<
         this.canRedoState = payload;
         return false;
       },
-      COMMAND_PRIORITY_LOW
+      COMMAND_PRIORITY_LOW,
     );
 
     return () => {
@@ -122,7 +129,8 @@ export class HistoryExtension extends BaseExtension<
         editor.focus();
         editor.dispatchCommand(REDO_COMMAND, undefined);
       },
-      clearHistory: () => editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
+      clearHistory: () =>
+        editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined),
     };
   }
 
@@ -132,7 +140,10 @@ export class HistoryExtension extends BaseExtension<
    * @param editor - The Lexical editor instance
    * @returns Object containing state query functions
    */
-  getStateQueries(editor: LexicalEditor): { canUndo: () => Promise<boolean>; canRedo: () => Promise<boolean> } {
+  getStateQueries(editor: LexicalEditor): {
+    canUndo: () => Promise<boolean>;
+    canRedo: () => Promise<boolean>;
+  } {
     return {
       canUndo: async () => this.canUndoState,
       canRedo: async () => this.canRedoState,

@@ -18,8 +18,12 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 Here's the minimal setup to get LexKit working:
 
 ```tsx
-import React from 'react';
-import { createEditorSystem, richTextExtension, boldExtension } from '@lexkit/editor';
+import React from "react";
+import {
+  createEditorSystem,
+  richTextExtension,
+  boldExtension,
+} from "@lexkit/editor";
 
 // 1. Define extensions (as const is required for type safety)
 const extensions = [richTextExtension, boldExtension] as const;
@@ -33,13 +37,9 @@ function MyEditor() {
 
   return (
     <div>
-      <button onClick={() => commands.toggleBold()}>
-        Toggle Bold
-      </button>
+      <button onClick={() => commands.toggleBold()}>Toggle Bold</button>
 
-      <RichText
-        placeholder="Type something..."
-      />
+      <RichText placeholder="Type something..." />
     </div>
   );
 }
@@ -67,8 +67,8 @@ import {
   underlineExtension,
   listExtension,
   imageExtension,
-  historyExtension
-} from '@lexkit/editor';
+  historyExtension,
+} from "@lexkit/editor";
 
 const extensions = [
   richTextExtension,
@@ -77,44 +77,40 @@ const extensions = [
   underlineExtension,
   listExtension,
   imageExtension,
-  historyExtension
+  historyExtension,
 ] as const;
 
 function EnhancedToolbar() {
   const { commands, activeStates, hasExtension } = useEditor();
 
   return (
-    <div style={{ display: 'flex', gap: '8px', padding: '8px' }}>
-      {hasExtension('bold') && (
+    <div style={{ display: "flex", gap: "8px", padding: "8px" }}>
+      {hasExtension("bold") && (
         <button
           onClick={() => commands.toggleBold()}
-          style={{ fontWeight: activeStates.bold ? 'bold' : 'normal' }}
+          style={{ fontWeight: activeStates.bold ? "bold" : "normal" }}
         >
           Bold
         </button>
       )}
 
-      {hasExtension('italic') && (
+      {hasExtension("italic") && (
         <button
           onClick={() => commands.toggleItalic()}
-          style={{ fontStyle: activeStates.italic ? 'italic' : 'normal' }}
+          style={{ fontStyle: activeStates.italic ? "italic" : "normal" }}
         >
           Italic
         </button>
       )}
 
-      {hasExtension('list') && (
+      {hasExtension("list") && (
         <>
-          <button onClick={() => commands.toggleUnorderedList()}>
-            • List
-          </button>
-          <button onClick={() => commands.toggleOrderedList()}>
-            1. List
-          </button>
+          <button onClick={() => commands.toggleUnorderedList()}>• List</button>
+          <button onClick={() => commands.toggleOrderedList()}>1. List</button>
         </>
       )}
 
-      {hasExtension('history') && (
+      {hasExtension("history") && (
         <>
           <button onClick={() => commands.undo()}>Undo</button>
           <button onClick={() => commands.redo()}>Redo</button>
@@ -135,12 +131,15 @@ imageExtension.configure({
   uploadHandler: async (file) => {
     // Your upload logic
     const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch('/api/upload', { method: 'POST', body: formData });
+    formData.append("file", file);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
     return await response.json();
   },
-  defaultAlignment: 'center',
-  resizable: true
+  defaultAlignment: "center",
+  resizable: true,
 });
 ```
 

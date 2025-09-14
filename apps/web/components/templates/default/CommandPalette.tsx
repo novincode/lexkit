@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import type { CommandPaletteItem } from '@lexkit/editor/extensions/core';
-import { Search, Command } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import type { CommandPaletteItem } from "@lexkit/editor/extensions/core";
+import { Search, Command } from "lucide-react";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -8,25 +8,33 @@ interface CommandPaletteProps {
   commands: CommandPaletteItem[];
 }
 
-export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProps) {
-  const [query, setQuery] = useState('');
+export function CommandPalette({
+  isOpen,
+  onClose,
+  commands,
+}: CommandPaletteProps) {
+  const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   // Filter commands based on query
-  const filteredCommands = commands.filter(cmd => {
-    const searchText = `${cmd.label} ${cmd.description || ''} ${cmd.keywords?.join(' ') || ''}`.toLowerCase();
+  const filteredCommands = commands.filter((cmd) => {
+    const searchText =
+      `${cmd.label} ${cmd.description || ""} ${cmd.keywords?.join(" ") || ""}`.toLowerCase();
     return searchText.includes(query.toLowerCase());
   });
 
   // Group commands by category
-  const groupedCommands = filteredCommands.reduce((groups, cmd) => {
-    const category = cmd.category || 'Other';
-    if (!groups[category]) groups[category] = [];
-    groups[category].push(cmd);
-    return groups;
-  }, {} as Record<string, CommandPaletteItem[]>);
+  const groupedCommands = filteredCommands.reduce(
+    (groups, cmd) => {
+      const category = cmd.category || "Other";
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(cmd);
+      return groups;
+    },
+    {} as Record<string, CommandPaletteItem[]>,
+  );
 
   // Flatten for navigation
   const flatCommands = filteredCommands;
@@ -40,7 +48,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
-      setQuery('');
+      setQuery("");
       setSelectedIndex(0);
     }
   }, [isOpen]);
@@ -51,19 +59,21 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
       if (!isOpen) return;
 
       switch (e.key) {
-        case 'Escape':
+        case "Escape":
           e.preventDefault();
           onClose();
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           e.preventDefault();
-          setSelectedIndex(prev => Math.min(prev + 1, flatCommands.length - 1));
+          setSelectedIndex((prev) =>
+            Math.min(prev + 1, flatCommands.length - 1),
+          );
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           e.preventDefault();
-          setSelectedIndex(prev => Math.max(prev - 1, 0));
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
           break;
-        case 'Enter':
+        case "Enter":
           e.preventDefault();
           if (flatCommands[selectedIndex]) {
             flatCommands[selectedIndex].action();
@@ -73,18 +83,15 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, selectedIndex, flatCommands, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="lexkit-command-palette-overlay"
-      onClick={onClose}
-    >
-      <div 
+    <div className="lexkit-command-palette-overlay" onClick={onClose}>
+      <div
         className="lexkit-command-palette"
         onClick={(e) => e.stopPropagation()}
       >
@@ -100,7 +107,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
           />
           <kbd className="lexkit-command-palette-kbd">ESC</kbd>
         </div>
-        
+
         <div ref={listRef} className="lexkit-command-palette-list">
           {Object.keys(groupedCommands).length === 0 ? (
             <div className="lexkit-command-palette-empty">
@@ -118,7 +125,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                     <div
                       key={cmd.id}
                       className={`lexkit-command-palette-item ${
-                        globalIndex === selectedIndex ? 'selected' : ''
+                        globalIndex === selectedIndex ? "selected" : ""
                       }`}
                       onClick={() => {
                         cmd.action();
@@ -148,10 +155,11 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
             ))
           )}
         </div>
-        
+
         <div className="lexkit-command-palette-footer">
           <span className="lexkit-command-palette-hint">
-            <kbd>↑↓</kbd> to navigate, <kbd>↵</kbd> to select, <kbd>ESC</kbd> to close
+            <kbd>↑↓</kbd> to navigate, <kbd>↵</kbd> to select, <kbd>ESC</kbd> to
+            close
           </span>
         </div>
       </div>

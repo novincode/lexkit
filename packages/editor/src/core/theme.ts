@@ -1,5 +1,5 @@
-import { EditorThemeClasses } from 'lexical'
-import React from 'react'
+import { EditorThemeClasses } from "lexical";
+import React from "react";
 
 /**
  * Enhanced theme type that extends Lexical's EditorThemeClasses
@@ -8,98 +8,98 @@ import React from 'react'
 export interface LexKitTheme extends EditorThemeClasses {
   // Custom properties for LexKit
   toolbar?: {
-    button?: string
-    buttonActive?: string
-    buttonDisabled?: string
-    group?: string
-  }
-  container?: string
-  wrapper?: string
+    button?: string;
+    buttonActive?: string;
+    buttonDisabled?: string;
+    group?: string;
+  };
+  container?: string;
+  wrapper?: string;
   draggable?: {
-    handle?: string
-    handleActive?: string
-    handleHover?: string
-    handleDragging?: string
-    blockDragging?: string
-    dropIndicator?: string
-    upButton?: string
-    downButton?: string
-    blockIsDragging?: string
-    buttonStack?: string
+    handle?: string;
+    handleActive?: string;
+    handleHover?: string;
+    handleDragging?: string;
+    blockDragging?: string;
+    dropIndicator?: string;
+    upButton?: string;
+    downButton?: string;
+    blockIsDragging?: string;
+    buttonStack?: string;
     styles?: {
-      handle?: React.CSSProperties
-      handleActive?: React.CSSProperties
-      handleHover?: React.CSSProperties
-      handleDragging?: React.CSSProperties
-      blockDragging?: React.CSSProperties
-      dropIndicator?: React.CSSProperties
-      upButton?: React.CSSProperties
-      downButton?: React.CSSProperties
-      blockIsDragging?: React.CSSProperties
-      buttonStack?: React.CSSProperties
-    }
-  }
+      handle?: React.CSSProperties;
+      handleActive?: React.CSSProperties;
+      handleHover?: React.CSSProperties;
+      handleDragging?: React.CSSProperties;
+      blockDragging?: React.CSSProperties;
+      dropIndicator?: React.CSSProperties;
+      upButton?: React.CSSProperties;
+      downButton?: React.CSSProperties;
+      blockIsDragging?: React.CSSProperties;
+      buttonStack?: React.CSSProperties;
+    };
+  };
   floatingToolbar?: {
-    container?: string
-    button?: string
-    buttonActive?: string
+    container?: string;
+    button?: string;
+    buttonActive?: string;
     styles?: {
-      container?: React.CSSProperties
-      button?: React.CSSProperties
-      buttonActive?: React.CSSProperties
-    }
-  }
+      container?: React.CSSProperties;
+      button?: React.CSSProperties;
+      buttonActive?: React.CSSProperties;
+    };
+  };
   htmlEmbed?: {
-    container?: string
-    preview?: string
-    editor?: string
-    textarea?: string
-    toggle?: string
-    content?: string
+    container?: string;
+    preview?: string;
+    editor?: string;
+    textarea?: string;
+    toggle?: string;
+    content?: string;
     styles?: {
-      container?: React.CSSProperties
-      preview?: React.CSSProperties
-      editor?: React.CSSProperties
-      textarea?: React.CSSProperties
-      toggle?: React.CSSProperties
-      content?: React.CSSProperties
-    }
-  }
+      container?: React.CSSProperties;
+      preview?: React.CSSProperties;
+      editor?: React.CSSProperties;
+      textarea?: React.CSSProperties;
+      toggle?: React.CSSProperties;
+      content?: React.CSSProperties;
+    };
+  };
   // Styles for inline CSS properties
   styles?: {
     toolbar?: {
-      button?: React.CSSProperties
-      buttonActive?: React.CSSProperties
-      buttonDisabled?: React.CSSProperties
-      group?: React.CSSProperties
-    }
-    container?: React.CSSProperties
-    wrapper?: React.CSSProperties
+      button?: React.CSSProperties;
+      buttonActive?: React.CSSProperties;
+      buttonDisabled?: React.CSSProperties;
+      group?: React.CSSProperties;
+    };
+    container?: React.CSSProperties;
+    wrapper?: React.CSSProperties;
     draggable?: {
-      handle?: React.CSSProperties
-      handleHover?: React.CSSProperties
-      handleDragging?: React.CSSProperties
-      blockDragging?: React.CSSProperties
-      dropIndicator?: React.CSSProperties
-      upButton?: React.CSSProperties
-      downButton?: React.CSSProperties
-      blockIsDragging?: React.CSSProperties
-      buttonStack?: React.CSSProperties
-    }
+      handle?: React.CSSProperties;
+      handleHover?: React.CSSProperties;
+      handleDragging?: React.CSSProperties;
+      blockDragging?: React.CSSProperties;
+      dropIndicator?: React.CSSProperties;
+      upButton?: React.CSSProperties;
+      downButton?: React.CSSProperties;
+      blockIsDragging?: React.CSSProperties;
+      buttonStack?: React.CSSProperties;
+    };
     floatingToolbar?: {
-      container?: React.CSSProperties
-      button?: React.CSSProperties
-      buttonActive?: React.CSSProperties
-    }
+      container?: React.CSSProperties;
+      button?: React.CSSProperties;
+      buttonActive?: React.CSSProperties;
+    };
     htmlEmbed?: {
-      container?: React.CSSProperties
-      preview?: React.CSSProperties
-      editor?: React.CSSProperties
-      textarea?: React.CSSProperties
-      toggle?: React.CSSProperties
-      content?: React.CSSProperties
-    }
-  }
+      container?: React.CSSProperties;
+      preview?: React.CSSProperties;
+      editor?: React.CSSProperties;
+      textarea?: React.CSSProperties;
+      toggle?: React.CSSProperties;
+      content?: React.CSSProperties;
+    };
+  };
 }
 
 /**
@@ -108,85 +108,89 @@ export interface LexKitTheme extends EditorThemeClasses {
 export const defaultLexKitTheme: LexKitTheme = {
   // Lexical's built-in theme properties
   text: {
-    bold: 'lexkit-text-bold',
-    italic: 'lexkit-text-italic',
-    underline: 'lexkit-text-underline',
-    strikethrough: 'lexkit-text-strikethrough',
-    underlineStrikethrough: 'lexkit-text-underline-strikethrough',
-    code: 'lexkit-text-code',
+    bold: "lexkit-text-bold",
+    italic: "lexkit-text-italic",
+    underline: "lexkit-text-underline",
+    strikethrough: "lexkit-text-strikethrough",
+    underlineStrikethrough: "lexkit-text-underline-strikethrough",
+    code: "lexkit-text-code",
   },
   list: {
-    ul: 'lexkit-list-ul',
-    ol: 'lexkit-list-ol',
-    listitem: 'lexkit-list-item',
+    ul: "lexkit-list-ul",
+    ol: "lexkit-list-ol",
+    listitem: "lexkit-list-item",
     nested: {
-      list: 'lexkit-list-nested',
-      listitem: 'lexkit-list-nested-item',
+      list: "lexkit-list-nested",
+      listitem: "lexkit-list-nested-item",
     },
   },
-  quote: 'lexkit-quote',
+  quote: "lexkit-quote",
   heading: {
-    h1: 'lexkit-heading-h1',
-    h2: 'lexkit-heading-h2',
-    h3: 'lexkit-heading-h3',
-    h4: 'lexkit-heading-h4',
-    h5: 'lexkit-heading-h5',
-    h6: 'lexkit-heading-h6',
+    h1: "lexkit-heading-h1",
+    h2: "lexkit-heading-h2",
+    h3: "lexkit-heading-h3",
+    h4: "lexkit-heading-h4",
+    h5: "lexkit-heading-h5",
+    h6: "lexkit-heading-h6",
   },
-  paragraph: 'lexkit-paragraph',
-  link: 'lexkit-link',
-  image: 'lexkit-image',
-  hr: 'lexkit-hr',
-  table: 'lexkit-table',
-  tableRow: 'lexkit-table-row',
-  tableCell: 'lexkit-table-cell',
-  tableCellHeader: 'lexkit-table-cell-header',
+  paragraph: "lexkit-paragraph",
+  link: "lexkit-link",
+  image: "lexkit-image",
+  hr: "lexkit-hr",
+  table: "lexkit-table",
+  tableRow: "lexkit-table-row",
+  tableCell: "lexkit-table-cell",
+  tableCellHeader: "lexkit-table-cell-header",
   code: "lexkit-code-block",
 
   // Custom LexKit properties
   toolbar: {
-    button: 'lexkit-toolbar-button',
-    buttonActive: 'lexkit-toolbar-button-active',
-    buttonDisabled: 'lexkit-toolbar-button-disabled',
-    group: 'lexkit-toolbar-group'
+    button: "lexkit-toolbar-button",
+    buttonActive: "lexkit-toolbar-button-active",
+    buttonDisabled: "lexkit-toolbar-button-disabled",
+    group: "lexkit-toolbar-group",
   },
-  container: 'lexkit-editor-container',
-  wrapper: 'lexkit-editor-wrapper',
+  container: "lexkit-editor-container",
+  wrapper: "lexkit-editor-wrapper",
   draggable: {
-    handle: 'lexkit-draggable-handle',
-    handleActive: 'lexkit-draggable-handle-active',
-    handleHover: 'lexkit-draggable-handle-hover',
-    handleDragging: 'lexkit-draggable-handle-dragging',
-    blockDragging: 'lexkit-draggable-block-dragging opacity-50 transition-opacity duration-200',
-    dropIndicator: 'lexkit-draggable-drop-indicator',
-    upButton: 'lexkit-draggable-up-button',
-    downButton: 'lexkit-draggable-down-button',
-    blockIsDragging: 'lexkit-draggable-block-is-dragging',
-    buttonStack: 'lexkit-draggable-button-stack',
+    handle: "lexkit-draggable-handle",
+    handleActive: "lexkit-draggable-handle-active",
+    handleHover: "lexkit-draggable-handle-hover",
+    handleDragging: "lexkit-draggable-handle-dragging",
+    blockDragging:
+      "lexkit-draggable-block-dragging opacity-50 transition-opacity duration-200",
+    dropIndicator: "lexkit-draggable-drop-indicator",
+    upButton: "lexkit-draggable-up-button",
+    downButton: "lexkit-draggable-down-button",
+    blockIsDragging: "lexkit-draggable-block-is-dragging",
+    buttonStack: "lexkit-draggable-button-stack",
   },
   floatingToolbar: {
-    container: 'lexkit-floating-toolbar',
-    button: 'lexkit-floating-toolbar-button',
-    buttonActive: 'lexkit-floating-toolbar-button-active',
+    container: "lexkit-floating-toolbar",
+    button: "lexkit-floating-toolbar-button",
+    buttonActive: "lexkit-floating-toolbar-button-active",
   },
   htmlEmbed: {
-    container: 'lexkit-html-embed-container',
-    preview: 'lexkit-html-embed-preview',
-    editor: 'lexkit-html-embed-editor',
-    textarea: 'lexkit-html-embed-textarea',
-    toggle: 'lexkit-html-embed-toggle',
-    content: 'lexkit-html-embed-content',
+    container: "lexkit-html-embed-container",
+    preview: "lexkit-html-embed-preview",
+    editor: "lexkit-html-embed-editor",
+    textarea: "lexkit-html-embed-textarea",
+    toggle: "lexkit-html-embed-toggle",
+    content: "lexkit-html-embed-content",
   },
   richText: {
-    contentEditable: 'lexkit-content-editable',
-    placeholder: 'lexkit-placeholder',
+    contentEditable: "lexkit-content-editable",
+    placeholder: "lexkit-placeholder",
   },
-}
+};
 
 /**
  * Helper function to merge themes
  */
-export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKitTheme>): LexKitTheme {
+export function mergeThemes(
+  baseTheme: LexKitTheme,
+  overrideTheme: Partial<LexKitTheme>,
+): LexKitTheme {
   return {
     ...baseTheme,
     ...overrideTheme,
@@ -257,12 +261,12 @@ export function mergeThemes(baseTheme: LexKitTheme, overrideTheme: Partial<LexKi
       },
       ...overrideTheme.styles,
     },
-  }
+  };
 }
 
 /**
  * Type guard to check if a theme is a LexKitTheme
  */
 export function isLexKitTheme(theme: any): theme is LexKitTheme {
-  return theme && typeof theme === 'object'
+  return theme && typeof theme === "object";
 }

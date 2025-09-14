@@ -1,16 +1,64 @@
-import { DecoratorNode, NodeKey, EditorConfig, LexicalNode, SerializedLexicalNode, Spread, createCommand, COMMAND_PRIORITY_EDITOR, $insertNodes, $isNodeSelection, $getSelection, $getRoot, DOMConversionMap, DOMExportOutput, $isRangeSelection, $createParagraphNode, $getNodeByKey, $setSelection, $createNodeSelection, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, PASTE_COMMAND, COMMAND_PRIORITY_NORMAL } from 'lexical';
-import { ComponentType, CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory, BaseExtensionConfig } from '@lexkit/editor/extensions/types';
-import { ImagePayload, ImageComponentProps, SerializedImageNode, ImageExtensionConfig, ImageCommands, ImageStateQueries, Alignment } from './types';
-import { ImageTranslator, importImageDOM, exportImageDOM, importImageJSON, exportImageJSON } from './ImageTranslator';
+import {
+  DecoratorNode,
+  NodeKey,
+  EditorConfig,
+  LexicalNode,
+  SerializedLexicalNode,
+  Spread,
+  createCommand,
+  COMMAND_PRIORITY_EDITOR,
+  $insertNodes,
+  $isNodeSelection,
+  $getSelection,
+  $getRoot,
+  DOMConversionMap,
+  DOMExportOutput,
+  $isRangeSelection,
+  $createParagraphNode,
+  $getNodeByKey,
+  $setSelection,
+  $createNodeSelection,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+  PASTE_COMMAND,
+  COMMAND_PRIORITY_NORMAL,
+} from "lexical";
+import {
+  ComponentType,
+  CSSProperties,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { LexicalEditor } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import {
+  ExtensionCategory,
+  BaseExtensionConfig,
+} from "@lexkit/editor/extensions/types";
+import {
+  ImagePayload,
+  ImageComponentProps,
+  SerializedImageNode,
+  ImageExtensionConfig,
+  ImageCommands,
+  ImageStateQueries,
+  Alignment,
+} from "./types";
+import {
+  ImageTranslator,
+  importImageDOM,
+  exportImageDOM,
+  importImageJSON,
+  exportImageJSON,
+} from "./ImageTranslator";
 
 /**
  * Command for inserting images into the editor
  */
-const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>('insert-image');
+const INSERT_IMAGE_COMMAND = createCommand<ImagePayload>("insert-image");
 
 /**
  * Default image component for rendering images in the editor
@@ -35,8 +83,8 @@ function ImageComponent({
   src,
   alt,
   caption,
-  alignment = 'none',
-  className = '',
+  alignment = "none",
+  className = "",
   style,
   nodeKey,
   width,
@@ -50,8 +98,12 @@ function ImageComponent({
   const [isSelected, setIsSelected] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(1);
-  const [currentWidth, setCurrentWidth] = useState<number | 'auto'>(width || 'auto');
-  const [currentHeight, setCurrentHeight] = useState<number | 'auto'>(height || 'auto');
+  const [currentWidth, setCurrentWidth] = useState<number | "auto">(
+    width || "auto",
+  );
+  const [currentHeight, setCurrentHeight] = useState<number | "auto">(
+    height || "auto",
+  );
 
   useEffect(() => {
     const img = imageRef.current;
@@ -65,7 +117,7 @@ function ImageComponent({
   // Clean up object URLs on unmount
   useEffect(() => {
     return () => {
-      if (src && src.startsWith('blob:')) {
+      if (src && src.startsWith("blob:")) {
         URL.revokeObjectURL(src);
       }
     };
@@ -73,19 +125,21 @@ function ImageComponent({
 
   // Update dimensions when props change
   useEffect(() => {
-    setCurrentWidth(width || 'auto');
-    setCurrentHeight(height || 'auto');
+    setCurrentWidth(width || "auto");
+    setCurrentHeight(height || "auto");
   }, [width, height]);
 
   // Listen for selection changes
   useEffect(() => {
     if (!nodeKey) return;
-    return editor.registerUpdateListener(({editorState}) => {
+    return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const selection = $getSelection();
         if ($isNodeSelection(selection)) {
           const selectedNodes = selection.getNodes();
-          setIsSelected(selectedNodes.some(node => node.getKey() === nodeKey));
+          setIsSelected(
+            selectedNodes.some((node) => node.getKey() === nodeKey),
+          );
         } else {
           setIsSelected(false);
         }
@@ -111,11 +165,13 @@ function ImageComponent({
     if (!imageRef.current || !event.target) {
       return;
     }
-    
+
     event.preventDefault();
     setIsResizing(true);
-    const startX = 'touches' in event ? event.touches?.[0]?.clientX || 0 : event.clientX;
-    const startY = 'touches' in event ? event.touches?.[0]?.clientY || 0 : event.clientY;
+    const startX =
+      "touches" in event ? event.touches?.[0]?.clientX || 0 : event.clientX;
+    const startY =
+      "touches" in event ? event.touches?.[0]?.clientY || 0 : event.clientY;
     const startWidth = imageRef.current.clientWidth || 100;
     const startHeight = imageRef.current.clientHeight || 100;
 
@@ -123,15 +179,21 @@ function ImageComponent({
     let currentResizeHeight = startHeight;
 
     const onMove = (moveEvent: any) => {
-      const x = 'touches' in moveEvent ? moveEvent.touches?.[0]?.clientX || 0 : moveEvent.clientX;
-      const y = 'touches' in moveEvent ? moveEvent.touches?.[0]?.clientY || 0 : moveEvent.clientY;
+      const x =
+        "touches" in moveEvent
+          ? moveEvent.touches?.[0]?.clientX || 0
+          : moveEvent.clientX;
+      const y =
+        "touches" in moveEvent
+          ? moveEvent.touches?.[0]?.clientY || 0
+          : moveEvent.clientY;
       let newWidth = startWidth;
       let newHeight = startHeight;
 
-      if (direction.includes('e')) newWidth += x - startX;
-      if (direction.includes('w')) newWidth += startX - x;
-      if (direction.includes('s')) newHeight += y - startY;
-      if (direction.includes('n')) newHeight += startY - y;
+      if (direction.includes("e")) newWidth += x - startX;
+      if (direction.includes("w")) newWidth += startX - x;
+      if (direction.includes("s")) newHeight += y - startY;
+      if (direction.includes("n")) newHeight += startY - y;
 
       // Maintain aspect ratio if shift key is held
       if (moveEvent.shiftKey) {
@@ -154,131 +216,132 @@ function ImageComponent({
         const node = $getNodeByKey(nodeKey!);
         if (node instanceof ImageNode) {
           // Only update dimensions if they are numbers
-          if (typeof currentResizeWidth === 'number' && typeof currentResizeHeight === 'number') {
+          if (
+            typeof currentResizeWidth === "number" &&
+            typeof currentResizeHeight === "number"
+          ) {
             node.setWidthAndHeight(currentResizeWidth, currentResizeHeight);
           }
         }
       });
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onUp);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
     };
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onUp);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onUp);
   };
 
   const figureStyle: React.CSSProperties = {
     margin: 0,
-    display: 'block',
-    position: 'relative',
+    display: "block",
+    position: "relative",
   };
 
   const imgStyle: React.CSSProperties = {
-    maxWidth: '100%',
-    display: 'block',
-    borderRadius: '4px',
-    width: typeof currentWidth === 'number' ? '100%' : currentWidth,
-    height: typeof currentHeight === 'number' ? '100%' : currentHeight,
+    maxWidth: "100%",
+    display: "block",
+    borderRadius: "4px",
+    width: typeof currentWidth === "number" ? "100%" : currentWidth,
+    height: typeof currentHeight === "number" ? "100%" : currentHeight,
     margin: 0,
   };
 
   const captionStyle: React.CSSProperties = {
-    fontSize: '0.9em',
-    color: '#666',
-    fontStyle: 'italic',
-    marginTop: '0.5rem',
-    textAlign: 'center'
+    fontSize: "0.9em",
+    color: "#666",
+    fontStyle: "italic",
+    marginTop: "0.5rem",
+    textAlign: "center",
   };
 
   return (
-    <figure className={`lexical-image align-${alignment} ${className} ${isSelected ? 'selected' : ''} ${isResizing ? 'resizing' : ''} ${uploading ? 'uploading' : ''}`} style={figureStyle}>
+    <figure
+      className={`lexical-image align-${alignment} ${className} ${isSelected ? "selected" : ""} ${isResizing ? "resizing" : ""} ${uploading ? "uploading" : ""}`}
+      style={figureStyle}
+    >
       <div
         style={{
-          position: 'relative',
-          display: 'inline-block',
+          position: "relative",
+          display: "inline-block",
           width: currentWidth,
           height: currentHeight,
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
         onClick={onClick}
       >
-        <img
-          ref={imageRef}
-          src={src}
-          alt={alt}
-          style={imgStyle}
-        />
+        <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
         {isSelected && resizable && (
           <>
             <div
               className="resizer ne"
-              onMouseDown={startResize('ne')}
-              onTouchStart={startResize('ne')}
+              onMouseDown={startResize("ne")}
+              onTouchStart={startResize("ne")}
               style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                width: '10px',
-                height: '10px',
-                background: '#007acc',
-                cursor: 'ne-resize',
-                borderRadius: '50%'
+                position: "absolute",
+                top: "-5px",
+                right: "-5px",
+                width: "10px",
+                height: "10px",
+                background: "#007acc",
+                cursor: "ne-resize",
+                borderRadius: "50%",
               }}
             />
             <div
               className="resizer nw"
-              onMouseDown={startResize('nw')}
-              onTouchStart={startResize('nw')}
+              onMouseDown={startResize("nw")}
+              onTouchStart={startResize("nw")}
               style={{
-                position: 'absolute',
-                top: '-5px',
-                left: '-5px',
-                width: '10px',
-                height: '10px',
-                background: '#007acc',
-                cursor: 'nw-resize',
-                borderRadius: '50%'
+                position: "absolute",
+                top: "-5px",
+                left: "-5px",
+                width: "10px",
+                height: "10px",
+                background: "#007acc",
+                cursor: "nw-resize",
+                borderRadius: "50%",
               }}
             />
             <div
               className="resizer se"
-              onMouseDown={startResize('se')}
-              onTouchStart={startResize('se')}
+              onMouseDown={startResize("se")}
+              onTouchStart={startResize("se")}
               style={{
-                position: 'absolute',
-                bottom: '-5px',
-                right: '-5px',
-                width: '10px',
-                height: '10px',
-                background: '#007acc',
-                cursor: 'se-resize',
-                borderRadius: '50%'
+                position: "absolute",
+                bottom: "-5px",
+                right: "-5px",
+                width: "10px",
+                height: "10px",
+                background: "#007acc",
+                cursor: "se-resize",
+                borderRadius: "50%",
               }}
             />
             <div
               className="resizer sw"
-              onMouseDown={startResize('sw')}
-              onTouchStart={startResize('sw')}
+              onMouseDown={startResize("sw")}
+              onTouchStart={startResize("sw")}
               style={{
-                position: 'absolute',
-                bottom: '-5px',
-                left: '-5px',
-                width: '10px',
-                height: '10px',
-                background: '#007acc',
-                cursor: 'sw-resize',
-                borderRadius: '50%'
+                position: "absolute",
+                bottom: "-5px",
+                left: "-5px",
+                width: "10px",
+                height: "10px",
+                background: "#007acc",
+                cursor: "sw-resize",
+                borderRadius: "50%",
               }}
             />
           </>
         )}
       </div>
       {caption && <figcaption style={captionStyle}>{caption}</figcaption>}
-      <div style={{ clear: 'both', height: 0, fontSize: 0 }} />
+      <div style={{ clear: "both", height: 0, fontSize: 0 }} />
     </figure>
   );
 }
@@ -304,7 +367,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   __uploading?: boolean;
 
   static getType(): string {
-    return 'image';
+    return "image";
   }
 
   static clone(node: ImageNode): ImageNode {
@@ -318,7 +381,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
       node.__width,
       node.__height,
       node.__uploading,
-      node.__key
+      node.__key,
     );
   }
 
@@ -333,20 +396,20 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   }
 
   constructor(
-    src: string = '',
-    alt: string = '',
+    src: string = "",
+    alt: string = "",
     caption?: string,
-    alignment: Alignment = 'none',
+    alignment: Alignment = "none",
     className?: string,
     style?: CSSProperties,
     width?: number,
     height?: number,
     uploading?: boolean,
-    key?: NodeKey
+    key?: NodeKey,
   ) {
     super(key);
     // Ensure src is not empty
-    this.__src = src && src.length > 0 ? src : '';
+    this.__src = src && src.length > 0 ? src : "";
     this.__alt = alt;
     this.__caption = caption;
     this.__alignment = alignment;
@@ -359,42 +422,58 @@ export class ImageNode extends DecoratorNode<ReactNode> {
 
   // Required for DecoratorNode: creates the DOM container for the React component
   createDOM(config: EditorConfig): HTMLElement {
-    const div = document.createElement('div');
-    const themeClass = config.theme?.image || '';
+    const div = document.createElement("div");
+    const themeClass = config.theme?.image || "";
     const alignment = this.__alignment;
-    
-    div.className = `${themeClass} lexical-image-container align-${alignment}`.trim();
-    
+
+    div.className =
+      `${themeClass} lexical-image-container align-${alignment}`.trim();
+
     // Key changes: Float the outer container, shrink-wrap width, handle display per alignment
-    div.style.display = alignment === 'center' ? 'block' : 'inline-block';
-    div.style.float = alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none';
-    div.style.margin = alignment === 'center' ? '1rem auto' : 
-                      alignment === 'left' ? '0 1rem 1rem 0' : 
-                      alignment === 'right' ? '0 0 1rem 1rem' : 
-                      '1rem 0';
-    div.style.textAlign = alignment === 'center' ? 'center' : 'inherit';
-    div.style.position = 'relative';
+    div.style.display = alignment === "center" ? "block" : "inline-block";
+    div.style.float =
+      alignment === "left" ? "left" : alignment === "right" ? "right" : "none";
+    div.style.margin =
+      alignment === "center"
+        ? "1rem auto"
+        : alignment === "left"
+          ? "0 1rem 1rem 0"
+          : alignment === "right"
+            ? "0 0 1rem 1rem"
+            : "1rem 0";
+    div.style.textAlign = alignment === "center" ? "center" : "inherit";
+    div.style.position = "relative";
 
     return div;
   }
 
   // Required for DecoratorNode: handles updates to the DOM container
-  updateDOM(prevNode: ImageNode, dom: HTMLElement, config: EditorConfig): boolean {
+  updateDOM(
+    prevNode: ImageNode,
+    dom: HTMLElement,
+    config: EditorConfig,
+  ): boolean {
     const alignment = this.__alignment;
     if (alignment !== prevNode.__alignment) {
-      const themeClass = config.theme?.image || '';
-      dom.className = `${themeClass} lexical-image-container align-${alignment}`.trim();
+      const themeClass = config.theme?.image || "";
+      dom.className =
+        `${themeClass} lexical-image-container align-${alignment}`.trim();
     }
-    
+
     // Update styles on change
-    dom.style.display = alignment === 'center' ? 'block' : 'inline-block';
-    dom.style.float = alignment === 'left' ? 'left' : alignment === 'right' ? 'right' : 'none';
-    dom.style.margin = alignment === 'center' ? '1rem auto' : 
-                      alignment === 'left' ? '0 1rem 1rem 0' : 
-                      alignment === 'right' ? '0 0 1rem 1rem' : 
-                      '1rem 0';
-    dom.style.textAlign = alignment === 'center' ? 'center' : 'inherit';
-    dom.style.position = 'relative';
+    dom.style.display = alignment === "center" ? "block" : "inline-block";
+    dom.style.float =
+      alignment === "left" ? "left" : alignment === "right" ? "right" : "none";
+    dom.style.margin =
+      alignment === "center"
+        ? "1rem auto"
+        : alignment === "left"
+          ? "0 1rem 1rem 0"
+          : alignment === "right"
+            ? "0 0 1rem 1rem"
+            : "1rem 0";
+    dom.style.textAlign = alignment === "center" ? "center" : "inherit";
+    dom.style.position = "relative";
 
     return false; // No full re-render needed
   }
@@ -411,7 +490,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
 
   setSrc(src: string): void {
     if (!src || src.length === 0) {
-      console.warn('Attempted to set empty src on ImageNode');
+      console.warn("Attempted to set empty src on ImageNode");
       return;
     }
     const writable = this.getWritable();
@@ -475,14 +554,16 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   decorate(): ReactNode {
     // Ensure we have a valid src
     if (!this.__src || this.__src.length === 0) {
-      console.error('❌ No src provided to ImageNode');
+      console.error("❌ No src provided to ImageNode");
       return (
-        <div style={{
-          color: 'red',
-          border: '1px solid red',
-          padding: '10px',
-          backgroundColor: '#ffe6e6'
-        }}>
+        <div
+          style={{
+            color: "red",
+            border: "1px solid red",
+            padding: "10px",
+            backgroundColor: "#ffe6e6",
+          }}
+        >
           Image Error: No source URL provided
         </div>
       );
@@ -506,14 +587,16 @@ export class ImageNode extends DecoratorNode<ReactNode> {
         />
       );
     } catch (error) {
-      console.error('❌ Error rendering ImageNode:', error);
+      console.error("❌ Error rendering ImageNode:", error);
       return (
-        <div style={{
-          color: 'red',
-          border: '1px solid red',
-          padding: '10px',
-          backgroundColor: '#ffe6e6'
-        }}>
+        <div
+          style={{
+            color: "red",
+            border: "1px solid red",
+            padding: "10px",
+            backgroundColor: "#ffe6e6",
+          }}
+        >
           Image Error: {String(error)}
         </div>
       );
@@ -525,21 +608,31 @@ export function $createImageNode(
   src: string,
   alt: string,
   caption?: string,
-  alignment: Alignment = 'none',
+  alignment: Alignment = "none",
   className?: string,
   style?: CSSProperties,
   width?: number,
   height?: number,
-  uploading?: boolean
+  uploading?: boolean,
 ): ImageNode {
   if (!src || src.length === 0) {
-    throw new Error('Cannot create ImageNode with empty src');
+    throw new Error("Cannot create ImageNode with empty src");
   }
-  return new ImageNode(src, alt, caption, alignment, className, style, width, height, uploading);
+  return new ImageNode(
+    src,
+    alt,
+    caption,
+    alignment,
+    className,
+    style,
+    width,
+    height,
+    uploading,
+  );
 }
 
 export class ImageExtension extends BaseExtension<
-  'image',
+  "image",
   ImageExtensionConfig,
   ImageCommands,
   ImageStateQueries,
@@ -549,8 +642,9 @@ export class ImageExtension extends BaseExtension<
   private recentImages: Set<string> = new Set();
 
   constructor() {
-    super('image', [ExtensionCategory.Toolbar]);
-    this.config = {  // Set defaults
+    super("image", [ExtensionCategory.Toolbar]);
+    this.config = {
+      // Set defaults
       ...this.config,
       resizable: true,
       pasteListener: { insert: true, replace: true },
@@ -577,11 +671,21 @@ export class ImageExtension extends BaseExtension<
     }
     // Merge pasteListener with defaults
     this.config.pasteListener = {
-      insert: config.pasteListener?.insert ?? this.config.pasteListener?.insert ?? true,
-      replace: config.pasteListener?.replace ?? this.config.pasteListener?.replace ?? true,
+      insert:
+        config.pasteListener?.insert ??
+        this.config.pasteListener?.insert ??
+        true,
+      replace:
+        config.pasteListener?.replace ??
+        this.config.pasteListener?.replace ??
+        true,
     };
     this.config.debug = config.debug ?? this.config.debug ?? false;
-    this.config = { ...this.config, ...config, resizable: config.resizable ?? true };
+    this.config = {
+      ...this.config,
+      ...config,
+      resizable: config.resizable ?? true,
+    };
     return this;
   }
 
@@ -591,8 +695,10 @@ export class ImageExtension extends BaseExtension<
       (payload) => {
         editor.update(() => {
           try {
-            let src = payload.src || (payload.file ? URL.createObjectURL(payload.file) : '');
-            if (!src) throw new Error('No src for image');
+            let src =
+              payload.src ||
+              (payload.file ? URL.createObjectURL(payload.file) : "");
+            if (!src) throw new Error("No src for image");
 
             // Check for duplicates
             if (this.recentImages.has(src)) {
@@ -603,41 +709,48 @@ export class ImageExtension extends BaseExtension<
             setTimeout(() => this.recentImages.delete(src), 1000);
 
             let uploading = false;
-            if (payload.file && this.config.uploadHandler && this.config.forceUpload) {
+            if (
+              payload.file &&
+              this.config.uploadHandler &&
+              this.config.forceUpload
+            ) {
               uploading = true;
               // Async upload
-              this.config.uploadHandler(payload.file).then((uploadedSrc) => {
-                editor.update(() => {
-                  const node = $getNodeByKey(imageNode.getKey());
-                  if (node instanceof ImageNode) {
-                    node.setSrc(uploadedSrc);
-                    node.__uploading = false;
-                  }
+              this.config
+                .uploadHandler(payload.file)
+                .then((uploadedSrc) => {
+                  editor.update(() => {
+                    const node = $getNodeByKey(imageNode.getKey());
+                    if (node instanceof ImageNode) {
+                      node.setSrc(uploadedSrc);
+                      node.__uploading = false;
+                    }
+                  });
+                })
+                .catch((error) => {
+                  console.error("Upload failed:", error);
+                  // Keep blob URL, set uploading to false
+                  editor.update(() => {
+                    const node = $getNodeByKey(imageNode.getKey());
+                    if (node instanceof ImageNode) {
+                      node.__uploading = false;
+                    }
+                  });
                 });
-              }).catch((error) => {
-                console.error('Upload failed:', error);
-                // Keep blob URL, set uploading to false
-                editor.update(() => {
-                  const node = $getNodeByKey(imageNode.getKey());
-                  if (node instanceof ImageNode) {
-                    node.__uploading = false;
-                  }
-                });
-              });
             }
 
             const imageNode = $createImageNode(
               src,
               payload.alt,
               payload.caption,
-              payload.alignment || this.config.defaultAlignment || 'none',
+              payload.alignment || this.config.defaultAlignment || "none",
               payload.className,
               payload.style,
               undefined,
               undefined,
-              uploading
+              uploading,
             );
-            
+
             const selection = $getSelection();
             if ($isRangeSelection(selection)) {
               selection.insertNodes([imageNode]);
@@ -648,12 +761,12 @@ export class ImageExtension extends BaseExtension<
               $getRoot().append(paragraph);
             }
           } catch (error) {
-            console.error('❌ Insertion error:', error);
+            console.error("❌ Insertion error:", error);
           }
         });
         return true;
       },
-      COMMAND_PRIORITY_EDITOR
+      COMMAND_PRIORITY_EDITOR,
     );
     const removeDelete = editor.registerCommand(
       KEY_DELETE_COMMAND,
@@ -661,16 +774,16 @@ export class ImageExtension extends BaseExtension<
         const selection = $getSelection();
         if ($isNodeSelection(selection)) {
           const nodes = selection.getNodes();
-          if (nodes.some(node => node instanceof ImageNode)) {
+          if (nodes.some((node) => node instanceof ImageNode)) {
             editor.update(() => {
-              nodes.forEach(node => node.remove());
+              nodes.forEach((node) => node.remove());
             });
             return true;
           }
         }
         return false;
       },
-      COMMAND_PRIORITY_EDITOR
+      COMMAND_PRIORITY_EDITOR,
     );
     const removeBackspace = editor.registerCommand(
       KEY_BACKSPACE_COMMAND,
@@ -678,21 +791,24 @@ export class ImageExtension extends BaseExtension<
         const selection = $getSelection();
         if ($isNodeSelection(selection)) {
           const nodes = selection.getNodes();
-          if (nodes.some(node => node instanceof ImageNode)) {
+          if (nodes.some((node) => node instanceof ImageNode)) {
             editor.update(() => {
-              nodes.forEach(node => node.remove());
+              nodes.forEach((node) => node.remove());
             });
             return true;
           }
         }
         return false;
       },
-      COMMAND_PRIORITY_EDITOR
+      COMMAND_PRIORITY_EDITOR,
     );
 
     // New: Paste handler
     let removePaste: () => void = () => {};
-    if (this.config.pasteListener?.insert || this.config.pasteListener?.replace) {
+    if (
+      this.config.pasteListener?.insert ||
+      this.config.pasteListener?.replace
+    ) {
       const debugLog = this.config.debug ? console.log : () => {};
       removePaste = editor.registerCommand<ClipboardEvent>(
         PASTE_COMMAND,
@@ -701,9 +817,11 @@ export class ImageExtension extends BaseExtension<
           if (!items) return false;
 
           let handled = false;
-          const hasHtml = Array.from(items).some(item => item.type === 'text/html');
+          const hasHtml = Array.from(items).some(
+            (item) => item.type === "text/html",
+          );
           for (const item of items) {
-            if (item.type.startsWith('image/')) {
+            if (item.type.startsWith("image/")) {
               if (hasHtml) {
                 // Skip handling image file if HTML is present to avoid duplicate with importDOM
                 continue;
@@ -712,20 +830,24 @@ export class ImageExtension extends BaseExtension<
               const file = item.getAsFile();
               if (!file) continue;
 
-              debugLog('📋 Pasting image:', file.name);
+              debugLog("📋 Pasting image:", file.name);
 
               // Get src (upload or local URL)
-              const getSrc = this.config.uploadHandler && this.config.forceUpload
-                ? this.config.uploadHandler(file).catch((err) => {
-                    console.error('Upload failed:', err);
-                    return URL.createObjectURL(file);  // Fallback
-                  })
-                : Promise.resolve(URL.createObjectURL(file));
+              const getSrc =
+                this.config.uploadHandler && this.config.forceUpload
+                  ? this.config.uploadHandler(file).catch((err) => {
+                      console.error("Upload failed:", err);
+                      return URL.createObjectURL(file); // Fallback
+                    })
+                  : Promise.resolve(URL.createObjectURL(file));
 
               getSrc.then((src) => {
                 // Skip if recently inserted
                 if (this.recentImages.has(src)) {
-                  debugLog('🚫 Duplicate paste image src detected, skipping:', src);
+                  debugLog(
+                    "🚫 Duplicate paste image src detected, skipping:",
+                    src,
+                  );
                   return;
                 }
                 this.recentImages.add(src);
@@ -733,37 +855,49 @@ export class ImageExtension extends BaseExtension<
 
                 let uploading = false;
                 let imageNode: ImageNode;
-                if (this.config.uploadHandler && this.config.forceUpload && file) {
+                if (
+                  this.config.uploadHandler &&
+                  this.config.forceUpload &&
+                  file
+                ) {
                   uploading = true;
                   // Async upload
-                  this.config.uploadHandler(file).then((uploadedSrc) => {
-                    editor.update(() => {
-                      const node = $getNodeByKey(imageNode.getKey());
-                      if (node instanceof ImageNode) {
-                        node.setSrc(uploadedSrc);
-                        node.__uploading = false;
-                      }
+                  this.config
+                    .uploadHandler(file)
+                    .then((uploadedSrc) => {
+                      editor.update(() => {
+                        const node = $getNodeByKey(imageNode.getKey());
+                        if (node instanceof ImageNode) {
+                          node.setSrc(uploadedSrc);
+                          node.__uploading = false;
+                        }
+                      });
+                    })
+                    .catch((error) => {
+                      console.error("Upload failed:", error);
+                      editor.update(() => {
+                        const node = $getNodeByKey(imageNode.getKey());
+                        if (node instanceof ImageNode) {
+                          node.__uploading = false;
+                        }
+                      });
                     });
-                  }).catch((error) => {
-                    console.error('Upload failed:', error);
-                    editor.update(() => {
-                      const node = $getNodeByKey(imageNode.getKey());
-                      if (node instanceof ImageNode) {
-                        node.__uploading = false;
-                      }
-                    });
-                  });
                 }
 
                 editor.update(() => {
                   const selection = $getSelection();
-                  const alt = file.name || 'Pasted image';
+                  const alt = file.name || "Pasted image";
 
-                  if ($isNodeSelection(selection) && this.config.pasteListener?.replace) {
+                  if (
+                    $isNodeSelection(selection) &&
+                    this.config.pasteListener?.replace
+                  ) {
                     const nodes = selection.getNodes();
-                    const existingImageNode = nodes.find((node) => node instanceof ImageNode) as ImageNode | undefined;
+                    const existingImageNode = nodes.find(
+                      (node) => node instanceof ImageNode,
+                    ) as ImageNode | undefined;
                     if (existingImageNode) {
-                      debugLog('🔄 Replacing selected image src');
+                      debugLog("🔄 Replacing selected image src");
                       existingImageNode.setSrc(src);
                       existingImageNode.__uploading = uploading;
                       handled = true;
@@ -772,23 +906,35 @@ export class ImageExtension extends BaseExtension<
                   }
 
                   if (this.config.pasteListener?.insert) {
-                    debugLog('➕ Inserting new pasted image');
-                    imageNode = $createImageNode(src, alt, undefined, 'none', undefined, undefined, undefined, undefined, uploading);
+                    debugLog("➕ Inserting new pasted image");
+                    imageNode = $createImageNode(
+                      src,
+                      alt,
+                      undefined,
+                      "none",
+                      undefined,
+                      undefined,
+                      undefined,
+                      undefined,
+                      uploading,
+                    );
                     if ($isRangeSelection(selection)) {
                       selection.insertNodes([imageNode]);
                     } else {
-                      $getRoot().append($createParagraphNode().append(imageNode));
+                      $getRoot().append(
+                        $createParagraphNode().append(imageNode),
+                      );
                     }
                     handled = true;
                   }
                 });
               });
-              break;  // Handle only first image
+              break; // Handle only first image
             }
           }
-          return handled;  // true if we handled it (stops other handlers)
+          return handled; // true if we handled it (stops other handlers)
         },
-        COMMAND_PRIORITY_NORMAL  // Balanced priority
+        COMMAND_PRIORITY_NORMAL, // Balanced priority
       );
     }
 
@@ -885,7 +1031,7 @@ export class ImageExtension extends BaseExtension<
             if ($isNodeSelection(selection)) {
               const nodes = selection.getNodes();
               if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
-                resolve((nodes[0] as ImageNode).__alignment === 'left');
+                resolve((nodes[0] as ImageNode).__alignment === "left");
                 return;
               }
             }
@@ -899,7 +1045,7 @@ export class ImageExtension extends BaseExtension<
             if ($isNodeSelection(selection)) {
               const nodes = selection.getNodes();
               if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
-                resolve((nodes[0] as ImageNode).__alignment === 'center');
+                resolve((nodes[0] as ImageNode).__alignment === "center");
                 return;
               }
             }
@@ -913,7 +1059,7 @@ export class ImageExtension extends BaseExtension<
             if ($isNodeSelection(selection)) {
               const nodes = selection.getNodes();
               if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
-                resolve((nodes[0] as ImageNode).__alignment === 'right');
+                resolve((nodes[0] as ImageNode).__alignment === "right");
                 return;
               }
             }
@@ -927,7 +1073,7 @@ export class ImageExtension extends BaseExtension<
             if ($isNodeSelection(selection)) {
               const nodes = selection.getNodes();
               if (nodes.length === 1 && nodes[0] instanceof ImageNode) {
-                resolve((nodes[0] as ImageNode).__alignment === 'none');
+                resolve((nodes[0] as ImageNode).__alignment === "none");
                 return;
               }
             }

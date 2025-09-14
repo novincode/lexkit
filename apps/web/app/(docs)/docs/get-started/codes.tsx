@@ -1,42 +1,42 @@
-import { RegisteredCodeSnippet } from '../../lib/types'
+import { RegisteredCodeSnippet } from "../../lib/types";
 
 // Installation examples
 export const INSTALLATION_EXAMPLES: RegisteredCodeSnippet[] = [
   {
-    id: 'install-npm',
-    code: 'npm install @lexkit/editor',
-    language: 'bash',
-    title: 'Install with npm',
-    description: 'Install LexKit using npm'
+    id: "install-npm",
+    code: "npm install @lexkit/editor",
+    language: "bash",
+    title: "Install with npm",
+    description: "Install LexKit using npm",
   },
   {
-    id: 'install-pnpm',
-    code: 'pnpm add @lexkit/editor',
-    language: 'bash',
-    title: 'Install with pnpm',
-    description: 'Install LexKit using pnpm'
+    id: "install-pnpm",
+    code: "pnpm add @lexkit/editor",
+    language: "bash",
+    title: "Install with pnpm",
+    description: "Install LexKit using pnpm",
   },
   {
-    id: 'install-yarn',
-    code: 'yarn add @lexkit/editor',
-    language: 'bash',
-    title: 'Install with yarn',
-    description: 'Install LexKit using yarn'
-  }
-]
+    id: "install-yarn",
+    code: "yarn add @lexkit/editor",
+    language: "bash",
+    title: "Install with yarn",
+    description: "Install LexKit using yarn",
+  },
+];
 
 // Basic usage examples
 export const BASIC_USAGE_EXAMPLES: RegisteredCodeSnippet[] = [
   {
-    id: 'basic-import',
+    id: "basic-import",
     code: `import { createEditorSystem } from '@lexkit/editor'
 import { DefaultTemplate } from '@lexkit/editor/templates'`,
-    language: 'typescript',
-    title: 'Import LexKit',
-    description: 'Import the main components'
+    language: "typescript",
+    title: "Import LexKit",
+    description: "Import the main components",
   },
   {
-    id: 'basic-editor',
+    id: "basic-editor",
     code: `function MyEditor() {
   return (
     <DefaultTemplate
@@ -48,13 +48,13 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
     />
   )
 }`,
-    language: 'tsx',
-    title: 'Basic Editor Component',
-    description: 'Create a basic editor with ready callback',
-    highlightLines: [3, 4, 5, 6, 7]
+    language: "tsx",
+    title: "Basic Editor Component",
+    description: "Create a basic editor with ready callback",
+    highlightLines: [3, 4, 5, 6, 7],
   },
   {
-    id: 'editor-with-content',
+    id: "editor-with-content",
     code: `function MyEditor() {
   const [content, setContent] = useState('')
 
@@ -70,13 +70,13 @@ import { DefaultTemplate } from '@lexkit/editor/templates'`,
 
   return <DefaultTemplate onReady={handleReady} />
 }`,
-    language: 'tsx',
-    title: 'Editor with Content Management',
-    description: 'Load and save editor content',
-    highlightLines: [5, 6, 9, 10, 11]
+    language: "tsx",
+    title: "Editor with Content Management",
+    description: "Load and save editor content",
+    highlightLines: [5, 6, 9, 10, 11],
   },
   {
-    id: 'richtext-with-extensions',
+    id: "richtext-with-extensions",
     code: `import { createEditorSystem, richTextExtension, boldExtension, italicExtension, historyExtension } from "@lexkit/editor"
 
 // Define your extensions (as const for type safety)
@@ -107,13 +107,15 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'typescript',
-    title: 'Rich Text with Extensions',
-    description: 'Create a rich text editor with multiple extensions',
-    highlightLines: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    language: "typescript",
+    title: "Rich Text with Extensions",
+    description: "Create a rich text editor with multiple extensions",
+    highlightLines: [
+      5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    ],
   },
   {
-    id: 'richtext-as-extension',
+    id: "richtext-as-extension",
     code: `import { createEditorSystem, richTextExtension } from "@lexkit/editor"
 
 // Define your extensions
@@ -141,13 +143,13 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'tsx',
-    title: 'RichText as Extension',
-    description: 'Use RichText as a LexKit extension with createEditorSystem',
-    highlightLines: [5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21]
+    language: "tsx",
+    title: "RichText as Extension",
+    description: "Use RichText as a LexKit extension with createEditorSystem",
+    highlightLines: [5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21],
   },
   {
-    id: 'richtext-lexical-direct',
+    id: "richtext-lexical-direct",
     code: `import { createEditorSystem, boldExtension, italicExtension, historyExtension } from "@lexkit/editor"
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
@@ -178,13 +180,13 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>()
     </LexicalComposer>
   )
 }`,
-    language: 'tsx',
-    title: 'RichText with Lexical Direct',
-    description: 'Use createEditorSystem with manual RichTextPlugin setup',
-    highlightLines: [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    language: "tsx",
+    title: "RichText with Lexical Direct",
+    description: "Use createEditorSystem with manual RichTextPlugin setup",
+    highlightLines: [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23],
   },
   {
-    id: 'theming-with-lexkit',
+    id: "theming-with-lexkit",
     code: `// Define a custom theme with classnames
 const simpleTheme: LexKitTheme = {
   // Editor content styles
@@ -220,15 +222,15 @@ function ThemedEditor() {
     </Provider>
   )
 }`,
-    language: 'tsx',
-    title: 'Theming with LexKit',
-    description: 'Apply custom themes to your LexKit editor',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
-  }
-]
+    language: "tsx",
+    title: "Theming with LexKit",
+    description: "Apply custom themes to your LexKit editor",
+    highlightLines: [
+      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+      22, 23, 24, 25, 26, 27, 28, 29,
+    ],
+  },
+];
 
 // Combine all examples for default export
-export default [
-  ...INSTALLATION_EXAMPLES,
-  ...BASIC_USAGE_EXAMPLES
-]
+export default [...INSTALLATION_EXAMPLES, ...BASIC_USAGE_EXAMPLES];

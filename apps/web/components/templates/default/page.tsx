@@ -1,7 +1,9 @@
-import { DefaultTemplate } from './DefaultTemplate';
+import { DefaultTemplate } from "./DefaultTemplate";
 
 export default function Page() {
-  return <div className='p-4'>
-     <DefaultTemplate />
-  </div>
+  return (
+    <div className="p-4">
+      <DefaultTemplate />
+    </div>
+  );
 }

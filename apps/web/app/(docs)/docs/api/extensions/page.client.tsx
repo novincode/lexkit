@@ -1,12 +1,18 @@
-'use client'
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { Badge } from '@repo/ui/components/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card';
-import { Button } from '@repo/ui/components/button';
-import { SimpleCodeBlock } from '@/app/(docs)/components/simple-code-block';
-import { getRawCode, getHighlightedCode } from '@/lib/generated/code-registry';
+import React from "react";
+import Link from "next/link";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
+import { SimpleCodeBlock } from "@/app/(docs)/components/simple-code-block";
+import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
 import {
   CheckCircle,
   Zap,
@@ -23,9 +29,16 @@ import {
   Sparkles,
   FileText,
   Type,
-  FunctionSquare
-} from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/table";
+  FunctionSquare,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui/components/table";
 
 export default function ExtensionsApiPageClient() {
   return (
@@ -34,11 +47,14 @@ export default function ExtensionsApiPageClient() {
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Extensions API</h1>
-          <p className="text-xl text-muted-foreground mt-2">Core API reference for LexKit extensions</p>
+          <p className="text-xl text-muted-foreground mt-2">
+            Core API reference for LexKit extensions
+          </p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Complete API reference for creating, configuring, and using LexKit extensions.
-          Learn about the core interfaces, types, and functions that power the extension system.
+          Complete API reference for creating, configuring, and using LexKit
+          extensions. Learn about the core interfaces, types, and functions that
+          power the extension system.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -70,7 +86,8 @@ export default function ExtensionsApiPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">
-                  Step-by-step guide to building custom extensions with interactive examples and best practices.
+                  Step-by-step guide to building custom extensions with
+                  interactive examples and best practices.
                 </p>
               </CardContent>
             </Card>
@@ -86,7 +103,8 @@ export default function ExtensionsApiPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">
-                  Learn how to create typed editor systems from your extension arrays.
+                  Learn how to create typed editor systems from your extension
+                  arrays.
                 </p>
               </CardContent>
             </Card>
@@ -98,7 +116,8 @@ export default function ExtensionsApiPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Core API Overview</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          The extension system is built around a few key interfaces and functions that work together to provide type safety and modularity.
+          The extension system is built around a few key interfaces and
+          functions that work together to provide type safety and modularity.
         </p>
 
         <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6">
@@ -111,8 +130,9 @@ export default function ExtensionsApiPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Factory function for creating type-safe extensions with a functional API.
-                Perfect for simple extensions and rapid development.
+                Factory function for creating type-safe extensions with a
+                functional API. Perfect for simple extensions and rapid
+                development.
               </p>
             </CardContent>
           </Card>
@@ -126,8 +146,9 @@ export default function ExtensionsApiPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Abstract base class for creating extensions with traditional object-oriented patterns.
-                Ideal for complex extensions with inheritance.
+                Abstract base class for creating extensions with traditional
+                object-oriented patterns. Ideal for complex extensions with
+                inheritance.
               </p>
             </CardContent>
           </Card>
@@ -141,8 +162,8 @@ export default function ExtensionsApiPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Core TypeScript interfaces and types that define the extension contract
-                and ensure type safety throughout the system.
+                Core TypeScript interfaces and types that define the extension
+                contract and ensure type safety throughout the system.
               </p>
             </CardContent>
           </Card>
@@ -151,7 +172,9 @@ export default function ExtensionsApiPageClient() {
 
       {/* createExtension API */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">createExtension Function</h2>
+        <h2 className="text-3xl font-bold text-center">
+          createExtension Function
+        </h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
           The primary factory function for creating type-safe extensions.
         </p>
@@ -163,8 +186,11 @@ export default function ExtensionsApiPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="createExtension Type Signature"
-              html={getHighlightedCode('extensions-create-extension-signature') || ''}
-              raw={getRawCode('extensions-create-extension-signature') || ''}
+              html={
+                getHighlightedCode("extensions-create-extension-signature") ||
+                ""
+              }
+              raw={getRawCode("extensions-create-extension-signature") || ""}
             />
           </CardContent>
         </Card>
@@ -184,9 +210,15 @@ export default function ExtensionsApiPageClient() {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell><code>config</code></TableCell>
-                  <TableCell><code>CreateExtensionConfig</code></TableCell>
-                  <TableCell>Configuration object defining the extension's behavior</TableCell>
+                  <TableCell>
+                    <code>config</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>CreateExtensionConfig</code>
+                  </TableCell>
+                  <TableCell>
+                    Configuration object defining the extension's behavior
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -209,58 +241,106 @@ export default function ExtensionsApiPageClient() {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell><code>name</code></TableCell>
-                  <TableCell><code>string</code></TableCell>
+                  <TableCell>
+                    <code>name</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>string</code>
+                  </TableCell>
                   <TableCell>Yes</TableCell>
                   <TableCell>Unique identifier for the extension</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>category</code></TableCell>
-                  <TableCell><code>ExtensionCategory[]</code></TableCell>
+                  <TableCell>
+                    <code>category</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>ExtensionCategory[]</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
                   <TableCell>Categories this extension belongs to</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>config</code></TableCell>
-                  <TableCell><code>Partial&lt;Config&gt;</code></TableCell>
+                  <TableCell>
+                    <code>config</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>Partial&lt;Config&gt;</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
                   <TableCell>Default configuration values</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>commands</code></TableCell>
-                  <TableCell><code>(editor: LexicalEditor) =&gt; Commands</code></TableCell>
+                  <TableCell>
+                    <code>commands</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>(editor: LexicalEditor) =&gt; Commands</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
-                  <TableCell>Function returning command implementations</TableCell>
+                  <TableCell>
+                    Function returning command implementations
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>stateQueries</code></TableCell>
-                  <TableCell><code>(editor: LexicalEditor) =&gt; StateQueries</code></TableCell>
+                  <TableCell>
+                    <code>stateQueries</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>(editor: LexicalEditor) =&gt; StateQueries</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
-                  <TableCell>Function returning state query implementations</TableCell>
+                  <TableCell>
+                    Function returning state query implementations
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>plugins</code></TableCell>
-                  <TableCell><code>ReactNode[]</code></TableCell>
+                  <TableCell>
+                    <code>plugins</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>ReactNode[]</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
                   <TableCell>React components to render as plugins</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>initialize</code></TableCell>
-                  <TableCell><code>(editor: LexicalEditor) =&gt; (() =&gt; void) | void</code></TableCell>
+                  <TableCell>
+                    <code>initialize</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>
+                      (editor: LexicalEditor) =&gt; (() =&gt; void) | void
+                    </code>
+                  </TableCell>
                   <TableCell>No</TableCell>
-                  <TableCell>Initialization function called when extension is registered</TableCell>
+                  <TableCell>
+                    Initialization function called when extension is registered
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>nodes</code></TableCell>
-                  <TableCell><code>any[]</code></TableCell>
+                  <TableCell>
+                    <code>nodes</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>any[]</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
-                  <TableCell>Custom Lexical nodes provided by the extension</TableCell>
+                  <TableCell>
+                    Custom Lexical nodes provided by the extension
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>supportedFormats</code></TableCell>
-                  <TableCell><code>readonly TextFormatType[]</code></TableCell>
+                  <TableCell>
+                    <code>supportedFormats</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>readonly TextFormatType[]</code>
+                  </TableCell>
                   <TableCell>No</TableCell>
-                  <TableCell>Text formats supported by this extension</TableCell>
+                  <TableCell>
+                    Text formats supported by this extension
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -274,8 +354,10 @@ export default function ExtensionsApiPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="Creating an extension with createExtension"
-              html={getHighlightedCode('extensions-create-extension-example') || ''}
-              raw={getRawCode('extensions-create-extension-example') || ''}
+              html={
+                getHighlightedCode("extensions-create-extension-example") || ""
+              }
+              raw={getRawCode("extensions-create-extension-example") || ""}
             />
           </CardContent>
         </Card>
@@ -285,7 +367,8 @@ export default function ExtensionsApiPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">BaseExtension Class</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          Abstract base class for creating extensions with object-oriented patterns.
+          Abstract base class for creating extensions with object-oriented
+          patterns.
         </p>
 
         <Card>
@@ -295,8 +378,10 @@ export default function ExtensionsApiPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="BaseExtension Class Definition"
-              html={getHighlightedCode('extensions-base-extension-signature') || ''}
-              raw={getRawCode('extensions-base-extension-signature') || ''}
+              html={
+                getHighlightedCode("extensions-base-extension-signature") || ""
+              }
+              raw={getRawCode("extensions-base-extension-signature") || ""}
             />
           </CardContent>
         </Card>
@@ -316,34 +401,62 @@ export default function ExtensionsApiPageClient() {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell><code>register(editor)</code></TableCell>
-                  <TableCell><code>() =&gt; void</code></TableCell>
-                  <TableCell>Register the extension with the Lexical editor</TableCell>
+                  <TableCell>
+                    <code>register(editor)</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>() =&gt; void</code>
+                  </TableCell>
+                  <TableCell>
+                    Register the extension with the Lexical editor
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>getCommands(editor)</code></TableCell>
-                  <TableCell><code>Commands</code></TableCell>
+                  <TableCell>
+                    <code>getCommands(editor)</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>Commands</code>
+                  </TableCell>
                   <TableCell>Return command implementations</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>getStateQueries(editor)</code></TableCell>
-                  <TableCell><code>StateQueries</code></TableCell>
+                  <TableCell>
+                    <code>getStateQueries(editor)</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>StateQueries</code>
+                  </TableCell>
                   <TableCell>Return state query implementations</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>getPlugins()</code></TableCell>
-                  <TableCell><code>Plugins</code></TableCell>
+                  <TableCell>
+                    <code>getPlugins()</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>Plugins</code>
+                  </TableCell>
                   <TableCell>Return React plugins/components</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>getNodes()</code></TableCell>
-                  <TableCell><code>any[]</code></TableCell>
+                  <TableCell>
+                    <code>getNodes()</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>any[]</code>
+                  </TableCell>
                   <TableCell>Return custom Lexical nodes</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell><code>configure(config)</code></TableCell>
-                  <TableCell><code>this</code></TableCell>
-                  <TableCell>Configure the extension with new settings</TableCell>
+                  <TableCell>
+                    <code>configure(config)</code>
+                  </TableCell>
+                  <TableCell>
+                    <code>this</code>
+                  </TableCell>
+                  <TableCell>
+                    Configure the extension with new settings
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -357,8 +470,10 @@ export default function ExtensionsApiPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="Creating an extension with BaseExtension"
-              html={getHighlightedCode('extensions-base-extension-example') || ''}
-              raw={getRawCode('extensions-base-extension-example') || ''}
+              html={
+                getHighlightedCode("extensions-base-extension-example") || ""
+              }
+              raw={getRawCode("extensions-base-extension-example") || ""}
             />
           </CardContent>
         </Card>
@@ -366,7 +481,9 @@ export default function ExtensionsApiPageClient() {
 
       {/* Core Types */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center">Core Types & Interfaces</h2>
+        <h2 className="text-3xl font-bold text-center">
+          Core Types & Interfaces
+        </h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
           Essential TypeScript types that define the extension system.
         </p>
@@ -379,8 +496,10 @@ export default function ExtensionsApiPageClient() {
             <CardContent>
               <SimpleCodeBlock
                 title="Extension Interface Definition"
-                html={getHighlightedCode('extensions-extension-interface') || ''}
-                raw={getRawCode('extensions-extension-interface') || ''}
+                html={
+                  getHighlightedCode("extensions-extension-interface") || ""
+                }
+                raw={getRawCode("extensions-extension-interface") || ""}
               />
             </CardContent>
           </Card>
@@ -392,8 +511,10 @@ export default function ExtensionsApiPageClient() {
             <CardContent>
               <SimpleCodeBlock
                 title="Extension Categories"
-                html={getHighlightedCode('extensions-extension-category-enum') || ''}
-                raw={getRawCode('extensions-extension-category-enum') || ''}
+                html={
+                  getHighlightedCode("extensions-extension-category-enum") || ""
+                }
+                raw={getRawCode("extensions-extension-category-enum") || ""}
               />
             </CardContent>
           </Card>
@@ -405,8 +526,10 @@ export default function ExtensionsApiPageClient() {
             <CardContent>
               <SimpleCodeBlock
                 title="Base Configuration Interface"
-                html={getHighlightedCode('extensions-base-extension-config') || ''}
-                raw={getRawCode('extensions-base-extension-config') || ''}
+                html={
+                  getHighlightedCode("extensions-base-extension-config") || ""
+                }
+                raw={getRawCode("extensions-base-extension-config") || ""}
               />
             </CardContent>
           </Card>
@@ -460,8 +583,9 @@ export default function ExtensionsApiPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Use <code>editor.read()</code> for reading operations and <code>editor.update()</code> for mutations.
-                Avoid unnecessary re-renders and optimize state queries.
+                Use <code>editor.read()</code> for reading operations and{" "}
+                <code>editor.update()</code> for mutations. Avoid unnecessary
+                re-renders and optimize state queries.
               </p>
             </CardContent>
           </Card>
@@ -475,13 +599,13 @@ export default function ExtensionsApiPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Document your extension's API with JSDoc comments.
-                Include examples and usage patterns for other developers.
+                Document your extension's API with JSDoc comments. Include
+                examples and usage patterns for other developers.
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

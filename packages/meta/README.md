@@ -15,7 +15,7 @@ npm install @lexkit/editor
 ## Quick Start
 
 ```tsx
-import { createEditorSystem, boldExtension } from 'lexkit';
+import { createEditorSystem, boldExtension } from "lexkit";
 
 const extensions = [boldExtension];
 const editor = createEditorSystem(extensions);
@@ -26,9 +26,7 @@ function MyEditor() {
 
   return (
     <div>
-      <button onClick={() => commands.toggleBold()}>
-        Bold
-      </button>
+      <button onClick={() => commands.toggleBold()}>Bold</button>
       {/* Your editor content */}
     </div>
   );

@@ -6,8 +6,8 @@ import {
   NodeKey,
   SerializedLexicalNode,
   Spread,
-} from 'lexical';
-import { ImageNode, $createImageNode } from './index'; // Adjust path if needed
+} from "lexical";
+import { ImageNode, $createImageNode } from "./index"; // Adjust path if needed
 
 /**
  * Serialized representation of an ImageNode for persistence and data exchange
@@ -15,7 +15,7 @@ import { ImageNode, $createImageNode } from './index'; // Adjust path if needed
 export type SerializedImageNode = Spread<
   {
     /** Node type identifier */
-    type: 'image';
+    type: "image";
     /** Version for migration support */
     version: number;
     /** Image source URL */
@@ -25,7 +25,7 @@ export type SerializedImageNode = Spread<
     /** Optional caption text */
     caption?: string;
     /** Image alignment */
-    alignment: 'left' | 'center' | 'right' | 'none';
+    alignment: "left" | "center" | "right" | "none";
     /** CSS class name */
     className?: string;
     /** Inline CSS styles as string record */
@@ -72,38 +72,47 @@ export class ImageTranslator {
       img: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
           try {
-            if (!domNode || !(domNode instanceof HTMLImageElement) || !domNode.src) {
+            if (
+              !domNode ||
+              !(domNode instanceof HTMLImageElement) ||
+              !domNode.src
+            ) {
               return null;
             }
             const img = domNode;
 
             // Skip blob URLs during paste to avoid duplicates, but allow http/https URLs
-            if (img.src.startsWith('blob:') || img.src.startsWith('data:')) {
+            if (img.src.startsWith("blob:") || img.src.startsWith("data:")) {
               return null;
             }
 
             // Extract alignment from various possible sources
-            let alignment: 'left' | 'center' | 'right' | 'none' = 'none';
+            let alignment: "left" | "center" | "right" | "none" = "none";
 
             // Check style attribute
             const computedStyle = img.style;
             if (computedStyle.textAlign) {
               alignment = computedStyle.textAlign as any;
             } else if (computedStyle.float) {
-              alignment = computedStyle.float === 'left' ? 'left' :
-                        computedStyle.float === 'right' ? 'right' : 'none';
+              alignment =
+                computedStyle.float === "left"
+                  ? "left"
+                  : computedStyle.float === "right"
+                    ? "right"
+                    : "none";
             }
 
             // Check class names for alignment
-            if (img.classList.contains('align-left')) alignment = 'left';
-            else if (img.classList.contains('align-center')) alignment = 'center';
-            else if (img.classList.contains('align-right')) alignment = 'right';
+            if (img.classList.contains("align-left")) alignment = "left";
+            else if (img.classList.contains("align-center"))
+              alignment = "center";
+            else if (img.classList.contains("align-right")) alignment = "right";
 
             // Extract caption from figure/figcaption if present
             let caption: string | undefined;
-            const figure = img.closest('figure');
+            const figure = img.closest("figure");
             if (figure) {
-              const figcaption = figure.querySelector('figcaption');
+              const figcaption = figure.querySelector("figcaption");
               if (figcaption) {
                 caption = figcaption.textContent || undefined;
               }
@@ -112,11 +121,11 @@ export class ImageTranslator {
             try {
               const node = $createImageNode(
                 img.src,
-                img.alt || '',
+                img.alt || "",
                 caption,
                 alignment,
                 img.className || undefined,
-                this.extractStyleObject(img)
+                this.extractStyleObject(img),
               );
 
               return { node };
@@ -132,27 +141,36 @@ export class ImageTranslator {
       figure: () => ({
         conversion: (domNode: HTMLElement): DOMConversionOutput | null => {
           try {
-            if (!domNode || !(domNode instanceof HTMLElement) || domNode.tagName !== 'FIGURE') {
+            if (
+              !domNode ||
+              !(domNode instanceof HTMLElement) ||
+              domNode.tagName !== "FIGURE"
+            ) {
               return null;
             }
             const figure = domNode;
-            const img = figure.querySelector('img');
+            const img = figure.querySelector("img");
 
-            if (!img || !img.src || (img.src.startsWith('blob:') || img.src.startsWith('data:'))) {
+            if (
+              !img ||
+              !img.src ||
+              img.src.startsWith("blob:") ||
+              img.src.startsWith("data:")
+            ) {
               return null;
             }
 
-            const figcaption = figure.querySelector('figcaption');
+            const figcaption = figure.querySelector("figcaption");
             const caption = figcaption?.textContent || undefined;
 
             try {
               const node = $createImageNode(
                 img.src,
-                img.alt || '',
+                img.alt || "",
                 caption,
-                'center', // Figures are typically centered
+                "center", // Figures are typically centered
                 figure.className || undefined,
-                this.extractStyleObject(figure)
+                this.extractStyleObject(figure),
               );
 
               return { node };
@@ -185,7 +203,7 @@ export class ImageTranslator {
    */
   static exportJSON(node: ImageNode): SerializedImageNode {
     return {
-      type: 'image',
+      type: "image",
       version: 1,
       src: node.__src,
       alt: node.__alt,
@@ -206,10 +224,20 @@ export class ImageTranslator {
    * @throws Error if src is empty
    */
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { src, alt, caption, alignment, className, style, width, height, uploading } = serializedNode;
+    const {
+      src,
+      alt,
+      caption,
+      alignment,
+      className,
+      style,
+      width,
+      height,
+      uploading,
+    } = serializedNode;
 
     if (!src || src.length === 0) {
-      throw new Error('Cannot import ImageNode with empty src');
+      throw new Error("Cannot import ImageNode with empty src");
     }
 
     return $createImageNode(
@@ -221,7 +249,7 @@ export class ImageTranslator {
       style ? this.recordToStyleObject(style) : undefined,
       width,
       height,
-      uploading
+      uploading,
     );
   }
 
@@ -230,9 +258,14 @@ export class ImageTranslator {
    * @param node - The ImageNode to convert
    * @returns Object with element and after callback
    */
-  private static createImageElement(node: ImageNode): { element: HTMLElement; after?: (el: HTMLElement | DocumentFragment | Text | null | undefined) => HTMLElement | DocumentFragment | Text | null | undefined } {
-    const element = document.createElement('figure');
-    const img = document.createElement('img');
+  private static createImageElement(node: ImageNode): {
+    element: HTMLElement;
+    after?: (
+      el: HTMLElement | DocumentFragment | Text | null | undefined,
+    ) => HTMLElement | DocumentFragment | Text | null | undefined;
+  } {
+    const element = document.createElement("figure");
+    const img = document.createElement("img");
 
     // Set basic image attributes
     img.src = node.__src;
@@ -257,35 +290,35 @@ export class ImageTranslator {
 
     // Apply alignment styles
     switch (node.__alignment) {
-      case 'left':
-        element.style.textAlign = 'left';
+      case "left":
+        element.style.textAlign = "left";
         break;
-      case 'center':
-        element.style.textAlign = 'center';
+      case "center":
+        element.style.textAlign = "center";
         break;
-      case 'right':
-        element.style.textAlign = 'right';
+      case "right":
+        element.style.textAlign = "right";
         break;
       default:
-        element.style.textAlign = 'left';
+        element.style.textAlign = "left";
     }
 
     // Basic figure styling
-    element.style.margin = '1rem 0';
-    element.style.display = 'block';
+    element.style.margin = "1rem 0";
+    element.style.display = "block";
 
     // Add image to figure
     element.appendChild(img);
 
     // Add caption if present
     if (node.__caption) {
-      const figcaption = document.createElement('figcaption');
+      const figcaption = document.createElement("figcaption");
       figcaption.textContent = node.__caption;
-      figcaption.style.fontSize = '0.9em';
-      figcaption.style.color = '#666';
-      figcaption.style.fontStyle = 'italic';
-      figcaption.style.marginTop = '0.5rem';
-      figcaption.style.textAlign = 'center';
+      figcaption.style.fontSize = "0.9em";
+      figcaption.style.color = "#666";
+      figcaption.style.fontStyle = "italic";
+      figcaption.style.marginTop = "0.5rem";
+      figcaption.style.textAlign = "center";
       element.appendChild(figcaption);
     }
 
@@ -294,7 +327,7 @@ export class ImageTranslator {
       element,
       after: (el: HTMLElement | DocumentFragment | Text | null | undefined) => {
         return el; // Return the element as expected
-      }
+      },
     };
   }
 
@@ -303,8 +336,16 @@ export class ImageTranslator {
    * @param element - The DOM element to extract styles from
    * @returns Style object or undefined if no styles
    */
-  private static extractStyleObject(element: HTMLElement): Record<string, any> | undefined {
-    if (!element || !(element instanceof HTMLElement) || !element.style || !element.style.length) return undefined;
+  private static extractStyleObject(
+    element: HTMLElement,
+  ): Record<string, any> | undefined {
+    if (
+      !element ||
+      !(element instanceof HTMLElement) ||
+      !element.style ||
+      !element.style.length
+    )
+      return undefined;
 
     const styleObj: Record<string, any> = {};
 
@@ -327,7 +368,9 @@ export class ImageTranslator {
    * @param style - Style object to convert
    * @returns String record of styles
    */
-  private static styleObjectToRecord(style: Record<string, any>): Record<string, string> {
+  private static styleObjectToRecord(
+    style: Record<string, any>,
+  ): Record<string, string> {
     const record: Record<string, string> = {};
     for (const [key, value] of Object.entries(style)) {
       record[key] = String(value);
@@ -340,7 +383,9 @@ export class ImageTranslator {
    * @param record - String record to convert
    * @returns Style object
    */
-  private static recordToStyleObject(record: Record<string, string>): Record<string, any> {
+  private static recordToStyleObject(
+    record: Record<string, string>,
+  ): Record<string, any> {
     return { ...record };
   }
 }
@@ -350,5 +395,5 @@ export const {
   importDOM: importImageDOM,
   exportDOM: exportImageDOM,
   importJSON: importImageJSON,
-  exportJSON: exportImageJSON
+  exportJSON: exportImageJSON,
 } = ImageTranslator;

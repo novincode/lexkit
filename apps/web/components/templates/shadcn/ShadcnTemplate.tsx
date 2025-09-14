@@ -1,6 +1,12 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   boldExtension,
   italicExtension,
@@ -19,32 +25,67 @@ import {
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
-  draggableBlockExtension
-} from '@lexkit/editor/extensions';
-import { commandPaletteExtension, floatingToolbarExtension, contextMenuExtension } from '@lexkit/editor/extensions/core';
-import { ALL_MARKDOWN_TRANSFORMERS } from '@lexkit/editor/extensions/export/transformers';
-import { MyCustomExtension } from '../MyCustomExtension';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+  draggableBlockExtension,
+} from "@lexkit/editor/extensions";
+import {
+  commandPaletteExtension,
+  floatingToolbarExtension,
+  contextMenuExtension,
+} from "@lexkit/editor/extensions/core";
+import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
+import { MyCustomExtension } from "../MyCustomExtension";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 
 // Import shared commands and components
-import { commandsToCommandPaletteItems, registerKeyboardShortcuts } from '../default/commands';
-import { ShadcnCommandPalette } from './CommandPalette';
-import { shadcnTheme } from './theme';
+import {
+  commandsToCommandPaletteItems,
+  registerKeyboardShortcuts,
+} from "../default/commands";
+import { ShadcnCommandPalette } from "./CommandPalette";
+import { shadcnTheme } from "./theme";
 
 // SHADCN Components
-import { Button } from '@repo/ui/components/button';
-import { Toggle } from '@repo/ui/components/toggle';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@repo/ui/components/tooltip';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/components/dialog';
-import { Separator } from '@repo/ui/components/separator';
-import { Label } from '@repo/ui/components/label';
-import { Input } from '@repo/ui/components/input';
-import { Textarea } from '@repo/ui/components/textarea';
-import { Switch } from '@repo/ui/components/switch';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@repo/ui/components/drawer';
+import { Button } from "@repo/ui/components/button";
+import { Toggle } from "@repo/ui/components/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@repo/ui/components/tooltip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
+import { Separator } from "@repo/ui/components/separator";
+import { Label } from "@repo/ui/components/label";
+import { Input } from "@repo/ui/components/input";
+import { Textarea } from "@repo/ui/components/textarea";
+import { Switch } from "@repo/ui/components/switch";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@repo/ui/components/drawer";
 
 // Icons
 import {
@@ -78,15 +119,19 @@ import {
   Hash,
   X,
   CloudUpload,
-  Globe
-} from 'lucide-react';
+  Globe,
+} from "lucide-react";
 
-import { createEditorSystem } from '@lexkit/editor';
-import type { ExtractCommands, ExtractStateQueries, BaseCommands } from '@lexkit/editor/extensions/types';
-import { RichText } from '@lexkit/editor/extensions/core/RichTextExtension';
-import { LexicalEditor } from 'lexical';
-import { createPortal } from 'react-dom';
-import './shadcn-styles.css';
+import { createEditorSystem } from "@lexkit/editor";
+import type {
+  ExtractCommands,
+  ExtractStateQueries,
+  BaseCommands,
+} from "@lexkit/editor/extensions/types";
+import { RichText } from "@lexkit/editor/extensions/core/RichTextExtension";
+import { LexicalEditor } from "lexical";
+import { createPortal } from "react-dom";
+import "./shadcn-styles.css";
 
 // Extensions array
 const extensions = [
@@ -97,7 +142,7 @@ const extensions = [
   linkExtension.configure({
     linkSelectedTextOnPaste: true,
     autoLinkText: true,
-    autoLinkUrls: true
+    autoLinkUrls: true,
   }),
   horizontalRuleExtension,
   tableExtension,
@@ -107,7 +152,7 @@ const extensions = [
   blockFormatExtension,
   htmlExtension,
   markdownExtension.configure({
-    customTransformers: ALL_MARKDOWN_TRANSFORMERS
+    customTransformers: ALL_MARKDOWN_TRANSFORMERS,
   }),
   codeExtension,
   codeFormatExtension,
@@ -133,14 +178,13 @@ const extensions = [
         )}
       </Button>
     ),
-
   }),
   MyCustomExtension,
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
   draggableBlockExtension.configure({
-    buttonStackPosition: 'right'
+    buttonStackPosition: "right",
   }),
 ] as const;
 
@@ -150,10 +194,10 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 // Extract the types for our specific extensions
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
-type ExtensionNames = typeof extensions[number]['name'];
+type ExtensionNames = (typeof extensions)[number]["name"];
 
 // Editor Mode Types
-type EditorMode = 'visual' | 'html' | 'markdown';
+type EditorMode = "visual" | "html" | "markdown";
 
 // Ref interface for parent control
 export interface ShadcnTemplateRef {
@@ -174,7 +218,7 @@ interface DialogState {
   };
   imageDialog: {
     isOpen: boolean;
-    activeTab: 'upload' | 'url';
+    activeTab: "upload" | "url";
     url: string;
     alt: string;
     caption: string;
@@ -188,71 +232,80 @@ function useDialogState() {
   const [dialogs, setDialogs] = useState<DialogState>({
     linkDialog: {
       isOpen: false,
-      url: '',
-      text: '',
+      url: "",
+      text: "",
       isEdit: false,
-      showTextField: true
+      showTextField: true,
     },
     imageDialog: {
       isOpen: false,
-      activeTab: 'upload',
-      url: '',
-      alt: '',
-      caption: '',
+      activeTab: "upload",
+      url: "",
+      alt: "",
+      caption: "",
       file: null,
-      dragOver: false
-    }
+      dragOver: false,
+    },
   });
 
-  const openLinkDialog = useCallback((url = '', text = '', isEdit = false, showTextField = true) => {
-    setDialogs(prev => ({
-      ...prev,
-      linkDialog: { isOpen: true, url, text, isEdit, showTextField }
-    }));
-  }, []);
+  const openLinkDialog = useCallback(
+    (url = "", text = "", isEdit = false, showTextField = true) => {
+      setDialogs((prev) => ({
+        ...prev,
+        linkDialog: { isOpen: true, url, text, isEdit, showTextField },
+      }));
+    },
+    [],
+  );
 
   const closeLinkDialog = useCallback(() => {
-    setDialogs(prev => ({
+    setDialogs((prev) => ({
       ...prev,
-      linkDialog: { ...prev.linkDialog, isOpen: false }
+      linkDialog: { ...prev.linkDialog, isOpen: false },
     }));
   }, []);
 
-  const updateLinkDialog = useCallback((updates: Partial<DialogState['linkDialog']>) => {
-    setDialogs(prev => ({
-      ...prev,
-      linkDialog: { ...prev.linkDialog, ...updates }
-    }));
-  }, []);
+  const updateLinkDialog = useCallback(
+    (updates: Partial<DialogState["linkDialog"]>) => {
+      setDialogs((prev) => ({
+        ...prev,
+        linkDialog: { ...prev.linkDialog, ...updates },
+      }));
+    },
+    [],
+  );
 
   const openImageDialog = useCallback(() => {
-    setDialogs(prev => ({
+    setDialogs((prev) => ({
       ...prev,
-      imageDialog: { ...prev.imageDialog, isOpen: true }
+      imageDialog: { ...prev.imageDialog, isOpen: true },
     }));
   }, []);
 
   const closeImageDialog = useCallback(() => {
-    setDialogs(prev => ({
+    setDialogs((prev) => ({
       ...prev,
       imageDialog: {
         isOpen: false,
-        activeTab: 'upload',
-        url: '',
-        alt: '',
-        caption: '',
+        activeTab: "upload",
+        url: "",
+        alt: "",
+        caption: "",
         file: null,
-        dragOver: false
-      }
+        dragOver: false,
+      },
     }));
   }, []);
 
-  const updateImageDialog = useCallback((updates: Partial<DialogState['imageDialog']>) => {
-    setDialogs(prev => ({
-      ...prev,
-      imageDialog: { ...prev.imageDialog, ...updates }
-    }));
-  }, []);
+  const updateImageDialog = useCallback(
+    (updates: Partial<DialogState["imageDialog"]>) => {
+      setDialogs((prev) => ({
+        ...prev,
+        imageDialog: { ...prev.imageDialog, ...updates },
+      }));
+    },
+    [],
+  );
 
   return {
     dialogs,
@@ -261,7 +314,7 @@ function useDialogState() {
     updateLinkDialog,
     openImageDialog,
     closeImageDialog,
-    updateImageDialog
+    updateImageDialog,
   };
 }
 
@@ -275,7 +328,7 @@ function LinkDialog({
   showTextField,
   onUrlChange,
   onTextChange,
-  onSubmit
+  onSubmit,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -298,7 +351,7 @@ function LinkDialog({
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5" />
-            {isEdit ? 'Edit Link' : 'Insert Link'}
+            {isEdit ? "Edit Link" : "Insert Link"}
           </DrawerTitle>
         </DrawerHeader>
 
@@ -333,7 +386,7 @@ function LinkDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={!url.trim()}>
-                {isEdit ? 'Update Link' : 'Insert Link'}
+                {isEdit ? "Update Link" : "Insert Link"}
               </Button>
             </div>
           </form>
@@ -361,17 +414,17 @@ function ImageDialog({
   onDragOver,
   onDragLeave,
   onDrop,
-  onSubmit
+  onSubmit,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: 'upload' | 'url';
+  activeTab: "upload" | "url";
   url: string;
   alt: string;
   caption: string;
   file: File | null;
   dragOver: boolean;
-  onTabChange: (tab: 'upload' | 'url') => void;
+  onTabChange: (tab: "upload" | "url") => void;
   onUrlChange: (url: string) => void;
   onAltChange: (alt: string) => void;
   onCaptionChange: (caption: string) => void;
@@ -425,7 +478,10 @@ function ImageDialog({
         </DrawerHeader>
 
         <div className="p-4">
-          <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as 'upload' | 'url')}>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => onTabChange(value as "upload" | "url")}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload" className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
@@ -442,10 +498,11 @@ function ImageDialog({
                 <div className="space-y-2">
                   <Label>Upload Image</Label>
                   <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragOver
-                      ? 'border-primary bg-primary/5'
-                      : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-                      }`}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      dragOver
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                    }`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
@@ -453,7 +510,9 @@ function ImageDialog({
                   >
                     <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground mb-2">
-                      {file ? file.name : 'Drop an image here, or click to select'}
+                      {file
+                        ? file.name
+                        : "Drop an image here, or click to select"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Supports: JPG, PNG, GIF, WebP (max 10MB)
@@ -509,7 +568,7 @@ function ImageDialog({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={activeTab === 'upload' ? !file : !url.trim()}
+                    disabled={activeTab === "upload" ? !file : !url.trim()}
                   >
                     Insert Image
                   </Button>
@@ -524,51 +583,69 @@ function ImageDialog({
 }
 
 // Custom hook for image handling
-function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
+function useImageHandlers(
+  commands: EditorCommands,
+  editor: LexicalEditor | null,
+) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlers = useMemo(() => ({
-    insertImageFromUrl: (url: string, alt = '', caption?: string) => {
-      commands.insertImage({ src: url, alt, caption });
-    },
+  const handlers = useMemo(
+    () => ({
+      insertImageFromUrl: (url: string, alt = "", caption?: string) => {
+        commands.insertImage({ src: url, alt, caption });
+      },
 
-    insertImageFromFile: async (file: File, alt = '', caption?: string) => {
-      if (imageExtension.config.uploadHandler) {
-        try {
-          const src = await imageExtension.config.uploadHandler(file);
-          commands.insertImage({ src, alt: alt || file.name, caption, file });
-        } catch (error) {
-          console.error('Failed to upload image:', error);
-          // Fallback to object URL
+      insertImageFromFile: async (file: File, alt = "", caption?: string) => {
+        if (imageExtension.config.uploadHandler) {
+          try {
+            const src = await imageExtension.config.uploadHandler(file);
+            commands.insertImage({ src, alt: alt || file.name, caption, file });
+          } catch (error) {
+            console.error("Failed to upload image:", error);
+            // Fallback to object URL
+            const src = URL.createObjectURL(file);
+            commands.insertImage({ src, alt: alt || file.name, caption, file });
+          }
+        } else {
           const src = URL.createObjectURL(file);
           commands.insertImage({ src, alt: alt || file.name, caption, file });
         }
-      } else {
-        const src = URL.createObjectURL(file);
-        commands.insertImage({ src, alt: alt || file.name, caption, file });
-      }
-    },
+      },
 
-    setImageAlignment: (alignment: 'left' | 'center' | 'right' | 'none') => {
-      commands.setImageAlignment(alignment);
-    },
+      setImageAlignment: (alignment: "left" | "center" | "right" | "none") => {
+        commands.setImageAlignment(alignment);
+      },
 
-    setImageCaption: (caption: string) => {
-      commands.setImageCaption(caption);
-    },
-  }), [commands]);
+      setImageCaption: (caption: string) => {
+        commands.setImageCaption(caption);
+      },
+    }),
+    [commands],
+  );
 
   return { handlers, fileInputRef };
 }
 
 // Modern Floating Toolbar with SHADCN components
-function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: string, text?: string, isEdit?: boolean, showTextField?: boolean) => void }) {
-  const { commands, activeStates, extensions, hasExtension, config } = useEditor();
+function ModernFloatingToolbar({
+  openLinkDialog,
+}: {
+  openLinkDialog: (
+    url?: string,
+    text?: string,
+    isEdit?: boolean,
+    showTextField?: boolean,
+  ) => void;
+}) {
+  const { commands, activeStates, extensions, hasExtension, config } =
+    useEditor();
   const [isVisible, setIsVisible] = useState(false);
   const [selectionRect, setSelectionRect] = useState<any>(null);
 
   // Get the floating toolbar extension instance
-  const floatingExtension = extensions.find(ext => ext.name === 'floatingToolbar') as any;
+  const floatingExtension = extensions.find(
+    (ext) => ext.name === "floatingToolbar",
+  ) as any;
 
   // Poll the extension state
   useEffect(() => {
@@ -596,19 +673,21 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
   return createPortal(
     <TooltipProvider>
       <div
-        className={theme.container || "flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg"}
+        className={
+          theme.container ||
+          "flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg"
+        }
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: selectionRect.y,
           ...(selectionRect.positionFromRight
             ? // Stick to right edge with margin
-              { right: 10, left: 'auto' }
+              { right: 10, left: "auto" }
             : // Use calculated position (either centered or left-aligned)
-              { left: selectionRect.x, right: 'auto' }
-          ),
+              { left: selectionRect.x, right: "auto" }),
           zIndex: 50,
-          pointerEvents: 'auto',
-          ...theme.styles?.container
+          pointerEvents: "auto",
+          ...theme.styles?.container,
         }}
       >
         {isImageSelected ? (
@@ -618,10 +697,16 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
-                  variant={activeStates.isImageAlignedLeft ? "pressed" : "default"}
-                  className={activeStates.isImageAlignedLeft ? theme.buttonActive : theme.button}
+                  variant={
+                    activeStates.isImageAlignedLeft ? "pressed" : "default"
+                  }
+                  className={
+                    activeStates.isImageAlignedLeft
+                      ? theme.buttonActive
+                      : theme.button
+                  }
                   pressed={activeStates.isImageAlignedLeft}
-                  onPressedChange={() => commands.setImageAlignment('left')}
+                  onPressedChange={() => commands.setImageAlignment("left")}
                 >
                   <AlignLeft className="h-4 w-4" />
                 </Toggle>
@@ -633,10 +718,16 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
-                  variant={activeStates.isImageAlignedCenter ? "pressed" : "default"}
-                  className={activeStates.isImageAlignedCenter ? theme.buttonActive : theme.button}
+                  variant={
+                    activeStates.isImageAlignedCenter ? "pressed" : "default"
+                  }
+                  className={
+                    activeStates.isImageAlignedCenter
+                      ? theme.buttonActive
+                      : theme.button
+                  }
                   pressed={activeStates.isImageAlignedCenter}
-                  onPressedChange={() => commands.setImageAlignment('center')}
+                  onPressedChange={() => commands.setImageAlignment("center")}
                 >
                   <AlignCenter className="h-4 w-4" />
                 </Toggle>
@@ -648,10 +739,16 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
-                  variant={activeStates.isImageAlignedRight ? "pressed" : "default"}
-                  className={activeStates.isImageAlignedRight ? theme.buttonActive : theme.button}
+                  variant={
+                    activeStates.isImageAlignedRight ? "pressed" : "default"
+                  }
+                  className={
+                    activeStates.isImageAlignedRight
+                      ? theme.buttonActive
+                      : theme.button
+                  }
                   pressed={activeStates.isImageAlignedRight}
-                  onPressedChange={() => commands.setImageAlignment('right')}
+                  onPressedChange={() => commands.setImageAlignment("right")}
                 >
                   <AlignRight className="h-4 w-4" />
                 </Toggle>
@@ -668,7 +765,7 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                   variant="ghost"
                   className={theme.button}
                   onClick={() => {
-                    const caption = prompt('Enter caption:') || '';
+                    const caption = prompt("Enter caption:") || "";
                     commands.setImageCaption(caption);
                   }}
                 >
@@ -686,7 +783,9 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.bold ? "pressed" : "default"}
-                  className={activeStates.bold ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.bold ? theme.buttonActive : theme.button
+                  }
                   pressed={activeStates.bold}
                   onPressedChange={() => commands.toggleBold()}
                 >
@@ -701,7 +800,9 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.italic ? "pressed" : "default"}
-                  className={activeStates.italic ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.italic ? theme.buttonActive : theme.button
+                  }
                   pressed={activeStates.italic}
                   onPressedChange={() => commands.toggleItalic()}
                 >
@@ -716,7 +817,9 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.underline ? "pressed" : "default"}
-                  className={activeStates.underline ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.underline ? theme.buttonActive : theme.button
+                  }
                   pressed={activeStates.underline}
                   onPressedChange={() => commands.toggleUnderline()}
                 >
@@ -731,7 +834,11 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.strikethrough ? "pressed" : "default"}
-                  className={activeStates.strikethrough ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.strikethrough
+                      ? theme.buttonActive
+                      : theme.button
+                  }
                   pressed={activeStates.strikethrough}
                   onPressedChange={() => commands.toggleStrikethrough()}
                 >
@@ -748,9 +855,11 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.code ? "pressed" : "default"}
-                  className={activeStates.code ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.code ? theme.buttonActive : theme.button
+                  }
                   pressed={activeStates.code}
-                  onPressedChange={() => commands.formatText('code')}
+                  onPressedChange={() => commands.formatText("code")}
                 >
                   <Code className="h-4 w-4" />
                 </Toggle>
@@ -763,7 +872,9 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                 <Toggle
                   size="sm"
                   variant={activeStates.isLink ? "pressed" : "default"}
-                  className={activeStates.isLink ? theme.buttonActive : theme.button}
+                  className={
+                    activeStates.isLink ? theme.buttonActive : theme.button
+                  }
                   pressed={activeStates.isLink}
                   onPressedChange={() => {
                     if (activeStates.isLink) {
@@ -771,30 +882,42 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                       commands.removeLink();
                     } else if (activeStates.isTextSelected) {
                       // Text is selected - only ask for URL
-                      openLinkDialog('', '', false, false);
+                      openLinkDialog("", "", false, false);
                     } else {
                       // No text selected - use the full dialog
-                      openLinkDialog('', '', false, true);
+                      openLinkDialog("", "", false, true);
                     }
                   }}
                 >
-                  {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                  {activeStates.isLink ? (
+                    <Unlink className="h-4 w-4" />
+                  ) : (
+                    <LinkIcon className="h-4 w-4" />
+                  )}
                 </Toggle>
               </TooltipTrigger>
-              <TooltipContent>{activeStates.isLink ? 'Remove Link' : 'Add Link'}</TooltipContent>
+              <TooltipContent>
+                {activeStates.isLink ? "Remove Link" : "Add Link"}
+              </TooltipContent>
             </Tooltip>
 
             <Separator orientation="vertical" className="h-6" />
 
             {/* Lists Section in Floating Toolbar */}
-            {hasExtension('list') && (
+            {hasExtension("list") && (
               <>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Toggle
                       size="sm"
-                      variant={activeStates.unorderedList ? "pressed" : "default"}
-                      className={activeStates.unorderedList ? theme.buttonActive : theme.button}
+                      variant={
+                        activeStates.unorderedList ? "pressed" : "default"
+                      }
+                      className={
+                        activeStates.unorderedList
+                          ? theme.buttonActive
+                          : theme.button
+                      }
                       pressed={activeStates.unorderedList}
                       onPressedChange={() => commands.toggleUnorderedList()}
                     >
@@ -809,7 +932,11 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
                     <Toggle
                       size="sm"
                       variant={activeStates.orderedList ? "pressed" : "default"}
-                      className={activeStates.orderedList ? theme.buttonActive : theme.button}
+                      className={
+                        activeStates.orderedList
+                          ? theme.buttonActive
+                          : theme.button
+                      }
                       pressed={activeStates.orderedList}
                       onPressedChange={() => commands.toggleOrderedList()}
                     >
@@ -824,7 +951,7 @@ function ModernFloatingToolbar({ openLinkDialog }: { openLinkDialog: (url?: stri
         )}
       </div>
     </TooltipProvider>,
-    document.body
+    document.body,
   );
 }
 
@@ -835,13 +962,18 @@ function ModernToolbar({
   activeStates,
   onCommandPaletteOpen,
   onLinkDialogOpen,
-  onImageDialogOpen
+  onImageDialogOpen,
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   onCommandPaletteOpen: () => void;
-  onLinkDialogOpen: (url?: string, text?: string, isEdit?: boolean, showTextField?: boolean) => void;
+  onLinkDialogOpen: (
+    url?: string,
+    text?: string,
+    isEdit?: boolean,
+    showTextField?: boolean,
+  ) => void;
   onImageDialogOpen: () => void;
 }) {
   const { lexical: editor } = useEditor();
@@ -849,31 +981,35 @@ function ModernToolbar({
   const [tableConfig, setTableConfig] = useState<TableConfig>({
     rows: 3,
     columns: 3,
-    includeHeaders: false
+    includeHeaders: false,
   });
 
   // Block format options
   const blockFormatOptions = [
-    { value: 'p', label: 'Paragraph', icon: <FileText className="h-4 w-4" /> },
-    { value: 'h1', label: 'Heading 1', icon: <Hash className="h-4 w-4" /> },
-    { value: 'h2', label: 'Heading 2', icon: <Hash className="h-4 w-4" /> },
-    { value: 'h3', label: 'Heading 3', icon: <Hash className="h-4 w-4" /> },
-    { value: 'quote', label: 'Quote', icon: <Quote className="h-4 w-4" /> },
+    { value: "p", label: "Paragraph", icon: <FileText className="h-4 w-4" /> },
+    { value: "h1", label: "Heading 1", icon: <Hash className="h-4 w-4" /> },
+    { value: "h2", label: "Heading 2", icon: <Hash className="h-4 w-4" /> },
+    { value: "h3", label: "Heading 3", icon: <Hash className="h-4 w-4" /> },
+    { value: "quote", label: "Quote", icon: <Quote className="h-4 w-4" /> },
   ];
 
   // Get current block format
-  const currentBlockFormat = activeStates.isH1 ? 'h1'
-    : activeStates.isH2 ? 'h2'
-      : activeStates.isH3 ? 'h3'
-        : activeStates.isQuote ? 'quote'
-          : 'p';
+  const currentBlockFormat = activeStates.isH1
+    ? "h1"
+    : activeStates.isH2
+      ? "h2"
+      : activeStates.isH3
+        ? "h3"
+        : activeStates.isQuote
+          ? "quote"
+          : "p";
 
   const handleBlockFormatChange = (value: string) => {
-    if (value === 'p') commands.toggleParagraph();
-    else if (value === 'h1') commands.toggleHeading('h1');
-    else if (value === 'h2') commands.toggleHeading('h2');
-    else if (value === 'h3') commands.toggleHeading('h3');
-    else if (value === 'quote') commands.toggleQuote();
+    if (value === "p") commands.toggleParagraph();
+    else if (value === "h1") commands.toggleHeading("h1");
+    else if (value === "h2") commands.toggleHeading("h2");
+    else if (value === "h3") commands.toggleHeading("h3");
+    else if (value === "quote") commands.toggleQuote();
   };
 
   return (
@@ -943,7 +1079,7 @@ function ModernToolbar({
                 size="sm"
                 variant={activeStates.code ? "pressed" : "default"}
                 pressed={activeStates.code}
-                onPressedChange={() => commands.formatText('code')}
+                onPressedChange={() => commands.formatText("code")}
               >
                 <Code className="h-4 w-4" />
               </Toggle>
@@ -963,26 +1099,35 @@ function ModernToolbar({
                     commands.removeLink();
                   } else if (activeStates.isTextSelected) {
                     // Text is selected - only ask for URL
-                    onLinkDialogOpen('', '', false, false);
+                    onLinkDialogOpen("", "", false, false);
                   } else {
                     // No text selected - use the full dialog
-                    onLinkDialogOpen('', '', false, true);
+                    onLinkDialogOpen("", "", false, true);
                   }
                 }}
               >
-                {activeStates.isLink ? <Unlink className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                {activeStates.isLink ? (
+                  <Unlink className="h-4 w-4" />
+                ) : (
+                  <LinkIcon className="h-4 w-4" />
+                )}
               </Toggle>
             </TooltipTrigger>
-            <TooltipContent>{activeStates.isLink ? 'Remove Link' : 'Insert Link'}</TooltipContent>
+            <TooltipContent>
+              {activeStates.isLink ? "Remove Link" : "Insert Link"}
+            </TooltipContent>
           </Tooltip>
         </div>
 
         <Separator orientation="vertical" className="h-6" />
 
         {/* Block Format Section */}
-        {hasExtension('blockFormat') && (
+        {hasExtension("blockFormat") && (
           <div className="flex items-center gap-1">
-            <Select value={currentBlockFormat} onValueChange={handleBlockFormatChange}>
+            <Select
+              value={currentBlockFormat}
+              onValueChange={handleBlockFormatChange}
+            >
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SelectTrigger className="w-32 h-8">
@@ -1003,7 +1148,7 @@ function ModernToolbar({
               </SelectContent>
             </Select>
 
-            {hasExtension('code') && (
+            {hasExtension("code") && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Toggle
@@ -1024,7 +1169,7 @@ function ModernToolbar({
         <Separator orientation="vertical" className="h-6" />
 
         {/* Lists Section */}
-        {hasExtension('list') && (
+        {hasExtension("list") && (
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1061,7 +1206,7 @@ function ModernToolbar({
         {/* Media & Content Section */}
         <div className="flex items-center gap-1">
           {/* Image Insert */}
-          {hasExtension('image') && (
+          {hasExtension("image") && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="ghost" onClick={onImageDialogOpen}>
@@ -1073,7 +1218,7 @@ function ModernToolbar({
           )}
 
           {/* Table Insert */}
-          {hasExtension('table') && (
+          {hasExtension("table") && (
             <Dialog open={showTableDialog} onOpenChange={setShowTableDialog}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1099,7 +1244,12 @@ function ModernToolbar({
                         min="1"
                         max="20"
                         value={tableConfig.rows}
-                        onChange={(e) => setTableConfig(prev => ({ ...prev, rows: parseInt(e.target.value) || 1 }))}
+                        onChange={(e) =>
+                          setTableConfig((prev) => ({
+                            ...prev,
+                            rows: parseInt(e.target.value) || 1,
+                          }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -1110,7 +1260,12 @@ function ModernToolbar({
                         min="1"
                         max="20"
                         value={tableConfig.columns}
-                        onChange={(e) => setTableConfig(prev => ({ ...prev, columns: parseInt(e.target.value) || 1 }))}
+                        onChange={(e) =>
+                          setTableConfig((prev) => ({
+                            ...prev,
+                            columns: parseInt(e.target.value) || 1,
+                          }))
+                        }
                       />
                     </div>
                   </div>
@@ -1118,18 +1273,28 @@ function ModernToolbar({
                     <Switch
                       id="headers"
                       checked={tableConfig.includeHeaders || false}
-                      onCheckedChange={(checked) => setTableConfig(prev => ({ ...prev, includeHeaders: checked }))}
+                      onCheckedChange={(checked) =>
+                        setTableConfig((prev) => ({
+                          ...prev,
+                          includeHeaders: checked,
+                        }))
+                      }
                     />
                     <Label htmlFor="headers">Include headers</Label>
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setShowTableDialog(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowTableDialog(false)}
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={() => {
-                      commands.insertTable(tableConfig);
-                      setShowTableDialog(false);
-                    }}>
+                    <Button
+                      onClick={() => {
+                        commands.insertTable(tableConfig);
+                        setShowTableDialog(false);
+                      }}
+                    >
                       Insert Table
                     </Button>
                   </div>
@@ -1139,7 +1304,7 @@ function ModernToolbar({
           )}
 
           {/* Horizontal Rule */}
-          {hasExtension('horizontalRule') && (
+          {hasExtension("horizontalRule") && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -1155,12 +1320,14 @@ function ModernToolbar({
           )}
 
           {/* HTML Embed */}
-          {hasExtension('htmlEmbed') && (
+          {hasExtension("htmlEmbed") && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
-                  variant={activeStates.isHTMLEmbedSelected ? "pressed" : "default"}
+                  variant={
+                    activeStates.isHTMLEmbedSelected ? "pressed" : "default"
+                  }
                   pressed={activeStates.isHTMLEmbedSelected}
                   onPressedChange={() => commands.insertHTMLEmbed()}
                 >
@@ -1175,7 +1342,7 @@ function ModernToolbar({
         <Separator orientation="vertical" className="h-6" />
 
         {/* History Section */}
-        {hasExtension('history') && (
+        {hasExtension("history") && (
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1213,11 +1380,7 @@ function ModernToolbar({
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onCommandPaletteOpen}
-              >
+              <Button size="sm" variant="ghost" onClick={onCommandPaletteOpen}>
                 <Command className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -1232,13 +1395,16 @@ function ModernToolbar({
 // Modern Mode Tabs with SHADCN Tabs - Clean
 function ModernModeTabs({
   mode,
-  onModeChange
+  onModeChange,
 }: {
   mode: EditorMode;
   onModeChange: (mode: EditorMode) => void;
 }) {
   return (
-    <Tabs value={mode} onValueChange={(value) => onModeChange(value as EditorMode)}>
+    <Tabs
+      value={mode}
+      onValueChange={(value) => onModeChange(value as EditorMode)}
+    >
       <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/50">
         <TabsTrigger value="visual" className="flex items-center gap-2 text-sm">
           <Eye className="h-4 w-4" />
@@ -1248,7 +1414,10 @@ function ModernModeTabs({
           <FileCode className="h-4 w-4" />
           HTML
         </TabsTrigger>
-        <TabsTrigger value="markdown" className="flex items-center gap-2 text-sm">
+        <TabsTrigger
+          value="markdown"
+          className="flex items-center gap-2 text-sm"
+        >
           <FileText className="h-4 w-4" />
           Markdown
         </TabsTrigger>
@@ -1260,7 +1429,7 @@ function ModernModeTabs({
 // Modern Source Views - Clean and full width
 function ModernHTMLSourceView({
   htmlContent,
-  onHtmlChange
+  onHtmlChange,
 }: {
   htmlContent: string;
   onHtmlChange: (html: string) => void;
@@ -1278,7 +1447,7 @@ function ModernHTMLSourceView({
 
 function ModernMarkdownSourceView({
   markdownContent,
-  onMarkdownChange
+  onMarkdownChange,
 }: {
   markdownContent: string;
   onMarkdownChange: (markdown: string) => void;
@@ -1302,14 +1471,14 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
 // Main Editor Content Component
 function EditorContent({
   className,
-  onReady
+  onReady,
 }: {
   className?: string;
   onReady?: (methods: ShadcnTemplateRef) => void;
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
-  const [mode, setMode] = useState<EditorMode>('visual');
-  const [content, setContent] = useState({ html: '', markdown: '' });
+  const [mode, setMode] = useState<EditorMode>("visual");
+  const [content, setContent] = useState({ html: "", markdown: "" });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   // Dialog state management
@@ -1320,14 +1489,17 @@ function EditorContent({
     updateLinkDialog,
     openImageDialog,
     closeImageDialog,
-    updateImageDialog
+    updateImageDialog,
   } = useDialogState();
 
   // Use ref to store latest commands to avoid dependency issues
   const commandsRef = React.useRef(commands);
 
   // Generate command palette items
-  const paletteCommands = React.useMemo(() => commandsToCommandPaletteItems(commands), [commands]);
+  const paletteCommands = React.useMemo(
+    () => commandsToCommandPaletteItems(commands),
+    [commands],
+  );
 
   // Update ref when commands change
   React.useEffect(() => {
@@ -1335,20 +1507,23 @@ function EditorContent({
   }, [commands]);
 
   // Create methods object that uses the ref
-  const methods = React.useMemo(() => ({
-    injectMarkdown: (content: string) => {
-      commandsRef.current.importFromMarkdown(content);
-    },
-    injectHTML: (content: string) => {
-      commandsRef.current.importFromHTML(content);
-    },
-    getMarkdown: () => {
-      return commandsRef.current.exportToMarkdown();
-    },
-    getHTML: () => {
-      return commandsRef.current.exportToHTML();
-    }
-  }), []);
+  const methods = React.useMemo(
+    () => ({
+      injectMarkdown: (content: string) => {
+        commandsRef.current.importFromMarkdown(content);
+      },
+      injectHTML: (content: string) => {
+        commandsRef.current.importFromHTML(content);
+      },
+      getMarkdown: () => {
+        return commandsRef.current.exportToMarkdown();
+      },
+      getHTML: () => {
+        return commandsRef.current.exportToHTML();
+      },
+    }),
+    [],
+  );
 
   // Image handlers
   const { handlers: imageHandlers } = useImageHandlers(commands, editor);
@@ -1366,9 +1541,9 @@ function EditorContent({
   const handleImageSubmit = useCallback(() => {
     const { activeTab, url, alt, caption, file } = dialogs.imageDialog;
 
-    if (activeTab === 'upload' && file) {
+    if (activeTab === "upload" && file) {
       imageHandlers.insertImageFromFile(file, alt, caption);
-    } else if (activeTab === 'url' && url.trim()) {
+    } else if (activeTab === "url" && url.trim()) {
       imageHandlers.insertImageFromUrl(url.trim(), alt, caption);
     }
 
@@ -1400,40 +1575,60 @@ function EditorContent({
   // Handle mode changes
   const handleModeChange = (newMode: EditorMode) => {
     // If leaving markdown mode, import the markdown content
-    if (mode === 'markdown' && newMode !== 'markdown' && editor && hasExtension('markdown')) {
+    if (
+      mode === "markdown" &&
+      newMode !== "markdown" &&
+      editor &&
+      hasExtension("markdown")
+    ) {
       try {
         commands.importFromMarkdown(content.markdown, true);
       } catch (error) {
-        console.error('Failed to import Markdown:', error);
+        console.error("Failed to import Markdown:", error);
       }
     }
 
     // If leaving HTML mode, import the HTML content
-    if (mode === 'html' && newMode !== 'html' && editor && hasExtension('html')) {
+    if (
+      mode === "html" &&
+      newMode !== "html" &&
+      editor &&
+      hasExtension("html")
+    ) {
       try {
         commands.importFromHTML(content.html);
       } catch (error) {
-        console.error('Failed to import HTML:', error);
+        console.error("Failed to import HTML:", error);
       }
     }
 
     // If entering markdown mode, sync current content
-    if (newMode === 'markdown' && mode !== 'markdown' && editor && hasExtension('markdown')) {
+    if (
+      newMode === "markdown" &&
+      mode !== "markdown" &&
+      editor &&
+      hasExtension("markdown")
+    ) {
       try {
         const markdown = commands.exportToMarkdown();
-        setContent(prev => ({ ...prev, markdown }));
+        setContent((prev) => ({ ...prev, markdown }));
       } catch (error) {
-        console.error('Failed to export Markdown:', error);
+        console.error("Failed to export Markdown:", error);
       }
     }
 
     // If entering HTML mode, sync current content
-    if (newMode === 'html' && mode !== 'html' && editor && hasExtension('html')) {
+    if (
+      newMode === "html" &&
+      mode !== "html" &&
+      editor &&
+      hasExtension("html")
+    ) {
       try {
         const html = commands.exportToHTML();
-        setContent(prev => ({ ...prev, html }));
+        setContent((prev) => ({ ...prev, html }));
       } catch (error) {
-        console.error('Failed to export HTML:', error);
+        console.error("Failed to export HTML:", error);
       }
     }
 
@@ -1441,11 +1636,11 @@ function EditorContent({
   };
 
   const handleHtmlChange = (html: string) => {
-    setContent(prev => ({ ...prev, html }));
+    setContent((prev) => ({ ...prev, html }));
   };
 
   const handleMarkdownChange = (markdown: string) => {
-    setContent(prev => ({ ...prev, markdown }));
+    setContent((prev) => ({ ...prev, markdown }));
   };
 
   return (
@@ -1456,7 +1651,7 @@ function EditorContent({
       </div>
 
       {/* Sticky Toolbar Header - only show in visual mode */}
-      {mode === 'visual' && (
+      {mode === "visual" && (
         <div className=" z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
           <div className="px-4 py-3">
             <ModernToolbar
@@ -1471,22 +1666,22 @@ function EditorContent({
         </div>
       )}
 
-      <div className='relative p-4'>
-
+      <div className="relative p-4">
         {/* Editor Content - Full width, no card wrapper */}
-        {mode === 'visual' ? (
+        {mode === "visual" ? (
           <div className="min-h-[600px] prose prose-lg max-w-none">
             <RichText
               className={shadcnTheme.contentEditable}
               placeholder="Start writing..."
               classNames={{
                 contentEditable: `${shadcnTheme.contentEditable} min-h-[600px] focus:outline-none`,
-                placeholder: "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none"
+                placeholder:
+                  "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none",
               }}
             />
             <ModernFloatingToolbar openLinkDialog={openLinkDialog} />
           </div>
-        ) : mode === 'html' ? (
+        ) : mode === "html" ? (
           <ModernHTMLSourceView
             htmlContent={content.html}
             onHtmlChange={handleHtmlChange}
@@ -1552,35 +1747,44 @@ interface ShadcnTemplateProps {
   onReady?: (methods: ShadcnTemplateRef) => void;
 }
 
-export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplateProps>(
-  ({ className, onReady }, ref) => {
-    const [editorMethods, setEditorMethods] = useState<ShadcnTemplateRef | null>(null);
+export const ShadcnTemplate = React.forwardRef<
+  ShadcnTemplateRef,
+  ShadcnTemplateProps
+>(({ className, onReady }, ref) => {
+  const [editorMethods, setEditorMethods] = useState<ShadcnTemplateRef | null>(
+    null,
+  );
 
-    // Configure image extension
-    useEffect(() => {
-      imageExtension.configure({
-        uploadHandler: async (file: File) => {
-          const objectUrl = URL.createObjectURL(file);
-          return objectUrl;
-        },
-        defaultAlignment: 'center',
-        resizable: true,
-        pasteListener: { insert: true, replace: true },
-        debug: false,
-      });
-    }, []);
+  // Configure image extension
+  useEffect(() => {
+    imageExtension.configure({
+      uploadHandler: async (file: File) => {
+        const objectUrl = URL.createObjectURL(file);
+        return objectUrl;
+      },
+      defaultAlignment: "center",
+      resizable: true,
+      pasteListener: { insert: true, replace: true },
+      debug: false,
+    });
+  }, []);
 
-    // Handle when editor is ready
-    const handleEditorReady = React.useCallback((methods: ShadcnTemplateRef) => {
+  // Handle when editor is ready
+  const handleEditorReady = React.useCallback(
+    (methods: ShadcnTemplateRef) => {
       setEditorMethods(methods);
 
       if (onReady) {
         onReady(methods);
       }
-    }, [onReady]);
+    },
+    [onReady],
+  );
 
-    // Expose methods via ref
-    React.useImperativeHandle(ref, () => ({
+  // Expose methods via ref
+  React.useImperativeHandle(
+    ref,
+    () => ({
       injectMarkdown: (content: string) => {
         if (editorMethods) {
           editorMethods.injectMarkdown(content);
@@ -1592,26 +1796,22 @@ export const ShadcnTemplate = React.forwardRef<ShadcnTemplateRef, ShadcnTemplate
         }
       },
       getMarkdown: () => {
-        return editorMethods ? editorMethods.getMarkdown() : '';
+        return editorMethods ? editorMethods.getMarkdown() : "";
       },
       getHTML: () => {
-        return editorMethods ? editorMethods.getHTML() : '';
-      }
-    }), [editorMethods]);
+        return editorMethods ? editorMethods.getHTML() : "";
+      },
+    }),
+    [editorMethods],
+  );
 
-    return (
-      <div
-        className={`shadcn-editor-wrapper ${className || ''}`}
-      >
-        <Provider extensions={extensions} config={{ theme: shadcnTheme }}>
-          <EditorContent
-            className={className}
-            onReady={handleEditorReady}
-          />
-        </Provider>
-      </div>
-    );
-  }
-);
+  return (
+    <div className={`shadcn-editor-wrapper ${className || ""}`}>
+      <Provider extensions={extensions} config={{ theme: shadcnTheme }}>
+        <EditorContent className={className} onReady={handleEditorReady} />
+      </Provider>
+    </div>
+  );
+});
 
-ShadcnTemplate.displayName = 'ShadcnTemplate';
+ShadcnTemplate.displayName = "ShadcnTemplate";

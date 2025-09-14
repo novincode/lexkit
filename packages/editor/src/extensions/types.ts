@@ -1,12 +1,12 @@
-import { LexicalEditor, TextFormatType, EditorThemeClasses } from 'lexical';
-import { ComponentType, CSSProperties, ReactNode } from 'react';
+import { LexicalEditor, TextFormatType, EditorThemeClasses } from "lexical";
+import { ComponentType, CSSProperties, ReactNode } from "react";
 
 /** Categories that extensions can belong to */
 export enum ExtensionCategory {
-  Toolbar = 'toolbar',
-  Sidebar = 'sidebar',
-  ContextMenu = 'contextmenu',
-  Floating = 'floating',
+  Toolbar = "toolbar",
+  Sidebar = "sidebar",
+  ContextMenu = "contextmenu",
+  Floating = "floating",
   // Add more as needed
 }
 
@@ -14,7 +14,7 @@ export enum ExtensionCategory {
 export interface BaseExtensionConfig {
   showInToolbar?: boolean;
   category?: ExtensionCategory[];
-  position?: 'before' | 'after';
+  position?: "before" | "after";
   [key: string]: any;
 }
 
@@ -36,7 +36,13 @@ export interface ToolbarItem {
  * @template StateQueries - State query functions
  * @template Plugins - React plugins provided by the extension
  */
-export interface Extension<Name extends string = string, Config extends BaseExtensionConfig = BaseExtensionConfig, Commands extends Record<string, any> = {}, StateQueries extends Record<string, () => Promise<boolean>> = {}, Plugins extends ReactNode[] = ReactNode[]> {
+export interface Extension<
+  Name extends string = string,
+  Config extends BaseExtensionConfig = BaseExtensionConfig,
+  Commands extends Record<string, any> = {},
+  StateQueries extends Record<string, () => Promise<boolean>> = {},
+  Plugins extends ReactNode[] = ReactNode[],
+> {
   /** Unique identifier for this extension */
   name: Name;
 
@@ -50,16 +56,28 @@ export interface Extension<Name extends string = string, Config extends BaseExte
   supportedFormats?: readonly TextFormatType[];
 
   /** Configure the extension with new settings */
-  configure?: (config: Partial<Config>) => Extension<Name, Config, Commands, StateQueries, Plugins>;
+  configure?: (
+    config: Partial<Config>,
+  ) => Extension<Name, Config, Commands, StateQueries, Plugins>;
 
   /** Register the extension with the Lexical editor */
   register: (editor: LexicalEditor) => () => void;
 
   /** Override the UI component for this extension */
-  overrideUI?: (CustomUI: ComponentType<{ selected?: boolean; className?: string; style?: CSSProperties; [key: string]: any }>) => Extension<Name, Config, Commands, StateQueries, Plugins>;
+  overrideUI?: (
+    CustomUI: ComponentType<{
+      selected?: boolean;
+      className?: string;
+      style?: CSSProperties;
+      [key: string]: any;
+    }>,
+  ) => Extension<Name, Config, Commands, StateQueries, Plugins>;
 
   /** Override node rendering */
-  overrideNodeRender?: (overrides: { createDOM?: (config: any) => HTMLElement; updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean }) => Extension<Name, Config, Commands, StateQueries, Plugins>;
+  overrideNodeRender?: (overrides: {
+    createDOM?: (config: any) => HTMLElement;
+    updateDOM?: (prev: any, next: any, dom: HTMLElement) => boolean;
+  }) => Extension<Name, Config, Commands, StateQueries, Plugins>;
 
   /** Get custom Lexical nodes */
   getNodes?: () => any[];
@@ -88,22 +106,28 @@ type MergeStateQueries<T> = {
 };
 
 // Infer unions from array of extensions
-export type ExtractNames<Exts extends readonly Extension[]> = Exts[number]['name'];
+export type ExtractNames<Exts extends readonly Extension[]> =
+  Exts[number]["name"];
 export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
-  ReturnType<Exts[number]['getCommands']>
+  ReturnType<Exts[number]["getCommands"]>
 >;
-export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<Exts[number]['getPlugins']>[number];
+export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<
+  Exts[number]["getPlugins"]
+>[number];
 
 // Helper: Union to intersection for flat types
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never)[any] extends (k: infer I) => void ? I : never;
+type UnionToIntersection<U> = (U extends any
+  ? (k: U) => void
+  : never)[any] extends (k: infer I) => void
+  ? I
+  : never;
 
 // Helper for union of keys
 type UnionKeys<T> = T extends unknown ? keyof T : never;
 
 // Extract state queries similarly
-export type ExtractStateQueries<Exts extends readonly Extension[]> = MergeStateQueries<
-  ReturnType<NonNullable<Exts[number]['getStateQueries']>>
->;
+export type ExtractStateQueries<Exts extends readonly Extension[]> =
+  MergeStateQueries<ReturnType<NonNullable<Exts[number]["getStateQueries"]>>>;
 
 // Base commands (always available)
 export interface BaseCommands {
@@ -137,8 +161,12 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
 
   /** Event listener registration functions */
   listeners: {
-    registerUpdate: (listener: (state: any) => void) => (() => void) | undefined;
-    registerPaste: (listener: (event: ClipboardEvent) => boolean) => (() => void) | undefined;
+    registerUpdate: (
+      listener: (state: any) => void,
+    ) => (() => void) | undefined;
+    registerPaste: (
+      listener: (event: ClipboardEvent) => boolean,
+    ) => (() => void) | undefined;
   };
 
   /** Export functions for different formats */

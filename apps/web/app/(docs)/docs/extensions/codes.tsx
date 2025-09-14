@@ -1,9 +1,9 @@
-import { RegisteredCodeSnippet } from '../../lib/types'
+import { RegisteredCodeSnippet } from "../../lib/types";
 
 // General extension examples
 export const EXTENSION_EXAMPLES: RegisteredCodeSnippet[] = [
   {
-    id: 'create-extension-basic',
+    id: "create-extension-basic",
     code: `import { createExtension } from '@lexkit/editor'
 
 const MyExtension = createExtension({
@@ -13,13 +13,13 @@ const MyExtension = createExtension({
     myCommand: () => console.log('Hello!')
   })
 })`,
-    language: 'typescript',
-    title: 'Create Basic Extension',
-    description: 'Minimal extension with a single command',
-    highlightLines: [4, 5, 6, 7]
+    language: "typescript",
+    title: "Create Basic Extension",
+    description: "Minimal extension with a single command",
+    highlightLines: [4, 5, 6, 7],
   },
   {
-    id: 'extension-commands',
+    id: "extension-commands",
     code: `commands: (editor) => ({
   insertText: (text: string) => {
     editor.update(() => {
@@ -37,13 +37,13 @@ const MyExtension = createExtension({
     })
   }
 })`,
-    language: 'typescript',
-    title: 'Extension Commands',
-    description: 'Define commands that manipulate the editor',
-    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12]
+    language: "typescript",
+    title: "Extension Commands",
+    description: "Define commands that manipulate the editor",
+    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12],
   },
   {
-    id: 'extension-state-queries',
+    id: "extension-state-queries",
     code: `stateQueries: (editor) => ({
   hasSelection: async () => {
     return new Promise(resolve => {
@@ -63,13 +63,13 @@ const MyExtension = createExtension({
     })
   }
 })`,
-    language: 'typescript',
-    title: 'State Queries',
-    description: 'Query editor state for UI decisions',
-    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12, 13]
+    language: "typescript",
+    title: "State Queries",
+    description: "Query editor state for UI decisions",
+    highlightLines: [2, 3, 4, 5, 6, 10, 11, 12, 13],
   },
   {
-    id: 'extension-setup',
+    id: "extension-setup",
     code: `// 1. Define your extensions
 const extensions = [MyExtension] as const
 
@@ -84,13 +84,13 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'typescript',
-    title: 'Setup Extension System',
-    description: 'Three steps to integrate extensions',
-    highlightLines: [2, 5, 8, 9, 10, 11]
+    language: "typescript",
+    title: "Setup Extension System",
+    description: "Three steps to integrate extensions",
+    highlightLines: [2, 5, 8, 9, 10, 11],
   },
   {
-    id: 'base-extension-commands',
+    id: "base-extension-commands",
     code: `getCommands(editor: LexicalEditor): TestCommands {
   return {
     insertTimestamp: () => {
@@ -115,13 +115,13 @@ function MyEditor() {
     }
   };
 }`,
-    language: 'typescript',
-    title: 'BaseExtension Commands',
-    description: 'Implement getCommands method for BaseExtension',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 19]
+    language: "typescript",
+    title: "BaseExtension Commands",
+    description: "Implement getCommands method for BaseExtension",
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 19],
   },
   {
-    id: 'base-extension-state-queries',
+    id: "base-extension-state-queries",
     code: `getStateQueries(editor: LexicalEditor): TestStateQueries {
   return {
     hasSelection: async () => {
@@ -143,13 +143,13 @@ function MyEditor() {
     }
   };
 }`,
-    language: 'typescript',
-    title: 'BaseExtension State Queries',
-    description: 'Implement getStateQueries method for BaseExtension',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+    language: "typescript",
+    title: "BaseExtension State Queries",
+    description: "Implement getStateQueries method for BaseExtension",
+    highlightLines: [2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15],
   },
   {
-    id: 'use-extension-commands',
+    id: "use-extension-commands",
     code: `function MyEditor() {
   const { commands, stateQueries } = useEditor()
 
@@ -184,12 +184,12 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Using Extension Commands',
-    description: 'Access and use extension commands in your components',
-    highlightLines: [2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19]
-  }
-]
+    language: "tsx",
+    title: "Using Extension Commands",
+    description: "Access and use extension commands in your components",
+    highlightLines: [2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19],
+  },
+];
 
 // Combine all examples for default export
-export default EXTENSION_EXAMPLES
+export default EXTENSION_EXAMPLES;

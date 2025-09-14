@@ -12,7 +12,7 @@ const extensions = [
   boldExtension,
   italicExtension,
   listExtension,
-  imageExtension
+  imageExtension,
 ] as const; // Required for type safety
 
 // The system automatically provides typed commands and state
@@ -24,8 +24,9 @@ const { commands, activeStates } = useEditor();
 ## Text Formatting Extensions
 
 ### Bold Extension
+
 ```tsx
-import { boldExtension } from '@lexkit/editor';
+import { boldExtension } from "@lexkit/editor";
 
 const extensions = [boldExtension] as const;
 
@@ -35,8 +36,9 @@ activeStates.bold; // Check if current selection is bold
 ```
 
 ### Italic Extension
+
 ```tsx
-import { italicExtension } from '@lexkit/editor';
+import { italicExtension } from "@lexkit/editor";
 
 const extensions = [italicExtension] as const;
 
@@ -45,8 +47,9 @@ activeStates.italic;
 ```
 
 ### Underline Extension
+
 ```tsx
-import { underlineExtension } from '@lexkit/editor';
+import { underlineExtension } from "@lexkit/editor";
 
 const extensions = [underlineExtension] as const;
 
@@ -55,8 +58,9 @@ activeStates.underline;
 ```
 
 ### Strikethrough Extension
+
 ```tsx
-import { strikethroughExtension } from '@lexkit/editor';
+import { strikethroughExtension } from "@lexkit/editor";
 
 const extensions = [strikethroughExtension] as const;
 
@@ -65,26 +69,28 @@ activeStates.strikethrough;
 ```
 
 ### Code Extension
+
 ```tsx
-import { codeExtension } from '@lexkit/editor';
+import { codeExtension } from "@lexkit/editor";
 
 const extensions = [codeExtension] as const;
 
-commands.formatText('code'); // Inline code
+commands.formatText("code"); // Inline code
 activeStates.code;
 ```
 
 ### Link Extension
+
 ```tsx
-import { linkExtension } from '@lexkit/editor';
+import { linkExtension } from "@lexkit/editor";
 
 const extensions = [linkExtension] as const;
 
 // Configure paste listener and validation
 linkExtension.configure({
   pasteListener: {
-    insert: true,  // Auto-convert pasted URLs to links
-    autoLink: false // Auto-link URLs as you type
+    insert: true, // Auto-convert pasted URLs to links
+    autoLink: false, // Auto-link URLs as you type
   },
   validateUrl: (url) => {
     try {
@@ -95,13 +101,13 @@ linkExtension.configure({
     }
   },
   defaultAttributes: {
-    target: '_blank',
-    rel: 'noopener noreferrer'
-  }
+    target: "_blank",
+    rel: "noopener noreferrer",
+  },
 });
 
 // Usage
-commands.insertLink('https://example.com', 'Link Text');
+commands.insertLink("https://example.com", "Link Text");
 commands.insertLink(); // Prompts for URL
 commands.removeLink();
 
@@ -111,27 +117,29 @@ activeStates.isLink;
 ## Structure Extensions
 
 ### List Extension
+
 ```tsx
-import { listExtension } from '@lexkit/editor';
+import { listExtension } from "@lexkit/editor";
 
 const extensions = [listExtension] as const;
 
 commands.toggleUnorderedList(); // • Bullet list
-commands.toggleOrderedList();   // 1. Numbered list
+commands.toggleOrderedList(); // 1. Numbered list
 
 activeStates.unorderedList;
 activeStates.orderedList;
 ```
 
 ### Block Format Extension
+
 ```tsx
-import { blockFormatExtension } from '@lexkit/editor';
+import { blockFormatExtension } from "@lexkit/editor";
 
 const extensions = [blockFormatExtension] as const;
 
-commands.toggleHeading('h1'); // H1 heading
-commands.toggleHeading('h2'); // H2 heading
-commands.toggleQuote();       // Blockquote
+commands.toggleHeading("h1"); // H1 heading
+commands.toggleHeading("h2"); // H2 heading
+commands.toggleQuote(); // Blockquote
 
 activeStates.isH1;
 activeStates.isH2;
@@ -139,8 +147,9 @@ activeStates.isQuote;
 ```
 
 ### Code Block Extension
+
 ```tsx
-import { codeFormatExtension } from '@lexkit/editor';
+import { codeFormatExtension } from "@lexkit/editor";
 
 const extensions = [codeFormatExtension] as const;
 
@@ -152,8 +161,9 @@ activeStates.isInCodeBlock;
 ## Media Extensions
 
 ### Image Extension
+
 ```tsx
-import { imageExtension } from '@lexkit/editor';
+import { imageExtension } from "@lexkit/editor";
 
 const extensions = [imageExtension] as const;
 
@@ -163,27 +173,28 @@ imageExtension.configure({
     // Your upload logic here
     return imageUrl;
   },
-  defaultAlignment: 'center',
+  defaultAlignment: "center",
   resizable: true,
-  pasteListener: { insert: true, replace: true }
+  pasteListener: { insert: true, replace: true },
 });
 
 // Usage
 commands.insertImage({
-  src: 'image-url',
-  alt: 'Alt text',
-  caption: 'Optional caption'
+  src: "image-url",
+  alt: "Alt text",
+  caption: "Optional caption",
 });
 
-commands.setImageAlignment('center');
-commands.setImageCaption('New caption');
+commands.setImageAlignment("center");
+commands.setImageCaption("New caption");
 
 activeStates.imageSelected;
 ```
 
 ### HTML Embed Extension
+
 ```tsx
-import { htmlEmbedExtension } from '@lexkit/editor';
+import { htmlEmbedExtension } from "@lexkit/editor";
 
 const extensions = [htmlEmbedExtension] as const;
 
@@ -197,8 +208,9 @@ activeStates.isHTMLPreviewMode;
 ## History Extension
 
 ### Undo/Redo
+
 ```tsx
-import { historyExtension } from '@lexkit/editor';
+import { historyExtension } from "@lexkit/editor";
 
 const extensions = [historyExtension] as const;
 
@@ -212,8 +224,9 @@ activeStates.canRedo;
 ## Export/Import Extensions
 
 ### HTML Extension
+
 ```tsx
-import { htmlExtension } from '@lexkit/editor';
+import { htmlExtension } from "@lexkit/editor";
 
 const extensions = [htmlExtension] as const;
 
@@ -222,8 +235,9 @@ await commands.importFromHTML(htmlString);
 ```
 
 ### Markdown Extension
+
 ```tsx
-import { markdownExtension } from '@lexkit/editor';
+import { markdownExtension } from "@lexkit/editor";
 
 const extensions = [markdownExtension] as const;
 
@@ -234,24 +248,24 @@ await commands.importFromMarkdown(markdownString);
 ## Creating Custom Extensions
 
 ```tsx
-import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { BaseExtension } from "@lexkit/editor/extensions/base";
 
-class MyCustomExtension extends BaseExtension<'myCustom'> {
+class MyCustomExtension extends BaseExtension<"myCustom"> {
   constructor() {
-    super('myCustom');
+    super("myCustom");
   }
 
   getCommands(editor) {
     return {
       insertMyBlock: (data) => {
         // Implementation
-      }
+      },
     };
   }
 
   getStateQueries(editor) {
     return {
-      hasMyBlock: () => Promise.resolve(false)
+      hasMyBlock: () => Promise.resolve(false),
     };
   }
 
@@ -288,8 +302,8 @@ import {
   listExtension,
   imageExtension,
   htmlExtension,
-  historyExtension
-} from '@lexkit/editor';
+  historyExtension,
+} from "@lexkit/editor";
 
 const extensions = [
   boldExtension,
@@ -297,7 +311,7 @@ const extensions = [
   listExtension,
   imageExtension,
   htmlExtension,
-  historyExtension
+  historyExtension,
 ] as const;
 
 // Configure image extension
@@ -305,7 +319,7 @@ imageExtension.configure({
   uploadHandler: async (file) => {
     // Upload logic
     return url;
-  }
+  },
 });
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -315,9 +329,9 @@ function MyEditor() {
 
   return (
     <div>
-      {hasExtension('bold') && (
+      {hasExtension("bold") && (
         <button onClick={() => commands.toggleBold()}>
-          {activeStates.bold ? 'Unbold' : 'Bold'}
+          {activeStates.bold ? "Unbold" : "Bold"}
         </button>
       )}
       {/* More UI based on available extensions */}

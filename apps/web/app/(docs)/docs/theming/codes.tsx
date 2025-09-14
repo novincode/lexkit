@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 export const THEMING_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'theming-basic-usage',
+    id: "theming-basic-usage",
     code: `import { LexKitTheme } from '@lexkit/editor'
 
 const myTheme: LexKitTheme = {
@@ -39,26 +39,29 @@ const myTheme: LexKitTheme = {
     placeholder: 'text-gray-400 italic',
   },
 }`,
-    language: 'typescript',
-    title: 'Basic Theme Definition',
-    description: 'Create a custom theme object with all available properties',
-    highlightLines: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+    language: "typescript",
+    title: "Basic Theme Definition",
+    description: "Create a custom theme object with all available properties",
+    highlightLines: [
+      3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+      23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+    ],
   },
   {
-    id: 'theming-apply-theme',
+    id: "theming-apply-theme",
     code: `<Provider
   extensions={extensions}
   config={{ theme: myTheme }}
 >
   <MyEditor />
 </Provider>`,
-    language: 'tsx',
-    title: 'Apply Theme to Editor',
-    description: 'Apply your custom theme to the LexKit editor',
-    highlightLines: [1, 2, 3, 4, 5, 6]
+    language: "tsx",
+    title: "Apply Theme to Editor",
+    description: "Apply your custom theme to the LexKit editor",
+    highlightLines: [1, 2, 3, 4, 5, 6],
   },
   {
-    id: 'theming-tailwind-theme',
+    id: "theming-tailwind-theme",
     code: `import { LexKitTheme } from '@lexkit/editor'
 
 const tailwindTheme: LexKitTheme = {
@@ -92,13 +95,16 @@ const tailwindTheme: LexKitTheme = {
     placeholder: 'text-gray-400 italic'
   }
 }`,
-    language: 'typescript',
-    title: 'Tailwind CSS Theme',
-    description: 'Complete theme using Tailwind utility classes',
-    highlightLines: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+    language: "typescript",
+    title: "Tailwind CSS Theme",
+    description: "Complete theme using Tailwind utility classes",
+    highlightLines: [
+      4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+      24, 25, 26, 27, 28, 29, 30, 31, 32,
+    ],
   },
   {
-    id: 'theming-merge-themes',
+    id: "theming-merge-themes",
     code: `import { mergeThemes, defaultLexKitTheme, LexKitTheme } from '@lexkit/editor'
 
 // Start with default theme
@@ -124,13 +130,15 @@ const finalTheme = mergeThemes(baseTheme, customOverrides)
 <Provider extensions={extensions} config={{ theme: finalTheme }}>
   <MyEditor />
 </Provider>`,
-    language: 'typescript',
-    title: 'Theme Merging',
-    description: 'Combine themes or override specific properties',
-    highlightLines: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    language: "typescript",
+    title: "Theme Merging",
+    description: "Combine themes or override specific properties",
+    highlightLines: [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+    ],
   },
   {
-    id: 'theming-css-variables',
+    id: "theming-css-variables",
     code: `/* CSS with custom properties */
 :root {
   --editor-bg: #ffffff;
@@ -159,13 +167,13 @@ const responsiveTheme: LexKitTheme = {
     button: 'px-3 py-2 bg-[var(--button-primary)] hover:bg-[var(--button-hover)] text-white rounded-md transition-colors',
   },
 }`,
-    language: 'typescript',
-    title: 'CSS Variables Theme',
-    description: 'Dynamic theming with CSS custom properties',
-    highlightLines: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
+    language: "typescript",
+    title: "CSS Variables Theme",
+    description: "Dynamic theming with CSS custom properties",
+    highlightLines: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27],
   },
   {
-    id: 'theming-extension-specific',
+    id: "theming-extension-specific",
     code: `const themeWithExtensions: LexKitTheme = {
   // Base properties
   paragraph: 'editor-paragraph',
@@ -193,13 +201,17 @@ const responsiveTheme: LexKitTheme = {
     buttonActive: 'bg-blue-100 text-blue-700',
   },
 }`,
-    language: 'typescript',
-    title: 'Extension-Specific Theming',
-    description: 'Theme properties for specific extensions like draggable blocks and floating toolbar',
-    highlightLines: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+    language: "typescript",
+    title: "Extension-Specific Theming",
+    description:
+      "Theme properties for specific extensions like draggable blocks and floating toolbar",
+    highlightLines: [
+      6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+    ],
   },
   {
-    id: 'theming-dynamic-theme-switching',
+    id: "theming-dynamic-theme-switching",
     code: `"use client"
 
 import { useState } from 'react'
@@ -240,13 +252,18 @@ function ThemeableEditor() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Dynamic Theme Switching',
-    description: 'Change themes dynamically based on user interaction or application state',
-    highlightLines: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
+    language: "tsx",
+    title: "Dynamic Theme Switching",
+    description:
+      "Change themes dynamically based on user interaction or application state",
+    highlightLines: [
+      5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+      43, 44, 45,
+    ],
   },
   {
-    id: 'theming-migration-before',
+    id: "theming-migration-before",
     code: `const lexicalTheme = {
   paragraph: 'editor-paragraph',
   text: {
@@ -257,13 +274,13 @@ function ThemeableEditor() {
 <LexicalComposer initialConfig={{ theme: lexicalTheme }}>
   <Editor />
 </LexicalComposer>`,
-    language: 'tsx',
-    title: 'Lexical Theme (Before)',
-    description: 'Traditional Lexical theme setup',
-    highlightLines: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    language: "tsx",
+    title: "Lexical Theme (Before)",
+    description: "Traditional Lexical theme setup",
+    highlightLines: [1, 2, 3, 4, 5, 6, 7, 8, 9],
   },
   {
-    id: 'theming-migration-after',
+    id: "theming-migration-after",
     code: `import { LexKitTheme } from '@lexkit/editor'
 
 const lexkitTheme: LexKitTheme = {
@@ -277,13 +294,13 @@ const lexkitTheme: LexKitTheme = {
 <Provider extensions={extensions} config={{ theme: lexkitTheme }}>
   <MyEditor />
 </Provider>`,
-    language: 'tsx',
-    title: 'LexKit Theme (After)',
-    description: 'Enhanced LexKit theme with additional properties',
-    highlightLines: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    language: "tsx",
+    title: "LexKit Theme (After)",
+    description: "Enhanced LexKit theme with additional properties",
+    highlightLines: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   },
   {
-    id: 'theming-component-level',
+    id: "theming-component-level",
     code: `import { LexKitTheme } from '@lexkit/editor'
 
 // Different themes for different editor instances
@@ -328,11 +345,16 @@ function MultiEditorApp() {
     </div>
   )
 }`,
-    language: 'tsx',
-    title: 'Component-Level Theming',
-    description: 'Apply different themes to different editor instances in the same application',
-    highlightLines: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+    language: "tsx",
+    title: "Component-Level Theming",
+    description:
+      "Apply different themes to different editor instances in the same application",
+    highlightLines: [
+      4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+      24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+      42, 43, 44, 45, 46, 47, 48, 49,
+    ],
   },
-]
+];
 
-export default THEMING_CODES
+export default THEMING_CODES;

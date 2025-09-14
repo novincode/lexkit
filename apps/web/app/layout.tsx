@@ -1,32 +1,33 @@
-import { Geist, Geist_Mono, Fira_Code } from "next/font/google"
-import { Metadata, Viewport } from "next"
-import Script from "next/script"
+import { Geist, Geist_Mono, Fira_Code } from "next/font/google";
+import { Metadata, Viewport } from "next";
+import Script from "next/script";
 
-import "@repo/ui/globals.css"
-import { Providers } from "@/components/providers"
+import "@repo/ui/globals.css";
+import { Providers } from "@/components/providers";
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 const fontFira = Fira_Code({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 // Next.js Metadata API
 export const metadata: Metadata = {
   title: {
     default: "LexKit - Free Open Source Rich Text Editor",
-    template: "%s | LexKit"
+    template: "%s | LexKit",
   },
-  description: "LexKit is a free, open-source, modern rich text editor built for React developers. Features drag-and-drop blocks, customizable extensions, and seamless integration with Lexical framework.",
+  description:
+    "LexKit is a free, open-source, modern rich text editor built for React developers. Features drag-and-drop blocks, customizable extensions, and seamless integration with Lexical framework.",
   keywords: [
     "rich text editor",
     "React editor",
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     "content editor",
     "text editor",
     "HTML editor",
-    "markdown editor"
+    "markdown editor",
   ],
   authors: [{ name: "LexKit Team" }],
   creator: "LexKit Team",
@@ -61,7 +62,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://lexkit.dev",
     title: "LexKit - Free Open Source Rich Text Editor",
-    description: "Modern, React-friendly rich text editor built on Lexical. Free, open-source, and fully customizable with drag-and-drop functionality.",
+    description:
+      "Modern, React-friendly rich text editor built on Lexical. Free, open-source, and fully customizable with drag-and-drop functionality.",
     siteName: "LexKit",
     images: [
       {
@@ -75,7 +77,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LexKit - Free Open Source Rich Text Editor",
-    description: "Modern, React-friendly rich text editor built on Lexical. Free, open-source, and fully customizable.",
+    description:
+      "Modern, React-friendly rich text editor built on Lexical. Free, open-source, and fully customizable.",
     images: ["/images/twitter-card.svg"],
     creator: "@lexkit_editor",
     site: "@lexkit_editor",
@@ -98,7 +101,11 @@ export const metadata: Metadata = {
       { url: "/images/favicon.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/images/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
     other: [
       {
@@ -117,7 +124,7 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "application-name": "LexKit Editor",
   },
-}
+};
 
 // Next.js Viewport API
 export const viewport: Viewport = {
@@ -130,12 +137,12 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#000000" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -149,44 +156,44 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              "name": "LexKit",
-              "description": "Free, open-source, modern rich text editor built for React developers using Lexical framework",
-              "url": "https://lexkit.dev",
-              "applicationCategory": "DeveloperApplication",
-              "operatingSystem": "Web Browser",
-              "programmingLanguage": "TypeScript, React",
-              "author": {
+              name: "LexKit",
+              description:
+                "Free, open-source, modern rich text editor built for React developers using Lexical framework",
+              url: "https://lexkit.dev",
+              applicationCategory: "DeveloperApplication",
+              operatingSystem: "Web Browser",
+              programmingLanguage: "TypeScript, React",
+              author: {
                 "@type": "Organization",
-                "name": "LexKit Team"
+                name: "LexKit Team",
               },
-              "offers": {
+              offers: {
                 "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
+                price: "0",
+                priceCurrency: "USD",
               },
-              "featureList": [
+              featureList: [
                 "Drag and Drop Blocks",
                 "Customizable Extensions",
                 "React Integration",
                 "TypeScript Support",
                 "Modern UI Components",
                 "Open Source",
-                "Free to Use"
+                "Free to Use",
               ],
-              "keywords": "rich text editor, React, Lexical, open source, drag and drop, WYSIWYG"
-            })
+              keywords:
+                "rich text editor, React, Lexical, open source, drag and drop, WYSIWYG",
+            }),
           }}
         />
         <Providers>
           <div className="flex min-h-screen flex-col">
             {/* <TopNavigation /> */}
-            <main className="flex-1">
-              {children}
-            </main>
+            <main className="flex-1">{children}</main>
             {/* <Footer /> */}
           </div>
         </Providers>
       </body>
     </html>
-  )
+  );
 }

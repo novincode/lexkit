@@ -1,11 +1,23 @@
-"use client"
+"use client";
 
-import { SimpleCodeBlock } from '@/app/(docs)/components/simple-code-block'
-import { getHighlightedCode, getRawCode } from '@/lib/generated/code-registry'
-import { Badge } from "@repo/ui/components/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card"
-import { Code, Zap, Shield, Layers, Target, Sparkles } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/table"
+import { SimpleCodeBlock } from "@/app/(docs)/components/simple-code-block";
+import { getHighlightedCode, getRawCode } from "@/lib/generated/code-registry";
+import { Badge } from "@repo/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Code, Zap, Shield, Layers, Target, Sparkles } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui/components/table";
 
 export default function CreateEditorSystemPageClient() {
   return (
@@ -14,11 +26,14 @@ export default function CreateEditorSystemPageClient() {
       <div className="text-center space-y-6 py-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">createEditorSystem</h1>
-          <p className="text-xl text-muted-foreground mt-2">Type-safe editor system factory</p>
+          <p className="text-xl text-muted-foreground mt-2">
+            Type-safe editor system factory
+          </p>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          The core factory function that creates a fully typed editor system based on your extensions.
-          Provides compile-time safety and intelligent autocomplete for your editor components.
+          The core factory function that creates a fully typed editor system
+          based on your extensions. Provides compile-time safety and intelligent
+          autocomplete for your editor components.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -40,8 +55,9 @@ export default function CreateEditorSystemPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">What It Does</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          createEditorSystem is the heart of LexKit's type system. It analyzes your extensions
-          and generates a perfectly typed Provider component and useEditor hook.
+          createEditorSystem is the heart of LexKit's type system. It analyzes
+          your extensions and generates a perfectly typed Provider component and
+          useEditor hook.
         </p>
 
         <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6">
@@ -54,8 +70,8 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Analyzes your extension array and extracts command types, state queries,
-                and configuration options at compile time.
+                Analyzes your extension array and extracts command types, state
+                queries, and configuration options at compile time.
               </p>
             </CardContent>
           </Card>
@@ -110,8 +126,12 @@ export default function CreateEditorSystemPageClient() {
               </p>
               <SimpleCodeBlock
                 title="Define extensions array"
-                html={getHighlightedCode('create-editor-system-define-extensions') || ''}
-                raw={getRawCode('create-editor-system-define-extensions') || ''}
+                html={
+                  getHighlightedCode(
+                    "create-editor-system-define-extensions",
+                  ) || ""
+                }
+                raw={getRawCode("create-editor-system-define-extensions") || ""}
               />
             </CardContent>
           </Card>
@@ -122,12 +142,15 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Use createEditorSystem with your extensions to generate typed components.
+                Use createEditorSystem with your extensions to generate typed
+                components.
               </p>
               <SimpleCodeBlock
                 title="Create typed editor system"
-                html={getHighlightedCode('create-editor-system-create-system') || ''}
-                raw={getRawCode('create-editor-system-create-system') || ''}
+                html={
+                  getHighlightedCode("create-editor-system-create-system") || ""
+                }
+                raw={getRawCode("create-editor-system-create-system") || ""}
               />
             </CardContent>
           </Card>
@@ -142,8 +165,10 @@ export default function CreateEditorSystemPageClient() {
               </p>
               <SimpleCodeBlock
                 title="Use the typed system"
-                html={getHighlightedCode('create-editor-system-basic-usage') || ''}
-                raw={getRawCode('create-editor-system-basic-usage') || ''}
+                html={
+                  getHighlightedCode("create-editor-system-basic-usage") || ""
+                }
+                raw={getRawCode("create-editor-system-basic-usage") || ""}
               />
             </CardContent>
           </Card>
@@ -154,7 +179,8 @@ export default function CreateEditorSystemPageClient() {
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Type Safety Benefits</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
-          createEditorSystem provides compile-time guarantees about your editor's capabilities.
+          createEditorSystem provides compile-time guarantees about your
+          editor's capabilities.
         </p>
 
         <Card>
@@ -164,8 +190,10 @@ export default function CreateEditorSystemPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="Only available commands and states are suggested"
-              html={getHighlightedCode('create-editor-system-type-safety') || ''}
-              raw={getRawCode('create-editor-system-type-safety') || ''}
+              html={
+                getHighlightedCode("create-editor-system-type-safety") || ""
+              }
+              raw={getRawCode("create-editor-system-type-safety") || ""}
             />
           </CardContent>
         </Card>
@@ -195,12 +223,17 @@ export default function CreateEditorSystemPageClient() {
                 <TableRow>
                   <TableCell className="font-mono">extensions</TableCell>
                   <TableCell>Extension[]</TableCell>
-                  <TableCell>Required. Array of extensions to include in the editor.</TableCell>
+                  <TableCell>
+                    Required. Array of extensions to include in the editor.
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono">config</TableCell>
                   <TableCell>EditorConfig</TableCell>
-                  <TableCell>Optional. Configuration object with theme and other settings.</TableCell>
+                  <TableCell>
+                    Optional. Configuration object with theme and other
+                    settings.
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono">children</TableCell>
@@ -219,8 +252,10 @@ export default function CreateEditorSystemPageClient() {
           <CardContent>
             <SimpleCodeBlock
               title="Configure theme and other options"
-              html={getHighlightedCode('create-editor-system-with-config') || ''}
-              raw={getRawCode('create-editor-system-with-config') || ''}
+              html={
+                getHighlightedCode("create-editor-system-with-config") || ""
+              }
+              raw={getRawCode("create-editor-system-with-config") || ""}
             />
           </CardContent>
         </Card>
@@ -243,12 +278,16 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Create different editor systems for different use cases in the same app.
+                Create different editor systems for different use cases in the
+                same app.
               </p>
               <SimpleCodeBlock
                 title="Different editors for different purposes"
-                html={getHighlightedCode('create-editor-system-multiple-editors') || ''}
-                raw={getRawCode('create-editor-system-multiple-editors') || ''}
+                html={
+                  getHighlightedCode("create-editor-system-multiple-editors") ||
+                  ""
+                }
+                raw={getRawCode("create-editor-system-multiple-editors") || ""}
               />
             </CardContent>
           </Card>
@@ -262,12 +301,16 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Access export/import utilities, state queries, and the raw editor instance.
+                Access export/import utilities, state queries, and the raw
+                editor instance.
               </p>
               <SimpleCodeBlock
                 title="Full access to editor capabilities"
-                html={getHighlightedCode('create-editor-system-advanced-state') || ''}
-                raw={getRawCode('create-editor-system-advanced-state') || ''}
+                html={
+                  getHighlightedCode("create-editor-system-advanced-state") ||
+                  ""
+                }
+                raw={getRawCode("create-editor-system-advanced-state") || ""}
               />
             </CardContent>
           </Card>
@@ -292,19 +335,26 @@ export default function CreateEditorSystemPageClient() {
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">Provider&lt;Exts&gt;</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    Provider&lt;Exts&gt;
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
-                    React component that provides editor context. Wraps your editor components.
+                    React component that provides editor context. Wraps your
+                    editor components.
                   </p>
                 </div>
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">extensions: Exts</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    extensions: Exts
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     Required. Your extension array.
                   </p>
                 </div>
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">config?: EditorConfig</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    config?: EditorConfig
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     Optional. Editor configuration.
                   </p>
@@ -323,25 +373,33 @@ export default function CreateEditorSystemPageClient() {
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">commands</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    commands
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     All available commands from your extensions.
                   </p>
                 </div>
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">activeStates</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    activeStates
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     Current state of all formatters and selections.
                   </p>
                 </div>
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">editor</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    editor
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     Raw Lexical editor instance for advanced use.
                   </p>
                 </div>
                 <div>
-                  <code className="bg-muted px-2 py-1 rounded text-sm">export / import</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">
+                    export / import
+                  </code>
                   <p className="text-sm text-muted-foreground mt-1">
                     Utilities for content serialization.
                   </p>
@@ -366,8 +424,9 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Always use <code className="bg-muted px-1 rounded">as const</code> with your extension arrays
-                to enable full type inference.
+                Always use{" "}
+                <code className="bg-muted px-1 rounded">as const</code> with
+                your extension arrays to enable full type inference.
               </p>
             </CardContent>
           </Card>
@@ -378,8 +437,8 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Create separate editor systems for different use cases rather than
-                one system with all possible extensions.
+                Create separate editor systems for different use cases rather
+                than one system with all possible extensions.
               </p>
             </CardContent>
           </Card>
@@ -390,8 +449,9 @@ export default function CreateEditorSystemPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                Use <code className="bg-muted px-1 rounded">typeof extensions</code> when calling createEditorSystem
-                to maintain type safety.
+                Use{" "}
+                <code className="bg-muted px-1 rounded">typeof extensions</code>{" "}
+                when calling createEditorSystem to maintain type safety.
               </p>
             </CardContent>
           </Card>
@@ -410,5 +470,5 @@ export default function CreateEditorSystemPageClient() {
         </div>
       </div>
     </div>
-  )
+  );
 }

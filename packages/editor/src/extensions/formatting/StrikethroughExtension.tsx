@@ -1,4 +1,4 @@
-import { TextFormatExtension } from '@lexkit/editor/extensions/base';
+import { TextFormatExtension } from "@lexkit/editor/extensions/base";
 
 /**
  * StrikethroughExtension - Provides strikethrough text formatting functionality
@@ -15,9 +15,9 @@ import { TextFormatExtension } from '@lexkit/editor/extensions/base';
  * const editor = createEditorSystem(extensions);
  * ```
  */
-export class StrikethroughExtension extends TextFormatExtension<'strikethrough'> {
+export class StrikethroughExtension extends TextFormatExtension<"strikethrough"> {
   constructor() {
-    super('strikethrough');
+    super("strikethrough");
   }
 }
 

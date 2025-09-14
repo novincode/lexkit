@@ -1,11 +1,15 @@
-import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } from '@lexical/list';
-import { ComponentType, CSSProperties, ReactNode } from 'react';
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ListNode, ListItemNode, $isListNode } from '@lexical/list';
-import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-import React from 'react';
+import {
+  INSERT_UNORDERED_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  REMOVE_LIST_COMMAND,
+} from "@lexical/list";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { ListNode, ListItemNode, $isListNode } from "@lexical/list";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import React from "react";
 
 /**
  * Commands provided by the list extension.
@@ -48,17 +52,20 @@ export type ListCommands = {
  * ```
  */
 export class ListExtension extends BaseExtension<
-  'list',
+  "list",
   any,
   ListCommands,
-  { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> },
+  {
+    unorderedList: () => Promise<boolean>;
+    orderedList: () => Promise<boolean>;
+  },
   ReactNode[]
 > {
   /**
    * Creates a new list extension instance.
    */
   constructor() {
-    super('list', [ExtensionCategory.Toolbar]);
+    super("list", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -115,11 +122,14 @@ export class ListExtension extends BaseExtension<
 
             if (listNode) {
               // If already an unordered list, remove it
-              if (listNode.getListType() === 'bullet') {
+              if (listNode.getListType() === "bullet") {
                 editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
               } else {
                 // If it's an ordered list, convert to unordered
-                editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+                editor.dispatchCommand(
+                  INSERT_UNORDERED_LIST_COMMAND,
+                  undefined,
+                );
               }
             } else {
               // No list, create unordered list
@@ -145,7 +155,7 @@ export class ListExtension extends BaseExtension<
 
             if (listNode) {
               // If already an ordered list, remove it
-              if (listNode.getListType() === 'number') {
+              if (listNode.getListType() === "number") {
                 editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
               } else {
                 // If it's an unordered list, convert to ordered
@@ -167,7 +177,10 @@ export class ListExtension extends BaseExtension<
    * @param editor - The Lexical editor instance
    * @returns Object containing state query functions for list types
    */
-  getStateQueries(editor: LexicalEditor): { unorderedList: () => Promise<boolean>; orderedList: () => Promise<boolean> } {
+  getStateQueries(editor: LexicalEditor): {
+    unorderedList: () => Promise<boolean>;
+    orderedList: () => Promise<boolean>;
+  } {
     return {
       unorderedList: () =>
         new Promise((resolve) => {
@@ -180,7 +193,7 @@ export class ListExtension extends BaseExtension<
             let node: any = selection.anchor.getNode();
             while (node) {
               if ($isListNode(node)) {
-                resolve(node.getListType() === 'bullet');
+                resolve(node.getListType() === "bullet");
                 return;
               }
               node = node.getParent();
@@ -199,7 +212,7 @@ export class ListExtension extends BaseExtension<
             let node: any = selection.anchor.getNode();
             while (node) {
               if ($isListNode(node)) {
-                resolve(node.getListType() === 'number');
+                resolve(node.getListType() === "number");
                 return;
               }
               node = node.getParent();

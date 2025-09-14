@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import type { CommandPaletteItem } from '@lexkit/editor/extensions/core';
-import { Search, Command } from 'lucide-react';
-import { Input } from '@repo/ui/components/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/dialog';
-import { ScrollArea } from '@repo/ui/components/scroll-area';
-import { Badge } from '@repo/ui/components/badge';
+import React, { useState, useEffect, useRef } from "react";
+import type { CommandPaletteItem } from "@lexkit/editor/extensions/core";
+import { Search, Command } from "lucide-react";
+import { Input } from "@repo/ui/components/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/dialog";
+import { ScrollArea } from "@repo/ui/components/scroll-area";
+import { Badge } from "@repo/ui/components/badge";
 
 interface ShadcnCommandPaletteProps {
   isOpen: boolean;
@@ -12,24 +17,32 @@ interface ShadcnCommandPaletteProps {
   commands: CommandPaletteItem[];
 }
 
-export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnCommandPaletteProps) {
-  const [query, setQuery] = useState('');
+export function ShadcnCommandPalette({
+  isOpen,
+  onClose,
+  commands,
+}: ShadcnCommandPaletteProps) {
+  const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter commands based on query
-  const filteredCommands = commands.filter(cmd => {
-    const searchText = `${cmd.label} ${cmd.description || ''} ${cmd.keywords?.join(' ') || ''}`.toLowerCase();
+  const filteredCommands = commands.filter((cmd) => {
+    const searchText =
+      `${cmd.label} ${cmd.description || ""} ${cmd.keywords?.join(" ") || ""}`.toLowerCase();
     return searchText.includes(query.toLowerCase());
   });
 
   // Group commands by category
-  const groupedCommands = filteredCommands.reduce((groups, cmd) => {
-    const category = cmd.category || 'Other';
-    if (!groups[category]) groups[category] = [];
-    groups[category].push(cmd);
-    return groups;
-  }, {} as Record<string, CommandPaletteItem[]>);
+  const groupedCommands = filteredCommands.reduce(
+    (groups, cmd) => {
+      const category = cmd.category || "Other";
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(cmd);
+      return groups;
+    },
+    {} as Record<string, CommandPaletteItem[]>,
+  );
 
   // Flatten for navigation
   const flatCommands = filteredCommands;
@@ -43,7 +56,7 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
-      setQuery('');
+      setQuery("");
       setSelectedIndex(0);
     }
   }, [isOpen]);
@@ -54,19 +67,21 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
       if (!isOpen) return;
 
       switch (e.key) {
-        case 'Escape':
+        case "Escape":
           e.preventDefault();
           onClose();
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           e.preventDefault();
-          setSelectedIndex(prev => Math.min(prev + 1, flatCommands.length - 1));
+          setSelectedIndex((prev) =>
+            Math.min(prev + 1, flatCommands.length - 1),
+          );
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           e.preventDefault();
-          setSelectedIndex(prev => Math.max(prev - 1, 0));
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
           break;
-        case 'Enter':
+        case "Enter":
           e.preventDefault();
           if (flatCommands[selectedIndex]) {
             flatCommands[selectedIndex].action();
@@ -76,8 +91,8 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, selectedIndex, flatCommands, onClose]);
 
   return (
@@ -126,8 +141,8 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
                           key={cmd.id}
                           className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
                             isSelected
-                              ? 'bg-accent text-accent-foreground'
-                              : 'hover:bg-muted'
+                              ? "bg-accent text-accent-foreground"
+                              : "hover:bg-muted"
                           }`}
                           onClick={() => {
                             cmd.action();
@@ -136,7 +151,9 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
                           onMouseEnter={() => setSelectedIndex(globalIndex)}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm">{cmd.label}</div>
+                            <div className="font-medium text-sm">
+                              {cmd.label}
+                            </div>
                             {cmd.description && (
                               <div className="text-xs text-muted-foreground mt-0.5">
                                 {cmd.description}
@@ -144,7 +161,10 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
                             )}
                           </div>
                           {cmd.shortcut && (
-                            <Badge variant="secondary" className="ml-2 text-xs font-mono">
+                            <Badge
+                              variant="secondary"
+                              className="ml-2 text-xs font-mono"
+                            >
                               {cmd.shortcut}
                             </Badge>
                           )}
@@ -160,9 +180,16 @@ export function ShadcnCommandPalette({ isOpen, onClose, commands }: ShadcnComman
 
         <div className="p-4 border-t bg-muted/50">
           <div className="text-xs text-muted-foreground text-center">
-            <kbd className="px-1 py-0.5 bg-background rounded text-xs">↑↓</kbd> to navigate,
-            <kbd className="px-1 py-0.5 bg-background rounded text-xs ml-1">↵</kbd> to select,
-            <kbd className="px-1 py-0.5 bg-background rounded text-xs ml-1">ESC</kbd> to close
+            <kbd className="px-1 py-0.5 bg-background rounded text-xs">↑↓</kbd>{" "}
+            to navigate,
+            <kbd className="px-1 py-0.5 bg-background rounded text-xs ml-1">
+              ↵
+            </kbd>{" "}
+            to select,
+            <kbd className="px-1 py-0.5 bg-background rounded text-xs ml-1">
+              ESC
+            </kbd>{" "}
+            to close
           </div>
         </div>
       </DialogContent>

@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { Github, ExternalLink, Menu, X } from "lucide-react"
-import { Button } from "@repo/ui/components/button"
-import { ThemeToggle } from "./theme-toggle"
-import { useState, useEffect } from "react"
-import { cn } from "@repo/ui/lib/utils"
-import { usePathname } from "next/navigation"
+import React from "react";
+import Link from "next/link";
+import { Github, ExternalLink, Menu, X } from "lucide-react";
+import { Button } from "@repo/ui/components/button";
+import { ThemeToggle } from "./theme-toggle";
+import { useState, useEffect } from "react";
+import { cn } from "@repo/ui/lib/utils";
+import { usePathname } from "next/navigation";
 
 interface TopNavigationProps {
-  className?: string
-  children?: React.ReactNode
-  beforeChildren?: React.ReactNode
-  afterChildren?: React.ReactNode
-  showMobileMenu?: boolean
+  className?: string;
+  children?: React.ReactNode;
+  beforeChildren?: React.ReactNode;
+  afterChildren?: React.ReactNode;
+  showMobileMenu?: boolean;
 }
 
 // Navigation items configuration
@@ -23,68 +23,71 @@ const navigationItems = [
     label: "Documentation",
     href: "/docs",
     activePaths: ["/docs"],
-    external: false
+    external: false,
   },
   {
     label: "Demo",
     href: "/demo",
     activePaths: ["/demo"],
-    external: false
+    external: false,
   },
 
   {
     label: "Playground",
     href: "https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx",
     activePaths: [],
-    external: true
-  }
-]
+    external: true,
+  },
+];
 
 export function TopNavigation({
   className,
   children,
   beforeChildren,
   afterChildren,
-  showMobileMenu = true
+  showMobileMenu = true,
 }: TopNavigationProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isClient, setIsClient] = useState(false)
-  const pathname = usePathname()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
 
   // Handle client-side hydration
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   // Helper function to check if a navigation item is active
-  const isActive = (item: typeof navigationItems[0]) => {
-    if (!isClient || item.external) return false
+  const isActive = (item: (typeof navigationItems)[0]) => {
+    if (!isClient || item.external) return false;
 
     // Check if current path matches any of the active paths
-    return item.activePaths.some(activePath => {
+    return item.activePaths.some((activePath) => {
       if (activePath === "/docs") {
         // Special case for docs - any path starting with /docs should be active
-        return pathname.startsWith("/docs")
+        return pathname.startsWith("/docs");
       }
-      return pathname === activePath || pathname.startsWith(activePath + "/")
-    })
-  }
+      return pathname === activePath || pathname.startsWith(activePath + "/");
+    });
+  };
 
   return (
-    <header className={cn(" z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
+    <header
+      className={cn(
+        " z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        className,
+      )}
+    >
       <div className="px-4 flex h-16 items-center">
         {/* Before children (mobile) */}
-        {beforeChildren && (
-          <div className=" mr-4">
-            {beforeChildren}
-          </div>
-        )}
+        {beforeChildren && <div className=" mr-4">{beforeChildren}</div>}
 
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-extralight text-xl">L</span>
+              <span className="text-primary-foreground font-extralight text-xl">
+                L
+              </span>
             </div>
             <span className="font-bold text-xl">LexKit</span>
           </Link>
@@ -101,7 +104,7 @@ export function TopNavigation({
                 "flex items-center gap-1 transition-colors",
                 isClient && isActive(item)
                   ? "text-primary underline underline-offset-4"
-                  : "text-foreground/60 hover:text-foreground"
+                  : "text-foreground/60 hover:text-foreground",
               )}
             >
               {item.label}
@@ -112,7 +115,6 @@ export function TopNavigation({
 
         {/* Right Side */}
         <div className="ml-auto flex items-center space-x-2">
-
           <Button variant="ghost" size="lg" asChild className="hidden md:flex">
             <Link
               href="https://github.com/novincode/lexkit"
@@ -132,7 +134,11 @@ export function TopNavigation({
               className="md:hidden mr-2 h-auto size-10"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+              {isMenuOpen ? (
+                <X className="size-6" />
+              ) : (
+                <Menu className="size-6" />
+              )}
             </Button>
           )}
           <ThemeToggle />
@@ -152,7 +158,7 @@ export function TopNavigation({
                   "flex items-center gap-1 transition-colors",
                   isClient && isActive(item)
                     ? "text-primary font-semibold"
-                    : "text-foreground/60 hover:text-foreground"
+                    : "text-foreground/60 hover:text-foreground",
                 )}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -171,13 +177,11 @@ export function TopNavigation({
 
             {/* After children (mobile) */}
             {afterChildren && (
-              <div className=" pt-2 border-t">
-                {afterChildren}
-              </div>
+              <div className=" pt-2 border-t">{afterChildren}</div>
             )}
           </nav>
         </div>
       )}
     </header>
-  )
+  );
 }

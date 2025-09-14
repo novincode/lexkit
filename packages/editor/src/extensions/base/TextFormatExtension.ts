@@ -1,7 +1,15 @@
-import { FORMAT_TEXT_COMMAND, INSERT_PARAGRAPH_COMMAND, INSERT_LINE_BREAK_COMMAND, LexicalEditor, TextFormatType, $getSelection, $isRangeSelection } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
+import {
+  FORMAT_TEXT_COMMAND,
+  INSERT_PARAGRAPH_COMMAND,
+  INSERT_LINE_BREAK_COMMAND,
+  LexicalEditor,
+  TextFormatType,
+  $getSelection,
+  $isRangeSelection,
+} from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { ReactNode } from "react";
 
 /**
  * Commands provided by text format extensions.
@@ -17,7 +25,9 @@ export type TextFormatCommands<Name extends TextFormatType> = {
  *
  * @template Name - The text format name (e.g., 'bold', 'italic')
  */
-export abstract class TextFormatExtension<Name extends TextFormatType> extends BaseExtension<
+export abstract class TextFormatExtension<
+  Name extends TextFormatType,
+> extends BaseExtension<
   Name,
   any,
   TextFormatCommands<Name>,
@@ -56,7 +66,7 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
         });
         return false; // Allow the default paragraph insertion to continue
       },
-      1 // COMMAND_PRIORITY_LOW
+      1, // COMMAND_PRIORITY_LOW
     );
 
     // Register listener for INSERT_LINE_BREAK_COMMAND to preserve formatting when Shift+Enter is pressed
@@ -66,7 +76,7 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
         // Don't clear formatting when Shift+Enter is pressed (preserves formatting for line break)
         return false; // Allow the default line break insertion to continue
       },
-      1 // COMMAND_PRIORITY_LOW
+      1, // COMMAND_PRIORITY_LOW
     );
 
     return () => {
@@ -82,7 +92,8 @@ export abstract class TextFormatExtension<Name extends TextFormatType> extends B
    * @returns Object with toggle command function
    */
   getCommands(editor: LexicalEditor): TextFormatCommands<Name> {
-    const key = `toggle${this.name.charAt(0).toUpperCase() + this.name.slice(1)}` as keyof TextFormatCommands<Name>;
+    const key =
+      `toggle${this.name.charAt(0).toUpperCase() + this.name.slice(1)}` as keyof TextFormatCommands<Name>;
     return {
       [key]: () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, this.name),
     } as any;

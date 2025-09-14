@@ -1,5 +1,5 @@
-import DraggableBlockExtensionPageClient from './page.client'
+import DraggableBlockExtensionPageClient from "./page.client";
 
 export default function DraggableBlockExtensionPage() {
-  return <DraggableBlockExtensionPageClient />
+  return <DraggableBlockExtensionPageClient />;
 }

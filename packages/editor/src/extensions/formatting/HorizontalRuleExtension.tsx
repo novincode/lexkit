@@ -1,10 +1,14 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { INSERT_HORIZONTAL_RULE_COMMAND, $isHorizontalRuleNode, HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import React from 'react';
-import type { LexicalNode, ElementNode } from 'lexical';
+import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import {
+  INSERT_HORIZONTAL_RULE_COMMAND,
+  $isHorizontalRuleNode,
+  HorizontalRuleNode,
+} from "@lexical/react/LexicalHorizontalRuleNode";
+import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import React from "react";
+import type { LexicalNode, ElementNode } from "lexical";
 
 /**
  * Horizontal Rule Transformer for Markdown
@@ -14,17 +18,23 @@ export const HORIZONTAL_RULE_TRANSFORMER = {
   dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
     if (!$isHorizontalRuleNode(node)) return null;
-    return '---';
+    return "---";
   },
   regExp: /^(?:---|\*\*\*|___)\s*$/,
-  replace: async (parentNode: ElementNode, children: LexicalNode[], match: string[]) => {
+  replace: async (
+    parentNode: ElementNode,
+    children: LexicalNode[],
+    match: string[],
+  ) => {
     // Dynamic import to avoid bundler warnings
-    const { $createHorizontalRuleNode } = await import('@lexical/react/LexicalHorizontalRuleNode');
+    const { $createHorizontalRuleNode } = await import(
+      "@lexical/react/LexicalHorizontalRuleNode"
+    );
     const hrNode = $createHorizontalRuleNode();
     parentNode.replace(hrNode);
     return hrNode;
   },
-  type: 'element' as const,
+  type: "element" as const,
 };
 
 /**
@@ -61,7 +71,7 @@ export type HorizontalRuleStateQueries = {
  * ```
  */
 export class HorizontalRuleExtension extends BaseExtension<
-  'horizontalRule',
+  "horizontalRule",
   any,
   HorizontalRuleCommands,
   HorizontalRuleStateQueries,
@@ -71,7 +81,7 @@ export class HorizontalRuleExtension extends BaseExtension<
    * Creates a new horizontal rule extension instance.
    */
   constructor() {
-    super('horizontalRule', [ExtensionCategory.Toolbar]);
+    super("horizontalRule", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -113,7 +123,7 @@ export class HorizontalRuleExtension extends BaseExtension<
     return {
       insertHorizontalRule: () => {
         editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
-      }
+      },
     };
   }
 
@@ -131,13 +141,15 @@ export class HorizontalRuleExtension extends BaseExtension<
             const selection = $getSelection();
             if (selection && $isRangeSelection(selection)) {
               const nodes = selection.getNodes();
-              const hasHorizontalRule = nodes.some((node: any) => $isHorizontalRuleNode(node));
+              const hasHorizontalRule = nodes.some((node: any) =>
+                $isHorizontalRuleNode(node),
+              );
               resolve(hasHorizontalRule);
             } else {
               resolve(false);
             }
           });
-        })
+        }),
     };
   }
 }

@@ -1,10 +1,17 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode, $createTextNode, $isNodeSelection } from 'lexical';
-import { 
-  INSERT_TABLE_COMMAND, 
-  TableNode, 
-  TableRowNode, 
-  TableCellNode, 
-  $isTableNode, 
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  $createParagraphNode,
+  $createTextNode,
+  $isNodeSelection,
+} from "lexical";
+import {
+  INSERT_TABLE_COMMAND,
+  TableNode,
+  TableRowNode,
+  TableCellNode,
+  $isTableNode,
   $isTableRowNode,
   $isTableCellNode,
   $createTableNodeWithDimensions,
@@ -13,13 +20,13 @@ import {
   $insertTableRowAtSelection,
   $insertTableColumnAtSelection,
   $deleteTableRowAtSelection,
-  $deleteTableColumnAtSelection
-} from '@lexical/table';
-import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import React from 'react';
-import type { LexicalNode, ElementNode } from 'lexical';
+  $deleteTableColumnAtSelection,
+} from "@lexical/table";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import React from "react";
+import type { LexicalNode, ElementNode } from "lexical";
 
 /**
  * Table configuration type
@@ -73,7 +80,7 @@ export type TableStateQueries = {
  * ```
  */
 export class TableExtension extends BaseExtension<
-  'table',
+  "table",
   any,
   TableCommands,
   TableStateQueries,
@@ -83,7 +90,7 @@ export class TableExtension extends BaseExtension<
    * Creates a new table extension instance.
    */
   constructor() {
-    super('table', [ExtensionCategory.Toolbar]);
+    super("table", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -96,14 +103,19 @@ export class TableExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     const handleContextMenu = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      
+
       // Check if we're right-clicking on a table element
-      const tableCell = target.closest('td, th');
+      const tableCell = target.closest("td, th");
       if (tableCell) {
         event.preventDefault();
-        
+
         // Show context menu with table commands
-        this.showTableContextMenu(editor, event.clientX, event.clientY, tableCell as HTMLElement);
+        this.showTableContextMenu(
+          editor,
+          event.clientX,
+          event.clientY,
+          tableCell as HTMLElement,
+        );
       }
     };
 
@@ -114,10 +126,12 @@ export class TableExtension extends BaseExtension<
         if ($isRangeSelection(selection)) {
           const anchorNode = selection.anchor.getNode();
           const focusNode = selection.focus.getNode();
-          
+
           // Check if either anchor or focus is in a table cell
-          const isInTable = this.isNodeInTableCell(anchorNode) || this.isNodeInTableCell(focusNode);
-          
+          const isInTable =
+            this.isNodeInTableCell(anchorNode) ||
+            this.isNodeInTableCell(focusNode);
+
           if (isInTable) {
             this.showTableFloatingToolbar(editor);
           } else {
@@ -129,13 +143,15 @@ export class TableExtension extends BaseExtension<
 
     const editorElement = editor.getRootElement();
     if (editorElement) {
-      editorElement.addEventListener('contextmenu', handleContextMenu);
-      
+      editorElement.addEventListener("contextmenu", handleContextMenu);
+
       // Listen for selection changes
-      const unregisterSelection = editor.registerUpdateListener(handleSelectionChange);
-      
+      const unregisterSelection = editor.registerUpdateListener(
+        handleSelectionChange,
+      );
+
       return () => {
-        editorElement.removeEventListener('contextmenu', handleContextMenu);
+        editorElement.removeEventListener("contextmenu", handleContextMenu);
         unregisterSelection();
       };
     }
@@ -173,7 +189,9 @@ export class TableExtension extends BaseExtension<
         editor.dispatchCommand(INSERT_TABLE_COMMAND, {
           columns: config.columns.toString(),
           rows: config.rows.toString(),
-          includeHeaders: config.includeHeaders ? { rows: true, columns: false } : false,
+          includeHeaders: config.includeHeaders
+            ? { rows: true, columns: false }
+            : false,
         });
       },
       table: {
@@ -206,8 +224,8 @@ export class TableExtension extends BaseExtension<
           editor.update(() => {
             $deleteTableColumnAtSelection();
           });
-        }
-      }
+        },
+      },
     };
   }
 
@@ -226,7 +244,7 @@ export class TableExtension extends BaseExtension<
             if (selection) {
               if ($isRangeSelection(selection)) {
                 const nodes = selection.getNodes();
-                
+
                 // Check if any selected node or its ancestors is a table
                 for (const node of nodes) {
                   let currentNode: any = node;
@@ -280,7 +298,7 @@ export class TableExtension extends BaseExtension<
             if (selection) {
               if ($isRangeSelection(selection)) {
                 const nodes = selection.getNodes();
-                
+
                 // Check if any selected node or its ancestors is a table cell
                 for (const node of nodes) {
                   let currentNode: any = node;
@@ -326,7 +344,7 @@ export class TableExtension extends BaseExtension<
               resolve(false);
             }
           });
-        })
+        }),
     };
   }
 
@@ -358,55 +376,66 @@ export class TableExtension extends BaseExtension<
   /**
    * Shows context menu with table-specific commands
    */
-  private showTableContextMenu(editor: LexicalEditor, x: number, y: number, target: HTMLElement) {
+  private showTableContextMenu(
+    editor: LexicalEditor,
+    x: number,
+    y: number,
+    target: HTMLElement,
+  ) {
     // For now, we'll use a simple approach with direct DOM manipulation
     // In a real implementation, this would integrate with the context menu extension
-    const contextMenu = document.createElement('div');
-    contextMenu.className = 'table-context-menu';
-    contextMenu.style.position = 'fixed';
+    const contextMenu = document.createElement("div");
+    contextMenu.className = "table-context-menu";
+    contextMenu.style.position = "fixed";
     contextMenu.style.left = `${x}px`;
     contextMenu.style.top = `${y}px`;
-    contextMenu.style.background = 'white';
-    contextMenu.style.border = '1px solid #ccc';
-    contextMenu.style.borderRadius = '4px';
-    contextMenu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-    contextMenu.style.zIndex = '1000';
-    contextMenu.style.minWidth = '150px';
+    contextMenu.style.background = "white";
+    contextMenu.style.border = "1px solid #ccc";
+    contextMenu.style.borderRadius = "4px";
+    contextMenu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+    contextMenu.style.zIndex = "1000";
+    contextMenu.style.minWidth = "150px";
 
     const items = [
-      { label: 'Insert Row Above', action: () => this.insertRowAbove(editor) },
-      { label: 'Insert Row Below', action: () => this.insertRowBelow(editor) },
-      { label: 'Insert Column Left', action: () => this.insertColumnLeft(editor) },
-      { label: 'Insert Column Right', action: () => this.insertColumnRight(editor) },
-      { label: 'Delete Row', action: () => this.deleteRow(editor) },
-      { label: 'Delete Column', action: () => this.deleteColumn(editor) },
+      { label: "Insert Row Above", action: () => this.insertRowAbove(editor) },
+      { label: "Insert Row Below", action: () => this.insertRowBelow(editor) },
+      {
+        label: "Insert Column Left",
+        action: () => this.insertColumnLeft(editor),
+      },
+      {
+        label: "Insert Column Right",
+        action: () => this.insertColumnRight(editor),
+      },
+      { label: "Delete Row", action: () => this.deleteRow(editor) },
+      { label: "Delete Column", action: () => this.deleteColumn(editor) },
     ];
 
-    items.forEach(item => {
-      const menuItem = document.createElement('div');
+    items.forEach((item) => {
+      const menuItem = document.createElement("div");
       menuItem.textContent = item.label;
-      menuItem.style.padding = '8px 12px';
-      menuItem.style.cursor = 'pointer';
-      menuItem.style.borderBottom = '1px solid #eee';
-      menuItem.addEventListener('click', () => {
+      menuItem.style.padding = "8px 12px";
+      menuItem.style.cursor = "pointer";
+      menuItem.style.borderBottom = "1px solid #eee";
+      menuItem.addEventListener("click", () => {
         item.action();
         if (contextMenu.parentNode) {
           document.body.removeChild(contextMenu);
         }
-        document.removeEventListener('click', closeMenu);
+        document.removeEventListener("click", closeMenu);
       });
-      menuItem.addEventListener('mouseenter', () => {
-        menuItem.style.backgroundColor = '#f5f5f5';
+      menuItem.addEventListener("mouseenter", () => {
+        menuItem.style.backgroundColor = "#f5f5f5";
       });
-      menuItem.addEventListener('mouseleave', () => {
-        menuItem.style.backgroundColor = 'white';
+      menuItem.addEventListener("mouseleave", () => {
+        menuItem.style.backgroundColor = "white";
       });
       contextMenu.appendChild(menuItem);
     });
 
     // Remove last border
     if (contextMenu.lastChild) {
-      (contextMenu.lastChild as HTMLElement).style.borderBottom = 'none';
+      (contextMenu.lastChild as HTMLElement).style.borderBottom = "none";
     }
 
     document.body.appendChild(contextMenu);
@@ -415,10 +444,10 @@ export class TableExtension extends BaseExtension<
     const closeMenu = (e: MouseEvent) => {
       if (!contextMenu.contains(e.target as Node) && contextMenu.parentNode) {
         document.body.removeChild(contextMenu);
-        document.removeEventListener('click', closeMenu);
+        document.removeEventListener("click", closeMenu);
       }
     };
-    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+    setTimeout(() => document.addEventListener("click", closeMenu), 0);
   }
 
   /**
@@ -521,14 +550,14 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
           if (!$isTableCellNode(cell)) continue;
 
           // Get text content from cell more safely
-          let textContent = '';
+          let textContent = "";
           try {
             textContent = cell.getTextContent().trim();
           } catch (error) {
-            console.warn('Error getting cell text content:', error);
-            textContent = '';
+            console.warn("Error getting cell text content:", error);
+            textContent = "";
           }
-          rowData.push(textContent || '');
+          rowData.push(textContent || "");
         }
 
         if (rowData.length > 0) {
@@ -543,12 +572,12 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
 
       // First row (header)
       if (tableData[0]) {
-        markdownLines.push('| ' + tableData[0].join(' | ') + ' |');
+        markdownLines.push("| " + tableData[0].join(" | ") + " |");
       }
 
       // Separator row
       const colCount = tableData[0]?.length || 1;
-      const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
+      const separator = "| " + Array(colCount).fill("---").join(" | ") + " |";
       markdownLines.push(separator);
 
       // Data rows (skip first row since it's the header)
@@ -558,23 +587,24 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
           // Pad row to match column count
           const paddedRow = [...row];
           while (paddedRow.length < colCount) {
-            paddedRow.push('');
+            paddedRow.push("");
           }
-          markdownLines.push('| ' + paddedRow.join(' | ') + ' |');
+          markdownLines.push("| " + paddedRow.join(" | ") + " |");
         }
       }
 
-      return markdownLines.join('\n');
+      return markdownLines.join("\n");
     } catch (error) {
-      console.error('Error exporting table to markdown:', error);
+      console.error("Error exporting table to markdown:", error);
       return null;
     }
   },
-  regExp: /^\|(.+)\|[ \t]*$\n\|[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|[ \t]*$(?:\n\|(.+)\|[ \t]*$)*/,
+  regExp:
+    /^\|(.+)\|[ \t]*$\n\|[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|[ \t]*$(?:\n\|(.+)\|[ \t]*$)*/,
   replace: (parentNode: any, _children: any[], match: any) => {
     try {
       const fullMatch = match[0];
-      const lines = fullMatch.trim().split('\n');
+      const lines = fullMatch.trim().split("\n");
 
       if (lines.length < 2) return;
 
@@ -584,7 +614,10 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       for (const line of lines) {
         if (!line.trim()) continue;
 
-        const cells = line.split('|').slice(1, -1).map((cell: string) => cell.trim());
+        const cells = line
+          .split("|")
+          .slice(1, -1)
+          .map((cell: string) => cell.trim());
 
         // Skip separator line (contains only dashes, colons, spaces)
         if (cells.every((cell: string) => /^[\s\-:]+$/.test(cell))) {
@@ -599,11 +632,15 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       if (tableData.length === 0) return;
 
       const totalRows = tableData.length;
-      const totalCols = Math.max(...tableData.map(row => row.length));
+      const totalCols = Math.max(...tableData.map((row) => row.length));
 
       // Create table node
-      const tableNode = $createTableNodeWithDimensions(totalRows, totalCols, true);
-      
+      const tableNode = $createTableNodeWithDimensions(
+        totalRows,
+        totalCols,
+        true,
+      );
+
       // Fill with data
       const tableRows = tableNode.getChildren();
 
@@ -616,7 +653,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
             const cell = rowCells[colIndex];
             if (cell && $isTableCellNode(cell)) {
               // Clear existing content
-              cell.getChildren().forEach(child => child.remove());
+              cell.getChildren().forEach((child) => child.remove());
 
               // Add new content
               const paragraph = $createParagraphNode();
@@ -631,10 +668,10 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
 
       parentNode.replace(tableNode);
     } catch (error) {
-      console.error('❌ Error importing table from markdown:', error);
+      console.error("❌ Error importing table from markdown:", error);
     }
   },
-  type: 'element' as const,
+  type: "element" as const,
 };
 
 /**

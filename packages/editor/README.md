@@ -2,13 +2,14 @@
 
 <div align="center">
 
-**A headless, ### ✅ **Production Ready for React**
+**A headless, ### ✅ **Production Ready for React\*\*
+
 - **Battle-tested in React production** - Comprehensive documentation, examples, and active community support
 - **Multi-format support** (HTML, Markdown, JSON)
 - **Image handling** with upload and paste support
 - **Undo/Redo** with full history
-- **Theme system** for consistent stylinge React rich text editor built on Lexical**  
-*Type-safe • Scalable • Production-ready*
+- **Theme system** for consistent stylinge React rich text editor built on Lexical\*\*  
+  _Type-safe • Scalable • Production-ready_
 
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://badge.fury.io/js/%40lexkit%2Feditor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,11 +23,13 @@
 ## ✨ What Makes LexKit Special
 
 LexKit is not just anothe### ✅ **React Developer Experience**
+
 - Commands and state queries are **automatically typed** based on your extensions
 - No more runtime errors from typos in command names
 - Full IntelliSense support in your IDEch text editor—it's a **type-safe React framework** built on top of Lexical that gives you complete control while maintaining developer experience. Here's what sets it apart:
 
 ### 🎯 **Type-Safe Commands & State**
+
 Commands and state queries are **automatically typed** based on your extensions:
 
 ```tsx
@@ -37,19 +40,24 @@ function MyEditor() {
   const { commands, activeStates } = useEditor();
 
   // ✅ TypeScript knows these exist and their signatures
-  commands.toggleBold();        // ✅ Available
-  commands.insertImage({});     // ✅ Available with proper types
-  commands.nonExistent();       // ❌ TypeScript error
+  commands.toggleBold(); // ✅ Available
+  commands.insertImage({}); // ✅ Available with proper types
+  commands.nonExistent(); // ❌ TypeScript error
 
   // ✅ State queries are also typed
-  if (activeStates.bold) { /* ... */ }      // ✅ Available
-  if (activeStates.imageSelected) { /* ... */ } // ✅ Available
+  if (activeStates.bold) {
+    /* ... */
+  } // ✅ Available
+  if (activeStates.imageSelected) {
+    /* ... */
+  } // ✅ Available
 }
 ```
 
 **Why `as const`?** It's required for TypeScript to infer literal types from your extensions array, enabling the powerful type safety features.
 
 ### 🎨 **React-First Design**
+
 - **Purpose-built for React** - Modern hooks and components
 - **Zero UI components** - Build your own interface
 - **Plug-and-play extensions** - Mix and match functionality
@@ -57,6 +65,7 @@ function MyEditor() {
 - **Theme system** - Style it your way
 
 ### 🚀 **Production Features Out-of-the-Box**
+
 - **HTML & Markdown export/import** with custom transformers
 - **Image handling** with upload, paste, and alignment
 - **Table support** with context menus, row/column manipulation, and GitHub Flavored Markdown
@@ -83,7 +92,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 Here's a **complete, working example** that showcases LexKit's power:
 
 ```tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   createEditorSystem,
   richTextExtension,
@@ -94,12 +103,12 @@ import {
   imageExtension,
   htmlExtension,
   markdownExtension,
-  historyExtension
-} from '@lexkit/editor';
+  historyExtension,
+} from "@lexkit/editor";
 
 // 1. Define your extensions (as const for type safety)
 const extensions = [
-  richTextExtension,    // 👈 Rich text editor with built-in error handling
+  richTextExtension, // 👈 Rich text editor with built-in error handling
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -107,7 +116,7 @@ const extensions = [
   imageExtension,
   htmlExtension,
   markdownExtension,
-  historyExtension
+  historyExtension,
 ] as const; // 👈 Required for TypeScript to infer literal types
 
 // 2. Create typed editor system
@@ -118,15 +127,18 @@ imageExtension.configure({
   uploadHandler: async (file: File) => {
     // Your upload logic here
     const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch('/api/upload', { method: 'POST', body: formData });
+    formData.append("file", file);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
     const { url } = await response.json();
     return url;
   },
-  defaultAlignment: 'center',
+  defaultAlignment: "center",
   resizable: true,
   pasteListener: { insert: true, replace: true }, // Auto-insert pasted images
-  debug: false
+  debug: false,
 });
 
 // 4. Create your toolbar component
@@ -134,56 +146,61 @@ function Toolbar() {
   const { commands, activeStates, hasExtension } = useEditor();
 
   return (
-    <div style={{ display: 'flex', gap: '8px', padding: '8px', borderBottom: '1px solid #ccc' }}>
-      {hasExtension('bold') && (
+    <div
+      style={{
+        display: "flex",
+        gap: "8px",
+        padding: "8px",
+        borderBottom: "1px solid #ccc",
+      }}
+    >
+      {hasExtension("bold") && (
         <button
           onClick={() => commands.toggleBold()}
           style={{
-            fontWeight: activeStates.bold ? 'bold' : 'normal',
-            padding: '4px 8px',
-            border: '1px solid #ccc',
-            background: activeStates.bold ? '#e0e0e0' : 'white'
+            fontWeight: activeStates.bold ? "bold" : "normal",
+            padding: "4px 8px",
+            border: "1px solid #ccc",
+            background: activeStates.bold ? "#e0e0e0" : "white",
           }}
         >
           Bold
         </button>
       )}
 
-      {hasExtension('italic') && (
+      {hasExtension("italic") && (
         <button
           onClick={() => commands.toggleItalic()}
           style={{
-            fontStyle: activeStates.italic ? 'italic' : 'normal',
-            padding: '4px 8px',
-            border: '1px solid #ccc',
-            background: activeStates.italic ? '#e0e0e0' : 'white'
+            fontStyle: activeStates.italic ? "italic" : "normal",
+            padding: "4px 8px",
+            border: "1px solid #ccc",
+            background: activeStates.italic ? "#e0e0e0" : "white",
           }}
         >
           Italic
         </button>
       )}
 
-      {hasExtension('list') && (
+      {hasExtension("list") && (
         <>
-          <button onClick={() => commands.toggleUnorderedList()}>
-            • List
-          </button>
-          <button onClick={() => commands.toggleOrderedList()}>
-            1. List
-          </button>
+          <button onClick={() => commands.toggleUnorderedList()}>• List</button>
+          <button onClick={() => commands.toggleOrderedList()}>1. List</button>
         </>
       )}
 
-      {hasExtension('image') && (
-        <button onClick={() => {
-          const src = prompt('Image URL:');
-          if (src) commands.insertImage({ src, alt: 'Image' });
-        }}>
+      {hasExtension("image") && (
+        <button
+          onClick={() => {
+            const src = prompt("Image URL:");
+            if (src) commands.insertImage({ src, alt: "Image" });
+          }}
+        >
           📷 Image
         </button>
       )}
 
-      {hasExtension('history') && (
+      {hasExtension("history") && (
         <>
           <button
             onClick={() => commands.undo()}
@@ -206,13 +223,13 @@ function Toolbar() {
 // 5. Create your editor component
 function Editor() {
   const { commands, hasExtension } = useEditor();
-  const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
-  const [content, setContent] = useState('');
+  const [mode, setMode] = useState<"visual" | "html" | "markdown">("visual");
+  const [content, setContent] = useState("");
 
   const handleModeChange = (newMode: typeof mode) => {
-    if (newMode === 'html' && hasExtension('html')) {
+    if (newMode === "html" && hasExtension("html")) {
       setContent(commands.exportToHTML());
-    } else if (newMode === 'markdown' && hasExtension('markdown')) {
+    } else if (newMode === "markdown" && hasExtension("markdown")) {
       setContent(commands.exportToMarkdown());
     }
     setMode(newMode);
@@ -220,45 +237,45 @@ function Editor() {
 
   const handleContentChange = (value: string) => {
     setContent(value);
-    if (mode === 'html' && hasExtension('html')) {
+    if (mode === "html" && hasExtension("html")) {
       commands.importFromHTML(value);
-    } else if (mode === 'markdown' && hasExtension('markdown')) {
+    } else if (mode === "markdown" && hasExtension("markdown")) {
       commands.importFromMarkdown(value);
     }
   };
 
   return (
-    <div style={{ border: '1px solid #ccc', borderRadius: '4px' }}>
+    <div style={{ border: "1px solid #ccc", borderRadius: "4px" }}>
       {/* Mode Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
+      <div style={{ display: "flex", borderBottom: "1px solid #ccc" }}>
         <button
-          onClick={() => handleModeChange('visual')}
+          onClick={() => handleModeChange("visual")}
           style={{
-            padding: '8px 16px',
-            background: mode === 'visual' ? '#f0f0f0' : 'white',
-            border: 'none',
-            borderRight: '1px solid #ccc'
+            padding: "8px 16px",
+            background: mode === "visual" ? "#f0f0f0" : "white",
+            border: "none",
+            borderRight: "1px solid #ccc",
           }}
         >
           Visual
         </button>
         <button
-          onClick={() => handleModeChange('html')}
+          onClick={() => handleModeChange("html")}
           style={{
-            padding: '8px 16px',
-            background: mode === 'html' ? '#f0f0f0' : 'white',
-            border: 'none',
-            borderRight: '1px solid #ccc'
+            padding: "8px 16px",
+            background: mode === "html" ? "#f0f0f0" : "white",
+            border: "none",
+            borderRight: "1px solid #ccc",
           }}
         >
           HTML
         </button>
         <button
-          onClick={() => handleModeChange('markdown')}
+          onClick={() => handleModeChange("markdown")}
           style={{
-            padding: '8px 16px',
-            background: mode === 'markdown' ? '#f0f0f0' : 'white',
-            border: 'none'
+            padding: "8px 16px",
+            background: mode === "markdown" ? "#f0f0f0" : "white",
+            border: "none",
           }}
         >
           Markdown
@@ -266,18 +283,18 @@ function Editor() {
       </div>
 
       {/* Toolbar (only in visual mode) */}
-      {mode === 'visual' && <Toolbar />}
+      {mode === "visual" && <Toolbar />}
 
       {/* Editor Content */}
-      <div style={{ minHeight: '200px' }}>
-        {mode === 'visual' ? (
+      <div style={{ minHeight: "200px" }}>
+        {mode === "visual" ? (
           <RichText
             placeholder="Start writing..."
             className="editor-content"
             style={{
-              padding: '16px',
-              outline: 'none',
-              minHeight: '200px'
+              padding: "16px",
+              outline: "none",
+              minHeight: "200px",
             }}
           />
         ) : (
@@ -285,13 +302,13 @@ function Editor() {
             value={content}
             onChange={(e) => handleContentChange(e.target.value)}
             style={{
-              width: '100%',
-              minHeight: '200px',
-              padding: '16px',
-              border: 'none',
-              outline: 'none',
-              fontFamily: 'monospace',
-              resize: 'vertical'
+              width: "100%",
+              minHeight: "200px",
+              padding: "16px",
+              border: "none",
+              outline: "none",
+              fontFamily: "monospace",
+              resize: "vertical",
             }}
             placeholder={`Enter ${mode.toUpperCase()} content...`}
           />
@@ -305,7 +322,7 @@ function Editor() {
 export default function App() {
   return (
     <Provider extensions={extensions}>
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
         <h1>My LexKit Editor</h1>
         <Editor />
       </div>
@@ -321,6 +338,7 @@ export default function App() {
 ## 🎉 **Latest Features**
 
 ### 📊 **Advanced Table Support**
+
 Comprehensive table functionality with context menus and GitHub Flavored Markdown:
 
 ```tsx
@@ -343,6 +361,7 @@ function MyEditor() {
 ```
 
 ### 🎯 **Command Palette**
+
 Searchable command interface with keyboard shortcuts:
 
 ```tsx
@@ -363,6 +382,7 @@ function MyEditor() {
 ```
 
 ### 📋 **Context Menus & Floating Toolbars**
+
 Headless contextual UI components for building rich interactions.
 
 ---
@@ -372,50 +392,57 @@ Headless contextual UI components for building rich interactions.
 LexKit provides **25+ extensions** with typed commands and state queries:
 
 ### Text Formatting
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
-| `boldExtension` | `toggleBold()` | `bold: boolean` |
-| `italicExtension` | `toggleItalic()` | `italic: boolean` |
-| `underlineExtension` | `toggleUnderline()` | `underline: boolean` |
+
+| Extension                | Commands                | State Queries            |
+| ------------------------ | ----------------------- | ------------------------ |
+| `boldExtension`          | `toggleBold()`          | `bold: boolean`          |
+| `italicExtension`        | `toggleItalic()`        | `italic: boolean`        |
+| `underlineExtension`     | `toggleUnderline()`     | `underline: boolean`     |
 | `strikethroughExtension` | `toggleStrikethrough()` | `strikethrough: boolean` |
-| `codeExtension` | `formatText('code')` | `code: boolean` |
+| `codeExtension`          | `formatText('code')`    | `code: boolean`          |
 
 ### Structure & Blocks
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
-| `listExtension` | `toggleUnorderedList()`, `toggleOrderedList()` | `unorderedList`, `orderedList` |
-| `blockFormatExtension` | `toggleHeading('h1'-'h6')`, `toggleQuote()` | `isH1`, `isH2`, ..., `isQuote` |
-| `codeFormatExtension` | `toggleCodeBlock()` | `isInCodeBlock` |
-| `horizontalRuleExtension` | `insertHorizontalRule()` | - |
+
+| Extension                 | Commands                                       | State Queries                  |
+| ------------------------- | ---------------------------------------------- | ------------------------------ |
+| `listExtension`           | `toggleUnorderedList()`, `toggleOrderedList()` | `unorderedList`, `orderedList` |
+| `blockFormatExtension`    | `toggleHeading('h1'-'h6')`, `toggleQuote()`    | `isH1`, `isH2`, ..., `isQuote` |
+| `codeFormatExtension`     | `toggleCodeBlock()`                            | `isInCodeBlock`                |
+| `horizontalRuleExtension` | `insertHorizontalRule()`                       | -                              |
 
 ### Tables
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
+
+| Extension        | Commands                                           | State Queries                      |
+| ---------------- | -------------------------------------------------- | ---------------------------------- |
 | `tableExtension` | `insertTable()`, `table.*` (row/column operations) | `isTableSelected`, `isInTableCell` |
 
 ### Media & Embeds
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
-| `imageExtension` | `insertImage({...})`, `setImageAlignment()`, `setImageCaption()` | `imageSelected` |
-| `htmlEmbedExtension` | `insertHTMLEmbed()`, `toggleHTMLPreview()` | `isHTMLEmbedSelected`, `isHTMLPreviewMode` |
+
+| Extension            | Commands                                                         | State Queries                              |
+| -------------------- | ---------------------------------------------------------------- | ------------------------------------------ |
+| `imageExtension`     | `insertImage({...})`, `setImageAlignment()`, `setImageCaption()` | `imageSelected`                            |
+| `htmlEmbedExtension` | `insertHTMLEmbed()`, `toggleHTMLPreview()`                       | `isHTMLEmbedSelected`, `isHTMLPreviewMode` |
 
 ### Core System
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
-| `commandPaletteExtension` | `showCommandPalette()`, `registerCommand()` | `isCommandPaletteOpen` |
-| `contextMenuExtension` | `showContextMenu()`, `hideContextMenu()` | `isContextMenuOpen` |
+
+| Extension                  | Commands                                         | State Queries           |
+| -------------------------- | ------------------------------------------------ | ----------------------- |
+| `commandPaletteExtension`  | `showCommandPalette()`, `registerCommand()`      | `isCommandPaletteOpen`  |
+| `contextMenuExtension`     | `showContextMenu()`, `hideContextMenu()`         | `isContextMenuOpen`     |
 | `floatingToolbarExtension` | `showFloatingToolbar()`, `hideFloatingToolbar()` | `isFloatingToolbarOpen` |
 
 ### History & Utils
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
+
+| Extension          | Commands           | State Queries        |
+| ------------------ | ------------------ | -------------------- |
 | `historyExtension` | `undo()`, `redo()` | `canUndo`, `canRedo` |
 
 ### Export/Import
-| Extension | Commands | State Queries |
-|-----------|----------|---------------|
-| `htmlExtension` | `exportToHTML()`, `importFromHTML()` | - |
-| `markdownExtension` | `exportToMarkdown()`, `importFromMarkdown()` | - |
+
+| Extension           | Commands                                     | State Queries |
+| ------------------- | -------------------------------------------- | ------------- |
+| `htmlExtension`     | `exportToHTML()`, `importFromHTML()`         | -             |
+| `markdownExtension` | `exportToMarkdown()`, `importFromMarkdown()` | -             |
 
 ---
 
@@ -426,18 +453,18 @@ LexKit provides **25+ extensions** with typed commands and state queries:
 The image extension is incredibly powerful and handles uploads, paste, and alignment:
 
 ```tsx
-import { imageExtension } from '@lexkit/editor';
+import { imageExtension } from "@lexkit/editor";
 
 // Configure once (before using Provider)
 imageExtension.configure({
   // Required: Handle file uploads
   uploadHandler: async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
     });
 
     const { url } = await response.json();
@@ -445,19 +472,19 @@ imageExtension.configure({
   },
 
   // Optional: Default alignment for new images
-  defaultAlignment: 'center', // 'left' | 'center' | 'right' | 'none'
+  defaultAlignment: "center", // 'left' | 'center' | 'right' | 'none'
 
   // Optional: Allow image resizing
   resizable: true,
 
   // Optional: Auto-insert images from clipboard
   pasteListener: {
-    insert: true,    // Insert pasted images
-    replace: true    // Replace selected images on paste
+    insert: true, // Insert pasted images
+    replace: true, // Replace selected images on paste
   },
 
   // Optional: Debug mode
-  debug: false
+  debug: false,
 });
 ```
 
@@ -466,12 +493,12 @@ imageExtension.configure({
 Create your own content types with full Lexical integration:
 
 ```tsx
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { $createCustomNode, CustomNode } from './CustomNode';
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { $createCustomNode, CustomNode } from "./CustomNode";
 
-class MyCustomExtension extends BaseExtension<'myCustom'> {
+class MyCustomExtension extends BaseExtension<"myCustom"> {
   constructor() {
-    super('myCustom');
+    super("myCustom");
   }
 
   getCommands(editor) {
@@ -481,7 +508,7 @@ class MyCustomExtension extends BaseExtension<'myCustom'> {
           const node = $createCustomNode(data);
           $getRoot().append(node);
         });
-      }
+      },
     };
   }
 
@@ -491,13 +518,13 @@ class MyCustomExtension extends BaseExtension<'myCustom'> {
         return new Promise((resolve) => {
           editor.getEditorState().read(() => {
             const root = $getRoot();
-            const hasCustom = root.getChildren().some(
-              child => child instanceof CustomNode
-            );
+            const hasCustom = root
+              .getChildren()
+              .some((child) => child instanceof CustomNode);
             resolve(hasCustom);
           });
         });
-      }
+      },
     };
   }
 
@@ -519,14 +546,18 @@ LexKit supports seamless switching between Visual, HTML, and Markdown editing mo
 ```tsx
 function MultiFormatEditor() {
   const { commands, hasExtension } = useEditor();
-  const [mode, setMode] = useState<'visual' | 'html' | 'markdown'>('visual');
-  const [content, setContent] = useState('');
+  const [mode, setMode] = useState<"visual" | "html" | "markdown">("visual");
+  const [content, setContent] = useState("");
 
   const switchMode = (newMode: typeof mode) => {
     // Export current content before switching
-    if (mode === 'visual' && newMode === 'html' && hasExtension('html')) {
+    if (mode === "visual" && newMode === "html" && hasExtension("html")) {
       setContent(commands.exportToHTML());
-    } else if (mode === 'visual' && newMode === 'markdown' && hasExtension('markdown')) {
+    } else if (
+      mode === "visual" &&
+      newMode === "markdown" &&
+      hasExtension("markdown")
+    ) {
       setContent(commands.exportToMarkdown());
     }
     setMode(newMode);
@@ -535,9 +566,9 @@ function MultiFormatEditor() {
   const updateContent = (value: string) => {
     setContent(value);
     // Import content back to editor
-    if (mode === 'html' && hasExtension('html')) {
+    if (mode === "html" && hasExtension("html")) {
       commands.importFromHTML(value);
-    } else if (mode === 'markdown' && hasExtension('markdown')) {
+    } else if (mode === "markdown" && hasExtension("markdown")) {
       commands.importFromMarkdown(value);
     }
   };
@@ -546,16 +577,14 @@ function MultiFormatEditor() {
     <div>
       {/* Mode Switcher */}
       <div>
-        <button onClick={() => switchMode('visual')}>Visual</button>
-        <button onClick={() => switchMode('html')}>HTML</button>
-        <button onClick={() => switchMode('markdown')}>Markdown</button>
+        <button onClick={() => switchMode("visual")}>Visual</button>
+        <button onClick={() => switchMode("html")}>HTML</button>
+        <button onClick={() => switchMode("markdown")}>Markdown</button>
       </div>
 
       {/* Content Area */}
-      {mode === 'visual' ? (
-        <RichText
-          placeholder="Start writing..."
-        />
+      {mode === "visual" ? (
+        <RichText placeholder="Start writing..." />
       ) : (
         <textarea
           value={content}
@@ -575,21 +604,21 @@ LexKit supports custom themes:
 ```tsx
 const customTheme = {
   text: {
-    bold: 'font-bold text-blue-600',
-    italic: 'italic text-green-600',
-    underline: 'underline decoration-red-500',
-    strikethrough: 'line-through text-gray-500'
+    bold: "font-bold text-blue-600",
+    italic: "italic text-green-600",
+    underline: "underline decoration-red-500",
+    strikethrough: "line-through text-gray-500",
   },
   block: {
-    h1: 'text-3xl font-bold mb-4',
-    h2: 'text-2xl font-semibold mb-3',
-    quote: 'border-l-4 border-gray-300 pl-4 italic'
-  }
+    h1: "text-3xl font-bold mb-4",
+    h2: "text-2xl font-semibold mb-3",
+    quote: "border-l-4 border-gray-300 pl-4 italic",
+  },
 };
 
 <Provider extensions={extensions} config={{ theme: customTheme }}>
   <YourEditor />
-</Provider>
+</Provider>;
 ```
 
 ### 🎨 Styling Your Editor
@@ -597,6 +626,7 @@ const customTheme = {
 LexKit is **headless by design** - you control all the styling! Here are your options:
 
 #### Option 1: CSS Classes (Recommended)
+
 Use the default theme structure and style with CSS:
 
 ```tsx
@@ -645,29 +675,31 @@ const theme = {
 ```
 
 #### Option 2: Tailwind CSS Classes
+
 Use Tailwind classes directly in your theme:
 
 ```tsx
 const theme = {
-  toolbar: 'flex gap-2 p-2 border-b border-gray-300 bg-gray-50',
-  editor: 'border border-gray-300 rounded min-h-[200px]',
-  contentEditable: 'p-4 outline-none min-h-[200px]',
-  paragraph: 'mb-4',
+  toolbar: "flex gap-2 p-2 border-b border-gray-300 bg-gray-50",
+  editor: "border border-gray-300 rounded min-h-[200px]",
+  contentEditable: "p-4 outline-none min-h-[200px]",
+  paragraph: "mb-4",
   heading: {
-    h1: 'text-3xl font-bold mb-4 text-blue-600',
-    h2: 'text-2xl font-semibold mb-3 text-blue-500',
-    h3: 'text-xl font-medium mb-2 text-blue-400',
+    h1: "text-3xl font-bold mb-4 text-blue-600",
+    h2: "text-2xl font-semibold mb-3 text-blue-500",
+    h3: "text-xl font-medium mb-2 text-blue-400",
   },
   text: {
-    bold: 'font-bold text-red-600',
-    italic: 'italic text-green-600',
-    underline: 'underline decoration-blue-500',
-    strikethrough: 'line-through text-gray-500'
-  }
+    bold: "font-bold text-red-600",
+    italic: "italic text-green-600",
+    underline: "underline decoration-blue-500",
+    strikethrough: "line-through text-gray-500",
+  },
 };
 ```
 
 #### Option 3: Inline Styles
+
 For quick prototyping, use inline styles as shown in the example above.
 
 **💡 Pro Tip:** Check out the [default theme](https://github.com/novincode/lexkit/blob/main/apps/web/app/templates/default/theme.ts) and [styles](https://github.com/novincode/lexkit/blob/main/apps/web/app/templates/default/styles.css) for a complete reference!
@@ -685,6 +717,7 @@ LexKit is built on top of [Lexical](https://lexical.dev/), the powerful editor f
 - **Collaboration**: Real-time editing support (via Lexical)
 
 **You need to install Lexical packages:**
+
 ```bash
 npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list @lexical/rich-text @lexical/selection @lexical/utils @lexical/code
 ```
@@ -694,17 +727,20 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 ## 🌟 Why Choose LexKit?
 
 ### ✅ **Type Safety First**
+
 - Commands and states are **automatically typed** based on your extensions
 - No more runtime errors from typos in command names
 - Full IntelliSense support in your IDE
 
 ### ✅ **Scalable Architecture**
+
 - **Headless by design** - Build any UI you want
 - **Composable extensions** - Add only what you need
 - **Custom nodes** - Support any content type
 - **Plugin system** - Extend functionality infinitely
 
 ### ✅ **Production Ready**
+
 - **Error boundaries** and robust error handling
 - **Multi-format support** (HTML, Markdown, JSON)
 - **Image handling** with upload and paste support
@@ -712,6 +748,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 - **Theme system** for consistent styling
 
 ### ✅ **Developer Experience**
+
 - **Zero-config setup** for React projects
 - **Tree-shakeable** - Only bundle what you use
 - **TypeScript first** - Full type safety
@@ -727,7 +764,7 @@ npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list
 - **[📝 Examples](https://lexkit.dev/examples)** - Real-world implementations
 - **[💬 Discord Community](https://discord.gg/SAqTGDkR)** - Get help and share ideas
 
-*📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*
+_📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples_
 
 ---
 

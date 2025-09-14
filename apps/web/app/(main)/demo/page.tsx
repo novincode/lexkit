@@ -1,18 +1,25 @@
-'use client'
-import React from 'react'
-import Link from 'next/link'
-import { Button } from '@repo/ui/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/card'
-import { Palette, Code } from 'lucide-react'
+"use client";
+import React from "react";
+import Link from "next/link";
+import { Button } from "@repo/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
+import { Palette, Code } from "lucide-react";
 
 const page = () => {
   return (
-    <div className='container mx-auto relative py-8'>
+    <div className="container mx-auto relative py-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">LexKit Editor Demo</h1>
           <p className="text-lg text-muted-foreground">
-            Choose a template to explore the different styling options available in LexKit
+            Choose a template to explore the different styling options available
+            in LexKit
           </p>
         </div>
 
@@ -36,9 +43,7 @@ const page = () => {
                   <li>• Lightweight and fast</li>
                   <li>• Perfect for basic editing needs</li>
                 </ul>
-                <Button className="w-full">
-                  Try Default Template
-                </Button>
+                <Button className="w-full">Try Default Template</Button>
               </CardContent>
             </Card>
           </Link>
@@ -73,12 +78,13 @@ const page = () => {
 
         <div className="text-center mt-8">
           <p className="text-sm text-muted-foreground">
-            Both templates use the same underlying LexKit editor system with different UI implementations
+            Both templates use the same underlying LexKit editor system with
+            different UI implementations
           </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

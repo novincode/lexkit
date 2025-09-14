@@ -1,7 +1,7 @@
-import { LexicalEditor } from 'lexical';
-import { ReactNode } from 'react';
-import { BaseExtension } from '../extensions/base/BaseExtension';
-import { BaseExtensionConfig, ExtensionCategory } from '../extensions/types';
+import { LexicalEditor } from "lexical";
+import { ReactNode } from "react";
+import { BaseExtension } from "../extensions/base/BaseExtension";
+import { BaseExtensionConfig, ExtensionCategory } from "../extensions/types";
 
 /**
  * Configuration options for creating a custom extension
@@ -11,7 +11,7 @@ export interface CreateExtensionConfig<
   Config extends BaseExtensionConfig = BaseExtensionConfig,
   Commands extends Record<string, any> = {},
   StateQueries extends Record<string, () => Promise<boolean>> = {},
-  Plugins extends ReactNode[] = ReactNode[]
+  Plugins extends ReactNode[] = ReactNode[],
 > {
   /** Unique name for the extension */
   name: Name;
@@ -78,11 +78,17 @@ export function createExtension<
   Config extends BaseExtensionConfig = BaseExtensionConfig,
   Commands extends Record<string, any> = {},
   StateQueries extends Record<string, () => Promise<boolean>> = {},
-  Plugins extends ReactNode[] = ReactNode[]
+  Plugins extends ReactNode[] = ReactNode[],
 >(
-  config: CreateExtensionConfig<Name, Config, Commands, StateQueries, Plugins>
+  config: CreateExtensionConfig<Name, Config, Commands, StateQueries, Plugins>,
 ): BaseExtension<Name, Config, Commands, StateQueries, Plugins> {
-  return new (class extends BaseExtension<Name, Config, Commands, StateQueries, Plugins> {
+  return new (class extends BaseExtension<
+    Name,
+    Config,
+    Commands,
+    StateQueries,
+    Plugins
+  > {
     private _plugins: Plugins = [] as unknown as Plugins;
     private _nodes: any[] = [];
     private _initialize?: (editor: LexicalEditor) => (() => void) | void;
@@ -120,7 +126,7 @@ export function createExtension<
 
       // Return cleanup function
       return () => {
-        if (typeof cleanup === 'function') {
+        if (typeof cleanup === "function") {
           cleanup();
         }
       };

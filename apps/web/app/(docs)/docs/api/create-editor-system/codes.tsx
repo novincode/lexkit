@@ -1,8 +1,8 @@
-import { RegisteredCodeSnippet } from '@/app/(docs)/lib/types'
+import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 
 export const CREATE_EDITOR_SYSTEM_CODES: RegisteredCodeSnippet[] = [
   {
-    id: 'create-editor-system-basic-usage',
+    id: "create-editor-system-basic-usage",
     code: `import { createEditorSystem } from '@lexkit/editor'
 import { boldExtension, italicExtension } from '@lexkit/editor'
 
@@ -19,13 +19,13 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'typescript',
-    title: 'Basic Usage',
-    description: 'Create a typed editor system with extensions',
-    highlightLines: [5, 8, 10, 11, 12, 13, 14, 15]
+    language: "typescript",
+    title: "Basic Usage",
+    description: "Create a typed editor system with extensions",
+    highlightLines: [5, 8, 10, 11, 12, 13, 14, 15],
   },
   {
-    id: 'create-editor-system-with-config',
+    id: "create-editor-system-with-config",
     code: `import { createEditorSystem, defaultLexKitTheme } from '@lexkit/editor'
 
 const extensions = [boldExtension, italicExtension] as const
@@ -51,13 +51,15 @@ function MyEditor() {
     </Provider>
   )
 }`,
-    language: 'typescript',
-    title: 'With Configuration',
-    description: 'Configure the editor with custom theme and settings',
-    highlightLines: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    language: "typescript",
+    title: "With Configuration",
+    description: "Configure the editor with custom theme and settings",
+    highlightLines: [
+      6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    ],
   },
   {
-    id: 'create-editor-system-using-commands',
+    id: "create-editor-system-using-commands",
     code: `function EditorToolbar() {
   const { commands, activeStates } = useEditor()
 
@@ -78,13 +80,13 @@ function MyEditor() {
     </div>
   )
 }`,
-    language: 'typescript',
-    title: 'Using Commands',
-    description: 'Access commands and state through the useEditor hook',
-    highlightLines: [2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    language: "typescript",
+    title: "Using Commands",
+    description: "Access commands and state through the useEditor hook",
+    highlightLines: [2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
   },
   {
-    id: 'create-editor-system-type-safety',
+    id: "create-editor-system-type-safety",
     code: `// ✅ Type-safe: Only commands from your extensions are available
 const { commands } = useEditor()
 
@@ -99,13 +101,13 @@ activeStates.bold     // ✅ boolean
 activeStates.italic   // ✅ boolean
 activeStates.isLink   // ✅ boolean (if linkExtension is included)
 // activeStates.unknown // ❌ TypeScript error - not available`,
-    language: 'typescript',
-    title: 'Type Safety',
-    description: 'Full TypeScript support with compile-time validation',
-    highlightLines: [3, 4, 5, 7, 9, 10, 11, 12]
+    language: "typescript",
+    title: "Type Safety",
+    description: "Full TypeScript support with compile-time validation",
+    highlightLines: [3, 4, 5, 7, 9, 10, 11, 12],
   },
   {
-    id: 'create-editor-system-multiple-editors',
+    id: "create-editor-system-multiple-editors",
     code: `// Different editor configurations for different use cases
 const basicExtensions = [boldExtension, italicExtension] as const
 const richExtensions = [
@@ -135,13 +137,16 @@ function ContentEditor() {
     </RichEditorSystem.Provider>
   )
 }`,
-    language: 'typescript',
-    title: 'Multiple Editor Types',
-    description: 'Create different editor systems for different use cases',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]
+    language: "typescript",
+    title: "Multiple Editor Types",
+    description: "Create different editor systems for different use cases",
+    highlightLines: [
+      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+      22, 23, 24, 25, 26, 27, 28,
+    ],
   },
   {
-    id: 'create-editor-system-advanced-state',
+    id: "create-editor-system-advanced-state",
     code: `function AdvancedEditor() {
   const {
     commands,
@@ -178,29 +183,34 @@ function ContentEditor() {
     </div>
   )
 }`,
-    language: 'typescript',
-    title: 'Advanced State Management',
-    description: 'Access advanced features like state queries and export/import',
-    highlightLines: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    language: "typescript",
+    title: "Advanced State Management",
+    description:
+      "Access advanced features like state queries and export/import",
+    highlightLines: [
+      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+      22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+    ],
   },
   {
-    id: 'create-editor-system-define-extensions',
+    id: "create-editor-system-define-extensions",
     code: `import { boldExtension, italicExtension, linkExtension } from '@lexkit/editor'
 
 const extensions = [boldExtension, italicExtension, linkExtension] as const`,
-    language: 'typescript',
-    title: 'Define extensions array',
-    description: 'Create a const array of extensions for type safety'
+    language: "typescript",
+    title: "Define extensions array",
+    description: "Create a const array of extensions for type safety",
   },
   {
-    id: 'create-editor-system-create-system',
+    id: "create-editor-system-create-system",
     code: `import { createEditorSystem } from '@lexkit/editor'
 
 const { Provider, useEditor } = createEditorSystem<typeof extensions>()`,
-    language: 'typescript',
-    title: 'Create typed editor system',
-    description: 'Use createEditorSystem with your extensions to generate typed components'
+    language: "typescript",
+    title: "Create typed editor system",
+    description:
+      "Use createEditorSystem with your extensions to generate typed components",
   },
-]
+];
 
-export default CREATE_EDITOR_SYSTEM_CODES
+export default CREATE_EDITOR_SYSTEM_CODES;

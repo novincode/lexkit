@@ -1,9 +1,14 @@
-import { LexicalEditor } from 'lexical';
-import { BaseExtension } from '@lexkit/editor/extensions/base';
-import { ExtensionCategory } from '@lexkit/editor/extensions/types';
-import { ReactNode } from 'react';
-import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-import { $getRoot, $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical';
+import { LexicalEditor } from "lexical";
+import { BaseExtension } from "@lexkit/editor/extensions/base";
+import { ExtensionCategory } from "@lexkit/editor/extensions/types";
+import { ReactNode } from "react";
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
+import {
+  $getRoot,
+  $createParagraphNode,
+  $getSelection,
+  $isRangeSelection,
+} from "lexical";
 
 /**
  * Commands provided by the HTML extension.
@@ -55,7 +60,7 @@ export type HTMLStateQueries = {
  * ```
  */
 export class HTMLExtension extends BaseExtension<
-  'html',
+  "html",
   {},
   HTMLCommands,
   HTMLStateQueries,
@@ -65,7 +70,7 @@ export class HTMLExtension extends BaseExtension<
    * Creates a new HTML extension instance.
    */
   constructor() {
-    super('html', [ExtensionCategory.Toolbar]);
+    super("html", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -96,39 +101,42 @@ export class HTMLExtension extends BaseExtension<
       },
 
       importFromHTML: (html: string) => {
-        editor.update(() => {
-          try {
-            const root = $getRoot();
-            root.clear();
+        editor.update(
+          () => {
+            try {
+              const root = $getRoot();
+              root.clear();
 
-            if (html.trim()) {
-              // Parse HTML properly to avoid wrapper issues
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(html, 'text/html');
-              
-              // Generate nodes from the body to avoid extra wrappers
-              const nodes = $generateNodesFromDOM(editor, doc);
-              
-              // Insert nodes directly to root
-              if (nodes && nodes.length > 0) {
-                nodes.forEach((node: any) => {
-                  if (node) {
-                    root.append(node);
-                  }
-                });
+              if (html.trim()) {
+                // Parse HTML properly to avoid wrapper issues
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+
+                // Generate nodes from the body to avoid extra wrappers
+                const nodes = $generateNodesFromDOM(editor, doc);
+
+                // Insert nodes directly to root
+                if (nodes && nodes.length > 0) {
+                  nodes.forEach((node: any) => {
+                    if (node) {
+                      root.append(node);
+                    }
+                  });
+                } else {
+                  root.append($createParagraphNode());
+                }
               } else {
                 root.append($createParagraphNode());
               }
-            } else {
+            } catch (error) {
+              console.error("Error importing HTML:", error);
+              const root = $getRoot();
+              root.clear();
               root.append($createParagraphNode());
             }
-          } catch (error) {
-            console.error('Error importing HTML:', error);
-            const root = $getRoot();
-            root.clear();
-            root.append($createParagraphNode());
-          }
-        }, { discrete: true });
+          },
+          { discrete: true },
+        );
       },
     };
   }

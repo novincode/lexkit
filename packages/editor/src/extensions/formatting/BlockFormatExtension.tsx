@@ -1,16 +1,30 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, COMMAND_PRIORITY_NORMAL, COMMAND_PRIORITY_EDITOR, KEY_ENTER_COMMAND, INSERT_PARAGRAPH_COMMAND } from 'lexical';
-import { $setBlocksType } from '@lexical/selection'; // Key import!
-import { $createParagraphNode, $isParagraphNode, ParagraphNode } from 'lexical';
-import { $createHeadingNode, $isHeadingNode, HeadingNode, HeadingTagType } from '@lexical/rich-text';
-import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text';
-import { BaseExtension } from '../base/BaseExtension';
-import { ExtensionCategory } from '../types';
-import { $getNearestNodeOfType } from '@lexical/utils'; // For better state queries
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_NORMAL,
+  COMMAND_PRIORITY_EDITOR,
+  KEY_ENTER_COMMAND,
+  INSERT_PARAGRAPH_COMMAND,
+} from "lexical";
+import { $setBlocksType } from "@lexical/selection"; // Key import!
+import { $createParagraphNode, $isParagraphNode, ParagraphNode } from "lexical";
+import {
+  $createHeadingNode,
+  $isHeadingNode,
+  HeadingNode,
+  HeadingTagType,
+} from "@lexical/rich-text";
+import { $createQuoteNode, $isQuoteNode, QuoteNode } from "@lexical/rich-text";
+import { BaseExtension } from "../base/BaseExtension";
+import { ExtensionCategory } from "../types";
+import { $getNearestNodeOfType } from "@lexical/utils"; // For better state queries
 
 /**
  * Supported block formats for the BlockFormatExtension
  */
-export type BlockFormat = 'p' | HeadingTagType | 'quote';
+export type BlockFormat = "p" | HeadingTagType | "quote";
 
 /**
  * Commands provided by the BlockFormatExtension for block-level formatting
@@ -75,13 +89,13 @@ export type BlockFormatStateQueries = {
  * ```
  */
 export class BlockFormatExtension extends BaseExtension<
-  'blockFormat',
+  "blockFormat",
   {}, // No extra config needed
   BlockFormatCommands,
   BlockFormatStateQueries
 > {
   constructor() {
-    super('blockFormat', [ExtensionCategory.Toolbar]);
+    super("blockFormat", [ExtensionCategory.Toolbar]);
   }
 
   /**
@@ -100,7 +114,10 @@ export class BlockFormatExtension extends BaseExtension<
           const blockNode = this.getBlockNode(anchorNode);
 
           // If we're in a heading or quote, ensure we create a proper paragraph
-          if (blockNode && ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))) {
+          if (
+            blockNode &&
+            ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))
+          ) {
             // Let the default INSERT_PARAGRAPH_COMMAND run, but ensure proper state
             return false; // Allow default behavior but we'll modify the result
           }
@@ -108,7 +125,7 @@ export class BlockFormatExtension extends BaseExtension<
 
         return false; // Allow default behavior for other cases
       },
-      COMMAND_PRIORITY_NORMAL
+      COMMAND_PRIORITY_NORMAL,
     );
 
     // Also register KEY_ENTER_COMMAND with higher priority to prevent conflicts
@@ -126,16 +143,19 @@ export class BlockFormatExtension extends BaseExtension<
           const blockNode = this.getBlockNode(anchorNode);
 
           // If we're in a heading or quote, handle the transition
-          if (blockNode && ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))) {
+          if (
+            blockNode &&
+            ($isHeadingNode(blockNode) || $isQuoteNode(blockNode))
+          ) {
             // Use the proper toggleParagraph command instead of manual insertion
-            this.toggleBlockFormat(editor, 'p');
+            this.toggleBlockFormat(editor, "p");
             return true; // Prevent default behavior
           }
         }
 
         return false; // Let default behavior handle other cases
       },
-      COMMAND_PRIORITY_EDITOR // Highest priority to override other handlers
+      COMMAND_PRIORITY_EDITOR, // Highest priority to override other handlers
     );
 
     return () => {
@@ -159,11 +179,13 @@ export class BlockFormatExtension extends BaseExtension<
    */
   getCommands(editor: LexicalEditor): BlockFormatCommands {
     return {
-      toggleBlockFormat: (format: BlockFormat) => this.toggleBlockFormat(editor, format),
-      toggleParagraph: () => this.toggleBlockFormat(editor, 'p'),
-      toggleHeading: (tag: HeadingTagType) => this.toggleBlockFormat(editor, tag),
-      toggleQuote: () => this.toggleBlockFormat(editor, 'quote'),
-      getCurrentBlockType: () => this.getCurrentFormat(editor) || 'p',
+      toggleBlockFormat: (format: BlockFormat) =>
+        this.toggleBlockFormat(editor, format),
+      toggleParagraph: () => this.toggleBlockFormat(editor, "p"),
+      toggleHeading: (tag: HeadingTagType) =>
+        this.toggleBlockFormat(editor, tag),
+      toggleQuote: () => this.toggleBlockFormat(editor, "quote"),
+      getCurrentBlockType: () => this.getCurrentFormat(editor) || "p",
     };
   }
 
@@ -185,8 +207,8 @@ export class BlockFormatExtension extends BaseExtension<
 
         // Set the new format
         $setBlocksType(selection, () => {
-          if (format === 'p') return $createParagraphNode();
-          if (format === 'quote') return $createQuoteNode();
+          if (format === "p") return $createParagraphNode();
+          if (format === "quote") return $createQuoteNode();
           return $createHeadingNode(format);
         });
       }
@@ -200,14 +222,14 @@ export class BlockFormatExtension extends BaseExtension<
    */
   getStateQueries(editor: LexicalEditor): BlockFormatStateQueries {
     return {
-      isParagraph: () => Promise.resolve(this.isFormat('p', editor)),
-      isH1: () => Promise.resolve(this.isFormat('h1', editor)),
-      isH2: () => Promise.resolve(this.isFormat('h2', editor)),
-      isH3: () => Promise.resolve(this.isFormat('h3', editor)),
-      isH4: () => Promise.resolve(this.isFormat('h4', editor)),
-      isH5: () => Promise.resolve(this.isFormat('h5', editor)),
-      isH6: () => Promise.resolve(this.isFormat('h6', editor)),
-      isQuote: () => Promise.resolve(this.isFormat('quote', editor)),
+      isParagraph: () => Promise.resolve(this.isFormat("p", editor)),
+      isH1: () => Promise.resolve(this.isFormat("h1", editor)),
+      isH2: () => Promise.resolve(this.isFormat("h2", editor)),
+      isH3: () => Promise.resolve(this.isFormat("h3", editor)),
+      isH4: () => Promise.resolve(this.isFormat("h4", editor)),
+      isH5: () => Promise.resolve(this.isFormat("h5", editor)),
+      isH6: () => Promise.resolve(this.isFormat("h6", editor)),
+      isQuote: () => Promise.resolve(this.isFormat("quote", editor)),
     };
   }
 
@@ -216,10 +238,16 @@ export class BlockFormatExtension extends BaseExtension<
    * @param node - The starting node
    * @returns The nearest block node or null
    */
-  private getBlockNode(node: any): ParagraphNode | HeadingNode | QuoteNode | null {
+  private getBlockNode(
+    node: any,
+  ): ParagraphNode | HeadingNode | QuoteNode | null {
     let current = node;
     while (current) {
-      if ($isParagraphNode(current) || $isHeadingNode(current) || $isQuoteNode(current)) {
+      if (
+        $isParagraphNode(current) ||
+        $isHeadingNode(current) ||
+        $isQuoteNode(current)
+      ) {
         return current;
       }
       current = current.getParent();
@@ -263,10 +291,12 @@ export class BlockFormatExtension extends BaseExtension<
    * @param node - The block node to check
    * @returns The format type or null
    */
-  private getNodeFormat(node: ParagraphNode | HeadingNode | QuoteNode): BlockFormat | null {
-    if ($isParagraphNode(node)) return 'p';
+  private getNodeFormat(
+    node: ParagraphNode | HeadingNode | QuoteNode,
+  ): BlockFormat | null {
+    if ($isParagraphNode(node)) return "p";
     if ($isHeadingNode(node)) return node.getTag();
-    if ($isQuoteNode(node)) return 'quote';
+    if ($isQuoteNode(node)) return "quote";
     return null;
   }
 
