@@ -9,7 +9,7 @@
 [![npm version](https://badge.fury.io/js/%40lexkit%2Feditor.svg)](https://github.com/novincode/lexkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 Documentation](https://github.com/novincode/lexkit/tree/main/packages/editor/docs) • [🚀 Demo](https://lexkit.dev/demo) • [⚡ Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze) • [💬 Discord](https://discord.gg/hAvRFC9Y)
+[📚 Documentation](https://github.com/novincode/lexkit/tree/main/packages/editor/docs) • [🚀 Demo](https://lexkit.dev/demo) • [⚡ Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx) • [💬 Discord](https://discord.gg/SAqTGDkR)
 
 </div>
 
@@ -918,7 +918,7 @@ import { Button } from "@repo/ui/components/button"
 ### 🚀 Examples & Tutorials
 - **[Quick Start Examples](https://github.com/novincode/lexkit/tree/main/examples)** - Code examples
 - **[Interactive Demo](https://lexkit.dev/demo)** - Live playground
-- **[StackBlitz Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment online
+- **[StackBlitz Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx)** - Experiment online
 
 ### 📝 Development
 - **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute
@@ -1093,8 +1093,8 @@ LexKit is built on top of [Lexical](https://lexical.dev/), the powerful editor f
 - **[🔧 Troubleshooting](https://github.com/novincode/lexkit/blob/main/packages/editor/docs/troubleshooting.md)** - Common issues & solutions
 - **[📚 API Reference](https://github.com/novincode/lexkit/blob/main/packages/editor/docs/api-reference.md)** - Complete API docs
 - **[🚀 Interactive Demo](https://lexkit.dev/demo)** - Try it live
-- **[⚡ Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze)** - Experiment with LexKit
-- **[💬 Discord Community](https://discord.gg/hAvRFC9Y)** - Get help and share ideas
+- **[⚡ Live Playground](https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx)** - Experiment with LexKit
+- **[💬 Discord Community](https://discord.gg/SAqTGDkR)** - Get help and share ideas
 
 *📝 **Coming Soon**: Comprehensive documentation website with playground, tutorials, and advanced examples*
 

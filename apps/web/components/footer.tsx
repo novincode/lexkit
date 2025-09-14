@@ -59,7 +59,7 @@ export function Footer() {
               
               <li>
                 <Link 
-                  href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze" 
+                  href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx" 
                   target="_blank"
                   className="hover:text-foreground transition-colors"
                 >
@@ -120,7 +120,7 @@ export function Footer() {
               <Link href="https://github.com/novincode/lexkit" target="_blank" className="hover:text-foreground transition-colors">
                 GitHub
               </Link>
-              <Link href="https://discord.gg/hAvRFC9Y" target="_blank" className="hover:text-foreground transition-colors">
+              <Link href="https://discord.gg/SAqTGDkR" target="_blank" className="hover:text-foreground transition-colors">
                 Discord
               </Link>
               <Link href="https://codeideal.com" target="_blank" className="hover:text-foreground transition-colors font-medium">

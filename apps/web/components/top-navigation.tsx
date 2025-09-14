@@ -34,7 +34,7 @@ const navigationItems = [
 
   {
     label: "Playground",
-    href: "https://stackblitz.com/edit/vitejs-vite-bpg2kpze",
+    href: "https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx",
     activePaths: [],
     external: true
   }
