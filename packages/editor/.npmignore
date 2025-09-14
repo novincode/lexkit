@@ -11,5 +11,24 @@ tsconfig.json
 tsup.config.ts
 .DS_Store
 
-# Only include dist/ and package.json, README.md
-*
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# Include only what we need
+!dist/
+!dist/index.js
+!dist/index.d.ts
+!package.json
+!README.md

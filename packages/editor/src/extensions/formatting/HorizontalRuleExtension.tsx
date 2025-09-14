@@ -1,5 +1,5 @@
 import { LexicalEditor, $getSelection, $isRangeSelection } from 'lexical';
-import { INSERT_HORIZONTAL_RULE_COMMAND, $isHorizontalRuleNode, HorizontalRuleNode, $createHorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
+import { INSERT_HORIZONTAL_RULE_COMMAND, $isHorizontalRuleNode, HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { BaseExtension } from '@lexkit/editor/extensions/base';
 import { ExtensionCategory } from '@lexkit/editor/extensions/types';
@@ -17,7 +17,9 @@ export const HORIZONTAL_RULE_TRANSFORMER = {
     return '---';
   },
   regExp: /^(?:---|\*\*\*|___)\s*$/,
-  replace: (parentNode: ElementNode, children: LexicalNode[], match: string[]) => {
+  replace: async (parentNode: ElementNode, children: LexicalNode[], match: string[]) => {
+    // Dynamic import to avoid bundler warnings
+    const { $createHorizontalRuleNode } = await import('@lexical/react/LexicalHorizontalRuleNode');
     const hrNode = $createHorizontalRuleNode();
     parentNode.replace(hrNode);
     return hrNode;

@@ -968,7 +968,7 @@ function DraggableBlockPlugin({ config, extension }: DraggableBlockPluginProps) 
                             ? rect.right + window.scrollX + (draggableConfig?.offsetRight || config.offsetRight || 10)
                             : rect.left + window.scrollX + (draggableConfig?.offsetLeft || config.offsetLeft || -40),
                         top: rect.top + window.scrollY,
-                        zIndex: 9999,
+                        zIndex: 40,
                         display: 'flex',
                         flexDirection: 'row',
                         gap: '6px',

@@ -5,5 +5,10 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   clean: true,
+  minify: true,
+  sourcemap: false, // Disable source maps for production bundle
   external: ["react", "react-dom"],
+  splitting: false,
+  treeshake: true,
+  target: "es2020",
 });

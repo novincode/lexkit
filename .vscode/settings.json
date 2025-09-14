@@ -1,18 +1,18 @@
 {
   "tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    "**/.vscode": true,
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/.turbo": true,
-    "**/.vercel": true,
-    "**/.next": true,
-    "**/.wrangler": true
+    "**/.git": false,
+    "**/.svn": false,
+    "**/.hg": false,
+    "**/.DS_Store": false,
+    "**/Thumbs.db": false,
+    "**/.vscode": false,
+    "**/node_modules": false,
+    "**/dist": false,
+    "**/.turbo": false,
+    "**/.vercel": false,
+    "**/.next": false,
+    "**/.wrangler": false
   },
   "explorerExclude.backup": {}
 }
