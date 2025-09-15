@@ -1,6 +1,6 @@
 {
   "name": "lexkit",
-  "version": "0.0.1",
+  "version": "0.0.23",
   "description": "LexKit - A headless, extensible rich text editor built on Lexical",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/novincode/lexkit#readme",
   "dependencies": {
-    "@lexkit/editor": "^0.0.1"
+    "@lexkit/editor": "^0.0.23"
   },
   "peerDependencies": {
     "@lexical/html": "^0.35.0",
