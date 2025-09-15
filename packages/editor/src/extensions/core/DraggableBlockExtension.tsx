@@ -659,8 +659,7 @@ function DraggableBlockPlugin({
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
       if (!isDragging || !draggedKeyRef.current) {
-        cleanupDragState();
-        return;
+        return; // Just return without cleanup/focus when not dragging
       }
 
       e.preventDefault();
@@ -1165,7 +1164,7 @@ function DraggableBlockPlugin({
             willChange: "transform, opacity",
             backfaceVisibility: "hidden",
             perspective: "1000px",
-            transition: "none",
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             ...mergedStyles.buttonStack,
           }}
         >

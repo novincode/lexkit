@@ -783,25 +783,26 @@
   pointer-events: auto;
   opacity: 0;
   animation: fade-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Base Drag Button Styles */
 .lexkit-drag-button {
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: linear-gradient(135deg, var(--lexkit-bg) 0%, var(--lexkit-muted) 100%);
+  border: 1px solid var(--lexkit-border);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: var(--lexkit-muted-fg);
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 2px 8px var(--lexkit-shadow),
     0 1px 3px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(8px);
@@ -822,11 +823,11 @@
 .lexkit-drag-button:hover {
   transform: scale(1.05);
   box-shadow:
-    0 6px 20px rgba(14, 165, 233, 0.15),
+    0 6px 20px var(--lexkit-shadow),
     0 3px 10px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  border-color: rgba(14, 165, 233, 0.6);
-  color: #0ea5e9;
+  border-color: var(--lexkit-border-hover);
+  color: var(--lexkit-accent);
 }
 
 .lexkit-drag-button:hover::before {
@@ -842,11 +843,11 @@
 
 /* Drag Handle - Modern Grip Icon */
 .lexkit-drag-handle {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  background: linear-gradient(135deg, var(--lexkit-bg) 0%, var(--lexkit-muted) 100%) !important;
   backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border: 1px solid var(--lexkit-border) !important;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 4px 16px var(--lexkit-shadow),
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -856,10 +857,10 @@
 .lexkit-drag-handle:hover {
   transform: scale(1.08) !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 8px 32px var(--lexkit-shadow),
     0 4px 16px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(59, 130, 246, 0.4) !important;
+  border-color: var(--lexkit-border-hover) !important;
 }
 
 .lexkit-drag-handle:active,
@@ -877,11 +878,11 @@
 /* Move Up/Down Buttons */
 .lexkit-move-up,
 .lexkit-move-down {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  background: linear-gradient(135deg, var(--lexkit-bg) 0%, var(--lexkit-muted) 100%) !important;
   backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border: 1px solid var(--lexkit-border) !important;
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 2px 8px var(--lexkit-shadow),
     0 1px 3px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -889,11 +890,11 @@
 
 .lexkit-move-up:hover,
 .lexkit-move-down:hover {
-  background: linear-gradient(135deg, rgba(240, 249, 255, 0.95) 0%, rgba(224, 242, 254, 0.9) 100%) !important;
-  border-color: rgba(14, 165, 233, 0.6) !important;
-  color: #0ea5e9 !important;
+  background: linear-gradient(135deg, var(--lexkit-muted) 0%, var(--lexkit-bg) 100%) !important;
+  border-color: var(--lexkit-border-hover) !important;
+  color: var(--lexkit-accent) !important;
   box-shadow:
-    0 6px 20px rgba(14, 165, 233, 0.2),
+    0 6px 20px var(--lexkit-shadow),
     0 3px 10px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
 }
@@ -989,27 +990,27 @@
 
 [data-theme="dark"] .lexkit-drag-handle,
 .dark .lexkit-drag-handle {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-  border-color: rgba(51, 65, 85, 0.8) !important;
-  color: #e2e8f0 !important;
+  background: linear-gradient(135deg, var(--lexkit-bg) 0%, var(--lexkit-muted) 100%) !important;
+  border-color: var(--lexkit-border) !important;
+  color: var(--lexkit-fg) !important;
 }
 
 [data-theme="dark"] .lexkit-move-up,
 [data-theme="dark"] .lexkit-move-down,
 .dark .lexkit-move-up,
 .dark .lexkit-move-down {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-  border-color: rgba(51, 65, 85, 0.8) !important;
-  color: #e2e8f0 !important;
+  background: linear-gradient(135deg, var(--lexkit-bg) 0%, var(--lexkit-muted) 100%) !important;
+  border-color: var(--lexkit-border) !important;
+  color: var(--lexkit-fg) !important;
 }
 
 [data-theme="dark"] .lexkit-move-up:hover,
 [data-theme="dark"] .lexkit-move-down:hover,
 .dark .lexkit-move-up:hover,
 .dark .lexkit-move-down:hover {
-  background: linear-gradient(135deg, rgba(30, 58, 83, 0.95) 0%, rgba(12, 36, 58, 0.9) 100%) !important;
-  border-color: rgba(14, 165, 233, 0.6) !important;
-  color: #38bdf8 !important;
+  background: linear-gradient(135deg, var(--lexkit-muted) 0%, var(--lexkit-bg) 100%) !important;
+  border-color: var(--lexkit-border-hover) !important;
+  color: var(--lexkit-accent) !important;
 }/* HTML Embed Styles - Modern and Clean */
 .html-embed-wrapper {
   position: relative;
