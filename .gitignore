@@ -38,5 +38,10 @@ npm-debug.log*
 .DS_Store
 *.pem
 
+# IDE Files
+.vscode/
+**/.vscode
 
 *_NOTES.*
+.vscode
+**/.vscode
