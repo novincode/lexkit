@@ -16,7 +16,7 @@ import {
   horizontalRuleExtension,
   tableExtension,
   type TableConfig,
-  listExtension,
+  listExtension, 
   historyExtension,
   imageExtension,
   blockFormatExtension,
