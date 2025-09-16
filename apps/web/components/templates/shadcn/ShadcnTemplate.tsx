@@ -25,7 +25,7 @@ import {
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
-  draggableBlockExtension,
+  DraggableBlockExtension, // We need the class itself, to re-create an instsance (Because we've configured one inside DefaultTemplate and using them both with different configs, will cause problems)
 } from "@lexkit/editor/extensions";
 import {
   commandPaletteExtension,
@@ -41,12 +41,20 @@ import {
   commandsToCommandPaletteItems,
   registerKeyboardShortcuts,
 } from "./commands";
-import { ShadcnCommandPalette } from "./CommandPalette";
 import { shadcnTheme } from "./theme";
 
 // SHADCN Components
 import { Button } from "@repo/ui/components/button";
 import { Toggle } from "@repo/ui/components/toggle";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@repo/ui/components/command";
 import {
   Tooltip,
   TooltipContent,
@@ -161,7 +169,6 @@ export const extensions = [
         variant="outline"
         size="sm"
         onClick={onClick}
-        className={className}
         style={style}
       >
         {isPreview ? (
@@ -181,7 +188,8 @@ export const extensions = [
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
-  draggableBlockExtension.configure({
+  
+  new DraggableBlockExtension({ // Create fresh instance to avoid caching issues when switching templates
     buttonStackPosition: "right",
   }),
 ] as const;
@@ -1570,6 +1578,19 @@ function EditorContent({
     }
   }, [editor, methods, onReady, commands]);
 
+  // Cmd+K keyboard shortcut for command palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setCommandPaletteOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Handle mode changes
   const handleModeChange = (newMode: EditorMode) => {
     // If leaving markdown mode, import the markdown content
@@ -1730,11 +1751,38 @@ function EditorContent({
       />
 
       {/* Command Palette */}
-      <ShadcnCommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        commands={paletteCommands}
-      />
+      <CommandDialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {Object.entries(
+            paletteCommands.reduce(
+              (groups, cmd) => {
+                const category = cmd.category || "Other";
+                if (!groups[category]) groups[category] = [];
+                groups[category].push(cmd);
+                return groups;
+              },
+              {} as Record<string, typeof paletteCommands>,
+            ),
+          ).map(([category, categoryCommands]) => (
+            <CommandGroup key={category} heading={category}>
+              {categoryCommands.map((cmd) => (
+                <CommandItem
+                  key={cmd.id}
+                  onSelect={() => {
+                    cmd.action();
+                    setCommandPaletteOpen(false);
+                  }}
+                >
+                  {cmd.label}
+                  {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ))}
+        </CommandList>
+      </CommandDialog>
     </div>
   );
 }
