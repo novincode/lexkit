@@ -15,8 +15,6 @@ import {
   $isTableRowNode,
   $isTableCellNode,
   $createTableNodeWithDimensions,
-  $createTableRowNode,
-  $createTableCellNode,
   $insertTableRowAtSelection,
   $insertTableColumnAtSelection,
   $deleteTableRowAtSelection,
@@ -24,17 +22,25 @@ import {
 } from "@lexical/table";
 import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { BaseExtension } from "@lexkit/editor/extensions/base";
-import { ExtensionCategory } from "@lexkit/editor/extensions/types";
-import React from "react";
-import type { LexicalNode, ElementNode } from "lexical";
+import { ExtensionCategory, BaseExtensionConfig } from "@lexkit/editor/extensions/types";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
+import type { LexicalNode } from "lexical";
 
 /**
  * Table configuration type
  */
-export type TableConfig = {
+export type TableConfig = BaseExtensionConfig & {
   rows: number;
   columns: number;
   includeHeaders?: boolean;
+  contextMenuRenderer?: (params: {
+    position: { x: number; y: number };
+    commands: TableCommands['table'];
+    onClose: () => void;
+  }) => React.ReactElement;
 };
 
 /**
@@ -65,23 +71,25 @@ export type TableStateQueries = {
  * Provides functionality to insert tables and manage table-related operations.
  *
  * @example
- * ```tsx
- * const extensions = [tableExtension] as const;
- * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+ * const extensions = [
+ *   tableExtension.configure({
+ *     contextMenuRenderer: ({ position, commands, onClose }) => (
+ *       <div style={{ position: 'fixed', left: position.x, top: position.y, zIndex: 1000 }}>
+ *         <button onClick={() => { commands.insertRowAbove(); onClose(); }}>Insert Row Above</button>
+ *       </div>
+ *     ),
+ *   })
+ * ] as const;
+ * const { Provider, useEditor } = createEditorSystem(extensions);
  *
  * function MyEditor() {
  *   const { commands } = useEditor();
- *   return (
- *     <button onClick={() => commands.insertTable(3, 3, true)}>
- *       Insert 3x3 Table with Headers
- *     </button>
- *   );
+ *   return <button onClick={() => commands.insertTable({ rows: 3, columns: 3, includeHeaders: true })}>Insert 3x3 Table with Headers</button>;
  * }
- * ```
  */
 export class TableExtension extends BaseExtension<
   "table",
-  any,
+  TableConfig,
   TableCommands,
   TableStateQueries,
   React.ReactElement[]
@@ -91,71 +99,25 @@ export class TableExtension extends BaseExtension<
    */
   constructor() {
     super("table", [ExtensionCategory.Toolbar]);
+    this.config = { rows: 3, columns: 3, includeHeaders: false };
+  }
+
+  /**
+   * Configures the table extension with custom settings.
+   */
+  configure(config: Partial<TableConfig>): this {
+    this.config = { ...this.config, ...config };
+    return this;
   }
 
   /**
    * Registers the extension with the editor.
-   * Sets up context menu handlers for table interactions.
+   * No special registration needed beyond plugins.
    *
    * @param editor - The Lexical editor instance
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
-    const handleContextMenu = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      // Check if we're right-clicking on a table element
-      const tableCell = target.closest("td, th");
-      if (tableCell) {
-        event.preventDefault();
-
-        // Show context menu with table commands
-        this.showTableContextMenu(
-          editor,
-          event.clientX,
-          event.clientY,
-          tableCell as HTMLElement,
-        );
-      }
-    };
-
-    const handleSelectionChange = () => {
-      // Check if we're in a table cell
-      editor.getEditorState().read(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const anchorNode = selection.anchor.getNode();
-          const focusNode = selection.focus.getNode();
-
-          // Check if either anchor or focus is in a table cell
-          const isInTable =
-            this.isNodeInTableCell(anchorNode) ||
-            this.isNodeInTableCell(focusNode);
-
-          if (isInTable) {
-            this.showTableFloatingToolbar(editor);
-          } else {
-            this.hideTableFloatingToolbar(editor);
-          }
-        }
-      });
-    };
-
-    const editorElement = editor.getRootElement();
-    if (editorElement) {
-      editorElement.addEventListener("contextmenu", handleContextMenu);
-
-      // Listen for selection changes
-      const unregisterSelection = editor.registerUpdateListener(
-        handleSelectionChange,
-      );
-
-      return () => {
-        editorElement.removeEventListener("contextmenu", handleContextMenu);
-        unregisterSelection();
-      };
-    }
-
     return () => {};
   }
 
@@ -171,10 +133,13 @@ export class TableExtension extends BaseExtension<
   /**
    * Returns React plugins provided by this extension.
    *
-   * @returns Array containing the TablePlugin
+   * @returns Array containing the TablePlugin and TableContextMenuPlugin
    */
   getPlugins(): React.ReactElement[] {
-    return [<TablePlugin key="table" />];
+    return [
+      <TablePlugin key="table" />,
+      <TableContextMenuPlugin key="table-context-menu" extension={this} />,
+    ];
   }
 
   /**
@@ -189,9 +154,7 @@ export class TableExtension extends BaseExtension<
         editor.dispatchCommand(INSERT_TABLE_COMMAND, {
           columns: config.columns.toString(),
           rows: config.rows.toString(),
-          includeHeaders: config.includeHeaders
-            ? { rows: true, columns: false }
-            : false,
+          includeHeaders: !!config.includeHeaders,
         });
       },
       table: {
@@ -350,191 +313,139 @@ export class TableExtension extends BaseExtension<
 
   /**
    * Returns markdown transformers provided by this extension.
-   * Note: Table import is handled separately in MarkdownExtension for multi-line support.
-   * This transformer is only used for export.
    *
    * @returns Array containing table markdown transformers
    */
   getMarkdownTransformers(): any[] {
     return [TABLE_MARKDOWN_TRANSFORMER];
   }
+}
 
-  /**
-   * Helper method to check if a node is inside a table cell
-   */
-  private isNodeInTableCell(node: any): boolean {
-    let currentNode = node;
-    while (currentNode) {
-      if ($isTableCellNode(currentNode)) {
-        return true;
-      }
-      currentNode = currentNode.getParent();
-    }
-    return false;
-  }
+/**
+ * Plugin for rendering table context menu
+ */
+function TableContextMenuPlugin({ extension }: { extension: TableExtension }) {
+  const [editor] = useLexicalComposerContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [target, setTarget] = useState<HTMLElement | null>(null);
 
-  /**
-   * Shows context menu with table-specific commands
-   */
-  private showTableContextMenu(
-    editor: LexicalEditor,
-    x: number,
-    y: number,
-    target: HTMLElement,
-  ) {
-    // For now, we'll use a simple approach with direct DOM manipulation
-    // In a real implementation, this would integrate with the context menu extension
-    const contextMenu = document.createElement("div");
-    contextMenu.className = "table-context-menu";
-    contextMenu.style.position = "fixed";
-    contextMenu.style.left = `${x}px`;
-    contextMenu.style.top = `${y}px`;
-    contextMenu.style.background = "white";
-    contextMenu.style.border = "1px solid #ccc";
-    contextMenu.style.borderRadius = "4px";
-    contextMenu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-    contextMenu.style.zIndex = "1000";
-    contextMenu.style.minWidth = "150px";
+  useEffect(() => {
+    const editorElement = editor.getRootElement();
+    if (!editorElement) return;
 
-    const items = [
-      { label: "Insert Row Above", action: () => this.insertRowAbove(editor) },
-      { label: "Insert Row Below", action: () => this.insertRowBelow(editor) },
-      {
-        label: "Insert Column Left",
-        action: () => this.insertColumnLeft(editor),
-      },
-      {
-        label: "Insert Column Right",
-        action: () => this.insertColumnRight(editor),
-      },
-      { label: "Delete Row", action: () => this.deleteRow(editor) },
-      { label: "Delete Column", action: () => this.deleteColumn(editor) },
-    ];
-
-    items.forEach((item) => {
-      const menuItem = document.createElement("div");
-      menuItem.textContent = item.label;
-      menuItem.style.padding = "8px 12px";
-      menuItem.style.cursor = "pointer";
-      menuItem.style.borderBottom = "1px solid #eee";
-      menuItem.addEventListener("click", () => {
-        item.action();
-        if (contextMenu.parentNode) {
-          document.body.removeChild(contextMenu);
-        }
-        document.removeEventListener("click", closeMenu);
-      });
-      menuItem.addEventListener("mouseenter", () => {
-        menuItem.style.backgroundColor = "#f5f5f5";
-      });
-      menuItem.addEventListener("mouseleave", () => {
-        menuItem.style.backgroundColor = "white";
-      });
-      contextMenu.appendChild(menuItem);
-    });
-
-    // Remove last border
-    if (contextMenu.lastChild) {
-      (contextMenu.lastChild as HTMLElement).style.borderBottom = "none";
-    }
-
-    document.body.appendChild(contextMenu);
-
-    // Close on click outside
-    const closeMenu = (e: MouseEvent) => {
-      if (!contextMenu.contains(e.target as Node) && contextMenu.parentNode) {
-        document.body.removeChild(contextMenu);
-        document.removeEventListener("click", closeMenu);
+    const handleContextMenu = (event: MouseEvent) => {
+      const targetEl = event.target as HTMLElement;
+      const tableCell = targetEl.closest("td, th");
+      if (tableCell) {
+        event.preventDefault();
+        setPosition({ x: event.clientX, y: event.clientY });
+        setTarget(tableCell as HTMLElement);
+        setIsOpen(true);
       }
     };
-    setTimeout(() => document.addEventListener("click", closeMenu), 0);
+
+    editorElement.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      editorElement.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (target && !target.contains(e.target as Node)) {
+          setIsOpen(false);
+          setTarget(null);
+        }
+      };
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [isOpen, target]);
+
+  if (!isOpen) return null;
+
+  const tableCommands = extension.getCommands(editor).table;
+
+  const renderer = extension.config.contextMenuRenderer;
+
+  if (!renderer) {
+    // Default renderer
+    return createPortal(
+      <div
+        style={{
+          position: "fixed",
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          background: "white",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          zIndex: 1000,
+          minWidth: "150px",
+        }}
+      >
+        {[
+          { label: "Insert Row Above", action: tableCommands.insertRowAbove },
+          { label: "Insert Row Below", action: tableCommands.insertRowBelow },
+          { label: "Insert Column Left", action: tableCommands.insertColumnLeft },
+          { label: "Insert Column Right", action: tableCommands.insertColumnRight },
+          { label: "Delete Row", action: tableCommands.deleteRow },
+          { label: "Delete Column", action: tableCommands.deleteColumn },
+        ].map((item) => (
+          <div
+            key={item.label}
+            style={{
+              padding: "8px 12px",
+              cursor: "pointer",
+              borderBottom: "1px solid #eee",
+            }}
+            onClick={() => {
+              item.action();
+              setIsOpen(false);
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "white")}
+          >
+            {item.label}
+          </div>
+        ))}
+      </div>,
+      document.body
+    );
   }
 
-  /**
-   * Shows floating toolbar with table commands
-   */
-  private showTableFloatingToolbar(editor: LexicalEditor) {
-    // For now, we'll use a simple approach
-    // In a real implementation, this would integrate with the floating toolbar extension
-    // console.log('Table floating toolbar would show here');
-  }
-
-  /**
-   * Hides the table floating toolbar
-   */
-  private hideTableFloatingToolbar(editor: LexicalEditor) {
-    // For now, we'll use a simple approach
-    // In a real implementation, this would integrate with the floating toolbar extension
-    // console.log('Table floating toolbar would hide here');
-  }
-
-  /**
-   * Inserts a row above the current selection
-   */
-  private insertRowAbove(editor: LexicalEditor) {
-    editor.update(() => {
-      $insertTableRowAtSelection(false);
-    });
-  }
-
-  /**
-   * Inserts a row below the current selection
-   */
-  private insertRowBelow(editor: LexicalEditor) {
-    editor.update(() => {
-      $insertTableRowAtSelection(true);
-    });
-  }
-
-  /**
-   * Inserts a column to the left of the current selection
-   */
-  private insertColumnLeft(editor: LexicalEditor) {
-    editor.update(() => {
-      $insertTableColumnAtSelection(false);
-    });
-  }
-
-  /**
-   * Inserts a column to the right of the current selection
-   */
-  private insertColumnRight(editor: LexicalEditor) {
-    editor.update(() => {
-      $insertTableColumnAtSelection(true);
-    });
-  }
-
-  /**
-   * Deletes the current row
-   */
-  private deleteRow(editor: LexicalEditor) {
-    editor.update(() => {
-      $deleteTableRowAtSelection();
-    });
-  }
-
-  /**
-   * Deletes the current column
-   */
-  private deleteColumn(editor: LexicalEditor) {
-    editor.update(() => {
-      $deleteTableColumnAtSelection();
-    });
-  }
+  // Custom renderer
+  return createPortal(
+    renderer({
+      position,
+      commands: tableCommands,
+      onClose: () => setIsOpen(false),
+    }),
+    document.body
+  );
 }
 
 /**
  * Table Markdown Transformer
  * Supports standard GitHub Flavored Markdown table syntax.
- * Uses proper transformer pattern like other extensions.
+ * Updated regex to properly match full table blocks, including empty cells.
  */
 export const TABLE_MARKDOWN_TRANSFORMER = {
   dependencies: [TableNode, TableRowNode, TableCellNode],
   export: (node: any) => {
-    if (!$isTableNode(node)) return null;
+    console.log("🔄 TABLE_MARKDOWN_TRANSFORMER export called with node:", node);
+    if (!$isTableNode(node)) {
+      console.log("❌ Node is not a table node");
+      return null;
+    }
 
+    console.log("🎯 Exporting table node");
     try {
       const rows = node.getChildren();
+      console.log("📊 Table has", rows.length, "rows");
       if (rows.length === 0) return null;
 
       const tableData: string[][] = [];
@@ -549,15 +460,15 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
         for (const cell of cells) {
           if (!$isTableCellNode(cell)) continue;
 
-          // Get text content from cell more safely
           let textContent = "";
           try {
             textContent = cell.getTextContent().trim();
+            console.log("📝 Cell text content:", textContent);
           } catch (error) {
             console.warn("Error getting cell text content:", error);
             textContent = "";
           }
-          rowData.push(textContent || "");
+          rowData.push(textContent);
         }
 
         if (rowData.length > 0) {
@@ -565,111 +476,47 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
         }
       }
 
+      console.log("📋 Table data extracted:", tableData);
       if (tableData.length === 0) return null;
 
-      // Generate markdown with better formatting
+      // Generate markdown
       const markdownLines: string[] = [];
 
-      // First row (header)
+      // Header row
       if (tableData[0]) {
         markdownLines.push("| " + tableData[0].join(" | ") + " |");
       }
 
-      // Separator row
+      // Separator
       const colCount = tableData[0]?.length || 1;
       const separator = "| " + Array(colCount).fill("---").join(" | ") + " |";
       markdownLines.push(separator);
 
-      // Data rows (skip first row since it's the header)
+      // Data rows
       for (let i = 1; i < tableData.length; i++) {
         const row = tableData[i];
-        if (row && row.length > 0) {
-          // Pad row to match column count
-          const paddedRow = [...row];
-          while (paddedRow.length < colCount) {
-            paddedRow.push("");
-          }
-          markdownLines.push("| " + paddedRow.join(" | ") + " |");
+        if (!row) continue;
+        const paddedRow = [...row];
+        while (paddedRow.length < colCount) {
+          paddedRow.push("");
         }
+        markdownLines.push("| " + paddedRow.join(" | ") + " |");
       }
 
-      return markdownLines.join("\n");
+      const result = markdownLines.join("\n");
+      console.log("🎯 Generated markdown:", result);
+      return result;
     } catch (error) {
       console.error("Error exporting table to markdown:", error);
       return null;
     }
   },
-  regExp:
-    /^\|(.+)\|[ \t]*$\n\|[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|[ \t]*$(?:\n\|(.+)\|[ \t]*$)*/,
-  replace: (parentNode: any, _children: any[], match: any) => {
-    try {
-      const fullMatch = match[0];
-      const lines = fullMatch.trim().split("\n");
-
-      if (lines.length < 2) return;
-
-      // Parse table data
-      const tableData: string[][] = [];
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-
-        const cells = line
-          .split("|")
-          .slice(1, -1)
-          .map((cell: string) => cell.trim());
-
-        // Skip separator line (contains only dashes, colons, spaces)
-        if (cells.every((cell: string) => /^[\s\-:]+$/.test(cell))) {
-          continue;
-        }
-
-        if (cells.length > 0) {
-          tableData.push(cells);
-        }
-      }
-
-      if (tableData.length === 0) return;
-
-      const totalRows = tableData.length;
-      const totalCols = Math.max(...tableData.map((row) => row.length));
-
-      // Create table node
-      const tableNode = $createTableNodeWithDimensions(
-        totalRows,
-        totalCols,
-        true,
-      );
-
-      // Fill with data
-      const tableRows = tableNode.getChildren();
-
-      tableData.forEach((rowData, rowIndex) => {
-        const tableRow = tableRows[rowIndex];
-        if (tableRow && $isTableRowNode(tableRow)) {
-          const rowCells = tableRow.getChildren();
-
-          rowData.forEach((cellText, colIndex) => {
-            const cell = rowCells[colIndex];
-            if (cell && $isTableCellNode(cell)) {
-              // Clear existing content
-              cell.getChildren().forEach((child) => child.remove());
-
-              // Add new content
-              const paragraph = $createParagraphNode();
-              if (cellText && cellText.trim()) {
-                paragraph.append($createTextNode(cellText.trim()));
-              }
-              cell.append(paragraph);
-            }
-          });
-        }
-      });
-
-      parentNode.replace(tableNode);
-    } catch (error) {
-      console.error("❌ Error importing table from markdown:", error);
-    }
+  regExp: /^\|.+\|$/,
+  replace: (parentNode: any, children: any[], match: RegExpMatchArray) => {
+    // This transformer is now handled in MarkdownExtension
+    // This is just a placeholder to prevent other transformers from interfering
+    console.log("🔄 TABLE_MARKDOWN_TRANSFORMER replace placeholder called");
+    return;
   },
   type: "element" as const,
 };

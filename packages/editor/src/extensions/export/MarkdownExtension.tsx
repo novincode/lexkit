@@ -8,8 +8,13 @@ import {
   $convertFromMarkdownString,
   TRANSFORMERS,
 } from "@lexical/markdown";
-import { $getRoot, $createParagraphNode } from "lexical";
+import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
 import { HTMLEmbedNode } from "../media/HTMLEmbedExtension";
+import {
+  $createTableNodeWithDimensions,
+  $isTableRowNode,
+  $isTableCellNode,
+} from "@lexical/table";
 
 /**
  * Configuration options for the Markdown extension.
@@ -124,11 +129,16 @@ export class MarkdownExtension extends BaseExtension<
       ...TRANSFORMERS,
     ];
 
+    console.log("🔧 MarkdownExtension transformers:", transformers.length, transformers.map(t => t.type || 'unknown'));
+
     return {
       exportToMarkdown: () => {
         return editor.getEditorState().read(() => {
           try {
-            return $convertToMarkdownString(transformers);
+            console.log("📤 Exporting to markdown with transformers:", transformers.length);
+            const result = $convertToMarkdownString(transformers);
+            console.log("📤 Export result:", result);
+            return result;
           } catch (error) {
             console.error("❌ Markdown export error:", error);
             return "";
@@ -176,6 +186,20 @@ export class MarkdownExtension extends BaseExtension<
                   },
                 );
 
+                // Pre-process table blocks
+                const tableBlocks: { tableData: string; placeholder: string }[] = [];
+                processedMarkdown = processedMarkdown.replace(
+                  /(\|.+?\|\s*\n\|[\s\-:|]+\|(?:\s*\n\|.+?\|)*)/g,
+                  (match, tableContent) => {
+                    const placeholder = `TABLEPLACEHOLDER${tableBlocks.length}TABLEPLACEHOLDER`;
+                    tableBlocks.push({
+                      tableData: tableContent.trim(),
+                      placeholder,
+                    });
+                    return placeholder;
+                  },
+                );
+
                 $convertFromMarkdownString(processedMarkdown, transformers);
 
                 // Replace placeholders with HTML embed nodes
@@ -203,6 +227,71 @@ export class MarkdownExtension extends BaseExtension<
                   };
 
                   traverseAndReplace(root);
+                }
+
+                // Replace placeholders with table nodes
+                if (tableBlocks.length > 0) {
+                  const traverseAndReplaceTable = (node: any) => {
+                    if (node.getTextContent?.()) {
+                      const text = node.getTextContent();
+                      for (const { tableData, placeholder } of tableBlocks) {
+                        if (text === placeholder) {
+                          console.log("🔄 Converting table placeholder to table node");
+                          console.log("📝 Table data:", tableData);
+                          
+                          // Parse table data
+                          const lines = tableData.split('\n').filter(line => line.trim() && line.includes('|'));
+                          const tableRows: string[][] = [];
+                          
+                          for (const line of lines) {
+                            const cells = line.split('|').slice(1, -1).map(cell => cell.trim());
+                            // Skip separator rows (contains only dashes, colons, spaces)
+                            if (!cells.every(cell => /^[\s\-:]+$/.test(cell))) {
+                              tableRows.push(cells);
+                            }
+                          }
+                          
+                          if (tableRows.length > 0) {
+                            const maxCols = Math.max(...tableRows.map(row => row.length));
+                            const tableNode = $createTableNodeWithDimensions(tableRows.length, maxCols, true);
+                            
+                            const tableNodeRows = tableNode.getChildren();
+                            tableRows.forEach((rowData, rowIndex) => {
+                              const tableRow = tableNodeRows[rowIndex];
+                              if (tableRow && $isTableRowNode(tableRow)) {
+                                const rowCells = tableRow.getChildren();
+                                
+                                for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+                                  const cell = rowCells[colIndex];
+                                  const cellText = rowData[colIndex] || "";
+                                  
+                                  if (cell && $isTableCellNode(cell)) {
+                                    cell.getChildren().forEach((child: any) => child.remove());
+                                    const paragraph = $createParagraphNode();
+                                    if (cellText.trim()) {
+                                      paragraph.append($createTextNode(cellText.trim()));
+                                    }
+                                    cell.append(paragraph);
+                                  }
+                                }
+                              }
+                            });
+                            
+                            if (node !== root && node.getParent?.()) {
+                              node.replace(tableNode);
+                              return;
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                    if (node.getChildren?.()) {
+                      [...node.getChildren()].forEach(child => traverseAndReplaceTable(child));
+                    }
+                  };
+
+                  traverseAndReplaceTable(root);
                 }
               } catch (error) {
                 console.error("❌ Markdown import error:", error);
