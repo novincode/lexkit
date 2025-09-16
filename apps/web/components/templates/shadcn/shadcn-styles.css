@@ -23,3 +23,19 @@
     transform: scaleY(1.2);
   }
 }
+
+
+/* Plain textarea for source views */
+.lexkit-html-view {
+  width: 100%;
+  min-height: 600px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  padding: 0;
+}

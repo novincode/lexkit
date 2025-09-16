@@ -93,6 +93,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@repo/ui/components/drawer";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@repo/ui/components/collapsible";
 
 // Icons
 import {
@@ -127,6 +132,7 @@ import {
   X,
   CloudUpload,
   Globe,
+  ChevronDown,
 } from "lucide-react";
 
 import { createEditorSystem } from "@lexkit/editor";
@@ -441,6 +447,7 @@ function ImageDialog({
   onSubmit: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -473,6 +480,16 @@ function ImageDialog({
     }
   };
 
+  const handleRemoveFile = () => {
+    onFileChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Check if we have valid content to show advanced options
+  const hasValidContent = activeTab === "upload" ? !!file : !!url.trim();
+
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent>
@@ -503,27 +520,56 @@ function ImageDialog({
               <TabsContent value="upload" className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label>Upload Image</Label>
-                  <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                      dragOver
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                    }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {file
-                        ? file.name
-                        : "Drop an image here, or click to select"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Supports: JPG, PNG, GIF, WebP (max 10MB)
-                    </p>
-                  </div>
+                  {!file ? (
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                        dragOver
+                          ? "border-primary bg-primary/5"
+                          : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Drop an image here, or click to select
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Supports: JPG, PNG, GIF, WebP (max 10MB)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-muted/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded border overflow-hidden bg-muted flex-shrink-0">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveFile}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -547,38 +593,61 @@ function ImageDialog({
                 </div>
               </TabsContent>
 
-              <div className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="image-alt">Alt Text (optional)</Label>
-                  <Input
-                    id="image-alt"
-                    placeholder="Describe the image"
-                    value={alt}
-                    onChange={(e) => onAltChange(e.target.value)}
-                  />
-                </div>
+              {/* Advanced Options - only show when we have valid content */}
+              {hasValidContent && (
+                <Collapsible
+                  open={showAdvanced}
+                  onOpenChange={setShowAdvanced}
+                  className="mt-4"
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full justify-between p-2 h-auto"
+                    >
+                      <span className="text-sm font-medium">Advanced Options</span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          showAdvanced ? "rotate-180" : ""
+                        }`}
+                      />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="image-alt">Alt Text (optional)</Label>
+                      <Input
+                        id="image-alt"
+                        placeholder="Describe the image for accessibility"
+                        value={alt}
+                        onChange={(e) => onAltChange(e.target.value)}
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="image-caption">Caption (optional)</Label>
-                  <Input
-                    id="image-caption"
-                    placeholder="Image caption"
-                    value={caption}
-                    onChange={(e) => onCaptionChange(e.target.value)}
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="image-caption">Caption (optional)</Label>
+                      <Input
+                        id="image-caption"
+                        placeholder="Image caption"
+                        value={caption}
+                        onChange={(e) => onCaptionChange(e.target.value)}
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={activeTab === "upload" ? !file : !url.trim()}
-                  >
-                    Insert Image
-                  </Button>
-                </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={activeTab === "upload" ? !file : !url.trim()}
+                >
+                  Insert Image
+                </Button>
               </div>
             </form>
           </Tabs>

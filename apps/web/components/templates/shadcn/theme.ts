@@ -106,7 +106,7 @@ export const shadcnTheme: LexKitTheme = {
   // Draggable Block Extension - accessed via this.theme.draggable in extensions
   draggable: {
     handle:
-      "w-6 h-6 p-0 flex items-center justify-center bg-background border border-border rounded-md text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-200 cursor-grab hover:scale-110 active:scale-95 active:rotate-12 active:cursor-grabbing backdrop-blur-sm",
+      "w-6 h-6 p-0 flex items-center justify-center bg-background border border-border rounded text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-200 cursor-grab hover:scale-110 active:scale-95 active:rotate-12 active:cursor-grabbing backdrop-blur-sm",
     handleActive:
       "bg-accent border-ring text-accent-foreground shadow-md scale-105 rotate-12 cursor-grabbing",
     upButton:
@@ -116,7 +116,7 @@ export const shadcnTheme: LexKitTheme = {
     buttonStack:
       "absolute z-[9999] flex flex-col gap-1.5 items-center pointer-events-auto  animate-in fade-in-0 slide-in-from-top-2 duration-300 -ml-10",
     blockDragging:
-      "opacity-60 rotate-2 scale-98 shadow-2xl rounded-lg transition-all duration-300 ease-out",
+      "opacity-60 rotate-2 scale-98 shadow-2xl rounded transition-all duration-300 ease-out",
     dropIndicator:
       "bg-gradient-to-r from-primary to-primary/80 shadow-2xl animate-pulse backdrop-blur-sm",
   },
