@@ -74,13 +74,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@repo/ui/components/dialog";
 import { Separator } from "@repo/ui/components/separator";
 import { Label } from "@repo/ui/components/label";
 import { Input } from "@repo/ui/components/input";
@@ -91,7 +84,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
+  DrawerFooter,
 } from "@repo/ui/components/drawer";
 import {
   Collapsible,
@@ -219,444 +212,6 @@ export interface ShadcnTemplateRef {
   getHTML: () => string;
 }
 
-// Global dialog state management for singleton dialogs
-interface DialogState {
-  linkDialog: {
-    isOpen: boolean;
-    url: string;
-    text: string;
-    isEdit: boolean;
-    showTextField: boolean;
-  };
-  imageDialog: {
-    isOpen: boolean;
-    activeTab: "upload" | "url";
-    url: string;
-    alt: string;
-    caption: string;
-    file: File | null;
-    dragOver: boolean;
-  };
-}
-
-// Custom hook for dialog state management
-function useDialogState() {
-  const [dialogs, setDialogs] = useState<DialogState>({
-    linkDialog: {
-      isOpen: false,
-      url: "",
-      text: "",
-      isEdit: false,
-      showTextField: true,
-    },
-    imageDialog: {
-      isOpen: false,
-      activeTab: "upload",
-      url: "",
-      alt: "",
-      caption: "",
-      file: null,
-      dragOver: false,
-    },
-  });
-
-  const openLinkDialog = useCallback(
-    (url = "", text = "", isEdit = false, showTextField = true) => {
-      setDialogs((prev) => ({
-        ...prev,
-        linkDialog: { isOpen: true, url, text, isEdit, showTextField },
-      }));
-    },
-    [],
-  );
-
-  const closeLinkDialog = useCallback(() => {
-    setDialogs((prev) => ({
-      ...prev,
-      linkDialog: { ...prev.linkDialog, isOpen: false },
-    }));
-  }, []);
-
-  const updateLinkDialog = useCallback(
-    (updates: Partial<DialogState["linkDialog"]>) => {
-      setDialogs((prev) => ({
-        ...prev,
-        linkDialog: { ...prev.linkDialog, ...updates },
-      }));
-    },
-    [],
-  );
-
-  const openImageDialog = useCallback(() => {
-    setDialogs((prev) => ({
-      ...prev,
-      imageDialog: { ...prev.imageDialog, isOpen: true },
-    }));
-  }, []);
-
-  const closeImageDialog = useCallback(() => {
-    setDialogs((prev) => ({
-      ...prev,
-      imageDialog: {
-        isOpen: false,
-        activeTab: "upload",
-        url: "",
-        alt: "",
-        caption: "",
-        file: null,
-        dragOver: false,
-      },
-    }));
-  }, []);
-
-  const updateImageDialog = useCallback(
-    (updates: Partial<DialogState["imageDialog"]>) => {
-      setDialogs((prev) => ({
-        ...prev,
-        imageDialog: { ...prev.imageDialog, ...updates },
-      }));
-    },
-    [],
-  );
-
-  return {
-    dialogs,
-    openLinkDialog,
-    closeLinkDialog,
-    updateLinkDialog,
-    openImageDialog,
-    closeImageDialog,
-    updateImageDialog,
-  };
-}
-
-// Link Dialog Component - Singleton
-function LinkDialog({
-  isOpen,
-  onClose,
-  url,
-  text,
-  isEdit,
-  showTextField,
-  onUrlChange,
-  onTextChange,
-  onSubmit,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  url: string;
-  text: string;
-  isEdit: boolean;
-  showTextField: boolean;
-  onUrlChange: (url: string) => void;
-  onTextChange: (text: string) => void;
-  onSubmit: () => void;
-}) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit();
-  };
-
-  return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
-            <LinkIcon className="h-5 w-5" />
-            {isEdit ? "Edit Link" : "Insert Link"}
-          </DrawerTitle>
-        </DrawerHeader>
-
-        <div className="p-4 space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="link-url">URL</Label>
-              <Input
-                id="link-url"
-                type="url"
-                placeholder="https://example.com"
-                value={url}
-                onChange={(e) => onUrlChange(e.target.value)}
-                autoFocus
-              />
-            </div>
-
-            {showTextField && (
-              <div className="space-y-2">
-                <Label htmlFor="link-text">Link Text</Label>
-                <Input
-                  id="link-text"
-                  placeholder="Link text"
-                  value={text}
-                  onChange={(e) => onTextChange(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!url.trim()}>
-                {isEdit ? "Update Link" : "Insert Link"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
-}
-
-// Image Dialog Component - Singleton with tabs
-function ImageDialog({
-  isOpen,
-  onClose,
-  activeTab,
-  url,
-  alt,
-  caption,
-  file,
-  dragOver,
-  onTabChange,
-  onUrlChange,
-  onAltChange,
-  onCaptionChange,
-  onFileChange,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onSubmit,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  activeTab: "upload" | "url";
-  url: string;
-  alt: string;
-  caption: string;
-  file: File | null;
-  dragOver: boolean;
-  onTabChange: (tab: "upload" | "url") => void;
-  onUrlChange: (url: string) => void;
-  onAltChange: (alt: string) => void;
-  onCaptionChange: (caption: string) => void;
-  onFileChange: (file: File | null) => void;
-  onDragOver: (dragOver: boolean) => void;
-  onDragLeave: () => void;
-  onDrop: (files: FileList) => void;
-  onSubmit: () => void;
-}) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit();
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    onDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    onDragLeave();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    onDragLeave();
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      onDrop(files);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0 && files[0]) {
-      onFileChange(files[0]);
-    }
-  };
-
-  const handleRemoveFile = () => {
-    onFileChange(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // Check if we have valid content to show advanced options
-  const hasValidContent = activeTab === "upload" ? !!file : !!url.trim();
-
-  return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
-            <Image className="h-5 w-5" />
-            Insert Image
-          </DrawerTitle>
-        </DrawerHeader>
-
-        <div className="p-4">
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => onTabChange(value as "upload" | "url")}
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Upload
-              </TabsTrigger>
-              <TabsTrigger value="url" className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                URL
-              </TabsTrigger>
-            </TabsList>
-
-            <form onSubmit={handleSubmit}>
-              <TabsContent value="upload" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Upload Image</Label>
-                  {!file ? (
-                    <div
-                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                        dragOver
-                          ? "border-primary bg-primary/5"
-                          : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                      }`}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Drop an image here, or click to select
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Supports: JPG, PNG, GIF, WebP (max 10MB)
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border rounded-lg p-4 bg-muted/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 rounded border overflow-hidden bg-muted flex-shrink-0">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRemoveFile}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="url" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="image-url">Image URL</Label>
-                  <Input
-                    id="image-url"
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    value={url}
-                    onChange={(e) => onUrlChange(e.target.value)}
-                  />
-                </div>
-              </TabsContent>
-
-              {/* Advanced Options - only show when we have valid content */}
-              {hasValidContent && (
-                <Collapsible
-                  open={showAdvanced}
-                  onOpenChange={setShowAdvanced}
-                  className="mt-4"
-                >
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full justify-between p-2 h-auto"
-                    >
-                      <span className="text-sm font-medium">Advanced Options</span>
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${
-                          showAdvanced ? "rotate-180" : ""
-                        }`}
-                      />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="image-alt">Alt Text (optional)</Label>
-                      <Input
-                        id="image-alt"
-                        placeholder="Describe the image for accessibility"
-                        value={alt}
-                        onChange={(e) => onAltChange(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="image-caption">Caption (optional)</Label>
-                      <Input
-                        id="image-caption"
-                        placeholder="Image caption"
-                        value={caption}
-                        onChange={(e) => onCaptionChange(e.target.value)}
-                      />
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={activeTab === "upload" ? !file : !url.trim()}
-                >
-                  Insert Image
-                </Button>
-              </div>
-            </form>
-          </Tabs>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
-}
-
 // Custom hook for image handling
 function useImageHandlers(
   commands: EditorCommands,
@@ -701,15 +256,344 @@ function useImageHandlers(
   return { handlers, fileInputRef };
 }
 
+// Link Dialog Component - Uses Drawer only
+function LinkDialog({
+  isOpen,
+  onOpenChange,
+  initialUrl = "",
+  initialText = "",
+  initialIsEdit = false,
+  onSubmit,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialUrl?: string;
+  initialText?: string;
+  initialIsEdit?: boolean;
+  onSubmit: (data: { url: string; text: string }) => void;
+}) {
+  const [url, setUrl] = useState(initialUrl);
+  const [text, setText] = useState(initialText);
+  const [isEdit, setIsEdit] = useState(initialIsEdit);
+
+  useEffect(() => {
+    if (isOpen) {
+      setUrl(initialUrl);
+      setText(initialText);
+      setIsEdit(initialIsEdit);
+    }
+  }, [isOpen, initialUrl, initialText, initialIsEdit]);
+
+  const handleSubmit = () => {
+    if (url.trim()) {
+      onSubmit({ url: url.trim(), text: text.trim() });
+      onOpenChange(false);
+    }
+  };
+
+  return (
+    <Drawer open={isOpen} onOpenChange={onOpenChange}>
+      <DrawerContent className="flex flex-col max-h-[80vh]">
+        <DrawerHeader>
+          <div className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5" />
+            <DrawerTitle>
+              {isEdit ? "Edit Link" : "Insert Link"}
+            </DrawerTitle>
+          </div>
+        </DrawerHeader>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="link-url">URL</Label>
+            <Input
+              id="link-url"
+              type="url"
+              placeholder="https://example.com"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="link-text">Link Text</Label>
+            <Input
+              id="link-text"
+              placeholder="Link text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <DrawerFooter>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={!url.trim()}>
+              {isEdit ? "Update Link" : "Insert Link"}
+            </Button>
+          </div>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// Image Dialog Component - Uses Drawer only
+function ImageDialog({
+  isOpen,
+  onOpenChange,
+  onSubmit,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: {
+    activeTab: "upload" | "url";
+    url: string;
+    alt: string;
+    caption: string;
+    file: File | null;
+  }) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<"upload" | "url">("upload");
+  const [url, setUrl] = useState("");
+  const [alt, setAlt] = useState("");
+  const [caption, setCaption] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab("upload");
+      setUrl("");
+      setAlt("");
+      setCaption("");
+      setFile(null);
+      setDragOver(false);
+      setShowAdvanced(false);
+    }
+  }, [isOpen]);
+
+  const handleSubmit = () => {
+    onSubmit({ activeTab, url, alt, caption, file });
+    onOpenChange(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0]) {
+      setFile(files[0]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0 && files[0]) {
+      setFile(files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Check if we have valid content to show advanced options
+  const hasValidContent = activeTab === "upload" ? !!file : !!url.trim();
+
+  return (
+    <Drawer open={isOpen} onOpenChange={onOpenChange}>
+      <DrawerContent className="flex flex-col max-h-[80vh]">
+        <DrawerHeader>
+          <div className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            <DrawerTitle>
+              Insert Image
+            </DrawerTitle>
+          </div>
+        </DrawerHeader>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "upload" | "url")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload
+              </TabsTrigger>
+              <TabsTrigger value="url" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                URL
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label>Upload Image</Label>
+                {!file ? (
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                      dragOver
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <CloudUpload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Drop an image here, or click to select
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Supports: JPG, PNG, GIF, WebP (max 10MB)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 rounded border overflow-hidden bg-muted flex-shrink-0">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveFile}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="url" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="image-url">Image URL</Label>
+                <Input
+                  id="image-url"
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Advanced Options - only show when we have valid content */}
+            {hasValidContent && (
+              <Collapsible
+                open={showAdvanced}
+                onOpenChange={setShowAdvanced}
+                className="mt-4"
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full justify-between p-2 h-auto"
+                  >
+                    <span className="text-sm font-medium">Advanced Options</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        showAdvanced ? "rotate-180" : ""
+                      }`}
+                    />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="image-alt">Alt Text (optional)</Label>
+                    <Input
+                      id="image-alt"
+                      placeholder="Describe the image for accessibility"
+                      value={alt}
+                      onChange={(e) => setAlt(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="image-caption">Caption (optional)</Label>
+                    <Input
+                      id="image-caption"
+                      placeholder="Image caption"
+                      value={caption}
+                      onChange={(e) => setCaption(e.target.value)}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+          </Tabs>
+        </div>
+
+        <DrawerFooter>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={activeTab === "upload" ? !file : !url.trim()}
+            >
+              Insert Image
+            </Button>
+          </div>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // Modern Floating Toolbar with SHADCN components
 function ModernFloatingToolbar({
   openLinkDialog,
 }: {
   openLinkDialog: (
-    url?: string,
-    text?: string,
-    isEdit?: boolean,
-    showTextField?: boolean,
+    initialUrl?: string,
+    initialText?: string,
+    initialIsEdit?: boolean,
   ) => void;
 }) {
   const { commands, activeStates, extensions, hasExtension, config } =
@@ -957,10 +841,10 @@ function ModernFloatingToolbar({
                       commands.removeLink();
                     } else if (activeStates.isTextSelected) {
                       // Text is selected - only ask for URL
-                      openLinkDialog("", "", false, false);
+                      openLinkDialog("", "", false);
                     } else {
                       // No text selected - use the full dialog
-                      openLinkDialog("", "", false, true);
+                      openLinkDialog("", "", false);
                     }
                   }}
                 >
@@ -1036,20 +920,19 @@ function ModernToolbar({
   hasExtension,
   activeStates,
   onCommandPaletteOpen,
-  onLinkDialogOpen,
-  onImageDialogOpen,
+  openLinkDialog,
+  openImageDialog,
 }: {
   commands: EditorCommands;
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   onCommandPaletteOpen: () => void;
-  onLinkDialogOpen: (
-    url?: string,
-    text?: string,
-    isEdit?: boolean,
-    showTextField?: boolean,
+  openLinkDialog: (
+    initialUrl?: string,
+    initialText?: string,
+    initialIsEdit?: boolean,
   ) => void;
-  onImageDialogOpen: () => void;
+  openImageDialog: () => void;
 }) {
   const { lexical: editor } = useEditor();
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -1174,10 +1057,10 @@ function ModernToolbar({
                     commands.removeLink();
                   } else if (activeStates.isTextSelected) {
                     // Text is selected - only ask for URL
-                    onLinkDialogOpen("", "", false, false);
+                    openLinkDialog("", "", false);
                   } else {
                     // No text selected - use the full dialog
-                    onLinkDialogOpen("", "", false, true);
+                    openLinkDialog("", "", false);
                   }
                 }}
               >
@@ -1222,22 +1105,6 @@ function ModernToolbar({
                 ))}
               </SelectContent>
             </Select>
-
-            {hasExtension("code") && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle
-                    size="sm"
-                    variant={activeStates.isInCodeBlock ? "pressed" : "default"}
-                    pressed={activeStates.isInCodeBlock}
-                    onPressedChange={() => commands.toggleCodeBlock()}
-                  >
-                    <Terminal className="h-4 w-4" />
-                  </Toggle>
-                </TooltipTrigger>
-                <TooltipContent>Code Block</TooltipContent>
-              </Tooltip>
-            )}
           </div>
         )}
 
@@ -1284,7 +1151,7 @@ function ModernToolbar({
           {hasExtension("image") && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="ghost" onClick={onImageDialogOpen}>
+                <Button size="sm" variant="ghost" onClick={openImageDialog}>
                   <Image className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -1294,88 +1161,93 @@ function ModernToolbar({
 
           {/* Table Insert */}
           {hasExtension("table") && (
-            <Dialog open={showTableDialog} onOpenChange={setShowTableDialog}>
+            <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="ghost">
-                      <Table className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
+                  <Button size="sm" variant="ghost" onClick={() => setShowTableDialog(true)}>
+                    <Table className="h-4 w-4" />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Insert Table</TooltipContent>
               </Tooltip>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Insert Table</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="rows">Rows</Label>
-                      <Input
-                        id="rows"
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={tableConfig.rows}
-                        onChange={(e) =>
-                          setTableConfig((prev) => ({
-                            ...prev,
-                            rows: parseInt(e.target.value) || 1,
-                          }))
-                        }
-                      />
+
+              <Drawer open={showTableDialog} onOpenChange={setShowTableDialog}>
+                <DrawerContent className="flex flex-col max-h-[80vh]">
+                  <DrawerHeader>
+                    <DrawerTitle>Insert Table</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="rows">Rows</Label>
+                          <Input
+                            id="rows"
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={tableConfig.rows}
+                            onChange={(e) =>
+                              setTableConfig((prev) => ({
+                                ...prev,
+                                rows: parseInt(e.target.value) || 1,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="columns">Columns</Label>
+                          <Input
+                            id="columns"
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={tableConfig.columns}
+                            onChange={(e) =>
+                              setTableConfig((prev) => ({
+                                ...prev,
+                                columns: parseInt(e.target.value) || 1,
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="headers"
+                          checked={tableConfig.includeHeaders || false}
+                          onCheckedChange={(checked) =>
+                            setTableConfig((prev) => ({
+                              ...prev,
+                              includeHeaders: checked,
+                            }))
+                          }
+                        />
+                        <Label htmlFor="headers">Include headers</Label>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="columns">Columns</Label>
-                      <Input
-                        id="columns"
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={tableConfig.columns}
-                        onChange={(e) =>
-                          setTableConfig((prev) => ({
-                            ...prev,
-                            columns: parseInt(e.target.value) || 1,
-                          }))
-                        }
-                      />
+                  </div>
+                  <DrawerFooter>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowTableDialog(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          commands.insertTable(tableConfig);
+                          setShowTableDialog(false);
+                        }}
+                      >
+                        Insert Table
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="headers"
-                      checked={tableConfig.includeHeaders || false}
-                      onCheckedChange={(checked) =>
-                        setTableConfig((prev) => ({
-                          ...prev,
-                          includeHeaders: checked,
-                        }))
-                      }
-                    />
-                    <Label htmlFor="headers">Include headers</Label>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowTableDialog(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        commands.insertTable(tableConfig);
-                        setShowTableDialog(false);
-                      }}
-                    >
-                      Insert Table
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            </>
           )}
 
           {/* Horizontal Rule */}
@@ -1555,17 +1427,13 @@ function EditorContent({
   const [mode, setMode] = useState<EditorMode>("visual");
   const [content, setContent] = useState({ html: "", markdown: "" });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-
-  // Dialog state management
-  const {
-    dialogs,
-    openLinkDialog,
-    closeLinkDialog,
-    updateLinkDialog,
-    openImageDialog,
-    closeImageDialog,
-    updateImageDialog,
-  } = useDialogState();
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [linkInitial, setLinkInitial] = useState({
+    url: "",
+    text: "",
+    isEdit: false,
+  });
 
   // Use ref to store latest commands to avoid dependency issues
   const commandsRef = React.useRef(commands);
@@ -1603,27 +1471,40 @@ function EditorContent({
   // Image handlers
   const { handlers: imageHandlers } = useImageHandlers(commands, editor);
 
-  // Handle link dialog submission
-  const handleLinkSubmit = useCallback(() => {
-    const { url, text, isEdit } = dialogs.linkDialog;
-    if (url.trim()) {
-      commands.insertLink(url.trim(), text.trim());
-      closeLinkDialog();
-    }
-  }, [dialogs.linkDialog, commands, closeLinkDialog]);
+  // Handle link dialog open with initial values
+  const openLinkDialog = useCallback(
+    (initialUrl = "", initialText = "", initialIsEdit = false) => {
+      setLinkInitial({ url: initialUrl, text: initialText, isEdit: initialIsEdit });
+      setLinkDialogOpen(true);
+    },
+    [],
+  );
 
-  // Handle image dialog submission
-  const handleImageSubmit = useCallback(() => {
-    const { activeTab, url, alt, caption, file } = dialogs.imageDialog;
+  // Handle link submit
+  const handleLinkSubmit = useCallback(
+    ({ url, text }: { url: string; text: string }) => {
+      commands.insertLink(url, text);
+    },
+    [commands],
+  );
 
-    if (activeTab === "upload" && file) {
-      imageHandlers.insertImageFromFile(file, alt, caption);
-    } else if (activeTab === "url" && url.trim()) {
-      imageHandlers.insertImageFromUrl(url.trim(), alt, caption);
-    }
-
-    closeImageDialog();
-  }, [dialogs.imageDialog, imageHandlers, closeImageDialog]);
+  // Handle image submit
+  const handleImageSubmit = useCallback(
+    ({ activeTab, url, alt, caption, file }: {
+      activeTab: "upload" | "url";
+      url: string;
+      alt: string;
+      caption: string;
+      file: File | null;
+    }) => {
+      if (activeTab === "upload" && file) {
+        imageHandlers.insertImageFromFile(file, alt, caption);
+      } else if (activeTab === "url" && url.trim()) {
+        imageHandlers.insertImageFromUrl(url.trim(), alt, caption);
+      }
+    },
+    [imageHandlers],
+  );
 
   // Register command palette commands and keyboard shortcuts
   useEffect(() => {
@@ -1747,8 +1628,8 @@ function EditorContent({
               hasExtension={hasExtension}
               activeStates={activeStates}
               onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
-              onLinkDialogOpen={openLinkDialog}
-              onImageDialogOpen={openImageDialog}
+              openLinkDialog={openLinkDialog}
+              openImageDialog={() => setImageDialogOpen(true)}
             />
           </div>
         </div>
@@ -1784,38 +1665,17 @@ function EditorContent({
 
       {/* Dialogs */}
       <LinkDialog
-        isOpen={dialogs.linkDialog.isOpen}
-        onClose={closeLinkDialog}
-        url={dialogs.linkDialog.url}
-        text={dialogs.linkDialog.text}
-        isEdit={dialogs.linkDialog.isEdit}
-        showTextField={dialogs.linkDialog.showTextField}
-        onUrlChange={(url) => updateLinkDialog({ url })}
-        onTextChange={(text) => updateLinkDialog({ text })}
+        isOpen={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        initialUrl={linkInitial.url}
+        initialText={linkInitial.text}
+        initialIsEdit={linkInitial.isEdit}
         onSubmit={handleLinkSubmit}
       />
 
       <ImageDialog
-        isOpen={dialogs.imageDialog.isOpen}
-        onClose={closeImageDialog}
-        activeTab={dialogs.imageDialog.activeTab}
-        url={dialogs.imageDialog.url}
-        alt={dialogs.imageDialog.alt}
-        caption={dialogs.imageDialog.caption}
-        file={dialogs.imageDialog.file}
-        dragOver={dialogs.imageDialog.dragOver}
-        onTabChange={(activeTab) => updateImageDialog({ activeTab })}
-        onUrlChange={(url) => updateImageDialog({ url })}
-        onAltChange={(alt) => updateImageDialog({ alt })}
-        onCaptionChange={(caption) => updateImageDialog({ caption })}
-        onFileChange={(file) => updateImageDialog({ file })}
-        onDragOver={(dragOver) => updateImageDialog({ dragOver })}
-        onDragLeave={() => updateImageDialog({ dragOver: false })}
-        onDrop={(files) => {
-          if (files.length > 0) {
-            updateImageDialog({ file: files[0], dragOver: false });
-          }
-        }}
+        isOpen={imageDialogOpen}
+        onOpenChange={setImageDialogOpen}
         onSubmit={handleImageSubmit}
       />
 
