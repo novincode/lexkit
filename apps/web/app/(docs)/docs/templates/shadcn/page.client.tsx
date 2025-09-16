@@ -458,7 +458,6 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             <TabsTrigger value="main">Main Component</TabsTrigger>
             <TabsTrigger value="styles">Styles</TabsTrigger>
             <TabsTrigger value="theme">Theme</TabsTrigger>
-            <TabsTrigger value="commands">Commands</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
           </TabsList>
 
@@ -516,23 +515,7 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </Card>
           </TabsContent>
 
-          <TabsContent value="commands">
-            <Card>
-              <CardHeader>
-                <CardTitle>Command Palette</CardTitle>
-                <CardDescription>
-                  Keyboard-driven command system for power users.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SimpleCodeBlock
-                  title="Command Palette Component"
-                  html={getHighlightedCode("shadcn/CommandPalette.tsx") || ""}
-                  raw={getRawCode("shadcn/CommandPalette.tsx") || ""}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+      
 
           <TabsContent value="components">
             <Card>
