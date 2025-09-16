@@ -4,11 +4,8 @@ import type {
 } from "@lexkit/editor/extensions/types";
 import type { CommandPaletteItem } from "@lexkit/editor/extensions/core";
 
-// Import extensions from the template instead of redefining
-import { extensions } from "./DefaultTemplate";
-
-// Extract the commands type from our extensions
-type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
+// Import extensions from the Shadcn template
+import { extensions } from "./ShadcnTemplate";
 
 /**
  * Keyboard shortcut configuration
@@ -36,6 +33,9 @@ export type CommandConfig = {
   icon?: string;
   condition?: (commands: EditorCommands) => boolean; // Only show if condition is true
 };
+
+// Extract the commands type from our extensions
+type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 
 /**
  * Generate all available commands based on the extensions
@@ -220,7 +220,8 @@ export function generateCommands(): CommandConfig[] {
         const src = prompt("Enter image URL:");
         if (src) {
           const alt = prompt("Enter alt text:") || "";
-          commands.insertImage({ src, alt });
+          const caption = prompt("Enter caption (optional):") || undefined;
+          commands.insertImage({ src, alt, caption });
         }
       },
       shortcuts: [{ key: "i", ctrlKey: true, shiftKey: true }],

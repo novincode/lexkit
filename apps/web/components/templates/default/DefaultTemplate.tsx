@@ -27,7 +27,6 @@ import {
   contextMenuExtension,
 } from "@lexkit/editor/extensions/core";
 import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
-import { MyCustomExtension } from "../MyCustomExtension";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { $getSelection, $isNodeSelection, $isRangeSelection } from "lexical";
@@ -81,7 +80,7 @@ import { FloatingToolbarExtension } from "@lexkit/editor/extensions/core/Floatin
 import { createPortal } from "react-dom";
 
 // Extensions array
-const extensions = [
+export const extensions = [
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -105,7 +104,6 @@ const extensions = [
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
-  MyCustomExtension,
   floatingToolbarExtension, // Simple extension without render config
   contextMenuExtension,
   commandPaletteExtension,
@@ -750,21 +748,6 @@ function Toolbar({
         </div>
       )}
 
-      {/* Custom Extension */}
-      {hasExtension("myBlock") && commands.insertMyBlock && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() =>
-              commands.insertMyBlock({ text: "Custom Block", color: "red" })
-            }
-            className="lexkit-toolbar-button"
-            title="Insert Custom Block"
-            style={{ width: "auto", padding: "0 8px", fontSize: "12px" }}
-          >
-            Custom
-          </button>
-        </div>
-      )}
 
       {/* Command Palette */}
       <div className="lexkit-toolbar-section">

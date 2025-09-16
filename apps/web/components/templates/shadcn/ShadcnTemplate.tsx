@@ -33,7 +33,6 @@ import {
   contextMenuExtension,
 } from "@lexkit/editor/extensions/core";
 import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
-import { MyCustomExtension } from "../MyCustomExtension";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 
@@ -41,7 +40,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import {
   commandsToCommandPaletteItems,
   registerKeyboardShortcuts,
-} from "../default/commands";
+} from "./commands";
 import { ShadcnCommandPalette } from "./CommandPalette";
 import { shadcnTheme } from "./theme";
 
@@ -134,7 +133,7 @@ import { createPortal } from "react-dom";
 import "./shadcn-styles.css";
 
 // Extensions array
-const extensions = [
+export const extensions = [
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -179,7 +178,6 @@ const extensions = [
       </Button>
     ),
   }),
-  MyCustomExtension,
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
