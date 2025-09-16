@@ -16,7 +16,7 @@ import {
   horizontalRuleExtension,
   tableExtension,
   type TableConfig,
-  listExtension, 
+  listExtension,
   historyExtension,
   imageExtension,
   blockFormatExtension,
@@ -80,12 +80,12 @@ import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
 import { Switch } from "@repo/ui/components/switch";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerFooter,
-} from "@repo/ui/components/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@repo/ui/components/dialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -256,54 +256,53 @@ function useImageHandlers(
   return { handlers, fileInputRef };
 }
 
-// Link Dialog Component - Uses Drawer only
+// Link Dialog Component - Uses Dialog only
 function LinkDialog({
   isOpen,
   onOpenChange,
   initialUrl = "",
-  initialText = "",
-  initialIsEdit = false,
   onSubmit,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   initialUrl?: string;
-  initialText?: string;
-  initialIsEdit?: boolean;
-  onSubmit: (data: { url: string; text: string }) => void;
+  onSubmit: (data: { url: string }) => void;
 }) {
   const [url, setUrl] = useState(initialUrl);
-  const [text, setText] = useState(initialText);
-  const [isEdit, setIsEdit] = useState(initialIsEdit);
 
   useEffect(() => {
     if (isOpen) {
       setUrl(initialUrl);
-      setText(initialText);
-      setIsEdit(initialIsEdit);
     }
-  }, [isOpen, initialUrl, initialText, initialIsEdit]);
+  }, [isOpen, initialUrl]);
 
   const handleSubmit = () => {
     if (url.trim()) {
-      onSubmit({ url: url.trim(), text: text.trim() });
+      onSubmit({ url: url.trim() });
       onOpenChange(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="flex flex-col max-h-[80vh]">
-        <DrawerHeader>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
           <div className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5" />
-            <DrawerTitle>
-              {isEdit ? "Edit Link" : "Insert Link"}
-            </DrawerTitle>
+            <DialogTitle>
+              Insert Link
+            </DialogTitle>
           </div>
-        </DrawerHeader>
+        </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="link-url">URL</Label>
             <Input
@@ -312,37 +311,28 @@ function LinkDialog({
               placeholder="https://example.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={handleKeyDown}
               autoFocus
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="link-text">Link Text</Label>
-            <Input
-              id="link-text"
-              placeholder="Link text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
             />
           </div>
         </div>
 
-        <DrawerFooter>
+        <DialogFooter>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={!url.trim()}>
-              {isEdit ? "Update Link" : "Insert Link"}
+              Insert Link
             </Button>
           </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-// Image Dialog Component - Uses Drawer only
+// Image Dialog Component - Uses Dialog only
 function ImageDialog({
   isOpen,
   onOpenChange,
@@ -384,6 +374,13 @@ function ImageDialog({
     onOpenChange(false);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (activeTab === "url" ? url.trim() : file)) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(true);
@@ -421,18 +418,18 @@ function ImageDialog({
   const hasValidContent = activeTab === "upload" ? !!file : !!url.trim();
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="flex flex-col max-h-[80vh]">
-        <DrawerHeader>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
           <div className="flex items-center gap-2">
             <Image className="h-5 w-5" />
-            <DrawerTitle>
+            <DialogTitle>
               Insert Image
-            </DrawerTitle>
+            </DialogTitle>
           </div>
-        </DrawerHeader>
+        </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="space-y-4">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "upload" | "url")}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload" className="flex items-center gap-2">
@@ -450,7 +447,7 @@ function ImageDialog({
                 <Label>Upload Image</Label>
                 {!file ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
                       dragOver
                         ? "border-primary bg-primary/5"
                         : "border-muted-foreground/25 hover:border-muted-foreground/50"
@@ -517,6 +514,7 @@ function ImageDialog({
                   placeholder="https://example.com/image.jpg"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
               </div>
             </TabsContent>
@@ -568,7 +566,7 @@ function ImageDialog({
           </Tabs>
         </div>
 
-        <DrawerFooter>
+        <DialogFooter>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
@@ -580,9 +578,9 @@ function ImageDialog({
               Insert Image
             </Button>
           </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -590,11 +588,9 @@ function ImageDialog({
 function ModernFloatingToolbar({
   openLinkDialog,
 }: {
-  openLinkDialog: (
-    initialUrl?: string,
-    initialText?: string,
-    initialIsEdit?: boolean,
-  ) => void;
+  openLinkDialog: (options?: {
+    initialUrl?: string;
+  }) => void;
 }) {
   const { commands, activeStates, extensions, hasExtension, config } =
     useEditor();
@@ -835,16 +831,14 @@ function ModernFloatingToolbar({
                     activeStates.isLink ? theme.buttonActive : theme.button
                   }
                   pressed={activeStates.isLink}
+                  disabled={!activeStates.isTextSelected && !activeStates.isLink}
                   onPressedChange={() => {
                     if (activeStates.isLink) {
                       // Text is already linked - remove the link
                       commands.removeLink();
                     } else if (activeStates.isTextSelected) {
-                      // Text is selected - only ask for URL
-                      openLinkDialog("", "", false);
-                    } else {
-                      // No text selected - use the full dialog
-                      openLinkDialog("", "", false);
+                      // Text is selected - open link dialog
+                      openLinkDialog({});
                     }
                   }}
                 >
@@ -927,11 +921,9 @@ function ModernToolbar({
   hasExtension: (name: ExtensionNames) => boolean;
   activeStates: EditorStateQueries;
   onCommandPaletteOpen: () => void;
-  openLinkDialog: (
-    initialUrl?: string,
-    initialText?: string,
-    initialIsEdit?: boolean,
-  ) => void;
+  openLinkDialog: (options?: {
+    initialUrl?: string;
+  }) => void;
   openImageDialog: () => void;
 }) {
   const { lexical: editor } = useEditor();
@@ -1051,16 +1043,14 @@ function ModernToolbar({
                 size="sm"
                 variant={activeStates.isLink ? "pressed" : "default"}
                 pressed={activeStates.isLink}
+                disabled={!activeStates.isTextSelected && !activeStates.isLink}
                 onPressedChange={() => {
                   if (activeStates.isLink) {
                     // Text is already linked - remove the link
                     commands.removeLink();
-                  } else if (activeStates.isTextSelected) {
-                    // Text is selected - only ask for URL
-                    openLinkDialog("", "", false);
                   } else {
-                    // No text selected - use the full dialog
-                    openLinkDialog("", "", false);
+                    // Text is selected (floating toolbar only shows when selected) - open link dialog
+                    openLinkDialog({});
                   }
                 }}
               >
@@ -1171,63 +1161,75 @@ function ModernToolbar({
                 <TooltipContent>Insert Table</TooltipContent>
               </Tooltip>
 
-              <Drawer open={showTableDialog} onOpenChange={setShowTableDialog}>
-                <DrawerContent className="flex flex-col max-h-[80vh]">
-                  <DrawerHeader>
-                    <DrawerTitle>Insert Table</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="flex-1 overflow-y-auto p-4">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="rows">Rows</Label>
-                          <Input
-                            id="rows"
-                            type="number"
-                            min="1"
-                            max="20"
-                            value={tableConfig.rows}
-                            onChange={(e) =>
-                              setTableConfig((prev) => ({
-                                ...prev,
-                                rows: parseInt(e.target.value) || 1,
-                              }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="columns">Columns</Label>
-                          <Input
-                            id="columns"
-                            type="number"
-                            min="1"
-                            max="20"
-                            value={tableConfig.columns}
-                            onChange={(e) =>
-                              setTableConfig((prev) => ({
-                                ...prev,
-                                columns: parseInt(e.target.value) || 1,
-                              }))
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="headers"
-                          checked={tableConfig.includeHeaders || false}
-                          onCheckedChange={(checked) =>
+              <Dialog open={showTableDialog} onOpenChange={setShowTableDialog}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Insert Table</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="rows">Rows</Label>
+                        <Input
+                          id="rows"
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={tableConfig.rows}
+                          onChange={(e) =>
                             setTableConfig((prev) => ({
                               ...prev,
-                              includeHeaders: checked,
+                              rows: parseInt(e.target.value) || 1,
                             }))
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              commands.insertTable(tableConfig);
+                              setShowTableDialog(false);
+                            }
+                          }}
                         />
-                        <Label htmlFor="headers">Include headers</Label>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="columns">Columns</Label>
+                        <Input
+                          id="columns"
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={tableConfig.columns}
+                          onChange={(e) =>
+                            setTableConfig((prev) => ({
+                              ...prev,
+                              columns: parseInt(e.target.value) || 1,
+                            }))
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              commands.insertTable(tableConfig);
+                              setShowTableDialog(false);
+                            }
+                          }}
+                        />
                       </div>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="headers"
+                        checked={tableConfig.includeHeaders || false}
+                        onCheckedChange={(checked) =>
+                          setTableConfig((prev) => ({
+                            ...prev,
+                            includeHeaders: checked,
+                          }))
+                        }
+                      />
+                      <Label htmlFor="headers">Include headers</Label>
+                    </div>
                   </div>
-                  <DrawerFooter>
+                  <DialogFooter>
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="outline"
@@ -1244,9 +1246,9 @@ function ModernToolbar({
                         Insert Table
                       </Button>
                     </div>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </>
           )}
 
@@ -1431,8 +1433,6 @@ function EditorContent({
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [linkInitial, setLinkInitial] = useState({
     url: "",
-    text: "",
-    isEdit: false,
   });
 
   // Use ref to store latest commands to avoid dependency issues
@@ -1473,8 +1473,11 @@ function EditorContent({
 
   // Handle link dialog open with initial values
   const openLinkDialog = useCallback(
-    (initialUrl = "", initialText = "", initialIsEdit = false) => {
-      setLinkInitial({ url: initialUrl, text: initialText, isEdit: initialIsEdit });
+    (options: {
+      initialUrl?: string;
+    } = {}) => {
+      const { initialUrl = "" } = options;
+      setLinkInitial({ url: initialUrl });
       setLinkDialogOpen(true);
     },
     [],
@@ -1482,8 +1485,8 @@ function EditorContent({
 
   // Handle link submit
   const handleLinkSubmit = useCallback(
-    ({ url, text }: { url: string; text: string }) => {
-      commands.insertLink(url, text);
+    ({ url }: { url: string }) => {
+      commands.insertLink(url);
     },
     [commands],
   );
@@ -1668,8 +1671,6 @@ function EditorContent({
         isOpen={linkDialogOpen}
         onOpenChange={setLinkDialogOpen}
         initialUrl={linkInitial.url}
-        initialText={linkInitial.text}
-        initialIsEdit={linkInitial.isEdit}
         onSubmit={handleLinkSubmit}
       />
 
