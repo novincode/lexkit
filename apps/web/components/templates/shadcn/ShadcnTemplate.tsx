@@ -1732,16 +1732,10 @@ function EditorContent({
 
       // Add right-click handler for context menus
       const handleContextMenu = (e: MouseEvent) => {
-        console.log("[ShadcnTemplate] Context menu triggered", { mode, target: e.target });
-
         // Only handle in visual mode
         if (mode !== "visual") {
-          console.log("[ShadcnTemplate] Not in visual mode, ignoring");
           return;
         }
-
-        // Prevent default context menu
-        e.preventDefault();
 
         // Get the clicked element and try to set selection to it
         const target = e.target as HTMLElement;
@@ -1753,21 +1747,18 @@ function EditorContent({
             tableCell = target.closest('td, th');
           }
 
-          console.log("[ShadcnTemplate] Table cell detection", { tableCell, target });
-
           if (tableCell) {
             // For right-click context menu, we can check the DOM directly
             const isInTableCell = tableCell.tagName === 'TD' || tableCell.tagName === 'TH' ||
                                  tableCell.hasAttribute('data-lexical-table-cell');
 
-            console.log("[ShadcnTemplate] Is in table cell?", isInTableCell);
-
             if (isInTableCell) {
+              // Only prevent default if we're in a table cell
+              e.preventDefault();
+              
               // Get table extension
               const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
               const contextMenuExtension = extensions.find((ext: any) => ext.name === "contextMenu") as any;
-
-              console.log("[ShadcnTemplate] Extensions found", { tableExtension: !!tableExtension, contextMenuExtension: !!contextMenuExtension, enableContextMenu: tableExtension?.config?.enableContextMenu });
 
               if (tableExtension && contextMenuExtension && tableExtension.config?.enableContextMenu) {
                 // Get table commands
@@ -1775,23 +1766,13 @@ function EditorContent({
                 // Get context menu items from table extension
                 const contextMenuItems = tableExtension.getContextMenuItems(tableCommands);
 
-                console.log("[ShadcnTemplate] Showing context menu", { items: contextMenuItems.length, position: { x: e.clientX, y: e.clientY } });
-
                 contextMenuExtension.getCommands(editor).showContextMenu({
                   items: contextMenuItems,
                   position: { x: e.clientX, y: e.clientY },
                 });
-              } else {
-                console.log("[ShadcnTemplate] Context menu not enabled or extensions missing");
               }
-            } else {
-              console.log("[ShadcnTemplate] Not in table cell");
             }
-          } else {
-            console.log("[ShadcnTemplate] No table cell found");
           }
-        } else {
-          console.log("[ShadcnTemplate] No target or editor");
         }
       };
 
@@ -1814,7 +1795,7 @@ function EditorContent({
         }
       };
     }
-  }, [editor, methods, onReady, commands]);
+  }, [editor, methods, onReady, commands, mode]);
 
   // Cmd+K keyboard shortcut for command palette
   useEffect(() => {
@@ -1924,8 +1905,11 @@ function EditorContent({
       )}
 
       <div className="relative p-4">
-        {/* Editor Content - Full width, no card wrapper */}
-        <div className="min-h-[600px] prose prose-lg max-w-none">
+        {/* Editor Content - Always render RichText but control visibility */}
+        <div 
+          className="min-h-[600px] prose prose-lg max-w-none"
+          style={{ display: mode === "visual" ? "block" : "none" }}
+        >
           <RichText
             className={shadcnTheme.contentEditable}
             placeholder="Start writing..."
@@ -1937,19 +1921,24 @@ function EditorContent({
           />
           <ModernFloatingToolbar openLinkDialog={openLinkDialog} />
         </div>
-        
-        {mode === "html" ? (
+
+        {mode === "html" && (
           <ModernHTMLSourceView
             htmlContent={content.html}
             onHtmlChange={handleHtmlChange}
           />
-        ) : (
+        )}
+
+        {mode === "markdown" && (
           <ModernMarkdownSourceView
             markdownContent={content.markdown}
             onMarkdownChange={handleMarkdownChange}
           />
         )}
       </div>
+
+      {/* Context Menu Renderer - Always rendered */}
+      <ContextMenuRenderer />
 
       {/* Dialogs */}
       <LinkDialog

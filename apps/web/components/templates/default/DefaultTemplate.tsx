@@ -1142,9 +1142,6 @@ function EditorContent({
       // Only handle in visual mode
       if (mode !== "visual") return;
 
-      // Prevent default context menu
-      e.preventDefault();
-
       // Get the clicked element and try to set selection to it
       const target = e.target as HTMLElement;
       if (target && editor) {
@@ -1162,6 +1159,9 @@ function EditorContent({
                                tableCell.hasAttribute('data-lexical-table-cell');
 
           if (isInTableCell) {
+            // Only prevent default if we're in a table cell
+            e.preventDefault();
+            
             // Get table extension
             const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
             const contextMenuExtension = extensions.find((ext: any) => ext.name === "contextMenu") as any;
