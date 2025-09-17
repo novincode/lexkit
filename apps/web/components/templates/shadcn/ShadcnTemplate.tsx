@@ -25,7 +25,7 @@ import {
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
-  DraggableBlockExtension, // We need the class itself, to re-create an instsance (Because we've configured one inside DefaultTemplate and using them both with different configs, will cause problems)
+  draggableBlockExtension,
 } from "@lexkit/editor/extensions";
 import {
   commandPaletteExtension,
@@ -42,6 +42,7 @@ import {
   registerKeyboardShortcuts,
 } from "./commands";
 import { shadcnTheme } from "./theme";
+import { cn } from "@repo/ui/lib/utils";
 
 // SHADCN Components
 import { Button } from "@repo/ui/components/button";
@@ -78,6 +79,13 @@ import { Separator } from "@repo/ui/components/separator";
 import { Label } from "@repo/ui/components/label";
 import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@repo/ui/components/context-menu";
 import { Switch } from "@repo/ui/components/switch";
 import {
   Dialog,
@@ -91,6 +99,62 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@repo/ui/components/collapsible";
+
+// Shadcn Table Context Menu Renderer
+function ShadcnTableContextMenuRenderer(props: {
+  items: any[];
+  position: { x: number; y: number };
+  onClose: () => void;
+  className: string;
+  style?: React.CSSProperties;
+  itemClassName: string;
+  itemStyle?: React.CSSProperties;
+  disabledItemClassName: string;
+  disabledItemStyle?: React.CSSProperties;
+}) {
+  const { items, position, onClose } = props;
+
+  console.log("[ShadcnTableContextMenuRenderer] Rendering", { items: items.length, position });
+
+  return createPortal(
+    <div
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+        props.className
+      )}
+      style={{
+        position: 'fixed',
+        left: position.x,
+        top: position.y,
+        zIndex: 1000,
+        ...props.style,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {items.map((item: any, index: number) => (
+        <div
+          key={index}
+          className={cn(
+            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            item.disabled ? props.disabledItemClassName : props.itemClassName
+          )}
+          style={item.disabled ? props.disabledItemStyle : props.itemStyle}
+          onClick={() => {
+            console.log("[ShadcnTableContextMenuRenderer] Item clicked", item.label);
+            if (!item.disabled && item.action) {
+              item.action();
+              onClose();
+            }
+          }}
+        >
+          {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+          {item.label}
+        </div>
+      ))}
+    </div>,
+    document.body
+  );
+}
 
 // Icons
 import {
@@ -151,7 +215,10 @@ export const extensions = [
     autoLinkUrls: true,
   }),
   horizontalRuleExtension,
-  tableExtension,
+  tableExtension.configure({
+    enableContextMenu: true,
+    contextMenuRenderer: ShadcnTableContextMenuRenderer,
+  }),
   listExtension,
   historyExtension,
   imageExtension,
@@ -188,7 +255,7 @@ export const extensions = [
   contextMenuExtension,
   commandPaletteExtension,
   
-  new DraggableBlockExtension({ // Create fresh instance to avoid caching issues when switching templates
+  draggableBlockExtension.configure({ // Create fresh instance to avoid caching issues when switching templates
     buttonStackPosition: "right",
   }),
 ] as const;
@@ -908,6 +975,126 @@ function ModernFloatingToolbar({
   );
 }
 
+// Context Menu Renderer
+function ContextMenuRenderer() {
+  const { extensions, lexical: editor } = useEditor();
+  const [contextMenuConfig, setContextMenuConfig] = useState<any>(null);
+
+  // Get the context menu extension instance
+  const contextMenuExtension = extensions.find(
+    (ext) => ext.name === "contextMenu",
+  ) as any;
+
+  useEffect(() => {
+    if (!contextMenuExtension) {
+      console.log("[ContextMenuRenderer] No context menu extension found");
+      return;
+    }
+
+    console.log("[ContextMenuRenderer] Subscribing to context menu extension");
+
+    const unsubscribe = contextMenuExtension.subscribe((config: any) => {
+      console.log("[ContextMenuRenderer] Context menu config changed", config);
+      setContextMenuConfig(config);
+
+      // Prevent body scrolling when context menu is open
+      if (config) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    });
+
+    return () => {
+      document.body.style.overflow = '';
+      unsubscribe();
+    };
+  }, [contextMenuExtension]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!contextMenuConfig) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.table-context-menu')) {
+        console.log("[ContextMenuRenderer] Clicking outside, hiding context menu");
+        if (contextMenuExtension) {
+          contextMenuExtension.getCommands(editor).hideContextMenu();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [contextMenuConfig, contextMenuExtension, editor]);
+
+  if (!contextMenuConfig) return null;
+
+  console.log("[ContextMenuRenderer] Rendering context menu", contextMenuConfig);
+
+  // Check if there's a custom renderer from any extension
+  // For now, we'll use the table extension's renderer if available
+  const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
+  const customRenderer = tableExtension?.config?.contextMenuRenderer;
+
+  if (customRenderer) {
+    console.log("[ContextMenuRenderer] Using custom renderer");
+    return customRenderer({
+      items: contextMenuConfig.items,
+      position: contextMenuConfig.position,
+      onClose: () => {
+        if (contextMenuExtension) {
+          contextMenuExtension.getCommands(editor).hideContextMenu();
+        }
+      },
+      className: tableExtension?.config?.theme?.contextMenu || "table-context-menu",
+      style: tableExtension?.config?.styles?.contextMenu,
+      itemClassName: tableExtension?.config?.theme?.contextMenuItem || "",
+      itemStyle: tableExtension?.config?.styles?.contextMenuItem,
+      disabledItemClassName: tableExtension?.config?.theme?.contextMenuItemDisabled || "",
+      disabledItemStyle: tableExtension?.config?.styles?.contextMenuItemDisabled,
+    });
+  }
+
+  // Default renderer
+  console.log("[ContextMenuRenderer] Using default renderer");
+  return createPortal(
+    <div
+      className="table-context-menu z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+      style={{
+        position: 'fixed',
+        left: contextMenuConfig.position.x,
+        top: contextMenuConfig.position.y,
+        zIndex: 1000,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {contextMenuConfig.items.map((item: any, index: number) => (
+        <div
+          key={index}
+          className={cn(
+            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            item.disabled && "opacity-50 cursor-not-allowed"
+          )}
+          onClick={() => {
+            if (!item.disabled && item.action) {
+              item.action();
+              if (contextMenuExtension) {
+                contextMenuExtension.getCommands(editor).hideContextMenu();
+              }
+            }
+          }}
+        >
+          {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+          {item.label}
+        </div>
+      ))}
+    </div>,
+    document.body
+  );
+}
+
 // Modern Toolbar Component with SHADCN - Simplified, no Card wrapper
 function ModernToolbar({
   commands,
@@ -1519,6 +1706,77 @@ function EditorContent({
       const originalShowCommand = commands.showCommandPalette;
       (commands as any).showCommandPalette = () => setCommandPaletteOpen(true);
 
+      // Add right-click handler for context menus
+      const handleContextMenu = (e: MouseEvent) => {
+        console.log("[ShadcnTemplate] Context menu triggered", { mode, target: e.target });
+
+        // Only handle in visual mode
+        if (mode !== "visual") {
+          console.log("[ShadcnTemplate] Not in visual mode, ignoring");
+          return;
+        }
+
+        // Prevent default context menu
+        e.preventDefault();
+
+        // Get the clicked element and try to set selection to it
+        const target = e.target as HTMLElement;
+        if (target && editor) {
+          // Try to find the table cell that was clicked
+          let tableCell = target.closest('[data-lexical-table-cell]');
+          if (!tableCell) {
+            // Try alternative selectors
+            tableCell = target.closest('td, th');
+          }
+
+          console.log("[ShadcnTemplate] Table cell detection", { tableCell, target });
+
+          if (tableCell) {
+            // For right-click context menu, we can check the DOM directly
+            const isInTableCell = tableCell.tagName === 'TD' || tableCell.tagName === 'TH' ||
+                                 tableCell.hasAttribute('data-lexical-table-cell');
+
+            console.log("[ShadcnTemplate] Is in table cell?", isInTableCell);
+
+            if (isInTableCell) {
+              // Get table extension
+              const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
+              const contextMenuExtension = extensions.find((ext: any) => ext.name === "contextMenu") as any;
+
+              console.log("[ShadcnTemplate] Extensions found", { tableExtension: !!tableExtension, contextMenuExtension: !!contextMenuExtension, enableContextMenu: tableExtension?.config?.enableContextMenu });
+
+              if (tableExtension && contextMenuExtension && tableExtension.config?.enableContextMenu) {
+                // Get table commands
+                const tableCommands = tableExtension.getCommands(editor);
+                // Get context menu items from table extension
+                const contextMenuItems = tableExtension.getContextMenuItems(tableCommands);
+
+                console.log("[ShadcnTemplate] Showing context menu", { items: contextMenuItems.length, position: { x: e.clientX, y: e.clientY } });
+
+                contextMenuExtension.getCommands(editor).showContextMenu({
+                  items: contextMenuItems,
+                  position: { x: e.clientX, y: e.clientY },
+                });
+              } else {
+                console.log("[ShadcnTemplate] Context menu not enabled or extensions missing");
+              }
+            } else {
+              console.log("[ShadcnTemplate] Not in table cell");
+            }
+          } else {
+            console.log("[ShadcnTemplate] No table cell found");
+          }
+        } else {
+          console.log("[ShadcnTemplate] No target or editor");
+        }
+      };
+
+      // Add event listener to editor root element
+      const editorElement = editor.getRootElement();
+      if (editorElement) {
+        editorElement.addEventListener("contextmenu", handleContextMenu);
+      }
+
       // Call onReady with methods when editor is ready
       if (onReady) {
         onReady(methods);
@@ -1527,6 +1785,9 @@ function EditorContent({
       return () => {
         unregister();
         (commands as any).showCommandPalette = originalShowCommand;
+        if (editorElement) {
+          editorElement.removeEventListener("contextmenu", handleContextMenu);
+        }
       };
     }
   }, [editor, methods, onReady, commands]);
@@ -1640,20 +1901,20 @@ function EditorContent({
 
       <div className="relative p-4">
         {/* Editor Content - Full width, no card wrapper */}
-        {mode === "visual" ? (
-          <div className="min-h-[600px] prose prose-lg max-w-none">
-            <RichText
-              className={shadcnTheme.contentEditable}
-              placeholder="Start writing..."
-              classNames={{
-                contentEditable: `${shadcnTheme.contentEditable} min-h-[600px] focus:outline-none`,
-                placeholder:
-                  "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none",
-              }}
-            />
-            <ModernFloatingToolbar openLinkDialog={openLinkDialog} />
-          </div>
-        ) : mode === "html" ? (
+        <div className="min-h-[600px] prose prose-lg max-w-none">
+          <RichText
+            className={shadcnTheme.contentEditable}
+            placeholder="Start writing..."
+            classNames={{
+              contentEditable: `${shadcnTheme.contentEditable} min-h-[600px] focus:outline-none`,
+              placeholder:
+                "shadcn-placeholder absolute top-8 left-4 text-muted-foreground pointer-events-none",
+            }}
+          />
+          <ModernFloatingToolbar openLinkDialog={openLinkDialog} />
+        </div>
+        
+        {mode === "html" ? (
           <ModernHTMLSourceView
             htmlContent={content.html}
             onHtmlChange={handleHtmlChange}
@@ -1679,6 +1940,9 @@ function EditorContent({
         onOpenChange={setImageDialogOpen}
         onSubmit={handleImageSubmit}
       />
+
+      {/* Context Menu Renderer */}
+      <ContextMenuRenderer />
 
       {/* Command Palette */}
       <CommandDialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
