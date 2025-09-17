@@ -86,6 +86,13 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/dropdown-menu";
 import { Switch } from "@repo/ui/components/switch";
 import {
   Dialog,
@@ -114,28 +121,31 @@ function ShadcnTableContextMenuRenderer(props: {
 }) {
   const { items, position, onClose } = props;
 
-  console.log("[ShadcnTableContextMenuRenderer] Rendering", { items: items.length, position });
+  console.log("[ShadcnTableContextMenuRenderer] Rendering context menu", { items: items.length, position });
 
+  // Use createPortal to render the context menu at the root level with fixed positioning
   return createPortal(
     <div
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+        "table-context-menu z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         props.className
       )}
       style={{
         position: 'fixed',
         left: position.x,
         top: position.y,
-        zIndex: 1000,
+        zIndex: 9999,
         ...props.style,
       }}
       onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => e.preventDefault()}
     >
       {items.map((item: any, index: number) => (
         <div
           key={index}
           className={cn(
-            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
             item.disabled ? props.disabledItemClassName : props.itemClassName
           )}
           style={item.disabled ? props.disabledItemStyle : props.itemStyle}
@@ -1017,7 +1027,8 @@ function ContextMenuRenderer() {
 
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.table-context-menu')) {
+      // Check for both our custom renderer and default renderer classes
+      if (!target.closest('.table-context-menu') && !target.closest('[data-radix-popper-content-wrapper]')) {
         console.log("[ContextMenuRenderer] Clicking outside, hiding context menu");
         if (contextMenuExtension) {
           contextMenuExtension.getCommands(editor).hideContextMenu();
@@ -1025,8 +1036,21 @@ function ContextMenuRenderer() {
       }
     };
 
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        console.log("[ContextMenuRenderer] Escape pressed, hiding context menu");
+        if (contextMenuExtension) {
+          contextMenuExtension.getCommands(editor).hideContextMenu();
+        }
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [contextMenuConfig, contextMenuExtension, editor]);
 
   if (!contextMenuConfig) return null;
