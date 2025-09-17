@@ -213,3 +213,50 @@
     font-size: 13px;
   }
 }
+
+/* Table Styles */
+.lexkit-table {
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
+  margin: 1rem 0;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.lexkit-table-row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lexkit-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.lexkit-table-cell {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.lexkit-table-cell:last-child {
+  border-right: none;
+}
+
+.lexkit-table-cell-header {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.lexkit-table-cell-header:last-child {
+  border-right: none;
+}

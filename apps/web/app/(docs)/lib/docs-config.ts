@@ -65,6 +65,12 @@ export const docsConfig: DocsSection[] = [
     title: "Extensions",
     items: [
       {
+        title: "ContextMenuExtension",
+        href: "/docs/extensions/ContextMenuExtension",
+        description: "Add customizable right-click context menus to your editor",
+        isNew: true,
+      },
+      {
         title: "LinkExtension",
         href: "/docs/extensions/LinkExtension",
         description: "Create and manage hyperlinks with smart paste behavior",
