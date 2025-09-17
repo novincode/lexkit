@@ -19,6 +19,7 @@ import {
   $isTableSelection,
 } from "@lexical/table";
 import { $createParagraphNode, $createTextNode } from "lexical";
+import { ContextMenuItem } from "@lexkit/editor/extensions/core/ContextMenuExtension";
 
 /**
  * Configuration options for the Table extension.
@@ -27,6 +28,10 @@ export type TableConfig = BaseExtensionConfig & {
   rows?: number;
   columns?: number;
   includeHeaders?: boolean;
+  /** Custom context menu items for tables */
+  contextMenuItems?: ContextMenuItem[];
+  /** Whether to show context menu on right-click */
+  enableContextMenu?: boolean;
 };
 
 /**
@@ -34,6 +39,7 @@ export type TableConfig = BaseExtensionConfig & {
  */
 export type TableCommands = {
   insertTable: (config: { rows?: number; columns?: number; includeHeaders?: boolean }) => void;
+  showTableContextMenu: (position: { x: number; y: number }) => void;
 };
 
 /**
@@ -55,12 +61,76 @@ export class TableExtension extends BaseExtension<
   TableStateQueries,
   ReactNode[]
 > {
-  constructor() {
+  private defaultContextMenuItems: ContextMenuItem[] = [
+    {
+      label: "Insert Row Above",
+      action: () => {
+        // TODO: Implement insert row above
+        console.log("Insert row above");
+      },
+    },
+    {
+      label: "Insert Row Below",
+      action: () => {
+        // TODO: Implement insert row below
+        console.log("Insert row below");
+      },
+    },
+    {
+      label: "Insert Column Left",
+      action: () => {
+        // TODO: Implement insert column left
+        console.log("Insert column left");
+      },
+    },
+    {
+      label: "Insert Column Right",
+      action: () => {
+        // TODO: Implement insert column right
+        console.log("Insert column right");
+      },
+    },
+    {
+      label: "Delete Row",
+      action: () => {
+        // TODO: Implement delete row
+        console.log("Delete row");
+      },
+    },
+    {
+      label: "Delete Column",
+      action: () => {
+        // TODO: Implement delete column
+        console.log("Delete column");
+      },
+    },
+    {
+      label: "Delete Table",
+      action: () => {
+        // TODO: Implement delete table
+        console.log("Delete table");
+      },
+    },
+  ];
+
+  constructor(config?: Partial<TableConfig>) {
     super("table", [ExtensionCategory.Toolbar]);
+    this.config = {
+      rows: 3,
+      columns: 3,
+      includeHeaders: false,
+      enableContextMenu: true,
+      contextMenuItems: this.defaultContextMenuItems,
+      ...config,
+    };
   }
 
   configure(config: Partial<TableConfig>): this {
     this.config = { ...this.config, ...config };
+    // Merge context menu items if provided
+    if (config.contextMenuItems) {
+      this.config.contextMenuItems = config.contextMenuItems;
+    }
     return this;
   }
 
@@ -81,21 +151,19 @@ export class TableExtension extends BaseExtension<
   getCommands(editor: LexicalEditor): TableCommands {
     return {
       insertTable: (config: { rows?: number; columns?: number; includeHeaders?: boolean }) => {
-        console.log('[TableExtension] insertTable called with config:', config);
         const { rows = 3, columns = 3, includeHeaders = false } = config;
 
         editor.update(() => {
           const selection = $getSelection();
-          console.log('[TableExtension] Current selection:', selection);
           if ($isRangeSelection(selection)) {
             const tableNode = $createTableNodeWithDimensions(rows, columns, includeHeaders);
-            console.log('[TableExtension] Created table node:', tableNode);
             selection.insertNodes([tableNode]);
-            console.log('[TableExtension] Inserted table node');
-          } else {
-            console.log('[TableExtension] No range selection, cannot insert table');
           }
         });
+      },
+      showTableContextMenu: (position: { x: number; y: number }) => {
+        // This will be implemented when the extension system allows cross-extension commands
+        // For now, this is a placeholder
       },
     };
   }
@@ -144,41 +212,30 @@ export const tableExtension = new TableExtension();
 export const TABLE_MARKDOWN_TRANSFORMER = {
   dependencies: [TableNode, TableRowNode, TableCellNode],
   export: (node: any) => {
-    console.log('[TableTransformer] Export called for node type:', node?.getType?.(), 'node:', node);
-    console.log('[TableTransformer] Is table node?', $isTableNode(node));
     if (!$isTableNode(node)) {
-      console.log('[TableTransformer] Not a table node, returning null');
       return null;
     }
 
     const rows = node.getChildren();
-    console.log('[TableTransformer] Table has', rows.length, 'rows');
     if (rows.length === 0) return null;
 
     const tableData: string[][] = [];
-    rows.forEach((row: any, rowIndex: number) => {
-      console.log('[TableTransformer] Processing row', rowIndex, 'type:', row?.getType?.());
+    rows.forEach((row: any) => {
       if (!$isTableRowNode(row)) {
-        console.log('[TableTransformer] Row is not a table row node');
         return;
       }
       const cells = row.getChildren();
-      console.log('[TableTransformer] Row has', cells.length, 'cells');
       const rowData: string[] = [];
-      cells.forEach((cell: any, cellIndex: number) => {
-        console.log('[TableTransformer] Processing cell', cellIndex, 'type:', cell?.getType?.());
+      cells.forEach((cell: any) => {
         if (!$isTableCellNode(cell)) {
-          console.log('[TableTransformer] Cell is not a table cell node');
           return;
         }
         const textContent = cell.getTextContent().trim();
-        console.log('[TableTransformer] Cell text content:', textContent);
         rowData.push(textContent);
       });
       if (rowData.length > 0) tableData.push(rowData);
     });
 
-    console.log('[TableTransformer] Final table data:', tableData);
     if (tableData.length === 0) return null;
 
     const markdownLines: string[] = [];
@@ -197,9 +254,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       markdownLines.push("| " + paddedRow.join(" | ") + " |");
     }
 
-    const result = markdownLines.join("\n");
-    console.log('[TableTransformer] Export result:', result);
-    return result;
+    return markdownLines.join("\n");
   },
   regExpStart: /^\|.*\|$/,
   regExpEnd: {
@@ -207,14 +262,8 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
     regExp: /^$/
   },
   replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {
-    console.log('[TableTransformer] Multiline replace called');
-    console.log('[TableTransformer] startMatch:', startMatch);
-    console.log('[TableTransformer] linesInBetween:', linesInBetween);
-    console.log('[TableTransformer] isImport:', isImport);
-    
     // Combine the start line with lines in between to get all table lines
     const allLines = [startMatch[0], ...(linesInBetween || [])];
-    console.log('[TableTransformer] All table lines:', allLines);
     
     // Filter lines that look like table rows
     const tableLines = allLines.filter((line: string) => {
@@ -222,10 +271,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       return trimmed && trimmed.includes('|') && trimmed.split('|').length > 1;
     });
     
-    console.log('[TableTransformer] Filtered table lines:', tableLines);
-    
     if (tableLines.length < 2) {
-      console.log('[TableTransformer] Not enough table lines, skipping');
       return;
     }
     
@@ -238,10 +284,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       }
     });
     
-    console.log('[TableTransformer] Parsed rows:', rows);
-    
     if (rows.length === 0 || !rows[0]) {
-      console.log('[TableTransformer] No valid rows, skipping');
       return;
     }
     
@@ -250,15 +293,11 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       !row.every((cell: string) => /^:?-+:?$/.test(cell))
     );
     
-    console.log('[TableTransformer] Data rows after filtering separators:', dataRows);
-    
     if (dataRows.length === 0) {
-      console.log('[TableTransformer] No data rows after filtering, skipping');
       return;
     }
     
     const tableNode = $createTableNodeWithDimensions(dataRows.length, Math.max(...dataRows.map(r => r.length)), false);
-    console.log('[TableTransformer] Created table node with', dataRows.length, 'rows and', Math.max(...dataRows.map(r => r.length)), 'columns');
     
     const tableRows = tableNode.getChildren();
     dataRows.forEach((rowData, rowIndex) => {
@@ -281,9 +320,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
       }
     });
     
-    console.log('[TableTransformer] Replacing rootNode with tableNode');
     rootNode.append(tableNode);
-    console.log('[TableTransformer] Replacement complete');
   },
   type: "multiline-element" as const,
 };

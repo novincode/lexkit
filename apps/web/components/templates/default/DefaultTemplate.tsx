@@ -402,6 +402,63 @@ function FloatingToolbarRenderer() {
   );
 }
 
+// Context Menu Renderer
+function ContextMenuRenderer() {
+  const { extensions } = useEditor();
+  const [contextMenuConfig, setContextMenuConfig] = useState<any>(null);
+
+  // Get the context menu extension instance
+  const contextMenuExtension = extensions.find(
+    (ext) => ext.name === "contextMenu",
+  ) as any;
+
+  useEffect(() => {
+    if (!contextMenuExtension) return;
+
+    const unsubscribe = contextMenuExtension.subscribe((config: any) => {
+      setContextMenuConfig(config);
+    });
+
+    return unsubscribe;
+  }, [contextMenuExtension]);
+
+  if (!contextMenuConfig) return null;
+
+  return createPortal(
+    <div
+      className="table-context-menu"
+      style={{
+        left: contextMenuConfig.position.x,
+        top: contextMenuConfig.position.y,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {contextMenuConfig.items.map((item: any, index: number) => (
+        <div
+          key={index}
+          onClick={() => {
+            if (!item.disabled && item.action) {
+              item.action();
+            }
+            // Hide menu after action
+            if (contextMenuExtension) {
+              contextMenuExtension.getCommands().hideContextMenu();
+            }
+          }}
+          style={{
+            opacity: item.disabled ? 0.5 : 1,
+            cursor: item.disabled ? "not-allowed" : "pointer",
+          }}
+        >
+          {item.icon && <span style={{ marginRight: 8 }}>{item.icon}</span>}
+          {item.label}
+        </div>
+      ))}
+    </div>,
+    document.body,
+  );
+}
+
 // Toolbar Component
 function Toolbar({
   commands,
@@ -983,15 +1040,11 @@ function EditorContent({
   ); // Empty dependency array - only create once
 
   // Register command palette commands and keyboard shortcuts
-  useEffect(() => {
+  useEffect(() => { 
     if (!editor) return;
 
     // Register commands in the command palette
     const paletteCommands = commandsToCommandPaletteItems(commands);
-    console.log(
-      "🎯 Registering command palette commands:",
-      paletteCommands.length,
-    );
     paletteCommands.forEach((cmd) => {
       commands.registerCommand(cmd);
     });
@@ -1015,15 +1068,46 @@ function EditorContent({
     };
     document.addEventListener("keydown", handleKeyDown);
 
+    // Add right-click handler for context menus
+    const handleContextMenu = (e: MouseEvent) => {
+      // Only handle in visual mode
+      if (mode !== "visual") return;
+
+      // Check if table is selected
+      const isTableSelected = activeStates.isTableSelected || activeStates.isInTableCell;
+      if (isTableSelected) {
+        e.preventDefault();
+        
+        // Get table extension
+        const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
+        const contextMenuExtension = extensions.find((ext: any) => ext.name === "contextMenu") as any;
+        
+        if (tableExtension && contextMenuExtension && tableExtension.config?.contextMenuItems) {
+          contextMenuExtension.getCommands().showContextMenu({
+            items: tableExtension.config.contextMenuItems,
+            position: { x: e.clientX, y: e.clientY },
+          });
+        }
+      }
+    };
+
+    // Add event listener to editor root element
+    const editorElement = editor.getRootElement();
+    if (editorElement) {
+      editorElement.addEventListener("contextmenu", handleContextMenu);
+    }
+
     // Call onReady with methods immediately when editor is ready
     if (onReady) {
-      console.log("🎉 Editor ready - calling onReady with methods");
       onReady(methods);
     }
 
     return () => {
       unregisterShortcuts();
       document.removeEventListener("keydown", handleKeyDown);
+      if (editorElement) {
+        editorElement.removeEventListener("contextmenu", handleContextMenu);
+      }
       // Restore original command
       (commands as any).showCommandPalette = originalShowCommand;
     };
@@ -1047,10 +1131,8 @@ function EditorContent({
       editor &&
       hasExtension("markdown")
     ) {
-      console.log('[DefaultTemplate] Switching from markdown to', newMode, 'with content:', content.markdown.substring(0, 100) + '...');
       try {
         await commands.importFromMarkdown(content.markdown, { immediate: true });
-        console.log('[DefaultTemplate] Import complete');
       } catch (error) {
         console.error("Failed to import Markdown:", error);
       }
@@ -1077,10 +1159,8 @@ function EditorContent({
       editor &&
       hasExtension("markdown")
     ) {
-      console.log('[DefaultTemplate] Switching to markdown from', mode);
       try {
         const markdown = commands.exportToMarkdown();
-        console.log('[DefaultTemplate] Exported markdown:', markdown.substring(0, 100) + '...');
         setContent((prev) => ({ ...prev, markdown }));
       } catch (error) {
         console.error("Failed to export Markdown:", error);
@@ -1138,6 +1218,7 @@ function EditorContent({
             ErrorBoundary={ErrorBoundary}
           />
           <FloatingToolbarRenderer />
+          <ContextMenuRenderer />
         </div>
         
         {mode === "html" && (
@@ -1212,12 +1293,10 @@ export const DefaultTemplate = React.forwardRef<
   // Handle when editor is ready - store methods and expose via ref
   const handleEditorReady = React.useCallback(
     (methods: DefaultTemplateRef) => {
-      console.log("🎯 Editor ready - storing methods");
       setEditorMethods(methods);
 
       // Call parent callback with methods
       if (onReady) {
-        console.log("📞 Calling parent onReady with methods");
         onReady(methods);
       }
     },
@@ -1230,15 +1309,7 @@ export const DefaultTemplate = React.forwardRef<
     () => ({
       injectMarkdown: (content: string) => {
         if (editorMethods) {
-          console.log(
-            "💉 Injecting markdown content via ref:",
-            content.substring(0, 50) + "...",
-          );
           editorMethods.injectMarkdown(content);
-        } else {
-          console.log(
-            "❌ Cannot inject via ref - editor methods not available",
-          );
         }
       },
       injectHTML: (content: string) => {

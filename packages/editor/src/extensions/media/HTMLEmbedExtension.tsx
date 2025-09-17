@@ -667,19 +667,24 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
 
     return null;
   },
-  regExp: /^```html-embed\s*\n([\s\S]*?)\n```$/,
-  replace: (parentNode: any, _children: any[], match: RegExpMatchArray) => {
-    const html = match[1] || "";
-
+  regExpStart: /^```html-embed\s*$/,
+  regExpEnd: {
+    optional: true,
+    regExp: /^```$/
+  },
+  replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {
+    // Combine the lines in between to get the HTML content
+    const html = linesInBetween.join('\n');
+    
     try {
       const payload: HTMLEmbedPayload = { html, preview: true };
       const node = new HTMLEmbedNode(payload);
-      parentNode.replace(node);
+      rootNode.append(node);
     } catch (error) {
       console.error("❌ Error creating HTML embed node:", error);
     }
   },
-  type: "element" as const,
+  type: "multiline-element" as const,
 };
 
 // Export instances

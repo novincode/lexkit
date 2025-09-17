@@ -72,31 +72,21 @@ class MarkdownManager {
 		return this.editor.getEditorState().read(() => {
 			const root = $getRoot();
 			const children = root.getChildren();
-			console.log('[MarkdownManager] Export: root has', children.length, 'children');
-			children.forEach((child, index) => {
-				console.log('[MarkdownManager] Child', index, 'type:', child.getType(), 'text:', child.getTextContent?.().substring(0, 50));
-			});
 			return $convertToMarkdownString(this.getAllTransformers());
 		});
 	}
 
 	import(markdown: string, onComplete?: () => void) {
-		console.log('[MarkdownManager] Starting import with markdown:', markdown.substring(0, 100) + '...');
-		console.log('[MarkdownManager] Available transformers:', this.getAllTransformers().map(t => t.type));
 		this.editor.update(
 			() => {
 				const root = $getRoot();
-				console.log('[MarkdownManager] Clearing root');
 				root.clear();
 				const content = markdown ?? '';
 				if (!content.trim()) {
-					console.log('[MarkdownManager] Empty content, adding paragraph');
 					root.append($createParagraphNode());
 					return;
 				}
-				console.log('[MarkdownManager] Converting from markdown...');
 				$convertFromMarkdownString(content, this.getAllTransformers());
-				console.log('[MarkdownManager] Conversion complete');
 				$getRoot().selectEnd(); // Reset selection to avoid stale references
 			},
 			{ discrete: true, onUpdate: onComplete },
@@ -165,20 +155,15 @@ export class MarkdownExtension extends BaseExtension<
 			},
 			importFromMarkdown: (markdown: string, opts?: { immediate?: boolean }) => {
 				return new Promise((resolve) => {
-					console.log('[MarkdownExtension] importFromMarkdown called with:', markdown.substring(0, 50) + '...', 'opts:', opts);
 					if (!this.manager) {
-						console.error('[MarkdownExtension] No manager available');
 						resolve();
 						return;
 					}
 					const { immediate } = opts || {};
 					const delay = immediate ? 0 : this.config.importDebounce || 0;
-					console.log('[MarkdownExtension] Will run import with delay:', delay);
 					if (this.importTimer) clearTimeout(this.importTimer);
 					const run = () => {
-						console.log('[MarkdownExtension] Running import');
 						this.manager?.import(markdown, () => {
-							console.log('[MarkdownExtension] Import complete');
 							resolve();
 						});
 					};
