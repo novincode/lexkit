@@ -23,6 +23,7 @@ import {
   blockFormatExtension,
   htmlExtension,
   markdownExtension,
+  MarkdownExtension,
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
@@ -216,6 +217,11 @@ import { LexicalEditor } from "lexical";
 import { createPortal } from "react-dom";
 import "./shadcn-styles.css";
 
+// Create markdown extension instance for this template
+const markdownExt = new MarkdownExtension().configure({
+  customTransformers: ALL_MARKDOWN_TRANSFORMERS,
+});
+
 // Extensions array
 export const extensions = [
   boldExtension,
@@ -231,15 +237,14 @@ export const extensions = [
   new TableExtension().configure({
     enableContextMenu: true,
     contextMenuRenderer: ShadcnTableContextMenuRenderer,
+    markdownExtension: markdownExt,
   }),
   listExtension,
   historyExtension,
   imageExtension,
   blockFormatExtension,
   htmlExtension,
-  markdownExtension.configure({
-    customTransformers: ALL_MARKDOWN_TRANSFORMERS,
-  }),
+  markdownExt,
   codeExtension,
   codeFormatExtension,
   new HTMLEmbedExtension().configure({
@@ -263,6 +268,7 @@ export const extensions = [
         )}
       </Button>
     ),
+    markdownExtension: markdownExt,
   }),
   floatingToolbarExtension,
   contextMenuExtension,

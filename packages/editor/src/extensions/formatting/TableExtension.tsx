@@ -60,6 +60,8 @@ export type TableConfig = BaseExtensionConfig & {
     disabledItemClassName: string;
     disabledItemStyle?: React.CSSProperties;
   }) => ReactNode;
+  /** Markdown extension instance to register transformers with */
+  markdownExtension?: typeof markdownExtension;
 };
 
 /**
@@ -160,8 +162,9 @@ export class TableExtension extends BaseExtension<
 
   register(editor: LexicalEditor): () => void {
     // Register its markdown transformer with markdown extension
+    const mdExtension = this.config.markdownExtension || markdownExtension;
     try {
-      markdownExtension.registerTransformer?.(TABLE_MARKDOWN_TRANSFORMER as any);
+      mdExtension.registerTransformer?.(TABLE_MARKDOWN_TRANSFORMER as any);
     } catch (e) {
       console.warn('[TableExtension] failed to register table markdown transformer', e);
     }

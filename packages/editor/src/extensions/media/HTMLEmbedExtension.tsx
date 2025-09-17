@@ -19,6 +19,7 @@ import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory, BaseExtensionConfig } from "../types";
 import { LexKitTheme } from "../../core/theme";
 import { useBaseEditor as useEditor } from "../../core/createEditorSystem"; // Use base for untyped access
+import { markdownExtension } from "../export/MarkdownExtension";
 
 // No shared defaults - use core theme
 
@@ -92,6 +93,8 @@ export interface HTMLEmbedConfig extends BaseExtensionConfig {
     className: string;
     style?: React.CSSProperties;
   }) => ReactNode;
+  /** Markdown extension instance to register transformers with */
+  markdownExtension?: typeof markdownExtension;
 }
 
 /**
@@ -560,7 +563,13 @@ export class HTMLEmbedExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    // No additional registration needed for DecoratorNode
+    // Register its markdown transformer with markdown extension
+    const mdExtension = this.config.markdownExtension || markdownExtension;
+    try {
+      mdExtension.registerTransformer?.(HTML_EMBED_MARKDOWN_TRANSFORMER as any);
+    } catch (e) {
+      console.warn('[HTMLEmbedExtension] failed to register html embed markdown transformer', e);
+    }
     return () => {};
   }
 

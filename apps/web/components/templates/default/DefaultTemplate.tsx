@@ -17,6 +17,7 @@ import {
   blockFormatExtension,
   htmlExtension,
   markdownExtension,
+  MarkdownExtension,
   codeExtension,
   codeFormatExtension,
   htmlEmbedExtension,
@@ -84,6 +85,14 @@ import { createPortal } from "react-dom";
 import { defaultTheme } from "./theme";
 
 // Extensions array
+import "./styles.css";
+
+// Create markdown extension instance for this template
+const markdownExt = new MarkdownExtension().configure({
+  customTransformers: ALL_MARKDOWN_TRANSFORMERS,
+});
+
+// Extensions array
 export const extensions = [
   boldExtension,
   italicExtension,
@@ -103,18 +112,19 @@ export const extensions = [
       contextMenuItem: "table-context-menu-item",
       contextMenuItemDisabled: "table-context-menu-item-disabled",
     },
+    markdownExtension: markdownExt,
   }),
   listExtension,
   historyExtension,
   imageExtension,
   blockFormatExtension,
   htmlExtension,
-  markdownExtension.configure({
-    customTransformers: ALL_MARKDOWN_TRANSFORMERS,
-  }),
+  markdownExt,
   codeExtension,
   codeFormatExtension,
-  new HTMLEmbedExtension(),
+  new HTMLEmbedExtension().configure({
+    markdownExtension: markdownExt,
+  }),
   floatingToolbarExtension, // Simple extension without render config
   contextMenuExtension,
   commandPaletteExtension,
