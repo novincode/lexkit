@@ -3,6 +3,8 @@ import { BaseExtension } from "@lexkit/editor/extensions/base";
 import { ExtensionCategory, BaseExtensionConfig } from "@lexkit/editor/extensions/types";
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Extension } from "../types";
+import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
 
 /**
  * Context menu item configuration
@@ -59,14 +61,24 @@ export type ContextMenuRenderer = (props: {
 /**
  * Context menu configuration
  */
-export type ContextMenuConfig = BaseExtensionConfig & {
+export interface ContextMenuConfig extends BaseExtensionConfig {
   // Default renderer for all context menus (can be overridden per provider)
   defaultRenderer?: ContextMenuRenderer;
   // Whether to prevent default browser context menu
   preventDefault?: boolean;
-  // Theme configuration
-  theme?: any;
-};
+  // Theme classes
+  theme?: {
+    container?: string;
+    item?: string;
+    itemDisabled?: string;
+  };
+  // Custom CSS styles for UI elements
+  styles?: {
+    container?: React.CSSProperties;
+    item?: React.CSSProperties;
+    itemDisabled?: React.CSSProperties;
+  };
+}
 
 /**
  * Commands provided by the context menu extension
@@ -244,11 +256,41 @@ class ContextMenuManager {
  * Context Menu Plugin - React component that renders the context menu
  */
 function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
+  const { config } = useEditor();
   const [menuState, setMenuState] = useState<{
     items: ContextMenuItem[];
     position: { x: number; y: number };
     renderer?: ContextMenuRenderer;
   } | null>(null);
+
+  // Get global theme
+  const globalContextMenuTheme = config?.theme?.contextMenu || {};
+
+  // Get extension-specific config
+  const extensionConfig = extension.config;
+
+  // Merged theme classes: extension config -> global theme (core theme provides defaults)
+  const mergedThemeClasses = {
+    container: extensionConfig?.theme?.container || globalContextMenuTheme.container || "lexkit-context-menu",
+    item: extensionConfig?.theme?.item || globalContextMenuTheme.item || "lexkit-context-menu-item",
+    itemDisabled: extensionConfig?.theme?.itemDisabled || globalContextMenuTheme.itemDisabled || "lexkit-context-menu-item-disabled",
+  };
+
+  // Merged styles: extension config -> global theme
+  const mergedStyles = {
+    container: {
+      ...extensionConfig?.styles?.container,
+      ...globalContextMenuTheme.styles?.container,
+    },
+    item: {
+      ...extensionConfig?.styles?.item,
+      ...globalContextMenuTheme.styles?.item,
+    },
+    itemDisabled: {
+      ...extensionConfig?.styles?.itemDisabled,
+      ...globalContextMenuTheme.styles?.itemDisabled,
+    },
+  };
 
   useEffect(() => {
     // Subscribe to menu state changes from the extension
@@ -266,9 +308,12 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
       items={menuState.items}
       position={menuState.position}
       onClose={() => extension.manager?.hideMenu()}
-      className="lexkit-context-menu z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-      itemClassName="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-      disabledItemClassName="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground opacity-50 cursor-not-allowed"
+      className={mergedThemeClasses.container}
+      style={mergedStyles.container}
+      itemClassName={mergedThemeClasses.item}
+      itemStyle={mergedStyles.item}
+      disabledItemClassName={mergedThemeClasses.itemDisabled}
+      disabledItemStyle={mergedStyles.itemDisabled}
     />,
     document.body
   );
