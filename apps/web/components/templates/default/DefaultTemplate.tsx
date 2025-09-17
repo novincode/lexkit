@@ -424,9 +424,19 @@ function ContextMenuRenderer() {
 
     const unsubscribe = contextMenuExtension.subscribe((config: any) => {
       setContextMenuConfig(config);
+      
+      // Prevent body scrolling when context menu is open
+      if (config) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     });
 
-    return unsubscribe;
+    return () => {
+      document.body.style.overflow = '';
+      unsubscribe();
+    };
   }, [contextMenuExtension]);
 
   // Close menu when clicking outside
