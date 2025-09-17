@@ -186,6 +186,7 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
 // Floating Toolbar Component
 function FloatingToolbarRenderer() {
   const { commands, activeStates, extensions, hasExtension } = useEditor();
+
   const [isVisible, setIsVisible] = useState(false);
   const [selectionRect, setSelectionRect] = useState<{ x: number; y: number; positionFromRight?: boolean } | null>(null);
 

@@ -664,6 +664,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedLeft ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedLeft}
                   onPressedChange={() => commands.setImageAlignment("left")}
                 >
@@ -677,6 +678,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedCenter ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedCenter}
                   onPressedChange={() => commands.setImageAlignment("center")}
                 >
@@ -690,6 +692,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isImageAlignedRight ? "pressed" : "default"}
                   pressed={activeStates.isImageAlignedRight}
                   onPressedChange={() => commands.setImageAlignment("right")}
                 >
@@ -723,6 +726,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.bold ? "pressed" : "default"}
                   pressed={activeStates.bold}
                   onPressedChange={() => commands.toggleBold()}
                 >
@@ -736,6 +740,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.italic ? "pressed" : "default"}
                   pressed={activeStates.italic}
                   onPressedChange={() => commands.toggleItalic()}
                 >
@@ -749,6 +754,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.underline ? "pressed" : "default"}
                   pressed={activeStates.underline}
                   onPressedChange={() => commands.toggleUnderline()}
                 >
@@ -762,6 +768,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.strikethrough ? "pressed" : "default"}
                   pressed={activeStates.strikethrough}
                   onPressedChange={() => commands.toggleStrikethrough()}
                 >
@@ -777,6 +784,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.code ? "pressed" : "default"}
                   pressed={activeStates.code}
                   onPressedChange={() => commands.formatText("code")}
                 >
@@ -790,6 +798,7 @@ function FloatingToolbarRenderer({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isLink ? "pressed" : "default"}
                   pressed={activeStates.isLink}
                   disabled={!activeStates.isTextSelected && !activeStates.isLink}
                   onPressedChange={() => {
@@ -907,6 +916,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.bold ? "pressed" : "default"}
                 pressed={activeStates.bold}
                 onPressedChange={() => commands.toggleBold()}
               >
@@ -920,6 +930,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.italic ? "pressed" : "default"}
                 pressed={activeStates.italic}
                 onPressedChange={() => commands.toggleItalic()}
               >
@@ -933,6 +944,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.underline ? "pressed" : "default"}
                 pressed={activeStates.underline}
                 onPressedChange={() => commands.toggleUnderline()}
               >
@@ -946,6 +958,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.strikethrough ? "pressed" : "default"}
                 pressed={activeStates.strikethrough}
                 onPressedChange={() => commands.toggleStrikethrough()}
               >
@@ -959,6 +972,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.code ? "pressed" : "default"}
                 pressed={activeStates.code}
                 onPressedChange={() => commands.formatText("code")}
               >
@@ -972,6 +986,7 @@ function Toolbar({
             <TooltipTrigger asChild>
               <Toggle
                 size="sm"
+                variant={activeStates.isLink ? "pressed" : "default"}
                 pressed={activeStates.isLink}
                 disabled={!activeStates.isTextSelected && !activeStates.isLink}
                 onPressedChange={() => {
@@ -1035,6 +1050,7 @@ function Toolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.unorderedList ? "pressed" : "default"}
                   pressed={activeStates.unorderedList}
                   onPressedChange={() => commands.toggleUnorderedList()}
                 >
@@ -1048,6 +1064,7 @@ function Toolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.orderedList ? "pressed" : "default"}
                   pressed={activeStates.orderedList}
                   onPressedChange={() => commands.toggleOrderedList()}
                 >
@@ -1200,6 +1217,7 @@ function Toolbar({
               <TooltipTrigger asChild>
                 <Toggle
                   size="sm"
+                  variant={activeStates.isHTMLEmbedSelected ? "pressed" : "default"}
                   pressed={activeStates.isHTMLEmbedSelected}
                   onPressedChange={() => commands.insertHTMLEmbed()}
                 >
