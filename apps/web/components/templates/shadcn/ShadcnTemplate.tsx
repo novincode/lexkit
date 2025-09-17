@@ -1453,7 +1453,7 @@ function EditorContent({
   const methods = React.useMemo(
     () => ({
       injectMarkdown: (content: string) => {
-        commandsRef.current.importFromMarkdown(content);
+        commandsRef.current.importFromMarkdown(content, { immediate: true });
       },
       injectHTML: (content: string) => {
         commandsRef.current.importFromHTML(content);
@@ -1554,7 +1554,7 @@ function EditorContent({
       hasExtension("markdown")
     ) {
       try {
-        commands.importFromMarkdown(content.markdown, true);
+        commands.importFromMarkdown(content.markdown, { immediate: true });
       } catch (error) {
         console.error("Failed to import Markdown:", error);
       }

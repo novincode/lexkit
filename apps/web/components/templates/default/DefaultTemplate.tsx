@@ -967,7 +967,7 @@ function EditorContent({
   const methods = React.useMemo(
     () => ({
       injectMarkdown: (content: string) => {
-        commandsRef.current.importFromMarkdown(content);
+        setTimeout(() => commandsRef.current.importFromMarkdown(content, { immediate: true }), 0);
       },
       injectHTML: (content: string) => {
         commandsRef.current.importFromHTML(content);
@@ -1039,7 +1039,7 @@ function EditorContent({
   };
 
   // Handle mode changes
-  const handleModeChange = (newMode: EditorMode) => {
+  const handleModeChange = async (newMode: EditorMode) => {
     // If leaving markdown mode, import the markdown content into the editor immediately
     if (
       mode === "markdown" &&
@@ -1047,8 +1047,10 @@ function EditorContent({
       editor &&
       hasExtension("markdown")
     ) {
+      console.log('[DefaultTemplate] Switching from markdown to', newMode, 'with content:', content.markdown.substring(0, 100) + '...');
       try {
-        commands.importFromMarkdown(content.markdown, true);
+        await commands.importFromMarkdown(content.markdown, { immediate: true });
+        console.log('[DefaultTemplate] Import complete');
       } catch (error) {
         console.error("Failed to import Markdown:", error);
       }
@@ -1062,7 +1064,7 @@ function EditorContent({
       hasExtension("html")
     ) {
       try {
-        commands.importFromHTML(content.html);
+        await commands.importFromHTML(content.html);
       } catch (error) {
         console.error("Failed to import HTML:", error);
       }
@@ -1075,8 +1077,10 @@ function EditorContent({
       editor &&
       hasExtension("markdown")
     ) {
+      console.log('[DefaultTemplate] Switching to markdown from', mode);
       try {
         const markdown = commands.exportToMarkdown();
+        console.log('[DefaultTemplate] Exported markdown:', markdown.substring(0, 100) + '...');
         setContent((prev) => ({ ...prev, markdown }));
       } catch (error) {
         console.error("Failed to export Markdown:", error);
@@ -1098,7 +1102,12 @@ function EditorContent({
       }
     }
 
-    setMode(newMode);
+    // Delay setting mode to allow React render cycle to catch up
+    setTimeout(() => setMode(newMode), 50);
+
+    if (newMode === "visual" && editor) {
+      setTimeout(() => editor.focus(), 100);
+    }
   };
 
   return (
@@ -1118,30 +1127,32 @@ function EditorContent({
       </div>
 
       <div className="lexkit-editor">
-        {mode === "visual" ? (
-          <>
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable className="lexkit-content-editable" />
-              }
-              placeholder={
-                <div className="lexkit-placeholder">Start typing...</div>
-              }
-              ErrorBoundary={ErrorBoundary}
-            />
-            <FloatingToolbarRenderer />
-          </>
-        ) : mode === "html" ? (
+        <div style={{ display: mode === "visual" ? "block" : "none" }}>
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable className="lexkit-content-editable" />
+            }
+            placeholder={
+              <div className="lexkit-placeholder">Start typing...</div>
+            }
+            ErrorBoundary={ErrorBoundary}
+          />
+          <FloatingToolbarRenderer />
+        </div>
+        
+        {mode === "html" && (
           <HTMLSourceView
             htmlContent={content.html}
             onHtmlChange={handleHtmlChange}
           />
-        ) : mode === "markdown" ? (
+        )}
+        
+        {mode === "markdown" && (
           <MarkdownSourceView
             markdownContent={content.markdown}
             onMarkdownChange={handleMarkdownChange}
           />
-        ) : null}
+        )}
       </div>
 
       {/* Command Palette */}

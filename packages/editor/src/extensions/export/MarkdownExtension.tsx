@@ -1,333 +1,203 @@
-import { LexicalEditor } from "lexical";
-import { BaseExtension } from "@lexkit/editor/extensions/base";
-import { ExtensionCategory } from "@lexkit/editor/extensions/types";
-import { BaseExtensionConfig } from "@lexkit/editor/extensions/types";
-import { ReactNode } from "react";
 import {
-  $convertToMarkdownString,
-  $convertFromMarkdownString,
-  TRANSFORMERS,
-} from "@lexical/markdown";
-import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
-import { HTMLEmbedNode } from "../media/HTMLEmbedExtension";
+	LexicalEditor,
+	$getRoot,
+	$createParagraphNode,
+} from 'lexical';
 import {
-  $createTableNodeWithDimensions,
-  $isTableRowNode,
-  $isTableCellNode,
-} from "@lexical/table";
+	$convertToMarkdownString,
+	$convertFromMarkdownString,
+	TRANSFORMERS,
+	type Transformer,
+} from '@lexical/markdown';
+import { BaseExtension } from '@lexkit/editor/extensions/base';
+import { ExtensionCategory } from '@lexkit/editor/extensions/types';
+import { BaseExtensionConfig } from '@lexkit/editor/extensions/types';
 
 /**
- * Configuration options for the Markdown extension.
+ * Minimal shape for a Markdown transformer (Lexical markdown plugin style)
  */
-export type MarkdownConfig = {
-  /** Custom transformers to extend Markdown parsing */
-  customTransformers?: Array<any>;
+// We wrap the core Transformer type so external extensions can pass partials without
+// fighting strict typing; we normalize later.
+export type MarkdownTransformer = Partial<Transformer> & { type: string };
+
+export type MarkdownConfig = BaseExtensionConfig & {
+	/** Optional debounce (ms) when importing markdown programmatically */
+	importDebounce?: number;
+	/** Pre-registered custom transformers */
+	transformers?: MarkdownTransformer[];
 };
 
-/**
- * Commands provided by the Markdown extension.
- */
 export type MarkdownCommands = {
-  /** Export the current editor content as Markdown string */
-  exportToMarkdown: () => string;
-  /** Import Markdown content into the editor, replacing current content */
-  importFromMarkdown: (markdown: string, immediate?: boolean) => void;
+	exportToMarkdown: () => string;
+	importFromMarkdown: (markdown: string, opts?: { immediate?: boolean }) => Promise<void>;
+	/** Register a transformer at runtime (extensions can call this) */
+	registerMarkdownTransformer: (transformer: MarkdownTransformer) => void;
 };
 
-/**
- * State queries provided by the Markdown extension.
- */
-export type MarkdownStateQueries = {
-  /** Check if Markdown export is available (always true) */
-  canExportMarkdown: () => Promise<boolean>;
-};
+export type MarkdownStateQueries = Record<string, never>;
 
-/**
- * Markdown extension for importing and exporting Markdown content.
- * Provides functionality to convert between Lexical editor state and Markdown strings,
- * with support for custom transformers and HTML embed blocks.
- *
- * @example
- * ```tsx
- * const extensions = [
- *   markdownExtension.configure({
- *     customTransformers: [customTransformer]
- *   })
- * ] as const;
- * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
- *
- * function MyEditor() {
- *   const { commands } = useEditor();
- *
- *   const handleExport = () => {
- *     const markdown = commands.exportToMarkdown();
- *     console.log('Exported Markdown:', markdown);
- *   };
- *
- *   const handleImport = () => {
- *     const markdown = '# Hello World\n\nThis is **bold** text.';
- *     commands.importFromMarkdown(markdown);
- *   };
- *
- *   return (
- *     <div>
- *       <button onClick={handleExport}>Export Markdown</button>
- *       <button onClick={handleImport}>Import Markdown</button>
- *     </div>
- *   );
- * }
- * ```
- */
-export class MarkdownExtension extends BaseExtension<
-  "markdown",
-  MarkdownConfig & BaseExtensionConfig,
-  MarkdownCommands,
-  MarkdownStateQueries,
-  ReactNode[]
-> {
-  private debounceTimeout: NodeJS.Timeout | null = null;
+class MarkdownManager {
+	private editor: LexicalEditor;
+	private extraTransformers: Transformer[] = [];
 
-  /**
-   * Creates a new Markdown extension instance.
-   */
-  constructor() {
-    super("markdown", [ExtensionCategory.Toolbar]);
-    this.config = { customTransformers: [] };
-  }
+	constructor(editor: LexicalEditor, seed: MarkdownTransformer[] = []) {
+		this.editor = editor;
+		this.extraTransformers = seed.map(t => ({
+			// @ts-ignore allow partial
+			...t,
+			dependencies: (t as any).dependencies || [],
+			type: t.type as any,
+		}) as Transformer);
+	}
 
-  /**
-   * Configures the Markdown extension with custom settings.
-   *
-   * @param config - Configuration options
-   * @returns This extension instance for chaining
-   */
-  configure(config: Partial<MarkdownConfig & BaseExtensionConfig>): this {
-    this.config = { ...this.config, ...config };
-    return this;
-  }
+	registerTransformer(transformer: MarkdownTransformer) {
+		// Normalize into a proper Transformer object (fallbacks to avoid undefined fields)
+		const normalized: Transformer = {
+			// @ts-ignore allow spread of partial
+			...transformer,
+			dependencies: (transformer as any).dependencies || [],
+			type: transformer.type as any,
+		} as Transformer;
+		if (!this.extraTransformers.includes(normalized)) {
+			this.extraTransformers.push(normalized);
+		}
+	}
 
-  /**
-   * Registers the extension with the Lexical editor.
-   * No special registration needed for Markdown functionality.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Cleanup function
-   */
-  register(editor: LexicalEditor): () => void {
-    return () => {};
-  }
+	private getAllTransformers(): Transformer[] {
+		// Order: extras first (to override core), then core
+		return [...this.extraTransformers, ...TRANSFORMERS];
+	}
 
-  /**
-   * Returns the commands provided by this extension.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Object containing Markdown import/export commands
-   */
-  getCommands(editor: LexicalEditor): MarkdownCommands {
-    const transformers = [
-      ...(this.config.customTransformers || []),
-      ...TRANSFORMERS,
-    ];
+	export(): string {
+		return this.editor.getEditorState().read(() => {
+			const root = $getRoot();
+			const children = root.getChildren();
+			console.log('[MarkdownManager] Export: root has', children.length, 'children');
+			children.forEach((child, index) => {
+				console.log('[MarkdownManager] Child', index, 'type:', child.getType(), 'text:', child.getTextContent?.().substring(0, 50));
+			});
+			return $convertToMarkdownString(this.getAllTransformers());
+		});
+	}
 
-    console.log("🔧 MarkdownExtension transformers:", transformers.length, transformers.map(t => t.type || 'unknown'));
-
-    return {
-      exportToMarkdown: () => {
-        return editor.getEditorState().read(() => {
-          try {
-            console.log("📤 Exporting to markdown with transformers:", transformers.length);
-            const result = $convertToMarkdownString(transformers);
-            console.log("📤 Export result:", result);
-            return result;
-          } catch (error) {
-            console.error("❌ Markdown export error:", error);
-            return "";
-          }
-        });
-      },
-
-      importFromMarkdown: (markdown: string, immediate = false) => {
-        // Clear existing debounce
-        if (this.debounceTimeout) {
-          clearTimeout(this.debounceTimeout);
-        }
-
-        const performImport = () => {
-          editor.update(
-            () => {
-              try {
-                const transformers = [
-                  ...(this.config.customTransformers || []),
-                  ...TRANSFORMERS,
-                ];
-
-                const root = $getRoot();
-                root.clear();
-
-                if (!markdown.trim()) {
-                  root.append($createParagraphNode());
-                  return;
-                }
-
-                // Pre-process html-embed blocks
-                let processedMarkdown = markdown;
-                const htmlEmbedBlocks: { html: string; placeholder: string }[] =
-                  [];
-
-                processedMarkdown = processedMarkdown.replace(
-                  /```html-embed\s*\n([\s\S]*?)\n```/g,
-                  (match, htmlContent) => {
-                    const placeholder = `HTMLEMBEDPLACEHOLDER${htmlEmbedBlocks.length}HTMLEMBEDPLACEHOLDER`;
-                    htmlEmbedBlocks.push({
-                      html: htmlContent.trim(),
-                      placeholder,
-                    });
-                    return placeholder;
-                  },
-                );
-
-                // Pre-process table blocks
-                const tableBlocks: { tableData: string; placeholder: string }[] = [];
-                processedMarkdown = processedMarkdown.replace(
-                  /(\|.+?\|\s*\n\|[\s\-:|]+\|(?:\s*\n\|.+?\|)*)/g,
-                  (match, tableContent) => {
-                    const placeholder = `TABLEPLACEHOLDER${tableBlocks.length}TABLEPLACEHOLDER`;
-                    tableBlocks.push({
-                      tableData: tableContent.trim(),
-                      placeholder,
-                    });
-                    return placeholder;
-                  },
-                );
-
-                $convertFromMarkdownString(processedMarkdown, transformers);
-
-                // Replace placeholders with HTML embed nodes
-                if (htmlEmbedBlocks.length > 0) {
-                  const traverseAndReplace = (node: any) => {
-                    if (node.getTextContent?.()) {
-                      const text = node.getTextContent();
-                      for (const { html, placeholder } of htmlEmbedBlocks) {
-                        if (text === placeholder) {
-                          const payload = { html, preview: true };
-                          const embedNode = new HTMLEmbedNode(payload);
-                          if (node !== root && node.getParent?.()) {
-                            node.replace(embedNode);
-                            return;
-                          }
-                        }
-                      }
-                    }
-
-                    if (node.getChildren?.()) {
-                      [...node.getChildren()].forEach((child) =>
-                        traverseAndReplace(child),
-                      );
-                    }
-                  };
-
-                  traverseAndReplace(root);
-                }
-
-                // Replace placeholders with table nodes
-                if (tableBlocks.length > 0) {
-                  const traverseAndReplaceTable = (node: any) => {
-                    if (node.getTextContent?.()) {
-                      const text = node.getTextContent();
-                      for (const { tableData, placeholder } of tableBlocks) {
-                        if (text === placeholder) {
-                          console.log("🔄 Converting table placeholder to table node");
-                          console.log("📝 Table data:", tableData);
-                          
-                          // Parse table data
-                          const lines = tableData.split('\n').filter(line => line.trim() && line.includes('|'));
-                          const tableRows: string[][] = [];
-                          
-                          for (const line of lines) {
-                            const cells = line.split('|').slice(1, -1).map(cell => cell.trim());
-                            // Skip separator rows (contains only dashes, colons, spaces)
-                            if (!cells.every(cell => /^[\s\-:]+$/.test(cell))) {
-                              tableRows.push(cells);
-                            }
-                          }
-                          
-                          if (tableRows.length > 0) {
-                            const maxCols = Math.max(...tableRows.map(row => row.length));
-                            const tableNode = $createTableNodeWithDimensions(tableRows.length, maxCols, true);
-                            
-                            const tableNodeRows = tableNode.getChildren();
-                            tableRows.forEach((rowData, rowIndex) => {
-                              const tableRow = tableNodeRows[rowIndex];
-                              if (tableRow && $isTableRowNode(tableRow)) {
-                                const rowCells = tableRow.getChildren();
-                                
-                                for (let colIndex = 0; colIndex < maxCols; colIndex++) {
-                                  const cell = rowCells[colIndex];
-                                  const cellText = rowData[colIndex] || "";
-                                  
-                                  if (cell && $isTableCellNode(cell)) {
-                                    cell.getChildren().forEach((child: any) => child.remove());
-                                    const paragraph = $createParagraphNode();
-                                    if (cellText.trim()) {
-                                      paragraph.append($createTextNode(cellText.trim()));
-                                    }
-                                    cell.append(paragraph);
-                                  }
-                                }
-                              }
-                            });
-                            
-                            if (node !== root && node.getParent?.()) {
-                              node.replace(tableNode);
-                              return;
-                            }
-                          }
-                        }
-                      }
-                    }
-
-                    if (node.getChildren?.()) {
-                      [...node.getChildren()].forEach(child => traverseAndReplaceTable(child));
-                    }
-                  };
-
-                  traverseAndReplaceTable(root);
-                }
-              } catch (error) {
-                console.error("❌ Markdown import error:", error);
-                const root = $getRoot();
-                root.clear();
-                root.append($createParagraphNode());
-              }
-            },
-            { discrete: true },
-          );
-        };
-
-        if (immediate) {
-          performImport();
-        } else {
-          this.debounceTimeout = setTimeout(performImport, 500);
-        }
-      },
-    };
-  }
-
-  /**
-   * Returns state query functions for this extension.
-   *
-   * @param editor - The Lexical editor instance
-   * @returns Object containing state query functions
-   */
-  getStateQueries(editor: LexicalEditor): MarkdownStateQueries {
-    return {
-      canExportMarkdown: async () => true,
-    };
-  }
+	import(markdown: string, onComplete?: () => void) {
+		console.log('[MarkdownManager] Starting import with markdown:', markdown.substring(0, 100) + '...');
+		console.log('[MarkdownManager] Available transformers:', this.getAllTransformers().map(t => t.type));
+		this.editor.update(
+			() => {
+				const root = $getRoot();
+				console.log('[MarkdownManager] Clearing root');
+				root.clear();
+				const content = markdown ?? '';
+				if (!content.trim()) {
+					console.log('[MarkdownManager] Empty content, adding paragraph');
+					root.append($createParagraphNode());
+					return;
+				}
+				console.log('[MarkdownManager] Converting from markdown...');
+				$convertFromMarkdownString(content, this.getAllTransformers());
+				console.log('[MarkdownManager] Conversion complete');
+				$getRoot().selectEnd(); // Reset selection to avoid stale references
+			},
+			{ discrete: true, onUpdate: onComplete },
+		);
+	}
 }
 
-/**
- * Pre-configured Markdown extension instance.
- * Ready to use in extension arrays.
- */
+export class MarkdownExtension extends BaseExtension<
+	'markdown',
+	MarkdownConfig,
+	MarkdownCommands,
+	MarkdownStateQueries,
+	[]
+> {
+	private manager: MarkdownManager | null = null;
+	private pendingTransformers: MarkdownTransformer[] = [];
+	private importTimer: any = null;
+
+	constructor() {
+		super('markdown', [ExtensionCategory.Toolbar]);
+		this.config = { importDebounce: 120, transformers: [] };
+	}
+
+	configure(config: Partial<MarkdownConfig>): this {
+		this.config = { ...this.config, ...config };
+		// If manager already exists, push new seed transformers now
+		if (this.manager && config.transformers?.length) {
+			config.transformers.forEach(t => this.manager?.registerTransformer(t));
+		} else if (config.transformers?.length) {
+			this.pendingTransformers.push(...config.transformers);
+		}
+		return this;
+	}
+
+	/** Allow other extensions to imperatively register transformers before or after we register with the editor */
+	registerTransformer = (transformer: MarkdownTransformer) => {
+		if (this.manager) {
+			this.manager.registerTransformer(transformer);
+		} else {
+			this.pendingTransformers.push(transformer);
+		}
+	};
+
+	register(editor: LexicalEditor): () => void {
+		this.manager = new MarkdownManager(editor, [
+			...(this.config.transformers || []),
+			...this.pendingTransformers,
+		]);
+		// Clear pending once consumed
+		this.pendingTransformers = [];
+		return () => {
+			this.manager = null;
+		};
+	}
+
+	getCommands(editor: LexicalEditor): MarkdownCommands {
+		return {
+			exportToMarkdown: () => {
+				if (!this.manager) return '';
+				try {
+					return this.manager.export();
+				} catch (e) {
+					console.error('[MarkdownExtension] export failed', e);
+					return '';
+				}
+			},
+			importFromMarkdown: (markdown: string, opts?: { immediate?: boolean }) => {
+				return new Promise((resolve) => {
+					console.log('[MarkdownExtension] importFromMarkdown called with:', markdown.substring(0, 50) + '...', 'opts:', opts);
+					if (!this.manager) {
+						console.error('[MarkdownExtension] No manager available');
+						resolve();
+						return;
+					}
+					const { immediate } = opts || {};
+					const delay = immediate ? 0 : this.config.importDebounce || 0;
+					console.log('[MarkdownExtension] Will run import with delay:', delay);
+					if (this.importTimer) clearTimeout(this.importTimer);
+					const run = () => {
+						console.log('[MarkdownExtension] Running import');
+						this.manager?.import(markdown, () => {
+							console.log('[MarkdownExtension] Import complete');
+							resolve();
+						});
+					};
+					if (delay > 0) {
+						this.importTimer = setTimeout(run, delay);
+					} else {
+						run();
+					}
+				});
+			},
+			registerMarkdownTransformer: (transformer: MarkdownTransformer) => {
+				this.registerTransformer(transformer);
+			},
+		};
+	}
+
+	getStateQueries(): MarkdownStateQueries {
+		return {};
+	}
+}
+
 export const markdownExtension = new MarkdownExtension();

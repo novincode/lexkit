@@ -17,7 +17,7 @@ export type HTMLCommands = {
   /** Export the current editor content as HTML string */
   exportToHTML: () => string;
   /** Import HTML content into the editor, replacing current content */
-  importFromHTML: (html: string) => void;
+  importFromHTML: (html: string) => Promise<void>;
 };
 
 /**
@@ -101,42 +101,45 @@ export class HTMLExtension extends BaseExtension<
       },
 
       importFromHTML: (html: string) => {
-        editor.update(
-          () => {
-            try {
-              const root = $getRoot();
-              root.clear();
+        return new Promise((resolve) => {
+          editor.update(
+            () => {
+              try {
+                const root = $getRoot();
+                root.clear();
 
-              if (html.trim()) {
-                // Parse HTML properly to avoid wrapper issues
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, "text/html");
+                if (html.trim()) {
+                  // Parse HTML properly to avoid wrapper issues
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, "text/html");
 
-                // Generate nodes from the body to avoid extra wrappers
-                const nodes = $generateNodesFromDOM(editor, doc);
+                  // Generate nodes from the body to avoid extra wrappers
+                  const nodes = $generateNodesFromDOM(editor, doc);
 
-                // Insert nodes directly to root
-                if (nodes && nodes.length > 0) {
-                  nodes.forEach((node: any) => {
-                    if (node) {
-                      root.append(node);
-                    }
-                  });
+                  // Insert nodes directly to root
+                  if (nodes && nodes.length > 0) {
+                    nodes.forEach((node: any) => {
+                      if (node) {
+                        root.append(node);
+                      }
+                    });
+                  } else {
+                    root.append($createParagraphNode());
+                  }
                 } else {
                   root.append($createParagraphNode());
                 }
-              } else {
+                $getRoot().selectEnd(); // Reset selection to avoid stale references
+              } catch (error) {
+                console.error("Error importing HTML:", error);
+                const root = $getRoot();
+                root.clear();
                 root.append($createParagraphNode());
               }
-            } catch (error) {
-              console.error("Error importing HTML:", error);
-              const root = $getRoot();
-              root.clear();
-              root.append($createParagraphNode());
-            }
-          },
-          { discrete: true },
-        );
+            },
+            { discrete: true, onUpdate: resolve },
+          );
+        });
       },
     };
   }
