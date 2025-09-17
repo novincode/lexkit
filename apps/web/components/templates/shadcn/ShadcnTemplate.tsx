@@ -15,6 +15,7 @@ import {
   linkExtension,
   horizontalRuleExtension,
   tableExtension,
+  TableExtension,
   type TableConfig,
   listExtension,
   historyExtension,
@@ -31,7 +32,9 @@ import {
   commandPaletteExtension,
   floatingToolbarExtension,
   contextMenuExtension,
+  DraggableBlockExtension,
 } from "@lexkit/editor/extensions/core";
+import { HTMLEmbedExtension } from "@lexkit/editor/extensions/media";
 import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -225,7 +228,7 @@ export const extensions = [
     autoLinkUrls: true,
   }),
   horizontalRuleExtension,
-  tableExtension.configure({
+  new TableExtension().configure({
     enableContextMenu: true,
     contextMenuRenderer: ShadcnTableContextMenuRenderer,
   }),
@@ -239,7 +242,7 @@ export const extensions = [
   }),
   codeExtension,
   codeFormatExtension,
-  htmlEmbedExtension.configure({
+  new HTMLEmbedExtension().configure({
     toggleRenderer: ({ isPreview, onClick, className, style }) => (
       <Button
         variant="outline"
@@ -265,7 +268,7 @@ export const extensions = [
   contextMenuExtension,
   commandPaletteExtension,
   
-  draggableBlockExtension.configure({ // Create fresh instance to avoid caching issues when switching templates
+  new DraggableBlockExtension().configure({ // Create fresh instance to avoid caching issues when switching templates
     buttonStackPosition: "right",
   }),
 ] as const;

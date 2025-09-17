@@ -9,6 +9,7 @@ import {
   linkExtension,
   horizontalRuleExtension,
   tableExtension,
+  TableExtension,
   type TableConfig,
   listExtension,
   historyExtension,
@@ -25,7 +26,9 @@ import {
   commandPaletteExtension,
   floatingToolbarExtension,
   contextMenuExtension,
+  DraggableBlockExtension,
 } from "@lexkit/editor/extensions/core";
+import { HTMLEmbedExtension } from "@lexkit/editor/extensions/media";
 import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -78,6 +81,7 @@ import { CommandPalette } from "./CommandPalette";
 import { SelectionRect } from "@lexkit/editor/extensions/core/FloatingToolbarExtension";
 import { FloatingToolbarExtension } from "@lexkit/editor/extensions/core/FloatingToolbarExtension";
 import { createPortal } from "react-dom";
+import { defaultTheme } from "./theme";
 
 // Extensions array
 export const extensions = [
@@ -92,7 +96,7 @@ export const extensions = [
     autoLinkUrls: true,
   }),
   horizontalRuleExtension,
-  tableExtension.configure({
+  new TableExtension().configure({
     enableContextMenu: true,
     theme: {
       contextMenu: "table-context-menu",
@@ -110,11 +114,11 @@ export const extensions = [
   }),
   codeExtension,
   codeFormatExtension,
-  htmlEmbedExtension,
+  new HTMLEmbedExtension(),
   floatingToolbarExtension, // Simple extension without render config
   contextMenuExtension,
   commandPaletteExtension,
-  draggableBlockExtension.configure({
+  new DraggableBlockExtension().configure({
     // showMoveButtons:false
   }), // Use with default configuration
 ] as const;
@@ -1423,7 +1427,7 @@ export const DefaultTemplate = React.forwardRef<
       className={`lexkit-editor-wrapper ${className || ""}`}
       data-editor-theme={editorTheme}
     >
-      <Provider extensions={extensions}>
+      <Provider extensions={extensions} config={{ theme: defaultTheme }}>
         <EditorContent
           className={className}
           isDark={isDark}
