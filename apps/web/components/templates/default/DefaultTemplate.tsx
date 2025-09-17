@@ -83,6 +83,7 @@ import { SelectionRect } from "@lexkit/editor/extensions/core/FloatingToolbarExt
 import { FloatingToolbarExtension } from "@lexkit/editor/extensions/core/FloatingToolbarExtension";
 import { createPortal } from "react-dom";
 import { defaultTheme } from "./theme";
+import { cn } from "@repo/ui/lib/utils";
 
 // Extensions array
 import "./styles.css";
@@ -418,119 +419,7 @@ function FloatingToolbarRenderer() {
   );
 }
 
-// Context Menu Renderer
-function ContextMenuRenderer() {
-  const { extensions, lexical: editor } = useEditor();
-  const [contextMenuConfig, setContextMenuConfig] = useState<any>(null);
-
-  // Get the context menu extension instance
-  const contextMenuExtension = extensions.find(
-    (ext) => ext.name === "contextMenu",
-  ) as any;
-
-  useEffect(() => {
-    if (!contextMenuExtension) return;
-
-    const unsubscribe = contextMenuExtension.subscribe((config: any) => {
-      setContextMenuConfig(config);
-      
-      // Prevent body scrolling when context menu is open
-      if (config) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
-    });
-
-    return () => {
-      document.body.style.overflow = '';
-      unsubscribe();
-    };
-  }, [contextMenuExtension]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    if (!contextMenuConfig) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.table-context-menu')) {
-        if (contextMenuExtension) {
-          contextMenuExtension.getCommands(editor).hideContextMenu();
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [contextMenuConfig, contextMenuExtension, editor]);
-
-  if (!contextMenuConfig) return null;
-
-  // Check if there's a custom renderer from any extension
-  // For now, we'll use the table extension's renderer if available
-  const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
-  const customRenderer = tableExtension?.config?.contextMenuRenderer;
-
-  if (customRenderer) {
-    return customRenderer({
-      items: contextMenuConfig.items,
-      position: contextMenuConfig.position,
-      onClose: () => {
-        if (contextMenuExtension) {
-          contextMenuExtension.getCommands(editor).hideContextMenu();
-        }
-      },
-      className: tableExtension?.config?.theme?.contextMenu || "table-context-menu",
-      style: tableExtension?.config?.styles?.contextMenu,
-      itemClassName: tableExtension?.config?.theme?.contextMenuItem || "",
-      itemStyle: tableExtension?.config?.styles?.contextMenuItem,
-      disabledItemClassName: tableExtension?.config?.theme?.contextMenuItemDisabled || "",
-      disabledItemStyle: tableExtension?.config?.styles?.contextMenuItemDisabled,
-    });
-  }
-
-  // Default renderer
-  return createPortal(
-    <div
-      className={defaultTheme.contextMenu?.container || "table-context-menu"}
-      style={{
-        position: 'fixed',
-        left: contextMenuConfig.position.x,
-        top: contextMenuConfig.position.y,
-        zIndex: 1000,
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {contextMenuConfig.items.map((item: any, index: number) => (
-        <div
-          key={index}
-          className={item.disabled ? 
-            (defaultTheme.contextMenu?.itemDisabled || "") : 
-            (defaultTheme.contextMenu?.item || "")
-          }
-          style={{
-            opacity: item.disabled ? 0.5 : 1,
-            cursor: item.disabled ? "not-allowed" : "pointer",
-          }}
-          onClick={() => {
-            if (!item.disabled && item.action) {
-              item.action();
-            }
-            // Hide menu after action
-            if (contextMenuExtension) {
-              contextMenuExtension.getCommands(editor).hideContextMenu();
-            }
-          }}
-        >
-          {item.icon && <span style={{ marginRight: 8 }}>{item.icon}</span>}
-          {item.label}
-        </div>
-      ))}
-    </div>,
-    document.body,
-  );
-}
+// Toolbar Component
 
 // Toolbar Component
 function Toolbar({
@@ -1141,72 +1030,11 @@ function EditorContent({
     };
     document.addEventListener("keydown", handleKeyDown);
 
-    // Add right-click handler for context menus
-    const handleContextMenu = (e: MouseEvent) => {
-      // Only handle in visual mode
-      if (mode !== "visual") return;
-
-      // Get the clicked element and try to set selection to it
-      const target = e.target as HTMLElement;
-      if (target && editor) {
-        // Try to find the table cell that was clicked
-        let tableCell = target.closest('[data-lexical-table-cell]');
-        if (!tableCell) {
-          // Try alternative selectors
-          tableCell = target.closest('td, th');
-        }
-
-        if (tableCell) {
-          // For right-click context menu, we can check the DOM directly
-          // instead of relying on Lexical selection
-          const isInTableCell = tableCell.tagName === 'TD' || tableCell.tagName === 'TH' ||
-                               tableCell.hasAttribute('data-lexical-table-cell');
-
-          if (isInTableCell) {
-            // Only prevent default if we're in a table cell
-            e.preventDefault();
-            
-            // Get table extension
-            const tableExtension = extensions.find((ext: any) => ext.name === "table") as any;
-            const contextMenuExtension = extensions.find((ext: any) => ext.name === "contextMenu") as any;
-
-            if (tableExtension && contextMenuExtension && tableExtension.config?.enableContextMenu) {
-              // Get table commands
-              const tableCommands = tableExtension.getCommands(editor);
-              // Get context menu items from table extension
-              const contextMenuItems = tableExtension.getContextMenuItems(tableCommands);
-
-              contextMenuExtension.getCommands(editor).showContextMenu({
-                items: contextMenuItems,
-                position: { x: e.clientX, y: e.clientY },
-              });
-            }
-          }
-        }
-      }
-    };
-
-    // Add event listener to editor root element
-    const editorElement = editor.getRootElement();
-    if (editorElement) {
-      editorElement.addEventListener("contextmenu", handleContextMenu);
-    }
-
-    // Call onReady with methods immediately when editor is ready
-    if (onReady) {
-      onReady(methods);
-    }
-
     return () => {
       unregisterShortcuts();
-      document.removeEventListener("keydown", handleKeyDown);
-      if (editorElement) {
-        editorElement.removeEventListener("contextmenu", handleContextMenu);
-      }
-      // Restore original command
       (commands as any).showCommandPalette = originalShowCommand;
     };
-  }, [editor, methods, onReady]);
+  }, [editor, methods, onReady, mode]);
 
   // Simple handlers - no debouncing needed
   const handleHtmlChange = (html: string) => {
@@ -1313,7 +1141,6 @@ function EditorContent({
             ErrorBoundary={ErrorBoundary}
           />
           <FloatingToolbarRenderer />
-          <ContextMenuRenderer />
         </div>
         
         {mode === "html" && (

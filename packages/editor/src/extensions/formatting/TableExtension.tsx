@@ -23,7 +23,13 @@ import {
   $deleteTableColumnAtSelection,
 } from "@lexical/table";
 import { $createParagraphNode, $createTextNode } from "lexical";
-import { ContextMenuItem } from "@lexkit/editor/extensions/core/ContextMenuExtension";
+import {
+  ContextMenuItem,
+  ContextMenuProvider,
+  ContextMenuRenderer,
+  ContextMenuExtension,
+  contextMenuExtension
+} from "@lexkit/editor/extensions/core/ContextMenuExtension";
 
 /**
  * Configuration options for the Table extension.
@@ -37,17 +43,9 @@ export type TableConfig = BaseExtensionConfig & {
   /** Custom context menu items - can be static items or a function that receives commands */
   contextMenuItems?: ContextMenuItem[] | ((commands: TableCommands) => ContextMenuItem[]);
   /** Custom context menu renderer for complete headless control */
-  contextMenuRenderer?: (props: {
-    items: ContextMenuItem[];
-    position: { x: number; y: number };
-    onClose: () => void;
-    className: string;
-    style?: React.CSSProperties;
-    itemClassName: string;
-    itemStyle?: React.CSSProperties;
-    disabledItemClassName: string;
-    disabledItemStyle?: React.CSSProperties;
-  }) => ReactNode;
+  contextMenuRenderer?: ContextMenuRenderer;
+  /** Context menu extension instance to register providers with */
+  contextMenuExtension?: typeof contextMenuExtension;
   /** Markdown extension instance to register transformers with */
   markdownExtension?: typeof markdownExtension;
 };
@@ -156,6 +154,44 @@ export class TableExtension extends BaseExtension<
     } catch (e) {
       console.warn('[TableExtension] failed to register table markdown transformer', e);
     }
+
+    // Register our context menu provider if context menu is enabled
+    if (this.config.enableContextMenu) {
+      const contextMenuExt = this.config.contextMenuExtension || contextMenuExtension;
+
+      if (contextMenuExt) {
+        const provider: ContextMenuProvider = {
+          id: 'table',
+          priority: 10, // Higher priority for tables
+
+          canHandle: ({ target, selection }) => {
+            // Check if we're in a table cell
+            const tableCell = target.closest('td, th, [data-lexical-table-cell]');
+            if (!tableCell) return false;
+
+            // Additional check via selection if needed
+            if ($isTableSelection(selection)) return true;
+
+            // Check via DOM
+            return tableCell.tagName === 'TD' || tableCell.tagName === 'TH';
+          },
+
+          getItems: ({ editor }) => {
+            const commands = this.getCommands(editor);
+            return this.getContextMenuItems(commands);
+          },
+
+          renderer: this.config.contextMenuRenderer || contextMenuExt.config?.defaultRenderer,
+        };
+
+        contextMenuExt.getCommands(editor).registerProvider(provider);
+
+        return () => {
+          contextMenuExt.getCommands(editor).unregisterProvider('table');
+        };
+      }
+    }
+
     return () => {};
   }
 
