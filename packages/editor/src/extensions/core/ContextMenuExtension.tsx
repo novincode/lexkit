@@ -1,7 +1,8 @@
 import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW } from "lexical";
 import { BaseExtension } from "@lexkit/editor/extensions/base";
 import { ExtensionCategory, BaseExtensionConfig } from "@lexkit/editor/extensions/types";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * Context menu item configuration
@@ -240,6 +241,40 @@ class ContextMenuManager {
 }
 
 /**
+ * Context Menu Plugin - React component that renders the context menu
+ */
+function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
+  const [menuState, setMenuState] = useState<{
+    items: ContextMenuItem[];
+    position: { x: number; y: number };
+    renderer?: ContextMenuRenderer;
+  } | null>(null);
+
+  useEffect(() => {
+    // Subscribe to menu state changes from the extension
+    const unsubscribe = extension.subscribe(setMenuState);
+    return unsubscribe;
+  }, [extension]);
+
+  if (!menuState) return null;
+
+  // Use the renderer from the menu state or fall back to the extension's default
+  const Renderer = menuState.renderer || extension.config.defaultRenderer!;
+
+  return createPortal(
+    <Renderer
+      items={menuState.items}
+      position={menuState.position}
+      onClose={() => extension.manager?.hideMenu()}
+      className="lexkit-context-menu z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+      itemClassName="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+      disabledItemClassName="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground opacity-50 cursor-not-allowed"
+    />,
+    document.body
+  );
+}
+
+/**
  * Context menu extension - provides a clean, registry-based context menu system
  */
 export class ContextMenuExtension extends BaseExtension<
@@ -249,7 +284,7 @@ export class ContextMenuExtension extends BaseExtension<
   ContextMenuStateQueries,
   React.ReactElement[]
 > {
-  private manager: ContextMenuManager | null = null;
+  public manager: ContextMenuManager | null = null;
 
   constructor(config: ContextMenuConfig = {}) {
     super("contextMenu", [ExtensionCategory.Toolbar]);
@@ -326,6 +361,10 @@ export class ContextMenuExtension extends BaseExtension<
     return {
       isContextMenuOpen: () => Promise.resolve(this.manager?.getCurrentMenu() !== null),
     };
+  }
+
+  getPlugins(): React.ReactElement[] {
+    return [<ContextMenuPlugin key="context-menu" extension={this} />];
   }
 
   // Public API for components to subscribe to menu changes
