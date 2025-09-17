@@ -1314,7 +1314,6 @@ table td[data-lexical-table-cell-selection] {
 
 /* Table Context Menu */
 .table-context-menu {
-  position: fixed;
   background: var(--lexkit-bg);
   border: 1px solid var(--lexkit-border);
   border-radius: 6px;

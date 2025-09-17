@@ -17,6 +17,10 @@ import {
 import {
   INSERT_TABLE_COMMAND,
   $isTableSelection,
+  $insertTableRowAtSelection,
+  $insertTableColumnAtSelection,
+  $deleteTableRowAtSelection,
+  $deleteTableColumnAtSelection,
 } from "@lexical/table";
 import { $createParagraphNode, $createTextNode } from "lexical";
 import { ContextMenuItem } from "@lexkit/editor/extensions/core/ContextMenuExtension";
@@ -28,10 +32,34 @@ export type TableConfig = BaseExtensionConfig & {
   rows?: number;
   columns?: number;
   includeHeaders?: boolean;
-  /** Custom context menu items for tables */
-  contextMenuItems?: ContextMenuItem[];
-  /** Whether to show context menu on right-click */
+  /** Enable context menu on right-click */
   enableContextMenu?: boolean;
+  /** Custom context menu items - can be static items or a function that receives commands */
+  contextMenuItems?: ContextMenuItem[] | ((commands: TableCommands) => ContextMenuItem[]);
+  /** Theme classes for context menu */
+  theme?: {
+    contextMenu?: string;
+    contextMenuItem?: string;
+    contextMenuItemDisabled?: string;
+  };
+  /** Custom CSS styles for context menu */
+  styles?: {
+    contextMenu?: React.CSSProperties;
+    contextMenuItem?: React.CSSProperties;
+    contextMenuItemDisabled?: React.CSSProperties;
+  };
+  /** Custom context menu renderer for complete headless control */
+  contextMenuRenderer?: (props: {
+    items: ContextMenuItem[];
+    position: { x: number; y: number };
+    onClose: () => void;
+    className: string;
+    style?: React.CSSProperties;
+    itemClassName: string;
+    itemStyle?: React.CSSProperties;
+    disabledItemClassName: string;
+    disabledItemStyle?: React.CSSProperties;
+  }) => ReactNode;
 };
 
 /**
@@ -39,6 +67,13 @@ export type TableConfig = BaseExtensionConfig & {
  */
 export type TableCommands = {
   insertTable: (config: { rows?: number; columns?: number; includeHeaders?: boolean }) => void;
+  insertRowAbove: () => void;
+  insertRowBelow: () => void;
+  insertColumnLeft: () => void;
+  insertColumnRight: () => void;
+  deleteRow: () => void;
+  deleteColumn: () => void;
+  deleteTable: () => void;
   showTableContextMenu: (position: { x: number; y: number }) => void;
 };
 
@@ -61,55 +96,44 @@ export class TableExtension extends BaseExtension<
   TableStateQueries,
   ReactNode[]
 > {
-  private defaultContextMenuItems: ContextMenuItem[] = [
+  getContextMenuItems(commands: TableCommands): ContextMenuItem[] {
+    if (typeof this.config.contextMenuItems === 'function') {
+      return this.config.contextMenuItems(commands);
+    }
+    if (Array.isArray(this.config.contextMenuItems)) {
+      return this.config.contextMenuItems;
+    }
+    return this.defaultContextMenuItems(commands);
+  }
+
+  private defaultContextMenuItems = (commands: TableCommands): ContextMenuItem[] => [
     {
       label: "Insert Row Above",
-      action: () => {
-        // TODO: Implement insert row above
-        console.log("Insert row above");
-      },
+      action: () => commands.insertRowAbove(),
     },
     {
       label: "Insert Row Below",
-      action: () => {
-        // TODO: Implement insert row below
-        console.log("Insert row below");
-      },
+      action: () => commands.insertRowBelow(),
     },
     {
       label: "Insert Column Left",
-      action: () => {
-        // TODO: Implement insert column left
-        console.log("Insert column left");
-      },
+      action: () => commands.insertColumnLeft(),
     },
     {
       label: "Insert Column Right",
-      action: () => {
-        // TODO: Implement insert column right
-        console.log("Insert column right");
-      },
+      action: () => commands.insertColumnRight(),
     },
     {
       label: "Delete Row",
-      action: () => {
-        // TODO: Implement delete row
-        console.log("Delete row");
-      },
+      action: () => commands.deleteRow(),
     },
     {
       label: "Delete Column",
-      action: () => {
-        // TODO: Implement delete column
-        console.log("Delete column");
-      },
+      action: () => commands.deleteColumn(),
     },
     {
       label: "Delete Table",
-      action: () => {
-        // TODO: Implement delete table
-        console.log("Delete table");
-      },
+      action: () => commands.deleteTable(),
     },
   ];
 
@@ -158,6 +182,48 @@ export class TableExtension extends BaseExtension<
           if ($isRangeSelection(selection)) {
             const tableNode = $createTableNodeWithDimensions(rows, columns, includeHeaders);
             selection.insertNodes([tableNode]);
+          }
+        });
+      },
+      insertRowAbove: () => {
+        editor.update(() => {
+          $insertTableRowAtSelection(false); // false = insert above
+        });
+      },
+      insertRowBelow: () => {
+        editor.update(() => {
+          $insertTableRowAtSelection(true); // true = insert below
+        });
+      },
+      insertColumnLeft: () => {
+        editor.update(() => {
+          $insertTableColumnAtSelection(false); // false = insert left
+        });
+      },
+      insertColumnRight: () => {
+        editor.update(() => {
+          $insertTableColumnAtSelection(true); // true = insert right
+        });
+      },
+      deleteRow: () => {
+        editor.update(() => {
+          $deleteTableRowAtSelection();
+        });
+      },
+      deleteColumn: () => {
+        editor.update(() => {
+          $deleteTableColumnAtSelection();
+        });
+      },
+      deleteTable: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isTableSelection(selection)) {
+            selection.getNodes().forEach((node) => {
+              if ($isTableNode(node)) {
+                node.remove();
+              }
+            });
           }
         });
       },
