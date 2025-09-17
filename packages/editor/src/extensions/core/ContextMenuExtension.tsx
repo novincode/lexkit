@@ -192,32 +192,35 @@ class ContextMenuManager {
     const target = event.target as HTMLElement;
 
     // Get current selection
-    const selection = this.editor.getEditorState().read(() => $getSelection());
+    this.editor.getEditorState().read(() => {
+      const selection = $getSelection();
 
-    // Find the first provider that can handle this context
-    const sortedProviders = Array.from(this.providers.values()).sort(
-      (a, b) => (b.priority || 0) - (a.priority || 0)
-    );
+      // Find the first provider that can handle this context
+      const sortedProviders = Array.from(this.providers.values()).sort(
+        (a, b) => (b.priority || 0) - (a.priority || 0)
+      );
 
-    for (const provider of sortedProviders) {
-      const context = { editor: this.editor, target, selection, event };
+      for (const provider of sortedProviders) {
+        const context = { editor: this.editor, target, selection, event };
 
-      if (provider.canHandle(context)) {
-        if (this.config.preventDefault !== false) {
-          event.preventDefault();
-        }
+        if (provider.canHandle(context)) {
+          if (this.config.preventDefault !== false) {
+            event.preventDefault();
+          }
 
-        const items = provider.getItems(context);
-        if (items.length > 0) {
-          this.showMenu({
-            items,
-            position: { x: event.clientX, y: event.clientY },
-            renderer: provider.renderer || this.config.defaultRenderer,
-          });
-          return;
+          const items = provider.getItems(context);
+          
+          if (items.length > 0) {
+            this.showMenu({
+              items,
+              position: { x: event.clientX, y: event.clientY },
+              renderer: provider.renderer || this.config.defaultRenderer,
+            });
+            return;
+          }
         }
       }
-    }
+    });
   }
 
   showMenu(config: {
@@ -298,8 +301,10 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
     return unsubscribe;
   }, [extension]);
 
-  if (!menuState) return null;
-
+  if (!menuState) {
+    return null;
+  }
+  
   // Use the renderer from the menu state or fall back to the extension's default
   const Renderer = menuState.renderer || extension.config.defaultRenderer!;
 
@@ -330,10 +335,16 @@ export class ContextMenuExtension extends BaseExtension<
   React.ReactElement[]
 > {
   public manager: ContextMenuManager | null = null;
+  private pendingListeners: Set<(menu: any) => void> = new Set();
 
   constructor(config: ContextMenuConfig = {}) {
     super("contextMenu", [ExtensionCategory.Toolbar]);
-    this.config = { defaultRenderer: DefaultContextMenuRenderer, ...config };
+    this.config = { 
+      defaultRenderer: DefaultContextMenuRenderer, 
+      position: "before", // Render before other plugins
+      initPriority: 100, // High priority to register first
+      ...config 
+    };
   }
 
   configure(config: Partial<ContextMenuConfig>): this {
@@ -348,13 +359,18 @@ export class ContextMenuExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     this.manager = new ContextMenuManager(editor, this.config);
 
+    // Notify any pending listeners that the manager is now available
+    this.pendingListeners.forEach(listener => {
+      this.manager?.subscribe(listener);
+    });
+    this.pendingListeners.clear();
+
     const handleContextMenu = (event: MouseEvent) => {
       this.manager?.handleContextMenu(event);
     };
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      // Hide menu if clicking outside (you can customize this selector)
       if (!target.closest('.lexkit-context-menu')) {
         this.manager?.hideMenu();
       }
@@ -367,6 +383,7 @@ export class ContextMenuExtension extends BaseExtension<
     };
 
     const editorElement = editor.getRootElement();
+    
     if (editorElement) {
       editorElement.addEventListener("contextmenu", handleContextMenu);
       document.addEventListener("mousedown", handleClickOutside);
@@ -388,7 +405,10 @@ export class ContextMenuExtension extends BaseExtension<
   getCommands(editor: LexicalEditor): ContextMenuCommands {
     return {
       registerProvider: (provider: ContextMenuProvider) => {
-        this.manager?.registerProvider(provider);
+        if (!this.manager) {
+          this.manager = new ContextMenuManager(editor, this.config);
+        }
+        this.manager.registerProvider(provider);
       },
       unregisterProvider: (id: string) => {
         this.manager?.unregisterProvider(id);
@@ -414,10 +434,15 @@ export class ContextMenuExtension extends BaseExtension<
 
   // Public API for components to subscribe to menu changes
   subscribe(listener: (menu: any) => void): () => void {
-    if (!this.manager) {
-      return () => {};
+    if (this.manager) {
+      return this.manager.subscribe(listener);
+    } else {
+      // Manager not created yet, queue the listener
+      this.pendingListeners.add(listener);
+      return () => {
+        this.pendingListeners.delete(listener);
+      };
     }
-    return this.manager.subscribe(listener);
   }
 }
 

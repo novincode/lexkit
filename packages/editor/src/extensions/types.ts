@@ -15,6 +15,8 @@ export interface BaseExtensionConfig {
   showInToolbar?: boolean;
   category?: ExtensionCategory[];
   position?: "before" | "after";
+  /** Initialization priority - higher numbers register first (default: 0) */
+  initPriority?: number;
   [key: string]: any;
 }
 

@@ -184,10 +184,14 @@ export class TableExtension extends BaseExtension<
           renderer: this.config.contextMenuRenderer || contextMenuExt.config?.defaultRenderer,
         };
 
-        contextMenuExt.getCommands(editor).registerProvider(provider);
+        const commands = contextMenuExt.getCommands(editor);
+        commands.registerProvider(provider);
 
         return () => {
-          contextMenuExt.getCommands(editor).unregisterProvider('table');
+          const commands = contextMenuExt.getCommands(editor);
+          if (commands) {
+            commands.unregisterProvider('table');
+          }
         };
       }
     }

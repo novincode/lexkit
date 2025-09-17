@@ -114,7 +114,15 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     // Register extensions (this was missing!)
     useEffect(() => {
       if (!editor) return;
-      const unregisters = extensions.map((ext) => ext.register(editor));
+      
+      // Sort extensions by initPriority (higher numbers first)
+      const sortedExtensions = [...extensions].sort((a, b) => {
+        const aPriority = a.config?.initPriority ?? 0;
+        const bPriority = b.config?.initPriority ?? 0;
+        return bPriority - aPriority;
+      });
+      
+      const unregisters = sortedExtensions.map((ext) => ext.register(editor));
       return () => unregisters.forEach((unreg) => unreg && unreg());
     }, [editor, extensions]);
 

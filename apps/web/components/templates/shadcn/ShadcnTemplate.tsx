@@ -163,8 +163,9 @@ function ShadcnContextMenuRenderer(props: {
 // Create custom Shadcn context menu extension
 const shadcnContextMenuExtension = contextMenuExtension.configure({
   defaultRenderer: ShadcnContextMenuRenderer,
+  preventDefault: true, // Explicitly prevent default browser context menu
   theme: {
-    container: "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+    container: "lexkit-context-menu z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
     item: "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
     itemDisabled: "opacity-50 cursor-not-allowed pointer-events-none"
   }
@@ -276,8 +277,8 @@ export const extensions = [
     markdownExtension: markdownExt,
   }),
   floatingToolbarExtension,
-  shadcnContextMenuExtension,
   commandPaletteExtension,
+  shadcnContextMenuExtension,
   
   new DraggableBlockExtension().configure({ // Create fresh instance to avoid caching issues when switching templates
     buttonStackPosition: "right",
