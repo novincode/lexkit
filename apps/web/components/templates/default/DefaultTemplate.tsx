@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect, useMemo, useRef } from "react";
+
+import React, { useState, useEffect, useMemo, useRef, forwardRef } from "react";
 import { useTheme } from "next-themes";
 import {
   boldExtension,
@@ -8,20 +9,15 @@ import {
   strikethroughExtension,
   linkExtension,
   horizontalRuleExtension,
-  tableExtension,
   TableExtension,
-  type TableConfig,
   listExtension,
   historyExtension,
   imageExtension,
   blockFormatExtension,
   htmlExtension,
-  markdownExtension,
   MarkdownExtension,
   codeExtension,
   codeFormatExtension,
-  htmlEmbedExtension,
-  draggableBlockExtension,
 } from "@lexkit/editor/extensions";
 import {
   commandPaletteExtension,
@@ -33,9 +29,13 @@ import { HTMLEmbedExtension } from "@lexkit/editor/extensions/media";
 import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { $getSelection, $isNodeSelection, $isRangeSelection } from "lexical";
-import { ImageNode } from "@lexkit/editor/extensions/media";
-import "./styles.css";
+import { LexicalEditor } from "lexical";
+import { createEditorSystem } from "@lexkit/editor";
+import type {
+  ExtractCommands,
+  ExtractStateQueries,
+  BaseCommands,
+} from "@lexkit/editor/extensions/types";
 import {
   Bold,
   Italic,
@@ -47,7 +47,7 @@ import {
   Redo,
   Sun,
   Moon,
-  Image,
+  Image as ImageIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -57,43 +57,36 @@ import {
   Minus,
   Code,
   Terminal,
-  Table,
+  Table as TableIcon,
   FileCode,
   Eye,
   Pencil,
   Command,
   Type,
-  ArrowRight,
   Quote,
 } from "lucide-react";
 import { Select, Dropdown, Dialog } from "./components";
-import { createEditorSystem } from "@lexkit/editor";
-import type {
-  ExtractCommands,
-  ExtractStateQueries,
-  BaseCommands,
-} from "@lexkit/editor/extensions/types";
-import { LexicalEditor } from "lexical";
 import {
   commandsToCommandPaletteItems,
   registerKeyboardShortcuts,
 } from "./commands";
 import { CommandPalette } from "./CommandPalette";
-import { SelectionRect } from "@lexkit/editor/extensions/core/FloatingToolbarExtension";
-import { FloatingToolbarExtension } from "@lexkit/editor/extensions/core/FloatingToolbarExtension";
 import { createPortal } from "react-dom";
 import { defaultTheme } from "./theme";
-import { cn } from "@repo/ui/lib/utils";
-
-// Extensions array
 import "./styles.css";
 
-// Create markdown extension instance for this template
+type TableConfig = {
+  rows?: number;
+  columns?: number;
+  includeHeaders?: boolean;
+};
+
+// Create markdown extension instance
 const markdownExt = new MarkdownExtension().configure({
   customTransformers: ALL_MARKDOWN_TRANSFORMERS,
 });
 
-// Extensions array
+// Define extensions array
 export const extensions = [
   boldExtension,
   italicExtension,
@@ -101,7 +94,6 @@ export const extensions = [
   strikethroughExtension,
   linkExtension.configure({
     linkSelectedTextOnPaste: true,
-
     autoLinkText: true,
     autoLinkUrls: true,
   }),
@@ -121,26 +113,24 @@ export const extensions = [
   new HTMLEmbedExtension().configure({
     markdownExtension: markdownExt,
   }),
-  floatingToolbarExtension, // Simple extension without render config
+  floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
-  new DraggableBlockExtension().configure({
-    // showMoveButtons:false
-  }), // Use with default configuration
+  new DraggableBlockExtension().configure({}),
 ] as const;
 
-// Create a typed editor system for these specific extensions
+// Create typed editor system
 const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
-// Extract the types for our specific extensions
+// Extract types
 type EditorCommands = BaseCommands & ExtractCommands<typeof extensions>;
 type EditorStateQueries = ExtractStateQueries<typeof extensions>;
 type ExtensionNames = (typeof extensions)[number]["name"];
 
-// Editor Mode Types
+// Editor modes
 type EditorMode = "visual" | "html" | "markdown";
 
-// Ref interface for parent control
+// Ref interface for external control
 export interface DefaultTemplateRef {
   injectMarkdown: (content: string) => void;
   injectHTML: (content: string) => void;
@@ -148,48 +138,41 @@ export interface DefaultTemplateRef {
   getHTML: () => string;
 }
 
-// Custom hook for image handling
-function useImageHandlers(
-  commands: EditorCommands,
-  editor: LexicalEditor | null,
-) {
+// Hook for image handling logic
+function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlers = useMemo(
     () => ({
-      insertImageFromUrl: () => {
+      insertFromUrl: () => {
         const src = prompt("Enter image URL:");
         if (!src) return;
         const alt = prompt("Enter alt text:") || "";
         const caption = prompt("Enter caption (optional):") || undefined;
         commands.insertImage({ src, alt, caption });
       },
-
-      insertImageFromFile: () => {
-        fileInputRef.current?.click();
-      },
-
-      handleFileUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
+      insertFromFile: () => fileInputRef.current?.click(),
+      handleUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && imageExtension.config.uploadHandler) {
+        if (!file) return;
+        let src: string;
+        if (imageExtension.config.uploadHandler) {
           try {
-            const src = await imageExtension.config.uploadHandler(file);
-            commands.insertImage({ src, alt: file.name, file });
+            src = await imageExtension.config.uploadHandler(file);
           } catch (error) {
             alert("Failed to upload image");
+            return;
           }
-        } else if (file) {
-          const src = URL.createObjectURL(file);
-          commands.insertImage({ src, alt: file.name, file });
+        } else {
+          src = URL.createObjectURL(file);
         }
+        commands.insertImage({ src, alt: file.name, file });
         e.target.value = "";
       },
-
-      setImageAlignment: (alignment: "left" | "center" | "right" | "none") => {
+      setAlignment: (alignment: "left" | "center" | "right" | "none") => {
         commands.setImageAlignment(alignment);
       },
-
-      setImageCaption: () => {
+      setCaption: () => {
         const newCaption = prompt("Enter caption:") || "";
         commands.setImageCaption(newCaption);
       },
@@ -200,25 +183,20 @@ function useImageHandlers(
   return { handlers, fileInputRef };
 }
 
-// Modern Floating Toolbar with proper positioning
+// Floating Toolbar Component
 function FloatingToolbarRenderer() {
   const { commands, activeStates, extensions, hasExtension } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
-  const [selectionRect, setSelectionRect] = useState<any>(null);
+  const [selectionRect, setSelectionRect] = useState<{ x: number; y: number; positionFromRight?: boolean } | null>(null);
 
-  // Get the floating toolbar extension instance
-  const floatingExtension = extensions.find(
-    (ext) => ext.name === "floatingToolbar",
-  ) as any;
+  const floatingExtension = extensions.find((ext) => ext.name === "floatingToolbar") as any;
 
-  // Poll the extension state
   useEffect(() => {
     if (!floatingExtension) return;
 
     const checkState = () => {
       const visible = floatingExtension.getIsVisible();
       const rect = floatingExtension.getSelectionRect();
-
       setIsVisible(visible);
       setSelectionRect(rect);
     };
@@ -237,11 +215,7 @@ function FloatingToolbarRenderer() {
       style={{
         position: "absolute",
         top: selectionRect.y,
-        ...(selectionRect.positionFromRight
-          ? // Stick to right edge with margin
-            { right: 10, left: "auto" }
-          : // Use calculated position (either centered or left-aligned)
-            { left: selectionRect.x, right: "auto" }),
+        ...(selectionRect.positionFromRight ? { right: 10, left: "auto" } : { left: selectionRect.x, right: "auto" }),
         zIndex: 50,
         maxWidth: 400,
         flexWrap: "wrap",
@@ -249,165 +223,74 @@ function FloatingToolbarRenderer() {
       }}
     >
       {isImageSelected ? (
-        // Image-specific toolbar
         <>
-          <button
-            onClick={() => commands.setImageAlignment("left")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? "active" : ""}`}
-            title="Align Left"
-          >
+          <button onClick={() => commands.setImageAlignment("left")} className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? "active" : ""}`} title="Align Left">
             <AlignLeft size={14} />
           </button>
-          <button
-            onClick={() => commands.setImageAlignment("center")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? "active" : ""}`}
-            title="Align Center"
-          >
+          <button onClick={() => commands.setImageAlignment("center")} className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? "active" : ""}`} title="Align Center">
             <AlignCenter size={14} />
           </button>
-          <button
-            onClick={() => commands.setImageAlignment("right")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? "active" : ""}`}
-            title="Align Right"
-          >
+          <button onClick={() => commands.setImageAlignment("right")} className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? "active" : ""}`} title="Align Right">
             <AlignRight size={14} />
           </button>
-
           <div className="w-px h-6 bg-border mx-1" />
-
-          <button
-            onClick={() => {
-              const caption = prompt("Enter caption:") || "";
-              commands.setImageCaption(caption);
-            }}
-            className="lexkit-toolbar-button"
-            title="Edit Caption"
-          >
+          <button onClick={() => commands.setImageCaption(prompt("Enter caption:") || "")} className="lexkit-toolbar-button" title="Edit Caption">
             <Type size={14} />
           </button>
         </>
       ) : (
-        // Text formatting toolbar
         <>
-          <button
-            onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""}`}
-            title="Bold"
-          >
+          <button onClick={() => commands.toggleBold()} className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""}`} title="Bold">
             <Bold size={14} />
           </button>
-          <button
-            onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""}`}
-            title="Italic"
-          >
+          <button onClick={() => commands.toggleItalic()} className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""}`} title="Italic">
             <Italic size={14} />
           </button>
-          <button
-            onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""}`}
-            title="Underline"
-          >
+          <button onClick={() => commands.toggleUnderline()} className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""}`} title="Underline">
             <Underline size={14} />
           </button>
-          <button
-            onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""}`}
-            title="Strikethrough"
-          >
+          <button onClick={() => commands.toggleStrikethrough()} className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""}`} title="Strikethrough">
             <Strikethrough size={14} />
           </button>
-
           <div className="w-px h-6 bg-border mx-1" />
-
-          <button
-            onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""}`}
-            title="Inline Code"
-          >
+          <button onClick={() => commands.formatText("code")} className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""}`} title="Inline Code">
             <Code size={14} />
           </button>
-
-          <button
-            onClick={() =>
-              activeStates.isLink
-                ? commands.removeLink()
-                : commands.insertLink()
-            }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""}`}
-            title={activeStates.isLink ? "Remove Link" : "Insert Link"}
-          >
+          <button onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()} className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""}`} title={activeStates.isLink ? "Remove Link" : "Insert Link"}>
             {activeStates.isLink ? <Unlink size={14} /> : <Link size={14} />}
           </button>
-
           <div className="w-px h-6 bg-border mx-1" />
-
           {hasExtension("blockFormat") && (
             <>
-              <button
-                onClick={() => commands.toggleParagraph()}
-                className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isQuote ? "active" : ""}`}
-                title="Paragraph"
-              >
+              <button onClick={() => commands.toggleParagraph()} className={`lexkit-toolbar-button ${!activeStates.isH1 && !activeStates.isH2 && !activeStates.isH3 && !activeStates.isH4 && !activeStates.isH5 && !activeStates.isH6 && !activeStates.isQuote ? "active" : ""}`} title="Paragraph">
                 P
               </button>
-              <button
-                onClick={() => commands.toggleHeading("h1")}
-                className={`lexkit-toolbar-button ${activeStates.isH1 ? "active" : ""}`}
-                title="Heading 1"
-              >
+              <button onClick={() => commands.toggleHeading("h1")} className={`lexkit-toolbar-button ${activeStates.isH1 ? "active" : ""}`} title="Heading 1">
                 H1
               </button>
-              <button
-                onClick={() => commands.toggleHeading("h2")}
-                className={`lexkit-toolbar-button ${activeStates.isH2 ? "active" : ""}`}
-                title="Heading 2"
-              >
+              <button onClick={() => commands.toggleHeading("h2")} className={`lexkit-toolbar-button ${activeStates.isH2 ? "active" : ""}`} title="Heading 2">
                 H2
               </button>
-              <button
-                onClick={() => commands.toggleHeading("h3")}
-                className={`lexkit-toolbar-button ${activeStates.isH3 ? "active" : ""}`}
-                title="Heading 3"
-              >
+              <button onClick={() => commands.toggleHeading("h3")} className={`lexkit-toolbar-button ${activeStates.isH3 ? "active" : ""}`} title="Heading 3">
                 H3
               </button>
-              <button
-                onClick={() => commands.toggleQuote()}
-                className={`lexkit-toolbar-button ${activeStates.isQuote ? "active" : ""}`}
-                title="Quote"
-              >
+              <button onClick={() => commands.toggleQuote()} className={`lexkit-toolbar-button ${activeStates.isQuote ? "active" : ""}`} title="Quote">
                 <Quote size={14} />
               </button>
-
               {hasExtension("code") && (
-                <button
-                  onClick={() => commands.toggleCodeBlock()}
-                  className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""}`}
-                  title="Code Block"
-                >
+                <button onClick={() => commands.toggleCodeBlock()} className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""}`} title="Code Block">
                   <Terminal size={14} />
                 </button>
               )}
-
               <div className="w-px h-6 bg-border mx-1" />
             </>
           )}
-
           {hasExtension("list") && (
             <>
-              <button
-                onClick={() => commands.toggleUnorderedList()}
-                className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""}`}
-                title="Bullet List"
-              >
+              <button onClick={() => commands.toggleUnorderedList()} className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""}`} title="Bullet List">
                 <List size={14} />
               </button>
-              <button
-                onClick={() => commands.toggleOrderedList()}
-                className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""}`}
-                title="Numbered List"
-              >
+              <button onClick={() => commands.toggleOrderedList()} className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""}`} title="Numbered List">
                 <ListOrdered size={14} />
               </button>
             </>
@@ -418,8 +301,6 @@ function FloatingToolbarRenderer() {
     document.body,
   );
 }
-
-// Toolbar Component
 
 // Toolbar Component
 function Toolbar({
@@ -439,7 +320,6 @@ function Toolbar({
 }) {
   const { lexical: editor } = useEditor();
   const { handlers, fileInputRef } = useImageHandlers(commands, editor);
-
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -449,7 +329,6 @@ function Toolbar({
     includeHeaders: false,
   });
 
-  // Block format options
   const blockFormatOptions = [
     { value: "p", label: "Paragraph" },
     { value: "h1", label: "Heading 1" },
@@ -461,414 +340,149 @@ function Toolbar({
     { value: "quote", label: "Quote" },
   ];
 
-  // Get current block format
-  const currentBlockFormat = activeStates.isH1
-    ? "h1"
-    : activeStates.isH2
-      ? "h2"
-      : activeStates.isH3
-        ? "h3"
-        : activeStates.isH4
-          ? "h4"
-          : activeStates.isH5
-            ? "h5"
-            : activeStates.isH6
-              ? "h6"
-              : activeStates.isQuote
-                ? "quote"
-                : "p";
+  const currentBlockFormat =
+    activeStates.isH1 ? "h1" :
+    activeStates.isH2 ? "h2" :
+    activeStates.isH3 ? "h3" :
+    activeStates.isH4 ? "h4" :
+    activeStates.isH5 ? "h5" :
+    activeStates.isH6 ? "h6" :
+    activeStates.isQuote ? "quote" :
+    "p";
 
   const handleBlockFormatChange = (value: string) => {
     if (value === "p") commands.toggleParagraph();
-    else if (value === "h1") commands.toggleHeading("h1");
-    else if (value === "h2") commands.toggleHeading("h2");
-    else if (value === "h3") commands.toggleHeading("h3");
-    else if (value === "h4") commands.toggleHeading("h4");
-    else if (value === "h5") commands.toggleHeading("h5");
-    else if (value === "h6") commands.toggleHeading("h6");
+    else if (value.startsWith("h")) commands.toggleHeading(value as "h1" | "h2" | "h3" | "h4" | "h5" | "h6");
     else if (value === "quote") commands.toggleQuote();
   };
 
-  const toolbar = (
-    <div className="lexkit-toolbar">
-      {/* Text Formatting Section */}
-      <div className="lexkit-toolbar-section">
-        {hasExtension("bold") && (
-          <button
-            onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""}`}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold size={16} />
-          </button>
-        )}
-        {hasExtension("italic") && (
-          <button
-            onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""}`}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic size={16} />
-          </button>
-        )}
-        {hasExtension("underline") && (
-          <button
-            onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""}`}
-            title="Underline (Ctrl+U)"
-          >
-            <Underline size={16} />
-          </button>
-        )}
-        {hasExtension("strikethrough") && (
-          <button
-            onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""}`}
-            title="Strikethrough"
-          >
-            <Strikethrough size={16} />
-          </button>
-        )}
-        <button
-          onClick={() => commands.formatText("code")}
-          className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""}`}
-          title="Inline Code"
-        >
-          <Code size={16} />
-        </button>
-        {hasExtension("link") && (
-          <button
-            onClick={() =>
-              activeStates.isLink
-                ? commands.removeLink()
-                : commands.insertLink()
-            }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""}`}
-            title={activeStates.isLink ? "Remove Link" : "Insert Link"}
-          >
-            {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
-          </button>
-        )}
-      </div>
-
-      {/* Block Format Section */}
-      {hasExtension("blockFormat") && (
-        <div className="lexkit-toolbar-section">
-          <Select
-            value={currentBlockFormat}
-            onValueChange={handleBlockFormatChange}
-            options={blockFormatOptions}
-            placeholder="Format"
-          />
-          {hasExtension("code") && (
-            <button
-              onClick={() => commands.toggleCodeBlock()}
-              className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""}`}
-              title="Code Block"
-            >
-              <Terminal size={16} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* List Section */}
-      {hasExtension("list") && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => commands.toggleUnorderedList()}
-            className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""}`}
-            title="Bullet List"
-          >
-            <List size={16} />
-          </button>
-          <button
-            onClick={() => commands.toggleOrderedList()}
-            className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""}`}
-            title="Numbered List"
-          >
-            <ListOrdered size={16} />
-          </button>
-        </div>
-      )}
-
-      {/* Horizontal Rule Section */}
-      {hasExtension("horizontalRule") && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => commands.insertHorizontalRule()}
-            className="lexkit-toolbar-button"
-            title="Insert Horizontal Rule"
-          >
-            <Minus size={16} />
-          </button>
-        </div>
-      )}
-
-      {/* Table Section */}
-      {hasExtension("table") && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => setShowTableDialog(true)}
-            className="lexkit-toolbar-button"
-            title="Insert Table (Ctrl+Shift+T)"
-          >
-            <Table size={16} />
-          </button>
-        </div>
-      )}
-
-      {/* Media Section */}
-      {hasExtension("image") && (
-        <div className="lexkit-toolbar-section">
-          <Dropdown
-            trigger={
-              <button
-                className={`lexkit-toolbar-button ${activeStates.imageSelected ? "active" : ""}`}
-                title="Insert Image"
-              >
-                <Image size={16} />
-              </button>
-            }
-            isOpen={showImageDropdown}
-            onOpenChange={setShowImageDropdown}
-          >
-            <button
-              className="lexkit-dropdown-item"
-              onClick={() => {
-                handlers.insertImageFromUrl();
-                setShowImageDropdown(false);
-              }}
-            >
-              <Link size={16} />
-              From URL
-            </button>
-            <button
-              className="lexkit-dropdown-item"
-              onClick={() => {
-                handlers.insertImageFromFile();
-                setShowImageDropdown(false);
-              }}
-            >
-              <Upload size={16} />
-              Upload File
-            </button>
-          </Dropdown>
-
-          {/* Image Alignment when image is selected */}
-          {activeStates.imageSelected && (
-            <Dropdown
-              trigger={
-                <button className="lexkit-toolbar-button" title="Align Image">
-                  <AlignCenter size={16} />
-                </button>
-              }
-              isOpen={showAlignDropdown}
-              onOpenChange={setShowAlignDropdown}
-            >
-              <button
-                className="lexkit-dropdown-item"
-                onClick={() => {
-                  handlers.setImageAlignment("left");
-                  setShowAlignDropdown(false);
-                }}
-              >
-                <AlignLeft size={16} />
-                Align Left
-              </button>
-              <button
-                className="lexkit-dropdown-item"
-                onClick={() => {
-                  handlers.setImageAlignment("center");
-                  setShowAlignDropdown(false);
-                }}
-              >
-                <AlignCenter size={16} />
-                Align Center
-              </button>
-              <button
-                className="lexkit-dropdown-item"
-                onClick={() => {
-                  handlers.setImageAlignment("right");
-                  setShowAlignDropdown(false);
-                }}
-              >
-                <AlignRight size={16} />
-                Align Right
-              </button>
-              <button
-                className="lexkit-dropdown-item"
-                onClick={() => {
-                  handlers.setImageCaption();
-                  setShowAlignDropdown(false);
-                }}
-              >
-                <Type size={16} />
-                Set Caption
-              </button>
-            </Dropdown>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handlers.handleFileUpload}
-            className="lexkit-file-input"
-          />
-        </div>
-      )}
-
-      {/* HTML Embed Section */}
-      {hasExtension("htmlEmbed") && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => commands.insertHTMLEmbed()}
-            className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""}`}
-            title="Insert HTML Embed"
-          >
-            <FileCode size={16} />
-          </button>
-          {activeStates.isHTMLEmbedSelected && (
-            <button
-              onClick={() => commands.toggleHTMLPreview()}
-              className="lexkit-toolbar-button"
-              title="Toggle Preview/Edit"
-            >
-              {activeStates.isHTMLPreviewMode ? (
-                <Eye size={16} />
-              ) : (
-                <Pencil size={16} />
-              )}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* History Section */}
-      {hasExtension("history") && (
-        <div className="lexkit-toolbar-section">
-          <button
-            onClick={() => commands.undo()}
-            disabled={!activeStates.canUndo}
-            className="lexkit-toolbar-button"
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo size={16} />
-          </button>
-          <button
-            onClick={() => commands.redo()}
-            disabled={!activeStates.canRedo}
-            className="lexkit-toolbar-button"
-            title="Redo (Ctrl+Y)"
-          >
-            <Redo size={16} />
-          </button>
-        </div>
-      )}
-
-
-      {/* Command Palette */}
-      <div className="lexkit-toolbar-section">
-        <button
-          onClick={onCommandPaletteOpen}
-          className="lexkit-toolbar-button"
-          title="Command Palette (Ctrl+K)"
-        >
-          <Command size={16} />
-        </button>
-      </div>
-
-      {/* Theme Toggle */}
-      <div className="lexkit-toolbar-section">
-        <button
-          onClick={toggleTheme}
-          className="lexkit-toolbar-button"
-          title={isDark ? "Light Mode" : "Dark Mode"}
-        >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <>
-      {toolbar}
+      <div className="lexkit-toolbar">
+        {/* Text Formatting */}
+        <div className="lexkit-toolbar-section">
+          <button onClick={() => commands.toggleBold()} className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""}`} title="Bold (Ctrl+B)"><Bold size={16} /></button>
+          <button onClick={() => commands.toggleItalic()} className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""}`} title="Italic (Ctrl+I)"><Italic size={16} /></button>
+          <button onClick={() => commands.toggleUnderline()} className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""}`} title="Underline (Ctrl+U)"><Underline size={16} /></button>
+          <button onClick={() => commands.toggleStrikethrough()} className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""}`} title="Strikethrough"><Strikethrough size={16} /></button>
+          <button onClick={() => commands.formatText("code")} className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""}`} title="Inline Code"><Code size={16} /></button>
+          <button onClick={() => activeStates.isLink ? commands.removeLink() : commands.insertLink()} className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""}`} title={activeStates.isLink ? "Remove Link" : "Insert Link"}>
+            {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
+          </button>
+        </div>
+
+        {/* Block Format */}
+        {hasExtension("blockFormat") && (
+          <div className="lexkit-toolbar-section">
+            <Select value={currentBlockFormat} onValueChange={handleBlockFormatChange} options={blockFormatOptions} placeholder="Format" />
+            {hasExtension("code") && (
+              <button onClick={() => commands.toggleCodeBlock()} className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""}`} title="Code Block"><Terminal size={16} /></button>
+            )}
+          </div>
+        )}
+
+        {/* Lists */}
+        {hasExtension("list") && (
+          <div className="lexkit-toolbar-section">
+            <button onClick={() => commands.toggleUnorderedList()} className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""}`} title="Bullet List"><List size={16} /></button>
+            <button onClick={() => commands.toggleOrderedList()} className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""}`} title="Numbered List"><ListOrdered size={16} /></button>
+          </div>
+        )}
+
+        {/* Horizontal Rule */}
+        {hasExtension("horizontalRule") && (
+          <div className="lexkit-toolbar-section">
+            <button onClick={() => commands.insertHorizontalRule()} className="lexkit-toolbar-button" title="Insert Horizontal Rule"><Minus size={16} /></button>
+          </div>
+        )}
+
+        {/* Table */}
+        {hasExtension("table") && (
+          <div className="lexkit-toolbar-section">
+            <button onClick={() => setShowTableDialog(true)} className="lexkit-toolbar-button" title="Insert Table (Ctrl+Shift+T)"><TableIcon size={16} /></button>
+          </div>
+        )}
+
+        {/* Image */}
+        {hasExtension("image") && (
+          <div className="lexkit-toolbar-section">
+            <Dropdown
+              trigger={<button className={`lexkit-toolbar-button ${activeStates.imageSelected ? "active" : ""}`} title="Insert Image"><ImageIcon size={16} /></button>}
+              isOpen={showImageDropdown}
+              onOpenChange={setShowImageDropdown}
+            >
+              <button className="lexkit-dropdown-item" onClick={() => { handlers.insertFromUrl(); setShowImageDropdown(false); }}><Link size={16} /> From URL</button>
+              <button className="lexkit-dropdown-item" onClick={() => { handlers.insertFromFile(); setShowImageDropdown(false); }}><Upload size={16} /> Upload File</button>
+            </Dropdown>
+            {activeStates.imageSelected && (
+              <Dropdown
+                trigger={<button className="lexkit-toolbar-button" title="Align Image"><AlignCenter size={16} /></button>}
+                isOpen={showAlignDropdown}
+                onOpenChange={setShowAlignDropdown}
+              >
+                <button className="lexkit-dropdown-item" onClick={() => { handlers.setAlignment("left"); setShowAlignDropdown(false); }}><AlignLeft size={16} /> Align Left</button>
+                <button className="lexkit-dropdown-item" onClick={() => { handlers.setAlignment("center"); setShowAlignDropdown(false); }}><AlignCenter size={16} /> Align Center</button>
+                <button className="lexkit-dropdown-item" onClick={() => { handlers.setAlignment("right"); setShowAlignDropdown(false); }}><AlignRight size={16} /> Align Right</button>
+                <button className="lexkit-dropdown-item" onClick={() => { handlers.setCaption(); setShowAlignDropdown(false); }}><Type size={16} /> Set Caption</button>
+              </Dropdown>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handlers.handleUpload} className="lexkit-file-input" />
+          </div>
+        )}
+
+        {/* HTML Embed */}
+        {hasExtension("htmlEmbed") && (
+          <div className="lexkit-toolbar-section">
+            <button onClick={() => commands.insertHTMLEmbed()} className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""}`} title="Insert HTML Embed"><FileCode size={16} /></button>
+            {activeStates.isHTMLEmbedSelected && (
+              <button onClick={() => commands.toggleHTMLPreview()} className="lexkit-toolbar-button" title="Toggle Preview/Edit">
+                {activeStates.isHTMLPreviewMode ? <Eye size={16} /> : <Pencil size={16} />}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* History */}
+        {hasExtension("history") && (
+          <div className="lexkit-toolbar-section">
+            <button onClick={() => commands.undo()} disabled={!activeStates.canUndo} className="lexkit-toolbar-button" title="Undo (Ctrl+Z)"><Undo size={16} /></button>
+            <button onClick={() => commands.redo()} disabled={!activeStates.canRedo} className="lexkit-toolbar-button" title="Redo (Ctrl+Y)"><Redo size={16} /></button>
+          </div>
+        )}
+
+        {/* Command Palette */}
+        <div className="lexkit-toolbar-section">
+          <button onClick={onCommandPaletteOpen} className="lexkit-toolbar-button" title="Command Palette (Ctrl+K)"><Command size={16} /></button>
+        </div>
+
+        {/* Theme Toggle */}
+        <div className="lexkit-toolbar-section">
+          <button onClick={toggleTheme} className="lexkit-toolbar-button" title={isDark ? "Light Mode" : "Dark Mode"}>
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
+      </div>
 
       {/* Table Dialog */}
-      <Dialog
-        isOpen={showTableDialog}
-        onClose={() => setShowTableDialog(false)}
-        title="Insert Table"
-      >
+      <Dialog isOpen={showTableDialog} onClose={() => setShowTableDialog(false)} title="Insert Table">
         <div className="lexkit-table-dialog">
           <div className="lexkit-form-group">
             <label htmlFor="table-rows">Rows:</label>
-            <input
-              id="table-rows"
-              type="number"
-              min="1"
-              max="20"
-              value={tableConfig.rows}
-              onChange={(e) =>
-                setTableConfig((prev) => ({
-                  ...prev,
-                  rows: parseInt(e.target.value) || 1,
-                }))
-              }
-              className="lexkit-input"
-            />
+            <input id="table-rows" type="number" min="1" max="20" value={tableConfig.rows} onChange={(e) => setTableConfig((prev) => ({ ...prev, rows: parseInt(e.target.value) || 1 }))} className="lexkit-input" />
           </div>
           <div className="lexkit-form-group">
             <label htmlFor="table-columns">Columns:</label>
-            <input
-              id="table-columns"
-              type="number"
-              min="1"
-              max="20"
-              value={tableConfig.columns}
-              onChange={(e) =>
-                setTableConfig((prev) => ({
-                  ...prev,
-                  columns: parseInt(e.target.value) || 1,
-                }))
-              }
-              className="lexkit-input"
-            />
+            <input id="table-columns" type="number" min="1" max="20" value={tableConfig.columns} onChange={(e) => setTableConfig((prev) => ({ ...prev, columns: parseInt(e.target.value) || 1 }))} className="lexkit-input" />
           </div>
           <div className="lexkit-form-group">
             <label className="lexkit-checkbox-label">
-              <input
-                type="checkbox"
-                checked={tableConfig.includeHeaders || false}
-                onChange={(e) =>
-                  setTableConfig((prev) => ({
-                    ...prev,
-                    includeHeaders: e.target.checked,
-                  }))
-                }
-                className="lexkit-checkbox"
-              />
+              <input type="checkbox" checked={tableConfig.includeHeaders || false} onChange={(e) => setTableConfig((prev) => ({ ...prev, includeHeaders: e.target.checked }))} className="lexkit-checkbox" />
               Include headers
             </label>
           </div>
           <div className="lexkit-dialog-actions">
-            <button
-              onClick={() => setShowTableDialog(false)}
-              className="lexkit-button-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                commands.insertTable(tableConfig);
-                setShowTableDialog(false);
-              }}
-              className="lexkit-button-primary"
-            >
-              Insert Table
-            </button>
+            <button onClick={() => setShowTableDialog(false)} className="lexkit-button-secondary">Cancel</button>
+            <button onClick={() => { commands.insertTable(tableConfig); setShowTableDialog(false); }} className="lexkit-button-primary">Insert Table</button>
           </div>
         </div>
       </Dialog>
@@ -877,81 +491,32 @@ function Toolbar({
 }
 
 // Mode Tabs Component
-function ModeTabs({
-  mode,
-  onModeChange,
-}: {
-  mode: EditorMode;
-  onModeChange: (mode: EditorMode) => void;
-}) {
+function ModeTabs({ mode, onModeChange }: { mode: EditorMode; onModeChange: (mode: EditorMode) => void }) {
   return (
     <div className="lexkit-mode-tabs">
-      <button
-        className={`lexkit-mode-tab ${mode === "visual" ? "active" : ""}`}
-        onClick={() => onModeChange("visual")}
-      >
-        Visual
-      </button>
-      <button
-        className={`lexkit-mode-tab ${mode === "html" ? "active" : ""}`}
-        onClick={() => onModeChange("html")}
-      >
-        HTML
-      </button>
-      <button
-        className={`lexkit-mode-tab ${mode === "markdown" ? "active" : ""}`}
-        onClick={() => onModeChange("markdown")}
-      >
-        Markdown
-      </button>
+      <button className={`lexkit-mode-tab ${mode === "visual" ? "active" : ""}`} onClick={() => onModeChange("visual")}>Visual</button>
+      <button className={`lexkit-mode-tab ${mode === "html" ? "active" : ""}`} onClick={() => onModeChange("html")}>HTML</button>
+      <button className={`lexkit-mode-tab ${mode === "markdown" ? "active" : ""}`} onClick={() => onModeChange("markdown")}>Markdown</button>
     </div>
   );
 }
 
-// HTML Source View Component
-function HTMLSourceView({
-  htmlContent,
-  onHtmlChange,
-}: {
-  htmlContent: string;
-  onHtmlChange: (html: string) => void;
-}) {
-  return (
-    <textarea
-      className="lexkit-html-view"
-      value={htmlContent}
-      onChange={(e) => onHtmlChange(e.target.value)}
-      placeholder="Enter HTML content..."
-      spellCheck={false}
-    />
-  );
+// HTML Source View
+function HTMLSourceView({ htmlContent, onHtmlChange }: { htmlContent: string; onHtmlChange: (html: string) => void }) {
+  return <textarea className="lexkit-html-view" value={htmlContent} onChange={(e) => onHtmlChange(e.target.value)} placeholder="Enter HTML content..." spellCheck={false} />;
 }
 
-// Markdown Source View Component
-function MarkdownSourceView({
-  markdownContent,
-  onMarkdownChange,
-}: {
-  markdownContent: string;
-  onMarkdownChange: (markdown: string) => void;
-}) {
-  return (
-    <textarea
-      className="lexkit-html-view"
-      value={markdownContent}
-      onChange={(e) => onMarkdownChange(e.target.value)}
-      placeholder="Enter Markdown content..."
-      spellCheck={false}
-    />
-  );
+// Markdown Source View
+function MarkdownSourceView({ markdownContent, onMarkdownChange }: { markdownContent: string; onMarkdownChange: (markdown: string) => void }) {
+  return <textarea className="lexkit-html-view" value={markdownContent} onChange={(e) => onMarkdownChange(e.target.value)} placeholder="Enter Markdown content..." spellCheck={false} />;
 }
 
-// Error Boundary Component
+// Error Boundary
 function ErrorBoundary({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Main Editor Content Component
+// Editor Content Component
 function EditorContent({
   className,
   isDark,
@@ -963,65 +528,54 @@ function EditorContent({
   toggleTheme: () => void;
   onReady?: (methods: DefaultTemplateRef) => void;
 }) {
-  const {
-    commands,
-    hasExtension,
-    activeStates,
-    lexical: editor,
-    stateQueries,
-  } = useEditor();
+  const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
   const [mode, setMode] = useState<EditorMode>("visual");
   const [content, setContent] = useState({ html: "", markdown: "" });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const commandsRef = useRef<EditorCommands>(commands);
+  const readyRef = useRef(false);
 
-  // Use ref to store latest commands to avoid dependency issues
-  const commandsRef = React.useRef(commands);
-
-  // Update ref when commands change
-  React.useEffect(() => {
+  useEffect(() => {
     commandsRef.current = commands;
   }, [commands]);
 
-  // Create methods object that uses the ref
-  const methods = React.useMemo(
+  const methods = useMemo<DefaultTemplateRef>(
     () => ({
       injectMarkdown: (content: string) => {
-        setTimeout(() => commandsRef.current.importFromMarkdown(content, { immediate: true }), 0);
+        setTimeout(() => {
+          if (editor) {
+            editor.update(() => {
+              commandsRef.current.importFromMarkdown(content, { immediate: true });
+            });
+          }
+        }, 100); // Small delay to ensure editor is ready
       },
       injectHTML: (content: string) => {
-        commandsRef.current.importFromHTML(content);
+        setTimeout(() => {
+          if (editor) {
+            editor.update(() => {
+              commandsRef.current.importFromHTML(content);
+            });
+          }
+        }, 100);
       },
-      getMarkdown: () => {
-        return commandsRef.current.exportToMarkdown();
-      },
-      getHTML: () => {
-        return commandsRef.current.exportToHTML();
-      },
+      getMarkdown: () => commandsRef.current.exportToMarkdown(),
+      getHTML: () => commandsRef.current.exportToHTML(),
     }),
-    [],
-  ); // Empty dependency array - only create once
+    [editor],
+  );
 
-  // Register command palette commands and keyboard shortcuts
-  useEffect(() => { 
-    if (!editor) return;
+  useEffect(() => {
+    if (!editor || !commands) return;
 
-    // Register commands in the command palette
     const paletteCommands = commandsToCommandPaletteItems(commands);
-    paletteCommands.forEach((cmd) => {
-      commands.registerCommand(cmd);
-    });
+    paletteCommands.forEach((cmd) => commands.registerCommand(cmd));
 
-    // Override the command palette show command to use our local state
     const originalShowCommand = commands.showCommandPalette;
     (commands as any).showCommandPalette = () => setCommandPaletteOpen(true);
 
-    // Register keyboard shortcuts
-    const unregisterShortcuts = registerKeyboardShortcuts(
-      commands,
-      document.body,
-    );
+    const unregisterShortcuts = registerKeyboardShortcuts(commands, document.body);
 
-    // Add Ctrl+K / Cmd+K shortcut for command palette
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
@@ -1030,86 +584,38 @@ function EditorContent({
     };
     document.addEventListener("keydown", handleKeyDown);
 
+    if (!readyRef.current) {
+      readyRef.current = true;
+      onReady?.(methods);
+    }
+
     return () => {
       unregisterShortcuts();
+      document.removeEventListener("keydown", handleKeyDown);
       (commands as any).showCommandPalette = originalShowCommand;
     };
-  }, [editor, methods, onReady, mode]);
+  }, [editor, commands, onReady, methods]);
 
-  // Simple handlers - no debouncing needed
-  const handleHtmlChange = (html: string) => {
-    setContent((prev) => ({ ...prev, html }));
-  };
+  const handleHtmlChange = (html: string) => setContent((prev) => ({ ...prev, html }));
 
-  const handleMarkdownChange = (markdown: string) => {
-    setContent((prev) => ({ ...prev, markdown }));
-  };
+  const handleMarkdownChange = (markdown: string) => setContent((prev) => ({ ...prev, markdown }));
 
-  // Handle mode changes
-  const handleModeChange = async (newMode: EditorMode) => {
-    // If leaving markdown mode, import the markdown content into the editor immediately
-    if (
-      mode === "markdown" &&
-      newMode !== "markdown" &&
-      editor &&
-      hasExtension("markdown")
-    ) {
-      try {
-        await commands.importFromMarkdown(content.markdown, { immediate: true });
-      } catch (error) {
-        console.error("Failed to import Markdown:", error);
-      }
+  const handleModeChange = (newMode: EditorMode) => {
+    if (mode === "markdown" && newMode !== "markdown" && hasExtension("markdown")) {
+      commands.importFromMarkdown(content.markdown, { immediate: true });
     }
-
-    // If leaving HTML mode, import the HTML content into the editor
-    if (
-      mode === "html" &&
-      newMode !== "html" &&
-      editor &&
-      hasExtension("html")
-    ) {
-      try {
-        await commands.importFromHTML(content.html);
-      } catch (error) {
-        console.error("Failed to import HTML:", error);
-      }
+    if (mode === "html" && newMode !== "html" && hasExtension("html")) {
+      commands.importFromHTML(content.html);
     }
-
-    // If entering markdown mode, sync the current editor content to markdown
-    if (
-      newMode === "markdown" &&
-      mode !== "markdown" &&
-      editor &&
-      hasExtension("markdown")
-    ) {
-      try {
-        const markdown = commands.exportToMarkdown();
-        setContent((prev) => ({ ...prev, markdown }));
-      } catch (error) {
-        console.error("Failed to export Markdown:", error);
-      }
+    if (newMode === "markdown" && mode !== "markdown" && hasExtension("markdown")) {
+      setContent((prev) => ({ ...prev, markdown: commands.exportToMarkdown() }));
     }
-
-    // If entering HTML mode, sync the current editor content to HTML
-    if (
-      newMode === "html" &&
-      mode !== "html" &&
-      editor &&
-      hasExtension("html")
-    ) {
-      try {
-        const html = commands.exportToHTML();
-        setContent((prev) => ({ ...prev, html }));
-      } catch (error) {
-        console.error("Failed to export HTML:", error);
-      }
+    if (newMode === "html" && mode !== "html" && hasExtension("html")) {
+      setContent((prev) => ({ ...prev, html: commands.exportToHTML() }));
     }
-
-    // Delay setting mode to allow React render cycle to catch up
-    setTimeout(() => setMode(newMode), 50);
-
-    if (newMode === "visual" && editor) {
-      setTimeout(() => editor.focus(), 100);
+    setMode(newMode);
+    if (newMode === "visual") {
+      setTimeout(() => editor?.focus(), 100);
     }
   };
 
@@ -1128,63 +634,33 @@ function EditorContent({
           />
         )}
       </div>
-
       <div className="lexkit-editor">
         <div style={{ display: mode === "visual" ? "block" : "none" }}>
           <RichTextPlugin
-            contentEditable={
-              <ContentEditable className="lexkit-content-editable" />
-            }
-            placeholder={
-              <div className="lexkit-placeholder">Start typing...</div>
-            }
+            contentEditable={<ContentEditable className="lexkit-content-editable" />}
+            placeholder={<div className="lexkit-placeholder">Start typing...</div>}
             ErrorBoundary={ErrorBoundary}
           />
           <FloatingToolbarRenderer />
         </div>
-        
-        {mode === "html" && (
-          <HTMLSourceView
-            htmlContent={content.html}
-            onHtmlChange={handleHtmlChange}
-          />
-        )}
-        
-        {mode === "markdown" && (
-          <MarkdownSourceView
-            markdownContent={content.markdown}
-            onMarkdownChange={handleMarkdownChange}
-          />
-        )}
+        {mode === "html" && <HTMLSourceView htmlContent={content.html} onHtmlChange={handleHtmlChange} />}
+        {mode === "markdown" && <MarkdownSourceView markdownContent={content.markdown} onMarkdownChange={handleMarkdownChange} />}
       </div>
-
-      {/* Command Palette */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        commands={commandsToCommandPaletteItems(commands)}
-      />
+      <CommandPalette isOpen={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} commands={commandsToCommandPaletteItems(commands)} />
     </>
   );
 }
 
-// Main Template Component - Truly Headless
+// Main DefaultTemplate Component
 interface DefaultTemplateProps {
   className?: string;
-  onReady?: (methods: DefaultTemplateRef) => void; // Callback when editor is ready with methods
+  onReady?: (methods: DefaultTemplateRef) => void;
 }
 
-export const DefaultTemplate = React.forwardRef<
-  DefaultTemplateRef,
-  DefaultTemplateProps
->(({ className, onReady }, ref) => {
+export const DefaultTemplate = forwardRef<DefaultTemplateRef, DefaultTemplateProps>(({ className, onReady }, ref) => {
   const { theme: globalTheme } = useTheme();
   const [editorTheme, setEditorTheme] = useState<"light" | "dark">("light");
-  const [editorMethods, setEditorMethods] = useState<DefaultTemplateRef | null>(
-    null,
-  );
 
-  // Initialize editor theme from global theme on mount
   useEffect(() => {
     if (globalTheme === "dark" || globalTheme === "light") {
       setEditorTheme(globalTheme);
@@ -1193,14 +669,9 @@ export const DefaultTemplate = React.forwardRef<
 
   const isDark = editorTheme === "dark";
 
-  // Configure image extension
   useEffect(() => {
     imageExtension.configure({
-      uploadHandler: async (file: File) => {
-        // For testing, create object URL
-        const objectUrl = URL.createObjectURL(file);
-        return objectUrl;
-      },
+      uploadHandler: async (file: File) => URL.createObjectURL(file),
       defaultAlignment: "center",
       resizable: true,
       pasteListener: { insert: true, replace: true },
@@ -1208,60 +679,24 @@ export const DefaultTemplate = React.forwardRef<
     });
   }, []);
 
-  const toggleTheme = () => {
-    setEditorTheme(isDark ? "light" : "dark");
+  const toggleTheme = () => setEditorTheme(isDark ? "light" : "dark");
+
+  // Expose methods via ref
+  const [methods, setMethods] = useState<DefaultTemplateRef | null>(null);
+  React.useImperativeHandle(ref, () => methods as DefaultTemplateRef, [methods]);
+
+  const handleReady = (m: DefaultTemplateRef) => {
+    setMethods(m);
+    onReady?.(m);
   };
 
-  // Handle when editor is ready - store methods and expose via ref
-  const handleEditorReady = React.useCallback(
-    (methods: DefaultTemplateRef) => {
-      setEditorMethods(methods);
-
-      // Call parent callback with methods
-      if (onReady) {
-        onReady(methods);
-      }
-    },
-    [onReady],
-  );
-
-  // Expose methods to parent via ref
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      injectMarkdown: (content: string) => {
-        if (editorMethods) {
-          editorMethods.injectMarkdown(content);
-        }
-      },
-      injectHTML: (content: string) => {
-        if (editorMethods) {
-          editorMethods.injectHTML(content);
-        }
-      },
-      getMarkdown: () => {
-        return editorMethods ? editorMethods.getMarkdown() : "";
-      },
-      getHTML: () => {
-        return editorMethods ? editorMethods.getHTML() : "";
-      },
-    }),
-    [editorMethods],
-  );
-
   return (
-    <div
-      className={`lexkit-editor-wrapper ${className || ""}`}
-      data-editor-theme={editorTheme}
-    >
+    <div className={`lexkit-editor-wrapper ${className || ""}`} data-editor-theme={editorTheme}>
       <Provider extensions={extensions} config={{ theme: defaultTheme }}>
-        <EditorContent
-          className={className}
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          onReady={handleEditorReady}
-        />
+        <EditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} onReady={handleReady} />
       </Provider>
     </div>
   );
 });
+
+DefaultTemplate.displayName = "DefaultTemplate";

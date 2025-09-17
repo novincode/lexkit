@@ -8,12 +8,12 @@ export const shadcnTheme: LexKitTheme = {
   },
 
   // Editor content styles (Lexical EditorThemeClasses)
-  editor: "min-h-[400px] p-4 focus:outline-none",
+  editor: "min-h-[400px] p-4 focus:outline-none relative",
   contentEditable:
-    "outline-none text-xl leading-relaxed text-foreground font-system",
+    "outline-none text-xl leading-relaxed text-foreground font-system min-h-[600px] focus:outline-none",
 
-  // Placeholder styling
-  placeholder: "text-xl leading-relaxed select-none text-muted-foreground",
+  // Placeholder styling - absolute positioned in relative container
+  placeholder: "absolute top-4 left-4 text-xl leading-relaxed select-none text-muted-foreground pointer-events-none z-0",
 
   // Node styles for Lexical - using Tailwind classes
   paragraph: "mb-3 leading-relaxed text-foreground",
@@ -92,7 +92,7 @@ export const shadcnTheme: LexKitTheme = {
     preview: "p-4",
     editor: "p-4 border-t border-border bg-muted/50",
     textarea:
-      "w-full h-32 p-3 bg-background border border-input rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring",
+      "w-full h-32 p-3 bg-background border border-input rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
     toggle:
       "mt-3 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors",
     content: "prose prose-sm max-w-none dark:prose-invert",
@@ -126,7 +126,7 @@ export const shadcnTheme: LexKitTheme = {
     container:
       "flex items-center gap-1 p-2 bg-background border border-border rounded-lg shadow-lg animate-in fade-in-0 slide-in-from-top-2 duration-200",
     button:
-      "w-8 h-8 bg-background  border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "w-8 h-8 bg-background border-border rounded text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     buttonActive: "bg-accent border-ring text-accent-foreground scale-105",
     styles: {
       container: {
@@ -134,5 +134,10 @@ export const shadcnTheme: LexKitTheme = {
         pointerEvents: "auto",
       },
     },
+  },
+
+  // Source view styling - for HTML/Markdown textareas
+  sourceView: {
+    textarea: "w-full h-full min-h-[600px] p-4 bg-background border-none rounded-none font-mono text-sm resize-none focus:outline-none focus:ring-0",
   },
 };
