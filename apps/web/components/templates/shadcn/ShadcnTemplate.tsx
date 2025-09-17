@@ -68,6 +68,8 @@ import {
   CloudUpload,
   Globe,
   ChevronDown,
+  Indent,
+  Outdent,
 } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import { Toggle } from "@repo/ui/components/toggle";
@@ -1073,6 +1075,36 @@ function Toolbar({
               </TooltipTrigger>
               <TooltipContent>Numbered List</TooltipContent>
             </Tooltip>
+
+            {(activeStates.unorderedList || activeStates.orderedList) && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => commands.indentList()}
+                    >
+                      <Indent className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Indent List</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => commands.outdentList()}
+                    >
+                      <Outdent className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Outdent List</TooltipContent>
+                </Tooltip>
+              </>
+            )}
           </div>
         )}
 

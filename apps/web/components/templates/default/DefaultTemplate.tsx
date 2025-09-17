@@ -64,6 +64,8 @@ import {
   Command,
   Type,
   Quote,
+  Indent,
+  Outdent,
 } from "lucide-react";
 import { Select, Dropdown, Dialog } from "./components";
 import {
@@ -387,6 +389,12 @@ function Toolbar({
           <div className="lexkit-toolbar-section">
             <button onClick={() => commands.toggleUnorderedList()} className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""}`} title="Bullet List"><List size={16} /></button>
             <button onClick={() => commands.toggleOrderedList()} className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""}`} title="Numbered List"><ListOrdered size={16} /></button>
+            {(activeStates.unorderedList || activeStates.orderedList) && (
+              <>
+                <button onClick={() => commands.indentList()} className="lexkit-toolbar-button" title="Indent List"><Indent size={14} /></button>
+                <button onClick={() => commands.outdentList()} className="lexkit-toolbar-button" title="Outdent List"><Outdent size={14} /></button>
+              </>
+            )}
           </div>
         )}
 

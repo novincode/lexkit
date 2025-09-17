@@ -3,11 +3,13 @@ import {
   INSERT_ORDERED_LIST_COMMAND,
   REMOVE_LIST_COMMAND,
 } from "@lexical/list";
+import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
+import { $setBlocksType } from "@lexical/selection";
 import { ComponentType, CSSProperties, ReactNode } from "react";
-import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode } from "lexical";
 import { BaseExtension } from "@lexkit/editor/extensions/base";
 import { ExtensionCategory } from "@lexkit/editor/extensions/types";
-import { ListNode, ListItemNode, $isListNode } from "@lexical/list";
+import { ListNode, ListItemNode, $isListNode, $isListItemNode } from "@lexical/list";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import React from "react";
 
@@ -19,6 +21,14 @@ export type ListCommands = {
   toggleUnorderedList: () => void;
   /** Toggle ordered (numbered) list for the current selection */
   toggleOrderedList: () => void;
+  /** Indent the current list item (nest it deeper) */
+  indentList: () => void;
+  /** Outdent the current list item (unnest it) */
+  outdentList: () => void;
+  /** Create a nested unordered list at the current selection */
+  insertNestedUnorderedList: () => void;
+  /** Create a nested ordered list at the current selection */
+  insertNestedOrderedList: () => void;
 };
 
 /**
@@ -46,6 +56,10 @@ export type ListCommands = {
  *       >
  *         Numbered List
  *       </button>
+ *       <button onClick={() => commands.indentList()}>Indent</button>
+ *       <button onClick={() => commands.outdentList()}>Outdent</button>
+ *       <button onClick={() => commands.insertNestedUnorderedList()}>Nested Bullet</button>
+ *       <button onClick={() => commands.insertNestedOrderedList()}>Nested Numbered</button>
  *     </div>
  *   );
  * }
@@ -112,7 +126,11 @@ export class ListExtension extends BaseExtension<
             const anchorNode = selection.anchor.getNode();
             let parent = anchorNode.getParent();
             let listNode: any = null;
+            let listItemNode: any = null;
             while (parent) {
+              if ($isListItemNode(parent)) {
+                listItemNode = parent;
+              }
               if ($isListNode(parent)) {
                 listNode = parent;
                 break;
@@ -121,15 +139,18 @@ export class ListExtension extends BaseExtension<
             }
 
             if (listNode) {
-              // If already an unordered list, remove it
               if (listNode.getListType() === "bullet") {
-                editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+                // If already an unordered list, check if we can outdent
+                if (listItemNode && listItemNode.getIndent() > 0) {
+                  // If nested, outdent instead of removing list
+                  editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+                } else {
+                  // If at top level, convert to paragraph
+                  $setBlocksType(selection, $createParagraphNode);
+                }
               } else {
                 // If it's an ordered list, convert to unordered
-                editor.dispatchCommand(
-                  INSERT_UNORDERED_LIST_COMMAND,
-                  undefined,
-                );
+                editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
               }
             } else {
               // No list, create unordered list
@@ -145,7 +166,11 @@ export class ListExtension extends BaseExtension<
             const anchorNode = selection.anchor.getNode();
             let parent = anchorNode.getParent();
             let listNode: any = null;
+            let listItemNode: any = null;
             while (parent) {
+              if ($isListItemNode(parent)) {
+                listItemNode = parent;
+              }
               if ($isListNode(parent)) {
                 listNode = parent;
                 break;
@@ -154,9 +179,15 @@ export class ListExtension extends BaseExtension<
             }
 
             if (listNode) {
-              // If already an ordered list, remove it
               if (listNode.getListType() === "number") {
-                editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+                // If already an ordered list, check if we can outdent
+                if (listItemNode && listItemNode.getIndent() > 0) {
+                  // If nested, outdent instead of removing list
+                  editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+                } else {
+                  // If at top level, convert to paragraph
+                  $setBlocksType(selection, $createParagraphNode);
+                }
               } else {
                 // If it's an unordered list, convert to ordered
                 editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
@@ -166,6 +197,24 @@ export class ListExtension extends BaseExtension<
               editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
             }
           }
+        });
+      },
+      indentList: () => {
+        editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+      },
+      outdentList: () => {
+        editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+      },
+      insertNestedUnorderedList: () => {
+        editor.update(() => {
+          editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+          editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+        });
+      },
+      insertNestedOrderedList: () => {
+        editor.update(() => {
+          editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+          editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
         });
       },
     };
