@@ -36,18 +36,6 @@ export type TableConfig = BaseExtensionConfig & {
   enableContextMenu?: boolean;
   /** Custom context menu items - can be static items or a function that receives commands */
   contextMenuItems?: ContextMenuItem[] | ((commands: TableCommands) => ContextMenuItem[]);
-  /** Theme classes for context menu */
-  theme?: {
-    contextMenu?: string;
-    contextMenuItem?: string;
-    contextMenuItemDisabled?: string;
-  };
-  /** Custom CSS styles for context menu */
-  styles?: {
-    contextMenu?: React.CSSProperties;
-    contextMenuItem?: React.CSSProperties;
-    contextMenuItemDisabled?: React.CSSProperties;
-  };
   /** Custom context menu renderer for complete headless control */
   contextMenuRenderer?: (props: {
     items: ContextMenuItem[];

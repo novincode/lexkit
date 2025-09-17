@@ -107,11 +107,6 @@ export const extensions = [
   horizontalRuleExtension,
   new TableExtension().configure({
     enableContextMenu: true,
-    theme: {
-      contextMenu: "table-context-menu",
-      contextMenuItem: "table-context-menu-item",
-      contextMenuItemDisabled: "table-context-menu-item-disabled",
-    },
     markdownExtension: markdownExt,
   }),
   listExtension,
@@ -498,13 +493,12 @@ function ContextMenuRenderer() {
   // Default renderer
   return createPortal(
     <div
-      className={tableExtension?.config?.theme?.contextMenu || "table-context-menu"}
+      className={defaultTheme.contextMenu?.container || "table-context-menu"}
       style={{
         position: 'fixed',
         left: contextMenuConfig.position.x,
         top: contextMenuConfig.position.y,
         zIndex: 1000,
-        ...tableExtension?.config?.styles?.contextMenu,
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -512,14 +506,10 @@ function ContextMenuRenderer() {
         <div
           key={index}
           className={item.disabled ? 
-            (tableExtension?.config?.theme?.contextMenuItemDisabled || "") : 
-            (tableExtension?.config?.theme?.contextMenuItem || "")
+            (defaultTheme.contextMenu?.itemDisabled || "") : 
+            (defaultTheme.contextMenu?.item || "")
           }
           style={{
-            ...(item.disabled ? 
-              tableExtension?.config?.styles?.contextMenuItemDisabled : 
-              tableExtension?.config?.styles?.contextMenuItem
-            ),
             opacity: item.disabled ? 0.5 : 1,
             cursor: item.disabled ? "not-allowed" : "pointer",
           }}

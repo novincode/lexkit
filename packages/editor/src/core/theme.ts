@@ -15,6 +15,11 @@ export interface LexKitTheme extends EditorThemeClasses {
   };
   container?: string;
   wrapper?: string;
+  contextMenu?: {
+    container?: string;
+    item?: string;
+    itemDisabled?: string;
+  };
   draggable?: {
     handle?: string;
     handleActive?: string;
@@ -112,13 +117,12 @@ export const defaultLexKitTheme: LexKitTheme = {
     italic: "lexkit-text-italic",
     underline: "lexkit-text-underline",
     strikethrough: "lexkit-text-strikethrough",
-    underlineStrikethrough: "lexkit-text-underline-strikethrough",
     code: "lexkit-text-code",
   },
   list: {
     ul: "lexkit-list-ul",
     ol: "lexkit-list-ol",
-    listitem: "lexkit-list-item",
+    listitem: "lexkit-list-li",
     nested: {
       list: "lexkit-list-nested",
       listitem: "lexkit-list-nested-item",
@@ -135,13 +139,45 @@ export const defaultLexKitTheme: LexKitTheme = {
   },
   paragraph: "lexkit-paragraph",
   link: "lexkit-link",
-  image: "lexkit-image",
+  image: "lexical-image",
   hr: "lexkit-hr",
   table: "lexkit-table",
   tableRow: "lexkit-table-row",
   tableCell: "lexkit-table-cell",
   tableCellHeader: "lexkit-table-cell-header",
-  code: "lexkit-code-block",
+  code: "lexkit-code",
+  codeHighlight: {
+    atrule: "lexkit-code-atrule",
+    attr: "lexkit-code-attr",
+    boolean: "lexkit-code-boolean",
+    builtin: "lexkit-code-builtin",
+    cdata: "lexkit-code-cdata",
+    char: "lexkit-code-char",
+    class: "lexkit-code-class",
+    "class-name": "lexkit-code-class-name",
+    comment: "lexkit-code-comment",
+    constant: "lexkit-code-constant",
+    deleted: "lexkit-code-deleted",
+    doctype: "lexkit-code-doctype",
+    entity: "lexkit-code-entity",
+    function: "lexkit-code-function",
+    important: "lexkit-code-important",
+    inserted: "lexkit-code-inserted",
+    keyword: "lexkit-code-keyword",
+    namespace: "lexkit-code-namespace",
+    number: "lexkit-code-number",
+    operator: "lexkit-code-operator",
+    prolog: "lexkit-code-prolog",
+    property: "lexkit-code-property",
+    punctuation: "lexkit-code-punctuation",
+    regex: "lexkit-code-regex",
+    selector: "lexkit-code-selector",
+    string: "lexkit-code-string",
+    symbol: "lexkit-code-symbol",
+    tag: "lexkit-code-tag",
+    url: "lexkit-code-url",
+    variable: "lexkit-code-variable",
+  },
 
   // Custom LexKit properties
   toolbar: {
@@ -152,6 +188,13 @@ export const defaultLexKitTheme: LexKitTheme = {
   },
   container: "lexkit-editor-container",
   wrapper: "lexkit-editor-wrapper",
+  editor: "lexkit-editor",
+  contentEditable: "lexkit-content-editable",
+  contextMenu: {
+    container: "lexkit-context-menu",
+    item: "lexkit-context-menu-item",
+    itemDisabled: "lexkit-context-menu-item-disabled",
+  },
   draggable: {
     handle: "lexkit-draggable-handle",
     handleActive: "lexkit-draggable-handle-active",
@@ -209,6 +252,10 @@ export function mergeThemes(
     heading: {
       ...baseTheme.heading,
       ...overrideTheme.heading,
+    },
+    codeHighlight: {
+      ...baseTheme.codeHighlight,
+      ...overrideTheme.codeHighlight,
     },
     toolbar: {
       ...baseTheme.toolbar,

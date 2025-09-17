@@ -222,6 +222,13 @@ const markdownExt = new MarkdownExtension().configure({
   customTransformers: ALL_MARKDOWN_TRANSFORMERS,
 });
 
+// Create table extension instance
+const tableExt = new TableExtension().configure({
+  enableContextMenu: true,
+  contextMenuRenderer: ShadcnTableContextMenuRenderer,
+  markdownExtension: markdownExt,
+});
+
 // Extensions array
 export const extensions = [
   boldExtension,
@@ -234,11 +241,7 @@ export const extensions = [
     autoLinkUrls: true,
   }),
   horizontalRuleExtension,
-  new TableExtension().configure({
-    enableContextMenu: true,
-    contextMenuRenderer: ShadcnTableContextMenuRenderer,
-    markdownExtension: markdownExt,
-  }),
+  tableExt,
   listExtension,
   historyExtension,
   imageExtension,
