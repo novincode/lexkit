@@ -1,6 +1,6 @@
 {
   "name": "lexkit",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "LexKit - A headless, extensible rich text editor built on Lexical",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
