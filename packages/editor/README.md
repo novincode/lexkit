@@ -174,4 +174,3 @@ Your support keeps this project alive and helps us build better tools for the Re
 **Built with ❤️ by [novincode](https://github.com/novincode)**
 
 MIT License - Use it however you want.</content>
-<parameter name="filePath">/Users/shayanmoradi/Desktop/Work/lexkit/README.md

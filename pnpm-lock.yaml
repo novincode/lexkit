@@ -257,8 +257,8 @@ importers:
         specifier: ^0.35.0
         version: 0.35.0
       '@lexkit/editor':
-        specifier: ^0.0.23
-        version: 0.0.23(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^0.0.30
+        version: 0.0.30(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       lexical:
         specifier: ^0.35.0
         version: 0.35.0
@@ -1314,7 +1314,7 @@ packages:
     peerDependencies:
       yjs: '>=13.5.22'
 
-  '@lexkit/editor@0.0.23':
+  '@lexkit/editor@0.0.30':
     resolution: {integrity: sha512-iQpvqQXFvoPrSLcdi4rVSzMHiGXKfKeiu9NiJ/ytLCWCGnr2/wiPQjDIMhRuRy0H8VJ6XC2LPmejoJoxD5REgQ==}
     peerDependencies:
       '@lexical/code': ^0.35.0
@@ -6241,7 +6241,7 @@ snapshots:
       lexical: 0.35.0
       yjs: 13.6.27
 
-  '@lexkit/editor@0.0.23(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@lexkit/editor@0.0.30(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@lexical/code': 0.35.0
       '@lexical/html': 0.35.0
