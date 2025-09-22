@@ -61,7 +61,10 @@ export {
 
 // Media Extensions
 export { ImageExtension, imageExtension } from "./media/ImageExtension";
-export { htmlEmbedExtension } from "./media/HTMLEmbedExtension";
+export {
+  HTMLEmbedExtension,
+  htmlEmbedExtension,
+} from "./media/HTMLEmbedExtension";
 
 // Custom Extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
@@ -78,4 +81,10 @@ export * from "./core";
 // Base Classes & Types
 export { TextFormatExtension } from "./base/TextFormatExtension";
 export * from "./types";
+
+// Export Transformers
+export { ALL_MARKDOWN_TRANSFORMERS } from "./export/transformers";
+
+// Export all media types
+export * from "./media/types";
 export * from "./base/BaseExtension";

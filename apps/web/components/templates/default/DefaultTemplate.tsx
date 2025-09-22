@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useMemo, useRef, forwardRef } from "react";
 import { useTheme } from "next-themes";
 import {
+  // Core system
+  createEditorSystem,
+
+  // Extensions
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -18,55 +22,24 @@ import {
   MarkdownExtension,
   codeExtension,
   codeFormatExtension,
-} from "@lexkit/editor/extensions";
-import {
+  HTMLEmbedExtension,
   commandPaletteExtension,
   floatingToolbarExtension,
   contextMenuExtension,
   DraggableBlockExtension,
-} from "@lexkit/editor/extensions/core";
-import { HTMLEmbedExtension } from "@lexkit/editor/extensions/media";
-import { ALL_MARKDOWN_TRANSFORMERS } from "@lexkit/editor/extensions/export/transformers";
+
+  // Utilities
+  ALL_MARKDOWN_TRANSFORMERS,
+
+  // Types
+  type ExtractCommands,
+  type ExtractStateQueries,
+  type BaseCommands,
+} from "@lexkit/editor";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalEditor } from "lexical";
-import { createEditorSystem } from "@lexkit/editor";
-import type {
-  ExtractCommands,
-  ExtractStateQueries,
-  BaseCommands,
-} from "@lexkit/editor/extensions/types";
-import {
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  List,
-  ListOrdered,
-  Undo,
-  Redo,
-  Sun,
-  Moon,
-  Image as ImageIcon,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Upload,
-  Link,
-  Unlink,
-  Minus,
-  Code,
-  Terminal,
-  Table as TableIcon,
-  FileCode,
-  Eye,
-  Pencil,
-  Command,
-  Type,
-  Quote,
-  Indent,
-  Outdent,
-} from "lucide-react";
+import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Undo, Redo, Sun, Moon, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, Upload, Link, Unlink, Minus, Code, Terminal, Table as TableIcon, FileCode, Eye, Pencil, Command, Type, Quote, Indent, Outdent } from "lucide-react";
 import { Select, Dropdown, Dialog } from "./components";
 import {
   commandsToCommandPaletteItems,
