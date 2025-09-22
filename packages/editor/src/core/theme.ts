@@ -145,7 +145,7 @@ export const defaultLexKitTheme: LexKitTheme = {
   tableRow: "lexkit-table-row",
   tableCell: "lexkit-table-cell",
   tableCellHeader: "lexkit-table-cell-header",
-  code: "lexkit-code",
+  code: "lexkit-code-block",
   codeHighlight: {
     atrule: "lexkit-code-atrule",
     attr: "lexkit-code-attr",
