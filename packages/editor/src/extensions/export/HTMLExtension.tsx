@@ -17,7 +17,7 @@ export type HTMLCommands = {
   /** Export the current editor content as HTML string */
   exportToHTML: () => string;
   /** Import HTML content into the editor, replacing current content */
-  importFromHTML: (html: string) => Promise<void>;
+  importFromHTML: (html: string, opts?: { preventFocus?: boolean }) => Promise<void>;
 };
 
 /**
@@ -100,7 +100,7 @@ export class HTMLExtension extends BaseExtension<
         });
       },
 
-      importFromHTML: (html: string) => {
+      importFromHTML: (html: string, opts?: { preventFocus?: boolean }) => {
         return new Promise((resolve) => {
           editor.update(
             () => {
@@ -129,7 +129,9 @@ export class HTMLExtension extends BaseExtension<
                 } else {
                   root.append($createParagraphNode());
                 }
-                $getRoot().selectEnd(); // Reset selection to avoid stale references
+                if (!opts?.preventFocus) {
+                  $getRoot().selectEnd(); // Reset selection to avoid stale references
+                }
               } catch (error) {
                 console.error("Error importing HTML:", error);
                 const root = $getRoot();

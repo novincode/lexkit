@@ -29,8 +29,7 @@ export type MarkdownConfig = BaseExtensionConfig & {
 
 export type MarkdownCommands = {
 	exportToMarkdown: () => string;
-	importFromMarkdown: (markdown: string, opts?: { immediate?: boolean }) => Promise<void>;
-	/** Register a transformer at runtime (extensions can call this) */
+	importFromMarkdown: (markdown: string, opts?: { immediate?: boolean; preventFocus?: boolean }) => Promise<void>;
 	registerMarkdownTransformer: (transformer: MarkdownTransformer) => void;
 };
 
@@ -76,7 +75,7 @@ class MarkdownManager {
 		});
 	}
 
-	import(markdown: string, onComplete?: () => void) {
+	import(markdown: string, onComplete?: () => void, preventFocus?: boolean) {
 		this.editor.update(
 			() => {
 				const root = $getRoot();
@@ -87,7 +86,9 @@ class MarkdownManager {
 					return;
 				}
 				$convertFromMarkdownString(content, this.getAllTransformers());
-				$getRoot().selectEnd(); // Reset selection to avoid stale references
+				if (!preventFocus) {
+					$getRoot().selectEnd(); // Reset selection to avoid stale references
+				}
 			},
 			{ discrete: true, onUpdate: onComplete },
 		);
@@ -153,19 +154,19 @@ export class MarkdownExtension extends BaseExtension<
 					return '';
 				}
 			},
-			importFromMarkdown: (markdown: string, opts?: { immediate?: boolean }) => {
+			importFromMarkdown: (markdown: string, opts?: { immediate?: boolean; preventFocus?: boolean }) => {
 				return new Promise((resolve) => {
 					if (!this.manager) {
 						resolve();
 						return;
 					}
-					const { immediate } = opts || {};
+					const { immediate, preventFocus } = opts || {};
 					const delay = immediate ? 0 : this.config.importDebounce || 0;
 					if (this.importTimer) clearTimeout(this.importTimer);
 					const run = () => {
 						this.manager?.import(markdown, () => {
 							resolve();
-						});
+						}, preventFocus);
 					};
 					if (delay > 0) {
 						this.importTimer = setTimeout(run, delay);

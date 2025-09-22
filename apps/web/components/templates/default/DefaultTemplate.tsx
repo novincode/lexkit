@@ -23,9 +23,9 @@ import {
   codeExtension,
   codeFormatExtension,
   HTMLEmbedExtension,
-  commandPaletteExtension,
   floatingToolbarExtension,
   contextMenuExtension,
+  commandPaletteExtension,
   DraggableBlockExtension,
 
   // Utilities
@@ -527,7 +527,7 @@ function EditorContent({
         setTimeout(() => {
           if (editor) {
             editor.update(() => {
-              commandsRef.current.importFromMarkdown(content, { immediate: true });
+              commandsRef.current.importFromMarkdown(content, { immediate: true, preventFocus: true });
             });
           }
         }, 100); // Small delay to ensure editor is ready
@@ -536,7 +536,7 @@ function EditorContent({
         setTimeout(() => {
           if (editor) {
             editor.update(() => {
-              commandsRef.current.importFromHTML(content);
+              commandsRef.current.importFromHTML(content, { preventFocus: true });
             });
           }
         }, 100);
