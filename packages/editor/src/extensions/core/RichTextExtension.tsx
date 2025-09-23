@@ -1,7 +1,10 @@
 import React from "react";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { Extension, BaseExtensionConfig, ExtensionCategory } from "../types";
+import { LexicalEditor } from "lexical";
+import { ReactNode } from "react";
+import { BaseExtension } from "../base";
+import { BaseExtensionConfig, ExtensionCategory } from "../types";
 import { defaultLexKitTheme } from "../../core/theme";
 
 // Base RichText props interface - shared between config and component
@@ -105,19 +108,42 @@ const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
   );
 };
 
-export const richTextExtension = (config: RichTextConfig = {}): Extension => ({
-  name: "richText",
-  category: [ExtensionCategory.Floating],
-  config: {
-    showInToolbar: false,
-    position: "after", // RichText should render after children
-    ...config,
-  },
-  register: () => () => {}, // No registration needed for RichTextPlugin
-  getPlugins: () => [<SharedRichText key="rich-text" {...config} />],
-  getCommands: () => ({}),
-  getStateQueries: () => ({}),
-});
+export interface RichTextConfig
+  extends BaseExtensionConfig,
+    BaseRichTextProps {}
+
+/**
+ * RichTextExtension - Provides the core rich text editing functionality
+ * Extends BaseExtension for consistency with other extensions
+ */
+export class RichTextExtension extends BaseExtension<
+  "richText",
+  RichTextConfig,
+  {}, // No commands
+  {}, // No state queries
+  ReactNode[] // Plugins
+> {
+  constructor(config: RichTextConfig = {}) {
+    super("richText", [ExtensionCategory.Floating]);
+    this.config = {
+      showInToolbar: false,
+      position: "after", // RichText should render after children
+      ...config,
+    };
+  }
+
+  register(editor: LexicalEditor): () => void {
+    // No registration needed for RichTextPlugin
+    return () => {};
+  }
+
+  getPlugins(): ReactNode[] {
+    return [<SharedRichText key="rich-text" {...this.config} />];
+  }
+}
+
+// Pre-configured instance for convenience
+export const richTextExtension = new RichTextExtension();
 
 // Standalone RichText Component for flexible usage
 export interface RichTextComponentProps extends SharedRichTextProps {}
