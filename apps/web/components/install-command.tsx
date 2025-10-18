@@ -10,9 +10,10 @@ interface InstallCommandProps {
   packages: string[];
   devDependencies?: boolean;
   className?: string;
+  commandMap?: Partial<Record<PackageManager, (packages: string[], dev: boolean) => string>>;
 }
 
-const packageManagerCommands = {
+const defaultPackageManagerCommands = {
   npm: (packages: string[], dev: boolean) =>
     `npm install ${dev ? "--save-dev " : ""}${packages.join(" ")}`,
   yarn: (packages: string[], dev: boolean) =>
@@ -27,14 +28,15 @@ export function InstallCommand({
   packages,
   devDependencies = false,
   className,
+  commandMap,
 }: InstallCommandProps) {
   const { packageManager, setPackageManager } = useStore();
   const [copied, setCopied] = useState(false);
 
-  const command = packageManagerCommands[packageManager](
-    packages,
-    devDependencies,
-  );
+  // Merge default commands with custom overrides
+  const packageManagerCommands = { ...defaultPackageManagerCommands, ...commandMap };
+
+  const command = packageManagerCommands[packageManager](packages, devDependencies);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(command);

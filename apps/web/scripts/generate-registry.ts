@@ -176,7 +176,16 @@ class CodeRegistryGenerator {
     fullPath: string,
     language: string,
   ): Promise<string> {
-    const content = fs.readFileSync(fullPath, "utf-8");
+    let content = fs.readFileSync(fullPath, "utf-8");
+    
+    // Replace @repo/ui imports with standard shadcn paths for user-facing examples
+    if (fullPath.includes('ShadcnTemplate.tsx') || fullPath.includes('shadcn/')) {
+      content = content
+        .replace(/@repo\/ui\/components\//g, '@/components/ui/')
+        .replace(/@repo\/ui\/lib\//g, '@/lib/')
+        .replace(/@repo\/ui/g, '@/components/ui');
+    }
+    
     return await codeToHtml(content, {
       lang: language,
       theme: "github-dark",

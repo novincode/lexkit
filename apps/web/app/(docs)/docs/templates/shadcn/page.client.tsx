@@ -19,6 +19,7 @@ import {
 } from "@repo/ui/components/tabs";
 import { SimpleCodeBlock } from "@/app/(docs)/components/simple-code-block";
 import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
+import { InstallCommand } from "@/components/install-command";
 import {
   ShadcnTemplate,
   ShadcnTemplateRef,
@@ -284,6 +285,56 @@ Select some text and try the **floating toolbar** that appears, or right-click f
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Installation */}
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Installation</h2>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Install Required SHADCN UI Components</CardTitle>
+            <CardDescription>
+              The ShadcnTemplate requires these SHADCN UI components. Install them all at once:
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InstallCommand
+              packages={[
+                "button",
+                "toggle",
+                "command",
+                "tooltip",
+                "tabs",
+                "select",
+                "separator",
+                "label",
+                "input",
+                "dropdown-menu",
+                "switch",
+                "dialog",
+                "collapsible",
+                "textarea"
+              ]}
+              commandMap={{
+                npm: (packages) => `npx shadcn@latest add ${packages.join(" ")}`,
+                yarn: (packages) => `yarn dlx shadcn@latest add ${packages.join(" ")}`,
+                pnpm: (packages) => `pnpm dlx shadcn@latest add ${packages.join(" ")}`,
+                bun: (packages) => `bunx --bun shadcn@latest add ${packages.join(" ")}`,
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Import Path Note</CardTitle>
+            <CardDescription>
+              The code examples below show imports from <code className="bg-muted px-1 py-0.5 rounded text-sm">@/components/ui/...</code>.
+              If your shadcn components are in a different path, adjust the imports accordingly.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
 
       {/* Usage Examples */}
