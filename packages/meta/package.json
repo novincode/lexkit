@@ -1,6 +1,6 @@
 {
   "name": "lexkit",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "description": "LexKit - A headless, extensible rich text editor built on Lexical",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,18 +35,18 @@
   },
   "homepage": "https://github.com/novincode/lexkit#readme",
   "dependencies": {
-    "@lexkit/editor": "^0.0.36"
+    "@lexkit/editor": "^0.0.37"
   },
   "peerDependencies": {
-    "@lexical/html": ">=0.34.0 <0.36.0",
-    "@lexical/list": ">=0.34.0 <0.36.0",
-    "@lexical/markdown": ">=0.34.0 <0.36.0",
-    "@lexical/react": ">=0.34.0 <0.36.0",
-    "@lexical/rich-text": ">=0.34.0 <0.36.0",
-    "@lexical/selection": ">=0.34.0 <0.36.0",
-    "@lexical/utils": ">=0.34.0 <0.36.0",
-    "@lexical/code": ">=0.34.0 <0.36.0",
-    "lexical": ">=0.34.0 <0.36.0",
+    "@lexical/html": ">=0.34.0",
+    "@lexical/list": ">=0.34.0",
+    "@lexical/markdown": ">=0.34.0",
+    "@lexical/react": ">=0.34.0",
+    "@lexical/rich-text": ">=0.34.0",
+    "@lexical/selection": ">=0.34.0",
+    "@lexical/utils": ">=0.34.0",
+    "@lexical/code": ">=0.34.0",
+    "lexical": ">=0.34.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
