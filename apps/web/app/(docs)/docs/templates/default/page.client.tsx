@@ -115,8 +115,8 @@ Select some text and try the toolbar buttons above, or press **Ctrl+K** to open 
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
           The DefaultTemplate is a production-ready rich text editor component
-          that includes a comprehensive toolbar, theme support, and all
-          essential editing features.
+          that you can copy into your project. It includes a comprehensive toolbar,
+          theme support, and all essential editing features.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Badge variant="secondary" className="px-3 py-1">
@@ -316,6 +316,54 @@ Select some text and try the toolbar buttons above, or press **Ctrl+K** to open 
         </div>
       </div>
 
+      {/* Installation */}
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Installation</h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+          First copy these files into your project:
+        </p>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Copy the DefaultTemplate Files</CardTitle>
+            <CardDescription>
+              Copy these files from the LexKit repository to your project:
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="font-medium mb-2">Files to copy:</p>
+              <div className="space-y-1 text-sm">
+                <div>• <code>CommandPalette.tsx</code></div>
+                <div>• <code>DefaultTemplate.tsx</code></div>
+                <div>• <code>commands.ts</code></div>
+                <div>• <code>components.tsx</code></div>
+                <div>• <code>styles.css</code></div>
+                <div>• <code>theme.ts</code></div>
+              </div>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="font-medium mb-2">From this GitHub location:</p>
+              <Link
+                href="https://github.com/novincode/lexkit/tree/main/apps/web/components/templates/default"
+                target="_blank"
+                className="text-primary hover:underline"
+              >
+                https://github.com/novincode/lexkit/tree/main/apps/web/components/templates/default
+              </Link>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="font-medium mb-2">Then update your imports:</p>
+              <pre className="text-sm bg-background p-2 rounded">
+{`import { DefaultTemplate } from '@/components/DefaultTemplate'`}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Usage Examples */}
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-center">Usage Examples</h2>
@@ -333,7 +381,7 @@ Select some text and try the toolbar buttons above, or press **Ctrl+K** to open 
               <CardHeader>
                 <CardTitle>Basic Usage</CardTitle>
                 <CardDescription>
-                  Get started with the DefaultTemplate in minutes.
+                  Get started with the DefaultTemplate after copying it to your project.
                 </CardDescription>
               </CardHeader>
               <CardContent>

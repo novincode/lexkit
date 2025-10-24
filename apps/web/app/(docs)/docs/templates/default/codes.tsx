@@ -3,7 +3,7 @@ import { RegisteredCodeSnippet } from "@/app/(docs)/lib/types";
 const DEFAULT_TEMPLATE_CODES: RegisteredCodeSnippet[] = [
   {
     id: "default-template-basic-usage",
-    code: `import { DefaultTemplate } from '@lexkit/editor/templates'
+    code: `import { DefaultTemplate } from '@/components/DefaultTemplate'
 
 function MyEditor() {
   return (
@@ -18,12 +18,12 @@ function MyEditor() {
 }`,
     language: "tsx",
     title: "Basic DefaultTemplate Usage",
-    description: "Create a basic editor with the DefaultTemplate",
+    description: "Create a basic editor with the DefaultTemplate (copy the component to your project first)",
   },
   {
     id: "default-template-with-ref",
     code: `import { useRef } from 'react'
-import { DefaultTemplate, DefaultTemplateRef } from '@lexkit/editor/templates'
+import { DefaultTemplate, DefaultTemplateRef } from '@/components/DefaultTemplate'
 
 function MyEditor() {
   const editorRef = useRef<DefaultTemplateRef>(null)
@@ -43,7 +43,7 @@ function MyEditor() {
 }`,
     language: "tsx",
     title: "DefaultTemplate with Ref",
-    description: "Access editor methods using a ref",
+    description: "Access editor methods using a ref (copy DefaultTemplate to your project first)",
   },
   {
     id: "default-template-extensions",
