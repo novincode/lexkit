@@ -272,7 +272,7 @@ function MyEditor() {
 
 // Define your extensions (as const for type safety)
 const extensions = [
-  richTextExtension({
+  richTextExtension.configure({
     placeholder: "Start writing...",
     classNames: {
       container: "my-editor-container",

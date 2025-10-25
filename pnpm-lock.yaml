@@ -130,37 +130,37 @@ importers:
   packages/editor:
     dependencies:
       '@lexical/code':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/html':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/link':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/list':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/markdown':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/react':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
       '@lexical/rich-text':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/selection':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/table':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/utils':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       lexical:
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       react:
         specifier: ^18.0.0 || ^19.0.0
@@ -233,34 +233,34 @@ importers:
   packages/meta:
     dependencies:
       '@lexical/code':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/html':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/list':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/markdown':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/react':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
       '@lexical/rich-text':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/selection':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexical/utils':
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       '@lexkit/editor':
-        specifier: ^0.0.36
-        version: 0.0.36(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^0.0.37
+        version: 0.0.37(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       lexical:
-        specifier: '>=0.34.0 <0.36.0'
+        specifier: '>=0.34.0'
         version: 0.35.0
       react:
         specifier: ^18.0.0 || ^19.0.0
@@ -1314,20 +1314,20 @@ packages:
     peerDependencies:
       yjs: '>=13.5.22'
 
-  '@lexkit/editor@0.0.36':
-    resolution: {integrity: sha512-X+aIHZ0ejHKtey6ic3gunEZR4w/4E4AATvO4VcD9jYecLpNpYeTO2uIxk4V7QY0wYhzVpvuBiiXEzwMMBLUe4g==}
+  '@lexkit/editor@0.0.37':
+    resolution: {integrity: sha512-g5fTZl8SMJQaTHpb/noQa4V2qmq4kCCchyaS7BpowyOvGOZ4DODJsV/m3p7KyZZ/bAsae+lw4yllsTMPB9I+MQ==}
     peerDependencies:
-      '@lexical/code': '>=0.34.0 <0.36.0'
-      '@lexical/html': '>=0.34.0 <0.36.0'
-      '@lexical/link': '>=0.34.0 <0.36.0'
-      '@lexical/list': '>=0.34.0 <0.36.0'
-      '@lexical/markdown': '>=0.34.0 <0.36.0'
-      '@lexical/react': '>=0.34.0 <0.36.0'
-      '@lexical/rich-text': '>=0.34.0 <0.36.0'
-      '@lexical/selection': '>=0.34.0 <0.36.0'
-      '@lexical/table': '>=0.34.0 <0.36.0'
-      '@lexical/utils': '>=0.34.0 <0.36.0'
-      lexical: '>=0.34.0 <0.36.0'
+      '@lexical/code': '>=0.34.0'
+      '@lexical/html': '>=0.34.0'
+      '@lexical/link': '>=0.34.0'
+      '@lexical/list': '>=0.34.0'
+      '@lexical/markdown': '>=0.34.0'
+      '@lexical/react': '>=0.34.0'
+      '@lexical/rich-text': '>=0.34.0'
+      '@lexical/selection': '>=0.34.0'
+      '@lexical/table': '>=0.34.0'
+      '@lexical/utils': '>=0.34.0'
+      lexical: '>=0.34.0'
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
@@ -6241,7 +6241,7 @@ snapshots:
       lexical: 0.35.0
       yjs: 13.6.27
 
-  '@lexkit/editor@0.0.36(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@lexkit/editor@0.0.37(@lexical/code@0.35.0)(@lexical/html@0.35.0)(@lexical/link@0.35.0)(@lexical/list@0.35.0)(@lexical/markdown@0.35.0)(@lexical/react@0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27))(@lexical/rich-text@0.35.0)(@lexical/selection@0.35.0)(@lexical/table@0.35.0)(@lexical/utils@0.35.0)(lexical@0.35.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@lexical/code': 0.35.0
       '@lexical/html': 0.35.0
