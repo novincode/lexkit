@@ -145,7 +145,7 @@ export function Footer() {
                 GitHub
               </Link>
               <Link
-                href="https://discord.gg/SAqTGDkR"
+                href="https://discord.gg/RAMYSDRag7"
                 target="_blank"
                 className="hover:text-foreground transition-colors"
               >

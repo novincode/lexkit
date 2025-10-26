@@ -144,7 +144,7 @@ LexKit powers editors in:
 
 ## Community & Support
 
-- **[💬 Discord](https://discord.gg/SAqTGDkR)** - Get help, share ideas
+- **[💬 Discord](https://discord.gg/RAMYSDRag7)** - Get help, share ideas
 - **[🐛 GitHub Issues](https://github.com/novincode/lexkit/issues)** - Bug reports, feature requests
 - **[💭 Discussions](https://github.com/novincode/lexkit/discussions)** - Questions, showcase your projects
 
