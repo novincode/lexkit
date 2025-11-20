@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Fira_Code } from "next/font/google";
+import { Geist, Geist_Mono, Fira_Code,Nunito } from "next/font/google";
 import { Metadata, Viewport } from "next";
 import Script from "next/script";
 
@@ -18,6 +18,10 @@ const fontMono = Geist_Mono({
 const fontFira = Fira_Code({
   subsets: ["latin"],
   variable: "--font-mono",
+});
+const fontNunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-nunito",
 });
 
 // Next.js Metadata API
@@ -147,7 +151,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans ${fontFira.className} antialiased overflow-x-hidden`}
+        className={` ${fontNunito.className} antialiased overflow-x-hidden`}
       >
         <Script
           id="structured-data"

@@ -1,6 +1,6 @@
 {
   "name": "@lexkit/editor",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "description": "LexKit Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,

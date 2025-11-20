@@ -101,7 +101,7 @@ export function Footer() {
             <div className="space-y-3">
               <Button asChild size="sm" className="w-full">
                 <Link
-                  href="https://buymeacoffee.com/lexkit"
+                  href="https://github.com/sponsors/novincode"
                   target="_blank"
                   className="flex items-center gap-2"
                 >
