@@ -8,6 +8,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { useState, useEffect } from "react";
 import { cn } from "@repo/ui/lib/utils";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 interface TopNavigationProps {
   className?: string;
@@ -84,12 +85,12 @@ export function TopNavigation({
         {/* Logo */}
         <div className="mr-6 flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-extralight text-xl">
-                L
-              </span>
-            </div>
-            <span className="font-bold text-xl">LexKit</span>
+            <Image
+            src={'/images/LEXKIT.svg'} 
+            width={100}
+            height={32}
+            alt="Lexkit Logo"
+             />
           </Link>
         </div>
 

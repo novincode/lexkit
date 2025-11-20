@@ -472,7 +472,7 @@ Ready to build something amazing? Let's get started! 🚀`);
                   variant="outline"
                   className="w-full justify-start"
                 >
-                  <Link href="/docs/examples">
+                  <Link href="/docs/introduction">
                     <BookOpen className="h-4 w-4 mr-2" />
                     View All Examples
                   </Link>

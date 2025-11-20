@@ -1,24 +1,26 @@
 import Link from "next/link";
 import { Coffee, Heart, Github } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
+import Image from "next/image";
 
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
-      <div className=" py-8 p-8 md:py-12">
+      <div className="py-8 px-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xs">
-                  L
-                </span>
-              </div>
-              <span className="font-semibold">LexKit</span>
+              <Image
+                src={'/images/LEXKIT.svg'}
+                width={100}
+                height={32}
+                alt="Lexkit Logo"
+              />
             </div>
             <p className="text-sm text-muted-foreground">
-              A headless, extensible rich text editor built on Lexical.
+              A headless, extensible rich text editor built on Lexical. <br />
+              Use the power of Lexical out of the box with better developer experience.
             </p>
           </div>
 

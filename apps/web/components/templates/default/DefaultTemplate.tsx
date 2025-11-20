@@ -627,7 +627,7 @@ function EditorContent({
         )}
       </div>
       <div className="lexkit-editor">
-        <div style={{ display: mode === "visual" ? "block" : "none" }}>
+        <div className="flex flex-col flex-1" style={{ display: mode === "visual" ? "flex" : "none" }}>
           <RichTextPlugin
             contentEditable={<ContentEditable className="lexkit-content-editable" />}
             placeholder={<div className="lexkit-placeholder">Start typing...</div>}

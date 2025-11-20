@@ -261,7 +261,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
             </a>
             <span className="text-muted-foreground">•</span>
             <a
-              href="#"
+              href="https://github.com/sponsors/novincode"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               💝 Support the project
@@ -335,7 +335,7 @@ Ready to try it? Pick your package manager above and let's build something amazi
           </div>
           <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
             <Link
-              href="/docs/getting-started"
+              href="/docs/get-started"
               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
             >
               🚀 Quick Start
@@ -347,16 +347,12 @@ Ready to try it? Pick your package manager above and let's build something amazi
             >
               🧩 Extensions
             </Link>
-            <span className="text-muted-foreground">•</span>
-            <Link
-              href="/docs/examples"
-              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
-            >
-              💡 Examples
-            </Link>
+          
             <span className="text-muted-foreground">•</span>
             <Link
               href="https://github.com/novincode/lexkit"
+              target="_blank"
+              
               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
             >
               ⭐ GitHub

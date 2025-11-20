@@ -303,7 +303,7 @@ That's it! You're ready to build something amazing.`);
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/docs/examples">
+                <Link href="/docs/introduction">
                   <Play className="mr-2 h-5 w-5" />
                   View Examples
                 </Link>

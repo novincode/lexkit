@@ -254,7 +254,7 @@ export function InstallationPageClient() {
           </div>
           <div className="flex items-center justify-center md:gap-6 gap-4 flex-wrap">
             <Link
-              href="/docs/getting-started"
+              href="/docs/get-started"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               Get Started Guide
