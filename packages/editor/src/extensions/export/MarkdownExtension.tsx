@@ -25,6 +25,8 @@ export type MarkdownConfig = BaseExtensionConfig & {
 	importDebounce?: number;
 	/** Pre-registered custom transformers */
 	transformers?: MarkdownTransformer[];
+	/** Alias for transformers (backward compatibility) */
+	customTransformers?: MarkdownTransformer[];
 };
 
 export type MarkdownCommands = {
@@ -69,8 +71,6 @@ class MarkdownManager {
 
 	export(): string {
 		return this.editor.getEditorState().read(() => {
-			const root = $getRoot();
-			const children = root.getChildren();
 			return $convertToMarkdownString(this.getAllTransformers());
 		});
 	}
@@ -113,11 +113,15 @@ export class MarkdownExtension extends BaseExtension<
 
 	configure(config: Partial<MarkdownConfig>): this {
 		this.config = { ...this.config, ...config };
+		
+		// Support both 'transformers' and 'customTransformers' for backward compatibility
+		const transformersToAdd = config.transformers || config.customTransformers || [];
+		
 		// If manager already exists, push new seed transformers now
-		if (this.manager && config.transformers?.length) {
-			config.transformers.forEach(t => this.manager?.registerTransformer(t));
-		} else if (config.transformers?.length) {
-			this.pendingTransformers.push(...config.transformers);
+		if (this.manager && transformersToAdd.length) {
+			transformersToAdd.forEach(t => this.manager?.registerTransformer(t));
+		} else if (transformersToAdd.length) {
+			this.pendingTransformers.push(...transformersToAdd);
 		}
 		return this;
 	}
@@ -132,8 +136,9 @@ export class MarkdownExtension extends BaseExtension<
 	};
 
 	register(editor: LexicalEditor): () => void {
+		const configTransformers = this.config.transformers || this.config.customTransformers || [];
 		this.manager = new MarkdownManager(editor, [
-			...(this.config.transformers || []),
+			...configTransformers,
 			...this.pendingTransformers,
 		]);
 		// Clear pending once consumed

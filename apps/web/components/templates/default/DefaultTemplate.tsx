@@ -582,19 +582,29 @@ function EditorContent({
 
   const handleMarkdownChange = (markdown: string) => setContent((prev) => ({ ...prev, markdown }));
 
-  const handleModeChange = (newMode: EditorMode) => {
+  const handleModeChange = async (newMode: EditorMode) => {
+    // Import when leaving markdown/html mode to visual
     if (mode === "markdown" && newMode !== "markdown" && hasExtension("markdown")) {
-      commands.importFromMarkdown(content.markdown, { immediate: true });
+      await commands.importFromMarkdown(content.markdown, { immediate: true });
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
     if (mode === "html" && newMode !== "html" && hasExtension("html")) {
-      commands.importFromHTML(content.html);
+      await commands.importFromHTML(content.html);
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
+    
+    // Export when entering markdown/html mode from visual
     if (newMode === "markdown" && mode !== "markdown" && hasExtension("markdown")) {
-      setContent((prev) => ({ ...prev, markdown: commands.exportToMarkdown() }));
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const markdown = commands.exportToMarkdown();
+      setContent((prev) => ({ ...prev, markdown }));
     }
     if (newMode === "html" && mode !== "html" && hasExtension("html")) {
-      setContent((prev) => ({ ...prev, html: commands.exportToHTML() }));
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const html = commands.exportToHTML();
+      setContent((prev) => ({ ...prev, html }));
     }
+    
     setMode(newMode);
     if (newMode === "visual") {
       setTimeout(() => editor?.focus(), 100);

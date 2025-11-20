@@ -1085,3 +1085,83 @@ export class ImageExtension extends BaseExtension<
 }
 
 export const imageExtension = new ImageExtension();
+
+/**
+ * Image Markdown Transformer
+ * Supports standard markdown image syntax with optional alignment
+ * 
+ * Syntax examples:
+ * - ![alt text](url)
+ * - ![alt text](url "caption")
+ * - ![alt text](url "caption") <!-- align:left -->
+ * - ![alt text](url "caption") <!-- align:center -->
+ * - ![alt text](url "caption") <!-- align:right -->
+ */
+export const IMAGE_MARKDOWN_TRANSFORMER = {
+  dependencies: [ImageNode],
+  export: (node: LexicalNode) => {
+    if (!$isImageNode(node)) {
+      return null;
+    }
+
+    const imageNode = node as ImageNode;
+    const src = imageNode.__src || "";
+    const alt = imageNode.__alt || "";
+    const caption = imageNode.__caption || "";
+    const alignment = imageNode.__alignment || "none";
+
+    if (!src) {
+      return null;
+    }
+
+    // Build markdown image syntax
+    let markdown = `![${alt}](${src}`;
+    
+    // Add caption as title if present
+    if (caption) {
+      markdown += ` "${caption}"`;
+    }
+    
+    markdown += ")";
+
+    // Add alignment as HTML comment if not 'none'
+    if (alignment && alignment !== "none") {
+      markdown += ` <!-- align:${alignment} -->`;
+    }
+
+    return markdown;
+  },
+  regExp: /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)(?:\s*<!--\s*align:(left|center|right)\s*-->)?\s*$/,
+  replace: (
+    parentNode: any,
+    _children: LexicalNode[],
+    match: RegExpMatchArray,
+  ) => {
+    const [, alt, src, caption, alignment] = match;
+
+    if (!src) return;
+
+    const imageNode = $createImageNode(
+      src,
+      alt || "",
+      caption || undefined,
+      (alignment as "left" | "center" | "right" | "none") || "none",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false,
+    );
+
+    parentNode.replace(imageNode);
+    return imageNode;
+  },
+  type: "element" as const,
+};
+
+/**
+ * Helper function to check if a node is an ImageNode
+ */
+export function $isImageNode(node: LexicalNode | null | undefined): node is ImageNode {
+  return node instanceof ImageNode;
+}
