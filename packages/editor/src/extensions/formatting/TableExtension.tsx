@@ -355,7 +355,7 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
   },
   regExpStart: /^\|.*\|$/,
   regExpEnd: {
-    optional: true,
+    optional: true as const,
     regExp: /^$/
   },
   replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {

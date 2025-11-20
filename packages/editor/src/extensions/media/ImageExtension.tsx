@@ -3,6 +3,7 @@ import {
   NodeKey,
   EditorConfig,
   LexicalNode,
+  ElementNode,
   SerializedLexicalNode,
   Spread,
   createCommand,
@@ -1133,9 +1134,10 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
   },
   regExp: /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)(?:\s*<!--\s*align:(left|center|right)\s*-->)?\s*$/,
   replace: (
-    parentNode: any,
+    parentNode: ElementNode,
     _children: LexicalNode[],
-    match: RegExpMatchArray,
+    match: string[],
+    isImport: boolean,
   ) => {
     const [, alt, src, caption, alignment] = match;
 
@@ -1154,7 +1156,6 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
     );
 
     parentNode.replace(imageNode);
-    return imageNode;
   },
   type: "element" as const,
 };

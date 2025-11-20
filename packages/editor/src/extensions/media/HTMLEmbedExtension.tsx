@@ -678,7 +678,7 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
   },
   regExpStart: /^```html-embed\s*$/,
   regExpEnd: {
-    optional: true,
+    optional: true as const,
     regExp: /^```$/
   },
   replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {

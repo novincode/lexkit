@@ -2,6 +2,7 @@ import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
 import {
   INSERT_HORIZONTAL_RULE_COMMAND,
   $isHorizontalRuleNode,
+  $createHorizontalRuleNode,
   HorizontalRuleNode,
 } from "@lexical/react/LexicalHorizontalRuleNode";
 import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
@@ -21,18 +22,13 @@ export const HORIZONTAL_RULE_TRANSFORMER = {
     return "---";
   },
   regExp: /^(?:---|\*\*\*|___)\s*$/,
-  replace: async (
+  replace: (
     parentNode: ElementNode,
     children: LexicalNode[],
     match: string[],
   ) => {
-    // Dynamic import to avoid bundler warnings
-    const { $createHorizontalRuleNode } = await import(
-      "@lexical/react/LexicalHorizontalRuleNode"
-    );
     const hrNode = $createHorizontalRuleNode();
     parentNode.replace(hrNode);
-    return hrNode;
   },
   type: "element" as const,
 };

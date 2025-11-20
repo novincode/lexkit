@@ -81,11 +81,6 @@ export class ImageTranslator {
             }
             const img = domNode;
 
-            // Skip blob URLs during paste to avoid duplicates, but allow http/https URLs
-            if (img.src.startsWith("blob:") || img.src.startsWith("data:")) {
-              return null;
-            }
-
             // Extract alignment from various possible sources
             let alignment: "left" | "center" | "right" | "none" = "none";
 
@@ -151,12 +146,7 @@ export class ImageTranslator {
             const figure = domNode;
             const img = figure.querySelector("img");
 
-            if (
-              !img ||
-              !img.src ||
-              img.src.startsWith("blob:") ||
-              img.src.startsWith("data:")
-            ) {
+            if (!img || !img.src) {
               return null;
             }
 

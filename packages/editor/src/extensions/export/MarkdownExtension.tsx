@@ -16,23 +16,21 @@ import { BaseExtensionConfig } from '@lexkit/editor/extensions/types';
 /**
  * Minimal shape for a Markdown transformer (Lexical markdown plugin style)
  */
-// We wrap the core Transformer type so external extensions can pass partials without
-// fighting strict typing; we normalize later.
-export type MarkdownTransformer = Partial<Transformer> & { type: string };
+export type MarkdownTransformer = Transformer;
 
 export type MarkdownConfig = BaseExtensionConfig & {
 	/** Optional debounce (ms) when importing markdown programmatically */
 	importDebounce?: number;
 	/** Pre-registered custom transformers */
-	transformers?: MarkdownTransformer[];
+	transformers?: Transformer[];
 	/** Alias for transformers (backward compatibility) */
-	customTransformers?: MarkdownTransformer[];
+	customTransformers?: Transformer[];
 };
 
 export type MarkdownCommands = {
 	exportToMarkdown: () => string;
 	importFromMarkdown: (markdown: string, opts?: { immediate?: boolean; preventFocus?: boolean }) => Promise<void>;
-	registerMarkdownTransformer: (transformer: MarkdownTransformer) => void;
+	registerMarkdownTransformer: (transformer: Transformer) => void;
 };
 
 export type MarkdownStateQueries = {};
@@ -41,26 +39,14 @@ class MarkdownManager {
 	private editor: LexicalEditor;
 	private extraTransformers: Transformer[] = [];
 
-	constructor(editor: LexicalEditor, seed: MarkdownTransformer[] = []) {
+	constructor(editor: LexicalEditor, seed: Transformer[] = []) {
 		this.editor = editor;
-		this.extraTransformers = seed.map(t => ({
-			// @ts-ignore allow partial
-			...t,
-			dependencies: (t as any).dependencies || [],
-			type: t.type as any,
-		}) as Transformer);
+		this.extraTransformers = [...seed];
 	}
 
-	registerTransformer(transformer: MarkdownTransformer) {
-		// Normalize into a proper Transformer object (fallbacks to avoid undefined fields)
-		const normalized: Transformer = {
-			// @ts-ignore allow spread of partial
-			...transformer,
-			dependencies: (transformer as any).dependencies || [],
-			type: transformer.type as any,
-		} as Transformer;
-		if (!this.extraTransformers.includes(normalized)) {
-			this.extraTransformers.push(normalized);
+	registerTransformer(transformer: Transformer) {
+		if (!this.extraTransformers.includes(transformer)) {
+			this.extraTransformers.push(transformer);
 		}
 	}
 
@@ -103,7 +89,7 @@ export class MarkdownExtension extends BaseExtension<
 	[]
 > {
 	private manager: MarkdownManager | null = null;
-	private pendingTransformers: MarkdownTransformer[] = [];
+	private pendingTransformers: Transformer[] = [];
 	private importTimer: any = null;
 
 	constructor() {
@@ -127,7 +113,7 @@ export class MarkdownExtension extends BaseExtension<
 	}
 
 	/** Allow other extensions to imperatively register transformers before or after we register with the editor */
-	registerTransformer = (transformer: MarkdownTransformer) => {
+	registerTransformer = (transformer: Transformer) => {
 		if (this.manager) {
 			this.manager.registerTransformer(transformer);
 		} else {
@@ -180,7 +166,7 @@ export class MarkdownExtension extends BaseExtension<
 					}
 				});
 			},
-			registerMarkdownTransformer: (transformer: MarkdownTransformer) => {
+			registerMarkdownTransformer: (transformer: Transformer) => {
 				this.registerTransformer(transformer);
 			},
 		};

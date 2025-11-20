@@ -11,7 +11,7 @@ import {
  * Uses ++underline++ syntax (common convention for underline in extended markdown)
  */
 export const UNDERLINE_TRANSFORMER = {
-  format: ["underline"],
+  format: ["underline"] as const,
   tag: "++",
   type: "text-format" as const,
 };
