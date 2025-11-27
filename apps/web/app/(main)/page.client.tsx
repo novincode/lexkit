@@ -313,8 +313,9 @@ That's it! You're ready to build something amazing.`);
         </div>
       </section>
 
+      
       {/* CTA Section */}
-      <section className="py-20 lg:py-32 bg-gradient-to-b from-slate-600/20 via-slate-500/10 to-muted/50">
+      <section className="py-10 lg:py-32 bg-gradient-to-b from-slate-600/20 via-slate-500/10 to-muted/50">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             <div className="space-y-4">
@@ -359,6 +360,64 @@ That's it! You're ready to build something amazing.`);
           </div>
         </div>
       </section>
+
+      {/* Sponsors Section */}
+      <section className="py-10 lg:py-32 bg-gradient-to-b from-muted/50 via-background to-slate-600/20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl lg:text-5xl font-bold">
+                🏅 Sponsors
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                A huge thank you to my golden sponsors:
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-4">
+              <a
+                href="https://github.com/initdesk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-transform hover:scale-110"
+              >
+                <img
+                  src="https://github.com/initdesk.png"
+                  alt="initdesk"
+                  width={90}
+                  height={90}
+                  className="rounded-full"
+                />
+              </a>
+              <a
+                href="https://github.com/initdesk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-lg font-semibold hover:text-primary transition-colors"
+              >
+                @initdesk
+              </a>
+            </div>
+
+            <p className="text-muted-foreground">
+              Your support helps keep this project alive and growing! 🙏
+            </p>
+
+            <Button size="lg" asChild variant="default">
+              <a
+                href="https://github.com/sponsors/novincode"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2"
+              >
+                <Heart className="h-5 w-5" />
+                Become a Sponsor
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

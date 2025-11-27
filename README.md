@@ -159,6 +159,18 @@ We welcome contributions! Whether you:
 
 Check our [Contributing Guide](./CONTRIBUTING.md) to get started.
 
+## 🏅 Sponsors
+
+A huge thank you to my golden sponsor:
+
+[<img src="https://github.com/initdesk.png" width="90" />](https://github.com/initdesk)
+
+**[@initdesk](https://github.com/initdesk)**
+
+Your support helps keep this project alive and growing! 🙏
+
+**[💝 Become a Sponsor](https://github.com/sponsors/novincode)**
+
 ## Support This Project
 
 LexKit is free and open source, built by developers for developers. If it's helping you build better editors, consider supporting its development:
