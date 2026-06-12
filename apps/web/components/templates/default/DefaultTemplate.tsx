@@ -58,7 +58,7 @@ type TableConfig = {
 
 // Create markdown extension instance
 const markdownExt = new MarkdownExtension().configure({
-  customTransformers: ALL_MARKDOWN_TRANSFORMERS,
+  customTransformers: [...ALL_MARKDOWN_TRANSFORMERS],
 });
 
 // Define extensions array
