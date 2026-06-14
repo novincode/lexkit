@@ -81,27 +81,12 @@ export class ImageTranslator {
             }
             const img = domNode;
 
-            // Extract alignment from various possible sources
-            let alignment: "left" | "center" | "right" | "none" = "none";
+            // Extract alignment from style, float, or class names
+            const alignment = this.extractAlignment(img);
 
-            // Check style attribute
-            const computedStyle = img.style;
-            if (computedStyle.textAlign) {
-              alignment = computedStyle.textAlign as any;
-            } else if (computedStyle.float) {
-              alignment =
-                computedStyle.float === "left"
-                  ? "left"
-                  : computedStyle.float === "right"
-                    ? "right"
-                    : "none";
-            }
-
-            // Check class names for alignment
-            if (img.classList.contains("align-left")) alignment = "left";
-            else if (img.classList.contains("align-center"))
-              alignment = "center";
-            else if (img.classList.contains("align-right")) alignment = "right";
+            // Extract intrinsic dimensions (attribute or inline style)
+            const width = this.extractDimension(img, "width");
+            const height = this.extractDimension(img, "height");
 
             // Extract caption from figure/figcaption if present
             let caption: string | undefined;
@@ -121,6 +106,8 @@ export class ImageTranslator {
                 alignment,
                 img.className || undefined,
                 this.extractStyleObject(img),
+                width,
+                height,
               );
 
               return { node };
@@ -153,14 +140,25 @@ export class ImageTranslator {
             const figcaption = figure.querySelector("figcaption");
             const caption = figcaption?.textContent || undefined;
 
+            // Preserve the figure's alignment instead of assuming "center".
+            // The editor exports alignment as an `align-*` class / text-align
+            // style on the figure, so a round-trip must read it back. (#11)
+            const alignment = this.extractAlignment(figure);
+
+            // Dimensions and presentation live on the inner <img>. (#10)
+            const width = this.extractDimension(img, "width");
+            const height = this.extractDimension(img, "height");
+
             try {
               const node = $createImageNode(
                 img.src,
                 img.alt || "",
                 caption,
-                "center", // Figures are typically centered
-                figure.className || undefined,
-                this.extractStyleObject(figure),
+                alignment,
+                img.className || undefined,
+                this.extractStyleObject(img),
+                width,
+                height,
               );
 
               return { node };
@@ -174,6 +172,75 @@ export class ImageTranslator {
         priority: 1, // Higher priority than img to handle figure first
       }),
     };
+  }
+
+  /**
+   * Extract the alignment of an image-bearing element.
+   * Class names (`align-left|center|right|none`) take precedence, then the
+   * `text-align` style, then `float`. Defaults to "none".
+   * @param element - The DOM element to read alignment from
+   */
+  private static extractAlignment(
+    element: HTMLElement,
+  ): "left" | "center" | "right" | "none" {
+    try {
+      if (element.classList) {
+        if (element.classList.contains("align-left")) return "left";
+        if (element.classList.contains("align-center")) return "center";
+        if (element.classList.contains("align-right")) return "right";
+        if (element.classList.contains("align-none")) return "none";
+      }
+
+      const style = element.style;
+      if (style) {
+        const textAlign = style.textAlign;
+        if (
+          textAlign === "left" ||
+          textAlign === "center" ||
+          textAlign === "right"
+        ) {
+          return textAlign;
+        }
+        if (style.float === "left") return "left";
+        if (style.float === "right") return "right";
+      }
+    } catch (error) {
+      // fall through to default
+    }
+    return "none";
+  }
+
+  /**
+   * Extract a pixel dimension (width/height) from a DOM element.
+   * Reads the HTML attribute first (e.g. `width="300"`), then a `px` inline
+   * style (e.g. `style="width: 300px"`). Percentage / auto values are ignored
+   * since they cannot be represented as a numeric pixel size.
+   * @param element - The DOM element to read from
+   * @param dimension - Which dimension to read
+   */
+  private static extractDimension(
+    element: HTMLElement,
+    dimension: "width" | "height",
+  ): number | undefined {
+    try {
+      // Attribute form: width="300" or width="300px"
+      const attr = element.getAttribute(dimension);
+      if (attr && /^\d+(?:px)?$/.test(attr.trim())) {
+        const value = parseInt(attr, 10);
+        if (!isNaN(value) && value > 0) return value;
+      }
+
+      // Inline style form: style="width: 300px"
+      const styleValue =
+        dimension === "width" ? element.style?.width : element.style?.height;
+      if (styleValue && /^\d+(?:\.\d+)?px$/.test(styleValue.trim())) {
+        const value = parseInt(styleValue, 10);
+        if (!isNaN(value) && value > 0) return value;
+      }
+    } catch (error) {
+      // ignore and fall through
+    }
+    return undefined;
   }
 
   /**

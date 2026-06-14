@@ -1,0 +1,95 @@
+name: Release @lexkit/editor
+
+# Publishes @lexkit/editor to npm whenever its version changes on main.
+#
+# Flow ("release as you sync"):
+#   1. Bump the version in packages/editor/package.json
+#      (e.g. `pnpm --filter @lexkit/editor version patch`).
+#   2. Commit & push to main.
+#   3. This workflow builds the package, checks whether that exact version is
+#      already on npm, and if not, publishes it (with provenance) and cuts a
+#      GitHub release. Pushes that don't change the version are no-ops.
+#
+# Setup required once:
+#   - Add an npm "Automation" access token as the repo secret `NPM_TOKEN`
+#     (Settings -> Secrets and variables -> Actions -> New repository secret).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/editor/**"
+      - ".github/workflows/release.yml"
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+concurrency:
+  group: release-editor
+  cancel-in-progress: false
+
+permissions:
+  contents: write # create tags + GitHub releases
+  id-token: write # REQUIRED for npm provenance (the "Published from GitHub" badge)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # version comes from "packageManager" in package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm --filter @lexkit/editor build
+
+      - name: Test
+        run: pnpm --filter @lexkit/editor test
+
+      - name: Check whether this version is already published
+        id: check
+        working-directory: packages/editor
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$NAME@$VERSION is already on npm — skipping publish."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$NAME@$VERSION is not on npm — publishing."
+          fi
+
+      - name: Publish to npm (with provenance)
+        if: steps.check.outputs.published == 'false'
+        working-directory: packages/editor
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+        run: pnpm publish --no-git-checks --access public
+
+      - name: Tag release and create GitHub Release
+        if: steps.check.outputs.published == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="editor-v${{ steps.check.outputs.version }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" \
+            --title "@lexkit/editor v${{ steps.check.outputs.version }}" \
+            --generate-notes
