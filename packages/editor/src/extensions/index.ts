@@ -60,7 +60,16 @@ export {
 } from "./export/MarkdownExtension";
 
 // Media Extensions
-export { ImageExtension, imageExtension } from "./media/ImageExtension";
+export {
+  ImageExtension,
+  imageExtension,
+  ImageNode,
+  $createImageNode,
+  $isImageNode,
+  IMAGE_MARKDOWN_TRANSFORMER,
+  IMAGE_TEXT_MATCH_TRANSFORMER,
+} from "./media/ImageExtension";
+export { ImageTranslator } from "./media/ImageTranslator";
 export {
   HTMLEmbedExtension,
   htmlEmbedExtension,
