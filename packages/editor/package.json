@@ -1,6 +1,6 @@
 {
   "name": "@lexkit/editor",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "description": "LexKit Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
@@ -14,6 +14,12 @@
       "default": "./dist/index.js"
     }
     
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsup",
