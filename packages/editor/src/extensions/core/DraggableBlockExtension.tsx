@@ -26,7 +26,7 @@ function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -462,7 +462,7 @@ function DraggableBlockPlugin({
 
   // Mouse tracking for handle visibility with smooth positioning
   useEffect(() => {
-    let hideTimeout: NodeJS.Timeout;
+    let hideTimeout: ReturnType<typeof setTimeout>;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) return;
@@ -1001,7 +1001,7 @@ function DraggableBlockPlugin({
     const editorElement = editor.getRootElement();
     if (!editorElement) return;
 
-    let pressTimeout: NodeJS.Timeout | null = null;
+    let pressTimeout: ReturnType<typeof setTimeout> | null = null;
     let startX = 0;
     let startY = 0;
 
