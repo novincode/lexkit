@@ -1088,9 +1088,82 @@ export class ImageExtension extends BaseExtension<
 export const imageExtension = new ImageExtension();
 
 /**
- * Image Markdown Transformer
- * Supports standard markdown image syntax with optional alignment
- * 
+ * Shared markdown pattern for images.
+ *
+ * Matches standard markdown image syntax with an optional title (used as the
+ * caption) and an optional trailing alignment HTML comment.
+ *
+ * Capture groups: 1=alt, 2=src, 3=caption (title), 4=alignment.
+ */
+const IMAGE_MARKDOWN_PATTERN =
+  String.raw`!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)(?:\s*<!--\s*align:(left|center|right)\s*-->)?`;
+
+/**
+ * Serialize an ImageNode to markdown.
+ * Shared by both the element and text-match transformers so the output is
+ * always identical regardless of where the image lives in the tree.
+ */
+function $exportImageToMarkdown(node: LexicalNode): string | null {
+  if (!$isImageNode(node)) {
+    return null;
+  }
+
+  const imageNode = node as ImageNode;
+  const src = imageNode.__src || "";
+  const alt = imageNode.__alt || "";
+  const caption = imageNode.__caption || "";
+  const alignment = imageNode.__alignment || "none";
+
+  if (!src) {
+    return null;
+  }
+
+  // Build markdown image syntax
+  let markdown = `![${alt}](${src}`;
+
+  // Add caption as title if present
+  if (caption) {
+    markdown += ` "${caption}"`;
+  }
+
+  markdown += ")";
+
+  // Add alignment as HTML comment if not 'none'
+  if (alignment && alignment !== "none") {
+    markdown += ` <!-- align:${alignment} -->`;
+  }
+
+  return markdown;
+}
+
+/**
+ * Build an ImageNode from a markdown match produced by IMAGE_MARKDOWN_PATTERN.
+ */
+function $createImageNodeFromMatch(match: string[]): ImageNode | null {
+  const [, alt, src, caption, alignment] = match;
+
+  if (!src) return null;
+
+  return $createImageNode(
+    src,
+    alt || "",
+    caption || undefined,
+    (alignment as "left" | "center" | "right" | "none") || "none",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    false,
+  );
+}
+
+/**
+ * Image Markdown Transformer (block / element level)
+ *
+ * Handles images that sit at the top level of the document (their own block).
+ * Element transformers are the only ones Lexical applies to direct children of
+ * the root during export, so this is required for standalone images.
+ *
  * Syntax examples:
  * - ![alt text](url)
  * - ![alt text](url "caption")
@@ -1100,64 +1173,44 @@ export const imageExtension = new ImageExtension();
  */
 export const IMAGE_MARKDOWN_TRANSFORMER = {
   dependencies: [ImageNode],
-  export: (node: LexicalNode) => {
-    if (!$isImageNode(node)) {
-      return null;
-    }
-
-    const imageNode = node as ImageNode;
-    const src = imageNode.__src || "";
-    const alt = imageNode.__alt || "";
-    const caption = imageNode.__caption || "";
-    const alignment = imageNode.__alignment || "none";
-
-    if (!src) {
-      return null;
-    }
-
-    // Build markdown image syntax
-    let markdown = `![${alt}](${src}`;
-    
-    // Add caption as title if present
-    if (caption) {
-      markdown += ` "${caption}"`;
-    }
-    
-    markdown += ")";
-
-    // Add alignment as HTML comment if not 'none'
-    if (alignment && alignment !== "none") {
-      markdown += ` <!-- align:${alignment} -->`;
-    }
-
-    return markdown;
-  },
-  regExp: /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)(?:\s*<!--\s*align:(left|center|right)\s*-->)?\s*$/,
+  export: $exportImageToMarkdown,
+  regExp: new RegExp(`^${IMAGE_MARKDOWN_PATTERN}\\s*$`),
   replace: (
     parentNode: ElementNode,
     _children: LexicalNode[],
     match: string[],
-    isImport: boolean,
+    _isImport: boolean,
   ) => {
-    const [, alt, src, caption, alignment] = match;
-
-    if (!src) return;
-
-    const imageNode = $createImageNode(
-      src,
-      alt || "",
-      caption || undefined,
-      (alignment as "left" | "center" | "right" | "none") || "none",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      false,
-    );
-
-    parentNode.replace(imageNode);
+    const imageNode = $createImageNodeFromMatch(match);
+    if (imageNode) {
+      parentNode.replace(imageNode);
+    }
   },
   type: "element" as const,
+};
+
+/**
+ * Image Markdown Transformer (inline / text-match level)
+ *
+ * Handles images nested inside another element (e.g. inside a paragraph, which
+ * is where they end up after HTML import or when inserted inline with text).
+ * Element transformers never reach those nodes during export — only text-match
+ * transformers do — so without this transformer such images are silently
+ * dropped from the markdown output. See issue #13.
+ */
+export const IMAGE_TEXT_MATCH_TRANSFORMER = {
+  dependencies: [ImageNode],
+  export: $exportImageToMarkdown,
+  importRegExp: new RegExp(IMAGE_MARKDOWN_PATTERN),
+  regExp: new RegExp(`${IMAGE_MARKDOWN_PATTERN}$`),
+  replace: (textNode: LexicalNode, match: string[]) => {
+    const imageNode = $createImageNodeFromMatch(match);
+    if (imageNode) {
+      textNode.replace(imageNode);
+    }
+  },
+  trigger: ")",
+  type: "text-match" as const,
 };
 
 /**
