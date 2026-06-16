@@ -65,6 +65,13 @@ export const docsConfig: DocsSection[] = [
     title: "Extensions",
     items: [
       {
+        title: "CollaborationExtension",
+        href: "/docs/extensions/CollaborationExtension",
+        description:
+          "Headless real-time collaboration (Yjs) with presence and themeable cursors",
+        isNew: true,
+      },
+      {
         title: "ContextMenuExtension",
         href: "/docs/extensions/ContextMenuExtension",
         description: "Add customizable right-click context menus to your editor",
