@@ -144,9 +144,6 @@ importers:
       '@lexical/markdown':
         specifier: '>=0.34.0'
         version: 0.35.0
-      '@lexical/react':
-        specifier: '>=0.34.0'
-        version: 0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
       '@lexical/rich-text':
         specifier: '>=0.34.0'
         version: 0.35.0
@@ -169,6 +166,12 @@ importers:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.1.1(react@19.1.1)
     devDependencies:
+      '@lexical/react':
+        specifier: '>=0.34.0'
+        version: 0.35.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(yjs@13.6.27)
+      '@lexical/yjs':
+        specifier: '>=0.34.0'
+        version: 0.35.0(yjs@13.6.27)
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -196,6 +199,9 @@ importers:
       vitest:
         specifier: ^4.1.8
         version: 4.1.8(@edge-runtime/vm@3.2.0)(@types/node@20.19.9)(jsdom@29.1.1)(vite@8.0.16(@types/node@20.19.9)(esbuild@0.25.9)(jiti@2.5.1)(tsx@4.20.5))
+      yjs:
+        specifier: ^13.6.27
+        version: 13.6.27
 
   packages/eslint-config:
     devDependencies:
@@ -5706,10 +5712,6 @@ packages:
     resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
 
-  undici@7.15.0:
-    resolution: {integrity: sha512-7oZJCPvvMvTd0OlqWsIxTuItTpJBpU1tcbVl24FMn3xt3+VSunwUasmfPJRE57oNO1KsZ4PgA1xTdAX4hq8NyQ==}
-    engines: {node: '>=20.18.1'}
-
   undici@7.27.2:
     resolution: {integrity: sha512-uZsKNuzQxDMUY6M3pIMvy5tvlGmtq8XJ2oLAkfRKGNu+1VQAIvLy2xIVG5ATZl5wDXl/tddByAWCizRbOme+TA==}
     engines: {node: '>=20.18.1'}
@@ -6658,7 +6660,7 @@ snapshots:
 
   '@img/sharp-wasm32@0.33.5':
     dependencies:
-      '@emnapi/runtime': 1.4.5
+      '@emnapi/runtime': 1.10.0
     optional: true
 
   '@img/sharp-wasm32@0.34.3':
@@ -7625,7 +7627,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
-      picomatch: 4.0.3
+      picomatch: 4.0.4
     optionalDependencies:
       rollup: 4.50.0
 
@@ -8129,7 +8131,7 @@ snapshots:
       glob: 10.4.5
       graceful-fs: 4.2.11
       node-gyp-build: 4.8.4
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       resolve-from: 5.0.0
     transitivePeerDependencies:
       - encoding
@@ -10217,7 +10219,7 @@ snapshots:
       glob-to-regexp: 0.4.1
       sharp: 0.33.5
       stoppable: 1.1.0
-      undici: 7.15.0
+      undici: 7.27.2
       workerd: 1.20250823.0
       ws: 8.18.0
       youch: 4.1.0-beta.10
@@ -11548,8 +11550,6 @@ snapshots:
   undici@5.29.0:
     dependencies:
       '@fastify/busboy': 2.1.1
-
-  undici@7.15.0: {}
 
   undici@7.27.2: {}
 
