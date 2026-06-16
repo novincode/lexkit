@@ -70,6 +70,16 @@ export interface LexKitTheme extends EditorThemeClasses {
       content?: React.CSSProperties;
     };
   };
+  collab?: {
+    /** Container that hosts remote cursor carets. */
+    cursorsContainer?: string;
+    /** Applied to each remote caret element. */
+    caret?: string;
+    /** Applied to the name label next to a caret. */
+    label?: string;
+    /** Applied to a remote selection highlight. */
+    selection?: string;
+  };
   // Styles for inline CSS properties
   styles?: {
     toolbar?: {
@@ -224,6 +234,12 @@ export const defaultLexKitTheme: LexKitTheme = {
   richText: {
     contentEditable: "lexkit-content-editable",
     placeholder: "lexkit-placeholder",
+  },
+  collab: {
+    cursorsContainer: "lexkit-collab-cursors",
+    caret: "lexkit-collab-caret",
+    label: "lexkit-collab-label",
+    selection: "lexkit-collab-selection",
   },
 };
 

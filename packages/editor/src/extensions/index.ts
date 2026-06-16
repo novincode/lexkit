@@ -75,6 +75,24 @@ export {
   htmlEmbedExtension,
 } from "./media/HTMLEmbedExtension";
 
+// Collaboration (Yjs) Extension
+export {
+  CollaborationExtension,
+  collaborationExtension,
+  useCollaborators,
+} from "./collaboration";
+export type {
+  CollaborationConfig,
+  CollaborationProviderFactory,
+  CollaborationCommands,
+  CollaborationStateQueries,
+  CollaboratorState,
+  LocalUserPatch,
+  UseCollaboratorsResult,
+  Provider as CollaborationProvider,
+  ExcludedProperties as CollaborationExcludedProperties,
+} from "./collaboration";
+
 // Custom Extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
 

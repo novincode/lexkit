@@ -10,6 +10,14 @@ name: Release @lexkit/editor
 #      already on npm, and if not, publishes it (with provenance) and cuts a
 #      GitHub release. Pushes that don't change the version are no-ops.
 #
+# Dist-tags: a prerelease version (one containing a hyphen, e.g.
+# `0.1.0-beta.0`) is published under the `beta` npm dist-tag, so
+# `npm i @lexkit/editor` stays on the stable `latest` while
+# `npm i @lexkit/editor@beta` gets the prerelease. Stable versions publish to
+# `latest`. To cut a beta from a feature branch before merging, run this
+# workflow manually against that branch:
+#   gh workflow run "Release @lexkit/editor" --ref <branch>
+#
 # Setup required once:
 #   - Add an npm "Automation" access token as the repo secret `NPM_TOKEN`
 #     (Settings -> Secrets and variables -> Actions -> New repository secret).
@@ -66,6 +74,14 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # A hyphen in the version marks a prerelease -> publish under `beta`.
+          if [[ "$VERSION" == *-* ]]; then
+            echo "dist_tag=beta" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "dist_tag=latest" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
           if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
             echo "::notice::$NAME@$VERSION is already on npm — skipping publish."
@@ -80,7 +96,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
-        run: pnpm publish --no-git-checks --access public
+        run: pnpm publish --no-git-checks --access public --tag "${{ steps.check.outputs.dist_tag }}"
 
       - name: Tag release and create GitHub Release
         if: steps.check.outputs.published == 'false'
@@ -90,6 +106,11 @@ jobs:
           TAG="editor-v${{ steps.check.outputs.version }}"
           git tag "$TAG"
           git push origin "$TAG"
+          PRERELEASE_FLAG=""
+          if [[ "${{ steps.check.outputs.prerelease }}" == "true" ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
           gh release create "$TAG" \
             --title "@lexkit/editor v${{ steps.check.outputs.version }}" \
-            --generate-notes
+            --generate-notes \
+            $PRERELEASE_FLAG

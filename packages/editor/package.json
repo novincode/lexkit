@@ -1,6 +1,6 @@
 {
   "name": "@lexkit/editor",
-  "version": "0.0.39",
+  "version": "0.1.0-beta.0",
   "description": "LexKit Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
@@ -47,6 +47,8 @@
   },
   "homepage": "https://github.com/novincode/lexkit#readme",
   "devDependencies": {
+    "@lexical/react": ">=0.34.0",
+    "@lexical/yjs": ">=0.34.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/react": "^19.1.1",
@@ -55,7 +57,8 @@
     "jsdom": "^29.1.1",
     "tsup": "^8.0.0",
     "typescript": "^5.7.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "yjs": "^13.6.27"
   },
   "peerDependencies": {
     "@lexical/code": ">=0.34.0",
@@ -68,8 +71,18 @@
     "@lexical/selection": ">=0.34.0",
     "@lexical/table": ">=0.34.0",
     "@lexical/utils": ">=0.34.0",
+    "@lexical/yjs": ">=0.34.0",
     "lexical": ">=0.34.0",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "yjs": ">=13.5.22"
+  },
+  "peerDependenciesMeta": {
+    "@lexical/yjs": {
+      "optional": true
+    },
+    "yjs": {
+      "optional": true
+    }
   }
 }
