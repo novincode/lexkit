@@ -1,6 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { DynamicCodeExample } from "../../../components/dynamic-code-example";
+import { SimpleCodeBlock } from "../../../components/simple-code-block";
+import { getHighlightedCode, getRawCode } from "@/lib/generated/code-registry";
 import { Badge } from "@repo/ui/components/badge";
 import { Users, Wifi, Palette, Plug } from "lucide-react";
 
@@ -21,18 +24,13 @@ const BasicCollaborativeEditor = dynamic(
   },
 );
 
-function Code({ children, title }: { children: string; title?: string }) {
+function Snippet({ id, title }: { id: string; title?: string }) {
   return (
-    <div className="rounded-lg border overflow-hidden my-4">
-      {title ? (
-        <div className="px-4 py-2 text-xs font-mono bg-muted/60 border-b text-muted-foreground">
-          {title}
-        </div>
-      ) : null}
-      <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
-        <code>{children}</code>
-      </pre>
-    </div>
+    <SimpleCodeBlock
+      title={title}
+      html={getHighlightedCode(id) || ""}
+      raw={getRawCode(id) || ""}
+    />
   );
 }
 
@@ -74,7 +72,15 @@ export default function CollaborationExtensionPageClient() {
           tabs sync peer-to-peer via the browser&apos;s BroadcastChannel, so this
           demo needs <strong>no server at all</strong>.
         </p>
-        <BasicCollaborativeEditor />
+        <DynamicCodeExample
+          title="Collaborative editor"
+          description="Open in two tabs and type — synced peer-to-peer, no server."
+          codes={[
+            "docs/extensions/CollaborationExtension/examples/BasicCollaborativeEditor.tsx",
+          ]}
+          preview={<BasicCollaborativeEditor />}
+          tabs={["preview", "Editor"]}
+        />
       </section>
 
       {/* Install */}
@@ -82,49 +88,20 @@ export default function CollaborationExtensionPageClient() {
         <h2 className="text-3xl font-bold">Install</h2>
         <p className="text-muted-foreground">
           The extension ships with LexKit. You add <code>yjs</code> and a
-          transport of your choice (they are optional peer dependencies — an
-          editor without the extension pulls in nothing collaboration-related).
+          transport of your choice — they are optional peer dependencies.
         </p>
-        <Code title="terminal">{`# pick a transport: y-webrtc (P2P), y-websocket (server), or y-indexeddb (offline)
-pnpm add yjs y-webrtc`}</Code>
+        <Snippet id="collaboration-install" />
       </section>
 
       {/* Quick start */}
       <section className="space-y-4">
         <h2 className="text-3xl font-bold">Quick start</h2>
         <p className="text-muted-foreground">
-          Collaboration is just another extension. The only required option is{" "}
-          <code>providerFactory</code> — the single seam where you plug in a
-          transport. LexKit never bundles one.
+          The only required option is <code>providerFactory</code> — the single
+          seam where you plug in a transport. LexKit never bundles one, and the
+          extension stays inert until it&apos;s set.
         </p>
-        <Code title="editor.tsx">{`import {
-  createEditorSystem,
-  richTextExtension,
-  collaborationExtension,
-  type CollaborationProvider,
-} from "@lexkit/editor";
-import { WebrtcProvider } from "y-webrtc";
-import * as Y from "yjs";
-
-const extensions = [
-  richTextExtension,
-  collaborationExtension.configure({
-    id: "my-room",
-    username: "Ada",
-    cursorColor: "#e11d48",
-    providerFactory: (id, docMap) => {
-      let doc = docMap.get(id);
-      if (!doc) { doc = new Y.Doc(); docMap.set(id, doc); }
-      return new WebrtcProvider(id, doc) as unknown as CollaborationProvider;
-    },
-  }),
-] as const;
-
-const { Provider, useEditor } = createEditorSystem<typeof extensions>();`}</Code>
-        <p className="text-muted-foreground">
-          The extension stays inert until <code>providerFactory</code> is set, so
-          it&apos;s safe to leave in the array and toggle collaboration on later.
-        </p>
+        <Snippet id="collaboration-quick-start" />
       </section>
 
       {/* Providers */}
@@ -133,65 +110,21 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();`}</Code
         <p className="text-muted-foreground">
           Anything implementing the Yjs <code>Provider</code> interface works.
         </p>
-        <Code title="y-websocket (client + server)">{`import { WebsocketProvider } from "y-websocket";
-
-providerFactory: (id, docMap) => {
-  let doc = docMap.get(id);
-  if (!doc) { doc = new Y.Doc(); docMap.set(id, doc); }
-  return new WebsocketProvider("wss://your-server", id, doc) as any;
-}`}</Code>
-        <Code title="y-webrtc (peer-to-peer, add signaling for cross-device)">{`import { WebrtcProvider } from "y-webrtc";
-
-providerFactory: (id, docMap) => {
-  let doc = docMap.get(id);
-  if (!doc) { doc = new Y.Doc(); docMap.set(id, doc); }
-  return new WebrtcProvider(id, doc, {
-    signaling: ["wss://your-signaling-server"],
-  }) as any;
-}`}</Code>
-        <Code title="y-indexeddb (offline persistence — combine with another provider)">{`import { IndexeddbPersistence } from "y-indexeddb";
-
-providerFactory: (id, docMap) => {
-  let doc = docMap.get(id);
-  if (!doc) { doc = new Y.Doc(); docMap.set(id, doc); }
-  // Persist locally so edits survive reloads and replay when back online.
-  new IndexeddbPersistence(id, doc);
-  return new WebsocketProvider("wss://your-server", id, doc) as any;
-}`}</Code>
+        <Snippet id="collaboration-y-websocket" title="y-websocket" />
+        <Snippet id="collaboration-y-webrtc" title="y-webrtc" />
+        <Snippet id="collaboration-y-indexeddb" title="y-indexeddb (offline)" />
       </section>
 
       {/* Presence */}
       <section className="space-y-4">
         <h2 className="text-3xl font-bold">Presence</h2>
         <p className="text-muted-foreground">
-          Build any presence UI with the headless <code>useCollaborators()</code>{" "}
-          hook, or drive it imperatively through{" "}
+          Build any presence UI with the headless{" "}
+          <code>useCollaborators()</code> hook, or drive it imperatively through{" "}
           <code>commands.collab</code>.
         </p>
-        <Code title="presence-bar.tsx">{`import { useCollaborators } from "@lexkit/editor";
-
-function PresenceBar() {
-  const { users, isConnected } = useCollaborators();
-  return (
-    <div>
-      {isConnected ? "live" : "offline"} · {users.length} online
-      {users.map((u) => (
-        <span key={u.clientId} style={{ color: u.color }}>
-          {u.name}{u.isLocal ? " (you)" : ""}
-        </span>
-      ))}
-    </div>
-  );
-}`}</Code>
-        <Code title="commands.collab">{`const { commands, activeStates } = useEditor();
-
-commands.collab.connect();
-commands.collab.disconnect();
-commands.collab.toggle();
-commands.collab.setLocalUser({ name: "Ada", color: "#e11d48", awarenessData: { avatar } });
-commands.collab.getUsers();         // CollaboratorState[]
-commands.collab.onUsersChange(cb);  // subscribe; returns unsubscribe
-activeStates.isCollaborating;       // boolean`}</Code>
+        <Snippet id="collaboration-presence-hook" title="useCollaborators()" />
+        <Snippet id="collaboration-commands" title="commands.collab" />
       </section>
 
       {/* Theming cursors */}
@@ -203,14 +136,7 @@ activeStates.isCollaborating;       // boolean`}</Code>
           color comes from <code>cursorColor</code>. Supply your own{" "}
           <code>cursorsContainerRef</code> to portal carets anywhere.
         </p>
-        <Code title="theme.ts">{`const theme = {
-  collab: {
-    cursorsContainer: "my-cursors-layer",
-    caret: "my-collab-caret",
-    label: "my-collab-label",
-    selection: "my-collab-selection",
-  },
-};`}</Code>
+        <Snippet id="collaboration-theme" title="theme.collab" />
       </section>
 
       {/* Offline */}
@@ -219,11 +145,11 @@ activeStates.isCollaborating;       // boolean`}</Code>
         <p className="text-muted-foreground">
           Yjs is a CRDT: when a client drops offline and keeps editing, then
           reconnects, all edits merge automatically with no data loss and every
-          replica converges to the same state. Add{" "}
-          <code>y-indexeddb</code> to persist a client&apos;s edits locally so
-          they survive reloads and replay on reconnect. This behaviour is
-          identical no matter how content is imported (Markdown, HTML or JSON) —
-          collaboration syncs the editor state itself.
+          replica converges to the same state. Add <code>y-indexeddb</code> to
+          persist a client&apos;s edits locally so they survive reloads and
+          replay on reconnect. This behaviour is identical no matter how content
+          is imported (Markdown, HTML or JSON) — collaboration syncs the editor
+          state itself.
         </p>
       </section>
 
