@@ -1,5 +1,5 @@
-import { defaultLexKitTheme, LexKitTheme } from "@lexkit/editor/core/theme";
+import { defaultLexKitTheme } from "@lexkit/editor";
 
-export const defaultTheme: LexKitTheme = {
+export const defaultTheme = {
   ...defaultLexKitTheme,
 };
