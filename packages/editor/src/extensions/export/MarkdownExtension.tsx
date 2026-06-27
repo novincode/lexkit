@@ -55,13 +55,13 @@ class MarkdownManager {
 		return [...this.extraTransformers, ...TRANSFORMERS];
 	}
 
-	export(): string {
+	toMarkdown(): string {
 		return this.editor.getEditorState().read(() => {
 			return $convertToMarkdownString(this.getAllTransformers());
 		});
 	}
 
-	import(markdown: string, onComplete?: () => void, preventFocus?: boolean) {
+	fromMarkdown(markdown: string, onComplete?: () => void, preventFocus?: boolean) {
 		this.editor.update(
 			() => {
 				const root = $getRoot();
@@ -139,7 +139,7 @@ export class MarkdownExtension extends BaseExtension<
 			exportToMarkdown: () => {
 				if (!this.manager) return '';
 				try {
-					return this.manager.export();
+					return this.manager.toMarkdown();
 				} catch (e) {
 					console.error('[MarkdownExtension] export failed', e);
 					return '';
@@ -155,7 +155,7 @@ export class MarkdownExtension extends BaseExtension<
 					const delay = immediate ? 0 : this.config.importDebounce || 0;
 					if (this.importTimer) clearTimeout(this.importTimer);
 					const run = () => {
-						this.manager?.import(markdown, () => {
+						this.manager?.fromMarkdown(markdown, () => {
 							resolve();
 						}, preventFocus);
 					};
